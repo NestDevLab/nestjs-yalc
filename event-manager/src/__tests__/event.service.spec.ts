@@ -186,6 +186,25 @@ describe('YalcEventService', () => {
       expect(eventError).toHaveBeenCalledWith('testEvent', expect.anything());
     });
 
+    it('should not construct error from promise if it resolved', async () => {
+      service.errorFromPromise('testEvent', Promise.resolve());
+      // Await for the promise to be resolved
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      expect(eventError).not.toHaveBeenCalled();
+    });
+
+    it('should construct error from promise if it rejected', async () => {
+      service.errorFromPromise('testEvent', Promise.reject());
+      // Await for the promise to be rejected
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      expect(eventError).toHaveBeenCalledWith('testEvent', expect.anything());
+    });
+
+    it('should construct result error', () => {
+      service.errorResult('testEvent');
+      expect(eventError).toHaveBeenCalledWith('testEvent', expect.anything());
+    });
+
     function getErrorMethods(instance: any): string[] {
       return Object.getOwnPropertyNames(Object.getPrototypeOf(instance)).filter(
         (methodName) =>
@@ -202,9 +221,22 @@ describe('YalcEventService', () => {
 
     it.each(errorMethods)(
       'should call eventError with correct parameters for %s',
-      (methodName) => {
-        service[methodName]('testEvent');
-        expect(eventError).toHaveBeenCalledWith('testEvent', expect.anything());
+      async (methodName) => {
+        if (methodName.endsWith('FromPromise')) {
+          service[methodName]('testEvent', Promise.reject());
+          // Await for the promise to be rejected
+          await new Promise((resolve) => setTimeout(resolve, 1));
+          expect(eventError).toHaveBeenCalledWith(
+            'testEvent',
+            expect.anything(),
+          );
+        } else {
+          service[methodName]('testEvent');
+          expect(eventError).toHaveBeenCalledWith(
+            'testEvent',
+            expect.anything(),
+          );
+        }
       },
     );
 

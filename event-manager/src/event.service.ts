@@ -49,6 +49,7 @@ import type { ClassType } from '@nestjs-yalc/types/globals.d.js';
 import { HttpStatusCodes } from '@nestjs-yalc/utils/http.helper.js';
 import { httpStatusCodeToErrors } from '@nestjs-yalc/errors/http-status-code-to-errors.js';
 import { isClass } from '@nestjs-yalc/utils/class.helper.js';
+import { err, Err, ResultAsync } from 'neverthrow';
 
 export interface IEventServiceOptions<
   TFormatter extends EventNameFormatter = EventNameFormatter,
@@ -160,6 +161,31 @@ export class YalcEventService<
     return this._error(eventName, this.buildErrorOptions(options));
   }
 
+  /**
+   * Use this method to return an Error variant of ResultAsync with a DefaultError.
+   */
+  @InjectTrace()
+  public errorResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, DefaultError> {
+    return err(this._error(eventName, this.buildErrorOptions(options)));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be a DefaultError.
+   */
+  @InjectTrace()
+  public errorFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, DefaultError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.error(eventName, this.applyCause(e, options)),
+    );
+  }
+
   @InjectTrace()
   public async errorAsync(
     eventName: Parameters<TFormatter> | string,
@@ -235,6 +261,21 @@ export class YalcEventService<
     return this._error(eventName, mergedOptions);
   }
 
+  public errorHttpResult(
+    eventName: Parameters<TFormatter> | string,
+    errorCode: number,
+    options?: TErrorOptions,
+  ): Err<never, DefaultError> {
+    const httpCode: HttpStatusCodes = errorCode;
+    const selectedError: DefaultError =
+      httpStatusCodeToErrors[httpCode] ?? InternalServerError;
+    const mergedOptions = this.applyLoggerLevel(
+      applyAwaitOption(this.buildErrorOptions(options, selectedError)),
+      getLogLevelByStatus(errorCode),
+    );
+    return err(this._error(eventName, mergedOptions));
+  }
+
   /**
    * Use this method to proxy an error generated somewhere else. Very useful with try{} catch{} blocks.
    * Where you do not want to change the nature of the error, but you want to forward it instead.
@@ -276,6 +317,34 @@ export class YalcEventService<
   }
 
   /**
+   * Use this method to construct an Error variant of ResultAsync with a BadRequestError representing a 400 Bad Request error.
+   */
+  @InjectTrace()
+  public errorBadRequestResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, BadRequestError> {
+    const mergedOptions = this.applyLoggerLevelByError(
+      applyAwaitOption(this.buildErrorOptions(options, BadRequestError)),
+    );
+    return err(this._error(eventName, mergedOptions));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be a BadRequestError representing a 400 Bad Request error.
+   */
+  @InjectTrace()
+  public errorBadRequestFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, BadRequestError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorBadRequest(eventName, this.applyCause(e, options)),
+    );
+  }
+
+  /**
    * Use this method to throw a 401 Unauthorized error when authentication is required and has failed or has not yet been provided.
    */
   @InjectTrace()
@@ -287,6 +356,31 @@ export class YalcEventService<
       applyAwaitOption(this.buildErrorOptions(options, UnauthorizedError)),
     );
     return this._error(eventName, mergedOptions);
+  }
+
+  /**
+   * Use this method to construct an Error variant of ResultAsync with an UnauthorizedError representing a 401 Unauthorized error.
+   */
+  @InjectTrace()
+  public errorUnauthorizedResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, UnauthorizedError> {
+    return err(this.errorUnauthorized(eventName, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be an UnauthorizedError representing a 401 Unauthorized error.
+   */
+  @InjectTrace()
+  public errorUnauthorizedFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, UnauthorizedError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorUnauthorized(eventName, this.applyCause(e, options)),
+    );
   }
 
   /**
@@ -318,6 +412,31 @@ export class YalcEventService<
   }
 
   /**
+   * Use this method to construct an Error variant of ResultAsync with a ForbiddenError representing a 403 Forbidden error.
+   */
+  @InjectTrace()
+  public errorForbiddenResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, ForbiddenError> {
+    return err(this.errorForbidden(eventName, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be a ForbiddenError representing a 403 Forbidden error.
+   */
+  @InjectTrace()
+  public errorForbiddenFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, ForbiddenError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorForbidden(eventName, this.applyCause(e, options)),
+    );
+  }
+
+  /**
    * Use this method to throw a 404 Not Found error when the server can not find the requested resource.
    */
   @InjectTrace()
@@ -329,6 +448,34 @@ export class YalcEventService<
       applyAwaitOption(this.buildErrorOptions(options, NotFoundError)),
     );
     return this._error(eventName, mergedOptions);
+  }
+
+  /**
+   * Use this method to construct an Error variant of ResultAsync with a NotFoundError representing a 404 Not Found error.
+   */
+  @InjectTrace()
+  public errorNotFoundResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, NotFoundError> {
+    const mergedOptions = this.applyLoggerLevelByError(
+      applyAwaitOption(this.buildErrorOptions(options, NotFoundError)),
+    );
+    return err(this._error(eventName, mergedOptions));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be a NotFoundError representing a 404 Not Found error.
+   */
+  @InjectTrace()
+  public errorNotFoundFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, NotFoundError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorNotFound(eventName, this.applyCause(e, options)),
+    );
   }
 
   /**
@@ -346,6 +493,31 @@ export class YalcEventService<
   }
 
   /**
+   * Use this method to construct an Error variant of ResultAsync with a MethodNotAllowedError representing a 405 Method Not Allowed error.
+   */
+  @InjectTrace()
+  public errorMethodNotAllowedResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, MethodNotAllowedError> {
+    return err(this.errorMethodNotAllowed(eventName, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be a MethodNotAllowedError representing a 405 Method Not Allowed error.
+   */
+  @InjectTrace()
+  public errorMethodNotAllowedFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, MethodNotAllowedError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorMethodNotAllowed(eventName, this.applyCause(e, options)),
+    );
+  }
+
+  /**
    * Use this method to throw a 406 Not Acceptable error when the server cannot produce a response matching the list of acceptable values defined in the request's headers.
    */
   @InjectTrace()
@@ -357,6 +529,31 @@ export class YalcEventService<
       applyAwaitOption(this.buildErrorOptions(options, NotAcceptableError)),
     );
     return this._error(eventName, mergedOptions);
+  }
+
+  /**
+   * Use this method to construct an Error variant of ResultAsync with a NotAcceptableError representing a 406 Not Acceptable error.
+   */
+  @InjectTrace()
+  public errorNotAcceptableResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, NotAcceptableError> {
+    return err(this.errorNotAcceptable(eventName, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be a NotAcceptableError representing a 406 Not Acceptable error.
+   */
+  @InjectTrace()
+  public errorNotAcceptableFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, NotAcceptableError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorNotAcceptable(eventName, this.applyCause(e, options)),
+    );
   }
 
   /**
@@ -374,6 +571,31 @@ export class YalcEventService<
   }
 
   /**
+   * Use this method to construct an Error variant of ResultAsync with a ConflictError representing a 409 Conflict error.
+   */
+  @InjectTrace()
+  public errorConflictResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, ConflictError> {
+    return err(this.errorConflict(eventName, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be a ConflictError representing a 409 Conflict error.
+   */
+  @InjectTrace()
+  public errorConflictFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, ConflictError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorConflict(eventName, this.applyCause(e, options)),
+    );
+  }
+
+  /**
    * Use this method to throw a 410 Gone error when the target resource is no longer available at the origin server and no forwarding address is known.
    */
   @InjectTrace()
@@ -385,6 +607,31 @@ export class YalcEventService<
       applyAwaitOption(this.buildErrorOptions(options, GoneError)),
     );
     return this._error(eventName, mergedOptions);
+  }
+
+  /**
+   * Use this method to construct an Error variant of ResultAsync with a GoneError representing a 410 Gone error.
+   */
+  @InjectTrace()
+  public errorGoneResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, GoneError> {
+    return err(this.errorGone(eventName, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be a GoneError representing a 410 Gone error.
+   */
+  @InjectTrace()
+  public errorGoneFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, GoneError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorGone(eventName, this.applyCause(e, options)),
+    );
   }
 
   /**
@@ -404,6 +651,31 @@ export class YalcEventService<
   }
 
   /**
+   * Use this method to construct an Error variant of ResultAsync with an UnsupportedMediaTypeError representing a 415 Unsupported Media Type error.
+   */
+  @InjectTrace()
+  public errorUnsupportedMediaTypeResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, UnsupportedMediaTypeError> {
+    return err(this.errorUnsupportedMediaType(eventName, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be an UnsupportedMediaTypeError representing a 415 Unsupported Media Type error.
+   */
+  @InjectTrace()
+  public errorUnsupportedMediaTypeFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, UnsupportedMediaTypeError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorUnsupportedMediaType(eventName, this.applyCause(e, options)),
+    );
+  }
+
+  /**
    * Use this method to throw a 422 Unprocessable Entity error when the server understands the content type of the request entity, but was unable to process the contained instructions.
    */
   @InjectTrace()
@@ -417,6 +689,31 @@ export class YalcEventService<
       ),
     );
     return this._error(eventName, mergedOptions);
+  }
+
+  /**
+   * Use this method to construct an Error variant of ResultAsync with an UnprocessableEntityError representing a 422 Unprocessable Entity error.
+   */
+  @InjectTrace()
+  public errorUnprocessableEntityResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, UnprocessableEntityError> {
+    return err(this.errorUnprocessableEntity(eventName, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be an UnprocessableEntityError representing a 422 Unprocessable Entity error.
+   */
+  @InjectTrace()
+  public errorUnprocessableEntityFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, UnprocessableEntityError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorUnprocessableEntity(eventName, this.applyCause(e, options)),
+    );
   }
 
   /**
@@ -434,6 +731,31 @@ export class YalcEventService<
   }
 
   /**
+   * Use this method to construct an Error variant of ResultAsync with a TooManyRequestsError representing a 429 Too Many Requests error.
+   */
+  @InjectTrace()
+  public errorTooManyRequestsResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, TooManyRequestsError> {
+    return err(this.errorTooManyRequests(eventName, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be a TooManyRequestsError representing a 429 Too Many Requests error.
+   */
+  @InjectTrace()
+  public errorTooManyRequestsFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, TooManyRequestsError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorTooManyRequests(eventName, this.applyCause(e, options)),
+    );
+  }
+
+  /**
    * Use this method to throw a 500 Internal Server Error when the server encountered an unexpected condition that prevented it from fulfilling the request.
    */
   @InjectTrace()
@@ -445,6 +767,31 @@ export class YalcEventService<
       this.buildErrorOptions(options, InternalServerError),
     );
     return this._error(eventName, mergedOptions);
+  }
+
+  /**
+   * Use this method to construct an Error variant of ResultAsync with an InternalServerError representing a 500 Internal Server Error error.
+   */
+  @InjectTrace()
+  public errorInternalServerErrorResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, InternalServerError> {
+    return err(this.errorInternalServerError(eventName, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be an InternalServerError representing a 500 Internal Server Error error.
+   */
+  @InjectTrace()
+  public errorInternalServerErrorFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, InternalServerError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorInternalServerError(eventName, this.applyCause(e, options)),
+    );
   }
 
   /**
@@ -462,6 +809,31 @@ export class YalcEventService<
   }
 
   /**
+   * Use this method to construct an Error variant of ResultAsync with a NotImplementedError representing a 501 Not Implemented error.
+   */
+  @InjectTrace()
+  public errorNotImplementedResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, NotImplementedError> {
+    return err(this.errorNotImplemented(eventName, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be a NotImplementedError representing a 501 Not Implemented error.
+   */
+  @InjectTrace()
+  public errorNotImplementedFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, NotImplementedError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorNotImplemented(eventName, this.applyCause(e, options)),
+    );
+  }
+
+  /**
    * Use this method to throw a 502 Bad Gateway error when one server on the internet received an invalid response from another server.
    */
   @InjectTrace()
@@ -473,6 +845,31 @@ export class YalcEventService<
       this.buildErrorOptions(options, BadGatewayError),
     );
     return this._error(eventName, mergedOptions);
+  }
+
+  /**
+   * Use this method to construct an Error variant of ResultAsync with a BadGatewayError representing a 502 Bad Gateway error.
+   */
+  @InjectTrace()
+  public errorBadGatewayResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, BadGatewayError> {
+    return err(this.errorBadGateway(eventName, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be a BadGatewayError representing a 502 Bad Gateway error.
+   */
+  @InjectTrace()
+  public errorBadGatewayFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, BadGatewayError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorBadGateway(eventName, this.applyCause(e, options)),
+    );
   }
 
   /**
@@ -490,6 +887,31 @@ export class YalcEventService<
   }
 
   /**
+   * Use this method to construct an Error variant of ResultAsync with a ServiceUnavailableError representing a 503 Service Unavailable error.
+   */
+  @InjectTrace()
+  public errorServiceUnavailableResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, ServiceUnavailableError> {
+    return err(this.errorServiceUnavailable(eventName, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be a ServiceUnavailableError representing a 503 Service Unavailable error.
+   */
+  @InjectTrace()
+  public errorServiceUnavailableFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, ServiceUnavailableError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorServiceUnavailable(eventName, this.applyCause(e, options)),
+    );
+  }
+
+  /**
    * Use this method to throw a 504 Gateway Timeout error when one server did not receive a timely response from another server or some other auxiliary server it needed to access to complete the request.
    */
   @InjectTrace()
@@ -501,6 +923,31 @@ export class YalcEventService<
       this.buildErrorOptions(options, GatewayTimeoutError),
     );
     return this._error(eventName, mergedOptions);
+  }
+
+  /**
+   * Use this method to construct an Error variant of ResultAsync with a GatewayTimeoutError representing a 504 Gateway Timeout error.
+   */
+  @InjectTrace()
+  public errorGatewayTimeoutResult(
+    eventName: Parameters<TFormatter> | string,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, GatewayTimeoutError> {
+    return err(this.errorGatewayTimeout(eventName, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error variant will be a GatewayTimeoutError representing a 504 Gateway Timeout error.
+   */
+  @InjectTrace()
+  public errorGatewayTimeoutFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, GatewayTimeoutError> {
+    return ResultAsync.fromPromise(promise, (e) =>
+      this.errorGatewayTimeout(eventName, this.applyCause(e, options)),
+    );
   }
 
   protected getLoggerLevelByOptions(options: IErrorEventOptions<TFormatter>) {
@@ -534,6 +981,19 @@ export class YalcEventService<
   >(options: TOpts): TOpts {
     const level = this.getLoggerLevelByOptions(options);
     return this.applyLoggerLevel(options, level);
+  }
+
+  /**
+   * Use this method to apply a Error instance to an options object.
+   */
+  protected applyCause<TOpts extends IErrorEventOptions<TFormatter>>(
+    cause: unknown,
+    options?: TOpts,
+  ): TOpts {
+    return {
+      ...options,
+      cause,
+    } as TOpts;
   }
 
   /**
