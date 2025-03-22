@@ -181,7 +181,7 @@ export class YalcEventService<
   }
 
   @InjectTrace()
-  public wrapError<T>(
+  public errorFromPromise<T>(
     eventName: Parameters<TFormatter> | string,
     promise: PromiseLike<T>,
     options?: IErrorBasedMethodOptions<TErrorOptions>,

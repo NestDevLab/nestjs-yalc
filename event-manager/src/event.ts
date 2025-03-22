@@ -420,28 +420,6 @@ export async function eventErrorAsync<
   ) as unknown as eventErrorReturnTypeAsync<TFormatter, TOption>;
 }
 
-export async function tryCatch<
-  T,
-  TFormatter extends EventNameFormatter = EventNameFormatter,
-  TOption extends IErrorEventOptions<TFormatter> = IErrorEventOptions<TFormatter>,
->(
-  promise: Promise<T>,
-  eventName: Parameters<TFormatter> | string,
-  options?: TOption,
-): PromiseResult<T> {
-  try {
-    return ok(await promise);
-  } catch (error) {
-    return err(
-      eventError(eventName, {
-        ...options,
-        logger: getLoggerOption(LogLevelEnum.ERROR, options),
-        errorClass: options?.errorClass ?? true,
-      }),
-    );
-  }
-}
-
 export function eventError<
   TFormatter extends EventNameFormatter = EventNameFormatter,
   TOption extends IErrorEventOptions<TFormatter> = IErrorEventOptions<TFormatter>,
