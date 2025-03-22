@@ -17,6 +17,8 @@ import { isClass } from '@nestjs-yalc/utils/class.helper.js';
 import { deepMergeWithoutArrayConcat } from '@nestjs-yalc/utils/object.helper.js';
 import _ from 'lodash';
 import { globalPromiseTracker } from '@nestjs-yalc/utils/promise.helper.js';
+import { PromiseResult } from './event.service.js';
+import { err, ok } from 'neverthrow';
 
 interface IEventEmitterOptions<
   TFormatter extends EventNameFormatter = EventNameFormatter,
@@ -416,6 +418,28 @@ export async function eventErrorAsync<
     eventName,
     _options,
   ) as unknown as eventErrorReturnTypeAsync<TFormatter, TOption>;
+}
+
+export async function tryCatch<
+  T,
+  TFormatter extends EventNameFormatter = EventNameFormatter,
+  TOption extends IErrorEventOptions<TFormatter> = IErrorEventOptions<TFormatter>,
+>(
+  promise: Promise<T>,
+  eventName: Parameters<TFormatter> | string,
+  options?: TOption,
+): PromiseResult<T> {
+  try {
+    return ok(await promise);
+  } catch (error) {
+    return err(
+      eventError(eventName, {
+        ...options,
+        logger: getLoggerOption(LogLevelEnum.ERROR, options),
+        errorClass: options?.errorClass ?? true,
+      }),
+    );
+  }
 }
 
 export function eventError<

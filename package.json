@@ -90,7 +90,8 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "typeorm": "^0.3.14",
-    "uuidv4": "^6.2.13"
+    "uuidv4": "^6.2.13",
+    "neverthrow": "^8.2.0"
   },
   "optionalDependencies": {
     "@graphql-tools/wrap": "^9.3.6",

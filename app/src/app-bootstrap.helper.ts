@@ -23,6 +23,7 @@ import {
   IGlobalOptions,
 } from './app-bootstrap-base.helper.js';
 import { getEnvLoggerLevels } from '@nestjs-yalc/logger/logger.helper.js';
+import { UnwrapResultInterceptor } from './unwrap-result.interceptor.js';
 
 export interface ICreateOptions {
   enableSwagger?: boolean;
@@ -163,6 +164,8 @@ export class AppBootstrap<
     );
 
     await this.getApp().register(fastifyCookie as any, {});
+
+    this.getApp().useGlobalInterceptors(new UnwrapResultInterceptor());
 
     /**
      * @todo refactor using a factory function to share with all services
