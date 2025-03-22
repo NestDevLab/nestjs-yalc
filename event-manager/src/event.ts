@@ -17,8 +17,6 @@ import { isClass } from '@nestjs-yalc/utils/class.helper.js';
 import { deepMergeWithoutArrayConcat } from '@nestjs-yalc/utils/object.helper.js';
 import _ from 'lodash';
 import { globalPromiseTracker } from '@nestjs-yalc/utils/promise.helper.js';
-import { PromiseResult } from './event.service.js';
-import { err, ok } from 'neverthrow';
 
 interface IEventEmitterOptions<
   TFormatter extends EventNameFormatter = EventNameFormatter,
