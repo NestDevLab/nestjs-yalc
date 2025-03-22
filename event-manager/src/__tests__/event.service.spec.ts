@@ -186,6 +186,30 @@ describe('YalcEventService', () => {
       expect(eventError).toHaveBeenCalledWith('testEvent', expect.anything());
     });
 
+    it('should call errorForward with correct parameters', () => {
+      service.errorForward('testEvent', new Error('test error'));
+      expect(eventError).toHaveBeenCalledWith('testEvent', expect.anything());
+    });
+
+    it('should call errorForwardResult with correct parameters', () => {
+      service.errorForwardResult('testEvent', new Error('test error'));
+      expect(eventError).toHaveBeenCalledWith('testEvent', expect.anything());
+    });
+
+    it('should call errorForwardFromPromise with correct parameters', async () => {
+      await service.errorForwardFromPromise(
+        'testEvent',
+        Promise.reject(new Error('test error')),
+      );
+
+      expect(eventError).toHaveBeenCalledWith('testEvent', expect.anything());
+    });
+
+    it('should not call errorForwardFromPromise with correct parameters', async () => {
+      await service.errorForwardFromPromise('testEvent', Promise.resolve());
+      expect(eventError).not.toHaveBeenCalled();
+    });
+
     it('should not construct error from promise if it resolved', async () => {
       service.errorFromPromise('testEvent', Promise.resolve());
       // Await for the promise to be resolved
@@ -194,9 +218,7 @@ describe('YalcEventService', () => {
     });
 
     it('should construct error from promise if it rejected', async () => {
-      service.errorFromPromise('testEvent', Promise.reject());
-      // Await for the promise to be rejected
-      await new Promise((resolve) => setTimeout(resolve, 1));
+      await service.errorFromPromise('testEvent', Promise.reject());
       expect(eventError).toHaveBeenCalledWith('testEvent', expect.anything());
     });
 
@@ -211,6 +233,8 @@ describe('YalcEventService', () => {
           methodName.startsWith('error') &&
           methodName !== 'errorAsync' &&
           methodName !== 'errorForward' && // error forward is tested separately
+          methodName !== 'errorForwardResult' &&
+          methodName !== 'errorForwardFromPromise' &&
           typeof instance[methodName] === 'function',
       );
     }
@@ -223,9 +247,7 @@ describe('YalcEventService', () => {
       'should call eventError with correct parameters for %s',
       async (methodName) => {
         if (methodName.endsWith('FromPromise')) {
-          service[methodName]('testEvent', Promise.reject());
-          // Await for the promise to be rejected
-          await new Promise((resolve) => setTimeout(resolve, 1));
+          await service[methodName]('testEvent', Promise.reject());
           expect(eventError).toHaveBeenCalledWith(
             'testEvent',
             expect.anything(),
