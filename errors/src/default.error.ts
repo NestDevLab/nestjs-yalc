@@ -542,30 +542,74 @@ export const errorToDefaultError = (
   error: Error | HttpException | DefaultError,
   options: IDefaultErrorOptions = {},
 ) => {
-  if (isDefaultErrorMixin(error)) {
-    return error;
+  try {
+    if (isDefaultErrorMixin(error)) {
+      return error;
+    }
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+
+  try {
+    if (error instanceof HttpException) {
+      // Test if it can be safely stringified
+      JSON.stringify(error.cause);
+      return new DefaultError(error.message, {
+        errorCode: error.getStatus(),
+        response: {
+          message: error.getResponse().toString(),
+          error: error.name,
+          statusCode: error.getStatus(),
+          statusCodeDescription: getHttpStatusDescription(error.getStatus()),
+        },
+        stack: error.stack,
+        cause: error.cause,
+        ...options,
+      });
+    }
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+
+  let name;
+  try {
+    name = error.name ?? 'UnknownError';
+    if (typeof name !== 'string') {
+      name = 'UnknownError';
+    }
+  } catch (e) {
+    name = 'UnknownError';
   }
 
-  if (error instanceof HttpException) {
-    return new DefaultError(error.message, {
-      errorCode: error.getStatus(),
-      response: {
-        message: error.getResponse().toString(),
-        error: error.name,
-        statusCode: error.getStatus(),
-        statusCodeDescription: getHttpStatusDescription(error.getStatus()),
-      },
-      stack: error.stack,
-      cause: error.cause,
-      ...options,
-    });
+  let message;
+  try {
+    message = error.message ?? 'UnknownError';
+    if (typeof message !== 'string') {
+      message = 'UnknownError';
+    }
+  } catch (e) {
+    message = 'UnknownError';
   }
 
-  return new DefaultError(error.message, {
-    stack: error.stack,
-    cause: error.cause as any,
+  let stack;
+  try {
+    // Test if it can be safely stringified
+    JSON.stringify(error.stack);
+    stack = error.stack;
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+
+  let cause: any;
+  try {
+    // Test if it can be safely stringified
+    JSON.stringify(error.cause);
+    cause = error.cause;
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+
+  return new DefaultError(message, {
+    stack,
+    cause,
     response: {
-      error: error.name,
+      error: name,
     },
     ...options,
   });

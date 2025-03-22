@@ -289,22 +289,219 @@ describe('DefaultError', () => {
   });
 
   describe('errorToDefaultError', () => {
-    it('should convert an error to a DefaultError', () => {
-      const error = new Error('test');
-      const defaultError = errorToDefaultError(error);
+    it.each([
+      { name: 'standard Error', value: new Error('test') },
+      { name: 'HttpException', value: new HttpException('test', 500) },
+      { name: 'DefaultError', value: new DefaultError('test') },
+      { name: 'string', value: 'test' as unknown as Error },
+      {
+        name: 'object with message',
+        value: { message: 'test' } as unknown as Error,
+      },
+      { name: 'empty object', value: {} as unknown as Error },
+      { name: 'null', value: null as unknown as Error },
+      { name: 'undefined', value: undefined as unknown as Error },
+      { name: 'number', value: 123 as unknown as Error },
+      { name: 'boolean', value: true as unknown as Error },
+      { name: 'array', value: [] as unknown as Error },
+      {
+        name: 'nested error',
+        value: { error: new Error('nested') } as unknown as Error,
+      },
+      {
+        name: 'error with circular reference',
+        value: (() => {
+          const err: any = new Error('circular');
+          err.self = err;
+          return err;
+        })(),
+      },
+      {
+        name: 'error with custom properties',
+        value: Object.assign(new Error('custom'), { custom: 'property' }),
+      },
+      {
+        name: 'BadRequestException',
+        value: new BadRequestException('bad request'),
+      },
+      {
+        name: 'ForbiddenException',
+        value: new ForbiddenException('forbidden'),
+      },
+      {
+        name: 'undefined with no prototype',
+        value: Object.create(null) as unknown as Error,
+      },
+      {
+        name: 'object with null prototype that mimics Error',
+        value: Object.assign(Object.create(null), {
+          message: 'test',
+          name: 'FakeError',
+          stack: 'fake stack',
+        }) as unknown as Error,
+      },
+      // These test method invocation problems with HttpException-like objects
+      {
+        name: 'fake HttpException with broken getStatus',
+        value: Object.assign(new Error('test'), {
+          getStatus: () => {
+            throw new Error('getStatus exploded');
+          },
+          getResponse: () => ({ toString: () => 'response' }),
+        }),
+      },
+      {
+        name: 'fake HttpException with broken getResponse',
+        value: Object.assign(new Error('test'), {
+          getStatus: () => 500,
+          getResponse: () => {
+            throw new Error('getResponse exploded');
+          },
+        }),
+      },
+      {
+        name: 'deeply nested circular reference',
+        value: (() => {
+          const err: any = new Error('deep circular');
+          const nested = { parent: err, child: {} };
+          err.nested = nested;
+          // @ts-expect-error - this is a test
+          nested.child.backRef = nested;
+          return err;
+        })(),
+      },
+      {
+        name: 'HttpException with complex response object',
+        value: new HttpException(
+          {
+            nested: {
+              deep: {
+                message: 'buried message',
+              },
+            },
+            circular: {},
+          },
+          500,
+          { cause: new Error('cause') },
+        ),
+      },
+      {
+        name: 'HttpException with array response',
+        value: new HttpException(['error1', 'error2'], 400),
+      },
+      {
+        name: 'custom error extending Error with broken inheritance',
+        value: (() => {
+          function CustomError(this: any, message: string) {
+            this.message = message;
+            // Not calling Error constructor properly
+          }
+          CustomError.prototype = Object.create(Error.prototype);
+          return new (CustomError as any)('broken inheritance');
+        })(),
+      },
+      {
+        name: 'error with non-enumerable properties',
+        value: (() => {
+          const err = new Error('hidden props');
+          Object.defineProperty(err, 'hiddenCause', {
+            value: new Error('hidden cause'),
+            enumerable: false,
+          });
+          return err;
+        })(),
+      },
+      {
+        name: 'frozen error object',
+        value: Object.freeze(new Error('frozen')),
+      },
+      {
+        name: 'proxy with revoked handler',
+        value: (() => {
+          const { proxy, revoke } = Proxy.revocable(
+            new Error('revoked proxy'),
+            {},
+          );
+          revoke();
+          return proxy;
+        })(),
+      },
+      {
+        name: 'circular reference in cause',
+        value: (() => {
+          const err: any = new Error('circular cause');
+          err.cause = new Error('cause error');
+          err.cause.parentError = err;
+          return err;
+        })(),
+      },
+      {
+        name: 'fake HttpException with getResponse returning bad value',
+        value: Object.assign(new Error('test'), {
+          getStatus: () => 500,
+          getResponse: () => ({
+            toString: () => {
+              throw new Error('toString exploded');
+            },
+          }),
+        }),
+      },
+      {
+        name: 'Error with getter that throws on message',
+        value: Object.defineProperty(new Error(), 'message', {
+          get: () => {
+            throw new Error('message getter exploded');
+          },
+        }),
+      },
+      {
+        name: 'Error with getter that throws on stack',
+        value: Object.defineProperty(new Error('test'), 'stack', {
+          get: () => {
+            throw new Error('stack getter exploded');
+          },
+        }),
+      },
+      {
+        name: 'Error with non string name',
+        value: { name: 123 } as unknown as Error,
+      },
+      {
+        name: 'Error with non string message',
+        value: { message: 123 } as unknown as Error,
+      },
+      {
+        name: 'Error with string cause',
+        value: { cause: 'test' } as unknown as Error,
+      },
+      {
+        name: 'Error with array cause',
+        value: { cause: ['test'] } as unknown as Error,
+      },
+      {
+        name: 'Error with error throwing cause key',
+        value: {
+          cause: Object.defineProperty({ test: 'test', boom: 'boom' }, 'boom', {
+            get: () => {
+              throw new Error('cause getter exploded');
+            },
+          }),
+        } as unknown as Error,
+      },
+      {
+        name: 'Error with getter that throws on name',
+        value: Object.defineProperty(new Error('test'), 'name', {
+          get: () => {
+            throw new Error('name getter exploded');
+          },
+        }),
+      },
+    ])('should safely convert $name to a DefaultError', ({ value }) => {
+      const defaultError = errorToDefaultError(value);
       expect(defaultError).toBeInstanceOf(DefaultError);
-    });
-
-    it('should convert an HttpException to a DefaultError', () => {
-      const error = new HttpException('test', 500);
-      const defaultError = errorToDefaultError(error);
-      expect(defaultError).toBeInstanceOf(DefaultError);
-    });
-
-    it('should keep a DefaultError as a DefaultError', () => {
-      const error = new DefaultError('test');
-      const defaultError = errorToDefaultError(error);
-      expect(defaultError).toBeInstanceOf(DefaultError);
+      expect(() => JSON.stringify(defaultError)).not.toThrow();
+      expect(defaultError.name).toBeDefined();
+      expect(defaultError.message).toBeDefined();
     });
   });
 });
