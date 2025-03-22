@@ -303,6 +303,31 @@ export class YalcEventService<
   }
 
   /**
+   * Use this method to forward an error and return an error variant of ResultAsync object.
+   */
+  public errorForwardResult<TError extends DefaultError>(
+    eventName: Parameters<TFormatter> | string,
+    error: Error | TError,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): Err<never, DefaultError> {
+    return err(this.errorForward(eventName, error, options));
+  }
+
+  /**
+   * Use this method to wrap a promise in a ResultAsync object. The error will be forwarded from the promise, with extra options added.
+   * If the error is not a subtype of DefaultError, it will be converted to a DefaultError.
+   */
+  public errorForwardFromPromise<T>(
+    eventName: Parameters<TFormatter> | string,
+    promise: PromiseLike<T>,
+    options?: IErrorBasedMethodOptions<TErrorOptions>,
+  ): ResultAsync<T, DefaultError> {
+    return ResultAsync.fromPromise(promise, (error) =>
+      this.errorForward(eventName, error as Error, options),
+    );
+  }
+
+  /**
    * Use this method to throw a 400 Bad Request error when the request could not be understood or was missing required parameters.
    */
   @InjectTrace()
