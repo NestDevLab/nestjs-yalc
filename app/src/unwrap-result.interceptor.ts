@@ -14,7 +14,8 @@ export class UnwrapResultInterceptor implements NestInterceptor {
       map((result) => {
         if (
           result instanceof ResultAsync ||
-          (typeof result === 'object' &&
+          (!!result &&
+            typeof result === 'object' &&
             typeof result.isOk === 'function' &&
             typeof result.isErr === 'function')
         ) {
