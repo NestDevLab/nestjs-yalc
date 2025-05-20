@@ -148,7 +148,6 @@ export class PinoLogger
  * on the class instance that might be destroyed before the flush is called.
  */
 export function flush() {
-  logger.trace?.('Flushing logger');
   destination?.flushSync();
   return new Promise((resolve, reject) => {
     logger.flush((err) => {
