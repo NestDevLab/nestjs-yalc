@@ -49,6 +49,7 @@ export interface IOptions {
   defaultConfOptions?: IDefaultConfOptions;
   tsJestConfig?: any;
   extraSetupFiles?: string[];
+  setupFilesAfterEnv?: string[];
 }
 
 // considering our heap consumption (~300-700mb), 5 workers will consume around 3GB of ram
