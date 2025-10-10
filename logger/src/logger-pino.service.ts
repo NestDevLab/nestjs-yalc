@@ -1,5 +1,5 @@
 import { LogLevel, OnApplicationShutdown } from '@nestjs/common';
-import { pino, Logger, stdTimeFunctions } from 'pino';
+import { pino, Logger } from 'pino';
 import {
   type IImprovedLoggerOptions,
   LoggerAbstractService,
@@ -102,7 +102,7 @@ export class PinoLogger
               return { level: label };
             },
           },
-          timestamp: stdTimeFunctions.isoTime,
+          timestamp: () => `,"timestamp":"${new Date().toISOString()}"`,
         },
         destination,
       );
