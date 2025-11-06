@@ -16,6 +16,16 @@ describe('setGlobalMigrationClasses', () => {
   });
 });
 
+describe('getGlobalMigrationClasses', () => {
+  it('should get global migration classes', () => {
+    const connName = 'testConnection';
+    const classes = [{ name: 'testClass' }];
+    global.TypeORM_Migration_classes = { [connName]: classes };
+
+    expect(getGlobalMigrationClasses(connName)).toEqual(classes);
+  });
+});
+
 jest.mock('@nestjs-yalc/logger');
 
 describe('yalcTypeOrmPostgresOptions', () => {
