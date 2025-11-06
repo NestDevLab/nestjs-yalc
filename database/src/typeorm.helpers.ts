@@ -16,6 +16,10 @@ export const setGlobalMigrationClasses = (
   };
 };
 
+export const getGlobalMigrationClasses = (connName: string) => {
+  return global.TypeORM_Migration_classes?.[connName];
+};
+
 export const yalcTypeOrmPostgresOptions = (
   name: string,
   postgresConf: PostgresConnectionCredentialsOptions,
