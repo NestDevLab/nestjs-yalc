@@ -2,6 +2,7 @@ import { expect, jest, describe, it } from '@jest/globals';
 import { TypeORMLogger } from '@nestjs-yalc/logger/typeorm-logger.js';
 import {
   setGlobalMigrationClasses,
+  getGlobalMigrationClasses,
   yalcTypeOrmPostgresOptions,
 } from '../typeorm.helpers.js';
 
