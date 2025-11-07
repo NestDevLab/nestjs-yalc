@@ -5,6 +5,8 @@ import {
   getGlobalPreDeployMigrationClasses,
   yalcTypeOrmPostgresOptions,
   setGlobalMigrationClasses,
+  getGlobalPostDeployMigrationClasses,
+  setGlobalPostDeployMigrationClasses,
 } from '../typeorm.helpers.ts';
 import { ClassType } from '@nestjs-yalc/types/index.js';
 import { MigrationInterface } from 'typeorm';
@@ -17,6 +19,17 @@ describe('setGlobalPreDeployMigrationClasses', () => {
     setGlobalPreDeployMigrationClasses(connName, classes as ClassType<MigrationInterface>[]);
 
     expect(global.TypeORM_Migration_classes?.[connName]).toEqual(classes);
+  });
+});
+
+describe('setGlobalPostDeployMigrationClasses', () => {
+  it('should set global post-deploy migration classes', () => {
+    const connName = 'testConnection';
+    const classes = [{ name: 'testClass' }] as ClassType<MigrationInterface>[];
+
+    setGlobalPostDeployMigrationClasses(connName, classes as ClassType<MigrationInterface>[]);
+
+    expect(global.TypeORM_PostDeploy_Migration_classes?.[connName]).toEqual(classes);
   });
 });
 
@@ -40,6 +53,16 @@ describe('getGlobalPreDeployMigrationClasses', () => {
     global.TypeORM_Migration_classes = { [connName]: classes };
 
     expect(getGlobalPreDeployMigrationClasses(connName)).toEqual(classes);
+  });
+});
+
+describe('getGlobalPostDeployMigrationClasses', () => {
+  it('should get global post-deploy migration classes', () => {
+    const connName = 'testConnection';
+    const classes = [{ name: 'testClass' }] as ClassType<MigrationInterface>[];
+    global.TypeORM_PostDeploy_Migration_classes = { [connName]: classes };
+
+    expect(getGlobalPostDeployMigrationClasses(connName)).toEqual(classes);
   });
 });
 
