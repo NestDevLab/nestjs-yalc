@@ -1,29 +1,45 @@
 import { expect, jest, describe, it } from '@jest/globals';
 import { TypeORMLogger } from '@nestjs-yalc/logger/typeorm-logger.js';
 import {
-  setGlobalMigrationClasses,
-  getGlobalMigrationClasses,
+  setGlobalPreDeployMigrationClasses,
+  getGlobalPreDeployMigrationClasses,
   yalcTypeOrmPostgresOptions,
-} from '../typeorm.helpers.js';
+  setGlobalMigrationClasses,
+} from '../typeorm.helpers.ts';
+import { ClassType } from '@nestjs-yalc/types/index.js';
+import { MigrationInterface } from 'typeorm';
 
-describe('setGlobalMigrationClasses', () => {
+describe('setGlobalPreDeployMigrationClasses', () => {
   it('should set global migration classes', () => {
     const connName = 'testConnection';
-    const classes = [{ name: 'testClass' }];
+    const classes = [{ name: 'testClass' }] as ClassType<MigrationInterface>[];
 
-    setGlobalMigrationClasses(connName, classes);
+    setGlobalPreDeployMigrationClasses(connName, classes as ClassType<MigrationInterface>[]);
 
-    expect(global.TypeORM_Migration_classes[connName]).toEqual(classes);
+    expect(global.TypeORM_Migration_classes?.[connName]).toEqual(classes);
   });
 });
 
-describe('getGlobalMigrationClasses', () => {
+describe('setGlobalMigrationClasses', () => {
+  it('should set global pre-deploy and post-deploy migration classes', () => {
+    const connName = 'testConnection';
+    const preDeployClasses = [{ name: 'testClassPre' }] as ClassType<MigrationInterface>[];
+    const postDeployClasses = [{ name: 'testClassPost' }] as ClassType<MigrationInterface>[];
+
+    setGlobalMigrationClasses(connName, preDeployClasses, postDeployClasses);
+
+    expect(global.TypeORM_Migration_classes?.[connName]).toEqual(preDeployClasses);
+    expect(global.TypeORM_PostDeploy_Migration_classes?.[connName]).toEqual(postDeployClasses);
+  });
+});
+
+describe('getGlobalPreDeployMigrationClasses', () => {
   it('should get global migration classes', () => {
     const connName = 'testConnection';
-    const classes = [{ name: 'testClass' }];
+    const classes = [{ name: 'testClass' }] as ClassType<MigrationInterface>[];
     global.TypeORM_Migration_classes = { [connName]: classes };
 
-    expect(getGlobalMigrationClasses(connName)).toEqual(classes);
+    expect(getGlobalPreDeployMigrationClasses(connName)).toEqual(classes);
   });
 });
 

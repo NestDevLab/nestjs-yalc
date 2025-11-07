@@ -6,18 +6,48 @@ import { MigrationInterface } from 'typeorm';
 import { ClassType } from 'nestjs-yalc';
 import { YalcEventService } from '@nestjs-yalc/event-manager/event.service.js';
 
-export const setGlobalMigrationClasses = (
+export const setGlobalPreDeployMigrationClasses = (
   connName: string,
   classes: ClassType<MigrationInterface>[],
 ) => {
   global.TypeORM_Migration_classes = {
-    ...global.TypeORM_Migration_classes,
+    ...(global.TypeORM_Migration_classes ?? {}),
     [connName]: classes,
   };
 };
 
-export const getGlobalMigrationClasses = (connName: string) => {
-  return global.TypeORM_Migration_classes?.[connName];
+export const setGlobalMigrationClasses = (
+  connName: string,
+  preDeployClasses: ClassType<MigrationInterface>[],
+  postDeployClasses: ClassType<MigrationInterface>[],
+) => {
+  global.TypeORM_Migration_classes = {
+    ...(global.TypeORM_Migration_classes ?? {}),
+    [connName]: preDeployClasses,
+  };
+
+  global.TypeORM_PostDeploy_Migration_classes = {
+    ...(global.TypeORM_PostDeploy_Migration_classes ?? {}),
+    [connName]: postDeployClasses,
+  };
+};
+
+export const getGlobalPreDeployMigrationClasses = (connName: string) => {
+  return global.TypeORM_Migration_classes?.[connName] ?? [];
+};
+
+export const setGlobalPostDeployMigrationClasses = (
+  connName: string,
+  classes: ClassType<MigrationInterface>[],
+) => {
+  global.TypeORM_PostDeploy_Migration_classes = {
+    ...(global.TypeORM_PostDeploy_Migration_classes ?? {}),
+    [connName]: classes,
+  };
+};
+
+export const getGlobalPostDeployMigrationClasses = (connName: string) => {
+  return global.TypeORM_PostDeploy_Migration_classes?.[connName] ?? [];
 };
 
 export const yalcTypeOrmPostgresOptions = (

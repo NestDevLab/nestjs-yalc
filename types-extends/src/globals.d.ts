@@ -8,6 +8,9 @@ declare global {
   var TypeORM_Migration_classes:
     | { [connName: string]: ClassType<MigrationInterface>[] | undefined }
     | undefined;
+  var TypeORM_PostDeploy_Migration_classes:
+    | { [connName: string]: ClassType<MigrationInterface>[] | undefined }
+    | undefined;
 
   namespace NodeJS {
     interface ProcessEnv {
