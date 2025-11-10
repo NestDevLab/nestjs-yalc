@@ -2,10 +2,10 @@ import { expect, jest, describe, it } from '@jest/globals';
 import { TypeORMLogger } from '@nestjs-yalc/logger/typeorm-logger.js';
 import {
   setGlobalPreDeployMigrationClasses,
-  getGlobalPreDeployMigrationClasses,
   yalcTypeOrmPostgresOptions,
-  setGlobalMigrationClasses,
   getGlobalPostDeployMigrationClasses,
+  setGlobalMigrationClasses,
+  getGlobalPreDeployMigrationClasses,
   setGlobalPostDeployMigrationClasses,
 } from '../typeorm.helpers.ts';
 import { ClassType } from '@nestjs-yalc/types/index.js';
@@ -44,6 +44,19 @@ describe('setGlobalMigrationClasses', () => {
     expect(global.TypeORM_Migration_classes?.[connName]).toEqual(preDeployClasses);
     expect(global.TypeORM_PostDeploy_Migration_classes?.[connName]).toEqual(postDeployClasses);
   });
+
+  it('should set global pre-deploy and post-deploy migration classes', () => {
+    const connName = 'testConnection';
+    const preDeployClasses = [{ name: 'testClassPre' }] as ClassType<MigrationInterface>[];
+    const postDeployClasses = [{ name: 'testClassPost' }] as ClassType<MigrationInterface>[];
+    global.TypeORM_Migration_classes = undefined;
+    global.TypeORM_PostDeploy_Migration_classes = undefined;
+
+    setGlobalMigrationClasses(connName, preDeployClasses, postDeployClasses);
+
+    expect(global.TypeORM_Migration_classes?.[connName]).toEqual(preDeployClasses);
+    expect(global.TypeORM_PostDeploy_Migration_classes?.[connName]).toEqual(postDeployClasses);
+  });
 });
 
 describe('getGlobalPreDeployMigrationClasses', () => {
@@ -54,6 +67,13 @@ describe('getGlobalPreDeployMigrationClasses', () => {
 
     expect(getGlobalPreDeployMigrationClasses(connName)).toEqual(classes);
   });
+
+  it('should get global migration classes', () => {
+    const connName = 'testConnection';
+    global.TypeORM_Migration_classes = undefined;
+
+    expect(getGlobalPreDeployMigrationClasses(connName)).toEqual([]);
+  });
 });
 
 describe('getGlobalPostDeployMigrationClasses', () => {
@@ -63,6 +83,13 @@ describe('getGlobalPostDeployMigrationClasses', () => {
     global.TypeORM_PostDeploy_Migration_classes = { [connName]: classes };
 
     expect(getGlobalPostDeployMigrationClasses(connName)).toEqual(classes);
+  });
+
+  it('should get global post-deploy migration classes', () => {
+    const connName = 'testConnection';
+    global.TypeORM_PostDeploy_Migration_classes = undefined;
+
+    expect(getGlobalPostDeployMigrationClasses(connName)).toEqual([]);
   });
 });
 
