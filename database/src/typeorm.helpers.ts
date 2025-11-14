@@ -36,6 +36,13 @@ export const getGlobalPreDeployMigrationClasses = (connName: string) => {
   return global.TypeORM_Migration_classes?.[connName] ?? [];
 };
 
+export const getGlobalMigrationClasses = (connName: string) => {
+  const preMigrateClasses = global.TypeORM_Migration_classes?.[connName] ?? [];
+  const postMigrateClasses =
+    global.TypeORM_PostDeploy_Migration_classes?.[connName] ?? [];
+  return [...preMigrateClasses, ...postMigrateClasses];
+};
+
 export const setGlobalPostDeployMigrationClasses = (
   connName: string,
   classes: ClassType<MigrationInterface>[],
