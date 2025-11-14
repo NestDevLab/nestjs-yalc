@@ -63,6 +63,7 @@
   "dependencies": {
     "@apollo/federation": "^0.38.1",
     "@apollo/subgraph": "^2.3.2",
+    "@aws-sdk/client-ssm": "^3.931.0",
     "@fastify/cookie": "^8.3.0",
     "@jorgebodega/typeorm-seeding": "^6.0.1",
     "@types/node-fetch": "^2.6.2",
@@ -81,6 +82,7 @@
     "lodash": "^4.17.21",
     "mobile-detect": "^1.4.5",
     "mysql2": "^3.9.4",
+    "neverthrow": "^8.2.0",
     "node-fetch": "^3.3.0",
     "p-map": "^5.5.0",
     "passport": "^0.6.0",
@@ -90,8 +92,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "typeorm": "^0.3.14",
-    "uuidv4": "^6.2.13",
-    "neverthrow": "^8.2.0"
+    "uuidv4": "^6.2.13"
   },
   "optionalDependencies": {
     "@graphql-tools/wrap": "^9.3.6",

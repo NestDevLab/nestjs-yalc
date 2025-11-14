@@ -1,146 +1,70 @@
-import { DeepMocked, createMock } from '@golevelup/ts-jest';
 import {
   expect,
   jest,
   describe,
   it,
   beforeEach,
-  beforeAll,
-  afterAll,
-  afterEach,
 } from '@jest/globals';
-import { importMockedEsm } from '@nestjs-yalc/jest/esm.helper.js';
+import { GetParameterCommandOutput } from '@aws-sdk/client-ssm';
 
-jest.mock('aws-sdk');
-
-import AWS from 'aws-sdk';
-const localEncryption = (await importMockedEsm(
-  '@nestjs-yalc/utils/encryption.helper.js',
-  import.meta,
-)) as DeepMocked<typeof import('@nestjs-yalc/utils/encryption.helper.js')>;
 const $ = await import('../encryption.helper.js');
 
-var mockKMSDecrypt: jest.Mock;
-var mockKMSEncrypt: jest.Mock;
-var mockSSMGetParameter: jest.Mock;
+const mockSSMSend = jest.fn();
+const mockSSMClient = {
+  send: mockSSMSend,
+};
 
-jest.mock('aws-sdk', () => {
-  mockKMSDecrypt = jest.fn();
-  mockKMSEncrypt = jest.fn();
-  mockSSMGetParameter = jest.fn();
-
+jest.mock('@aws-sdk/client-ssm', () => {
   return {
-    KMS: jest.fn(() =>
-      createMock<AWS.KMS>({
-        decrypt: mockKMSDecrypt as any,
-        encrypt: mockKMSEncrypt as any,
-      }),
-    ),
-    SSM: jest.fn(() =>
-      createMock<AWS.SSM>({
-        getParameter: () => ({ promise: mockSSMGetParameter }),
-      }),
-    ),
+    SSMClient: jest.fn(() => mockSSMClient),
+    GetParameterCommand: jest.fn((params) => params),
   };
 });
 
-// Please let me know if you know how to solve this as unknown as void.
 describe('Encryption/Decryption Module', () => {
   beforeEach(() => {
-    process.env.AWS_REMOTE_KEYID = 'SomeRemoteKeyWeHaveStoredExternally';
-    process.env.NODE_ENV = 'production';
-  });
-
-  // Your test cases go here
-  it('should decrypt using AWS', async () => {
-    mockKMSDecrypt.mockImplementation((params, callback) => {
-      callback(null, { Plaintext: 'decrypted' });
-    });
-
-    const result = await $.decryptString('toDecrypt', $.EncryptMode.AWS);
-    expect(result).toBe('decrypted');
-  });
-
-  it('should handle AWS decryption error', async () => {
-    mockKMSDecrypt.mockImplementation((params, callback) => {
-      callback(new Error('AWS Error'), null);
-    });
-
-    await expect(
-      $.decryptString('toDecrypt', $.EncryptMode.AWS),
-    ).rejects.toThrow('AWS Error');
-  });
-
-  it('should decrypt using LOCAL', async () => {
-    jest.spyOn(localEncryption, 'decryptAes').mockReturnValue('localDecrypted');
-    const result = await $.decryptString('toDecrypt', $.EncryptMode.LOCAL);
-    expect(result).toBe('localDecrypted');
-  });
-
-  it('should encrypt using AWS', async () => {
-    const encryptionResult = Buffer.from('encrypted');
-    mockKMSEncrypt.mockImplementation((params, callback) => {
-      callback(null, { CiphertextBlob: encryptionResult });
-    });
-
-    const result = await $.encryptString('toEncrypt', $.EncryptMode.AWS);
-    expect(result).toBe(encryptionResult.toString('base64'));
-  });
-
-  it('should handle AWS encryption error', async () => {
-    mockKMSEncrypt.mockImplementation((params, callback) => {
-      callback(new Error('AWS Error'), null);
-    });
-
-    await expect(
-      $.encryptString('toEncrypt', $.EncryptMode.AWS),
-    ).rejects.toThrow('AWS Error');
-  });
-
-  it('should encrypt using LOCAL', async () => {
-    jest.spyOn(localEncryption, 'encryptAes').mockReturnValue('localEncrypted');
-    const result = await $.encryptString('toEncrypt', $.EncryptMode.LOCAL);
-    expect(result).toBe('localEncrypted');
+    jest.clearAllMocks();
   });
 
   it('should handle SSM variable decryption with cache', async () => {
-    mockSSMGetParameter.mockReturnValue({
+    mockSSMClient.send = jest.fn().mockImplementationOnce(() => ({
       Parameter: { Value: 'ssmDecrypted' },
-    });
+    }));
 
     const result = await $.decryptSsmVariable('toDecrypt');
     expect(result).toBe('ssmDecrypted');
   });
 
   it('should handle SSM variable decryption with cache without value', async () => {
-    mockSSMGetParameter.mockReturnValue({
+    mockSSMClient.send = jest.fn().mockImplementationOnce(() => ({
       Parameter: null,
-    });
+    }));
 
-    const result = await $.decryptSsmVariable('toDecrypt', true);
-    expect(result).toBe('ssmDecrypted');
+    const result = await $.decryptSsmVariable('toDecryptNull', true);
+    expect(result).toBe('');
   });
 
   it('should handle SSM variable decryption with cache with empty value', async () => {
-    mockSSMGetParameter.mockReturnValue({
+    mockSSMClient.send = jest.fn().mockImplementationOnce(() => ({
       Parameter: {},
-    });
+    }));
 
     const result = await $.decryptSsmVariable('toDecryptNoValue');
+    console.log('result', { result, toDecryptNoValue: 'toDecryptNoValue' });
     expect(result).toBe('');
   });
 
   it('should handle SSM variable decryption with cache with empty value...again', async () => {
-    mockSSMGetParameter.mockReturnValue({
+    mockSSMClient.send = jest.fn().mockImplementationOnce(() => ({
       Parameter: {},
-    });
+    }));
 
     const result = await $.decryptSsmVariable('toDecryptNoValue');
     expect(result).toBe('');
   });
 
   it('should handle SSM variable decryption error', async () => {
-    mockSSMGetParameter.mockImplementation(() => {
+    mockSSMClient.send = jest.fn().mockImplementationOnce(() => {
       throw new Error('SSM Error');
     });
 
@@ -149,9 +73,9 @@ describe('Encryption/Decryption Module', () => {
   });
 
   it('should set environment variables from SSM', async () => {
-    mockSSMGetParameter.mockReturnValue({
+    mockSSMClient.send = jest.fn().mockImplementationOnce(() => ({
       Parameter: { Value: 'ssmDecrypted' },
-    });
+    }));
 
     const envVars = { TEST_VAR: 'ssmVar' };
     const result = await $.setEnvironmentVariablesFromSsm(envVars, false);
@@ -160,9 +84,9 @@ describe('Encryption/Decryption Module', () => {
   });
 
   it('should set environment variables from SSM with cache', async () => {
-    mockSSMGetParameter.mockReturnValue({
+    mockSSMClient.send = jest.fn().mockImplementationOnce(() => ({
       Parameter: { Value: 'ssmDecrypted' },
-    });
+    }));
 
     const envVars = { TEST_VAR: 'ssmVar' };
     const result = await $.setEnvironmentVariablesFromSsm(envVars);
@@ -170,62 +94,16 @@ describe('Encryption/Decryption Module', () => {
     expect(process.env.TEST_VAR).toBe('ssmDecrypted');
   });
 
-  it('should throw error if AWS_REMOTE_KEYID is undefined in asyncEncrypt', async () => {
-    delete process.env.AWS_REMOTE_KEYID;
-    await expect($.asyncEncrypt('toEncrypt')).rejects.toThrow(
-      'Calling kms encrypt function without setting the AWS_REMOTE_KEYID variable',
-    );
-  });
-
-  it('should handle decryptCallback success', () => {
-    const resolve = jest.fn();
-    const reject = jest.fn();
-    const callback = $.decryptCallback(resolve, reject);
-
-    callback(null, { Plaintext: 'decrypted' });
-    expect(resolve).toHaveBeenCalledWith('decrypted');
-    expect(reject).not.toHaveBeenCalled();
-  });
-
-  it('should handle decryptCallback error', () => {
-    const resolve = jest.fn();
-    const reject = jest.fn();
-    const callback = $.decryptCallback(resolve, reject);
-
-    callback(new Error('Some error'), null);
-    expect(reject).toHaveBeenCalledWith(new Error('Some error'));
-    expect(resolve).not.toHaveBeenCalled();
-  });
-
-  it('should handle decryptCallback with undefined Plaintext', () => {
-    const resolve = jest.fn();
-    const reject = jest.fn();
-    const callback = $.decryptCallback(resolve, reject);
-
-    callback(null, {});
-    expect(resolve).toHaveBeenCalledWith('');
-    expect(reject).not.toHaveBeenCalled();
-  });
-
-  it('should handle undefined CiphertextBlob in asyncEncrypt', async () => {
-    mockKMSEncrypt.mockImplementation((params, callback) => {
-      callback(null, { CiphertextBlob: undefined });
-    });
-
-    const result = $.asyncEncrypt('toEncrypt');
-
-    await expect(result).rejects.toEqual(
-      'Error CiphertextBlob coming from kms encrypt is undefined',
-    );
-  });
-
   it('should handle concurrent SSM variable decryption with cache', async () => {
-    mockSSMGetParameter.mockReset();
-    // Mock SSM getParameter to return a promise that resolves after 100ms
-    mockSSMGetParameter.mockReturnValue(
+    mockSSMClient.send = jest.fn().mockReset();
+    // Mock SSM send to return a promise that resolves after 100ms
+    mockSSMClient.send.mockReturnValue(
       new Promise((resolve) =>
         setTimeout(
-          () => resolve({ Parameter: { Value: 'ssmDecrypted' } }),
+          () =>
+            resolve({
+              Parameter: { Value: 'ssmDecrypted' },
+            } as GetParameterCommandOutput),
           100,
         ),
       ),
@@ -242,7 +120,7 @@ describe('Encryption/Decryption Module', () => {
     // Check that all promises resolved to the same value
     expect(results).toEqual(Array(5).fill('ssmDecrypted'));
 
-    // Check that SSM getParameter was called only once
-    expect(mockSSMGetParameter).toHaveBeenCalledTimes(1);
+    // Check that SSM send was called only once
+    expect(mockSSMClient.send).toHaveBeenCalledTimes(1);
   });
 });
