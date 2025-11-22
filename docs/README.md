@@ -16,6 +16,9 @@ Nest-yalc stands for Nestjs - Yet Another Library Collection
 ## Documentation
 
 - [How to create graphql API with nestjs-yalc/crud-gen](./api-creation.md)
+- [CRUD-Gen modeling (ModelObject/ModelField)](./crud-gen-modeling.md)
+- [CRUD-Gen dependency factory reference](./crud-gen-factory.md)
+- [CRUD-Gen REST usage](./crud-gen-rest.md)
 
 - [How to use the Api-Strategy library](./api-strategy.md)
 
