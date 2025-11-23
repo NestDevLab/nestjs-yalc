@@ -27,6 +27,7 @@ Nest-yalc stands for Nestjs - Yet Another Library Collection
 - [How to use the EventManager module library](./event-manager-module.md), [Event](./event-manager-event.md), [Service](./event-manager-service.md)
 
 - [How to use the Logger library](./logger.md)
+- [How to build a modular platform with nestjs-yalc](./how-to-integrate-nestjs-yalc.md)
 
 ## NPM package.json and Workspace
 

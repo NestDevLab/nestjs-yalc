@@ -1,92 +1,117 @@
 # API Strategy
 
-This library implements a [strategy pattern](https://refactoring.guru/design-patterns/strategy
-) and a [factory-pattern](https://refactoring.guru/design-patterns/factory-method
-) that allow switching, at runtime, between different API types.
-
-The main use case is to allow developers to implement calls or events in any application without taking care of the underlying implementation.
-In this way you can switch between different API implementations and protocols without refactoring the entire code.
+This library implements the strategy pattern and factory pattern so you can switch, at runtime, between different API transport types (HTTP, in-process calls, events). You code against interfaces, while the concrete strategy can change per environment.
 
 ## Getting started
 
-### Inject the provider
+### Strategies included
 
-To inject the API strategy in your NestJS you can create a provider by using one of the following classes within a [custom provider useFactory](https://docs.nestjs.com/fundamentals/custom-providers#factory-providers-usefactory) in your Nest Module.
+- **`NestHttpCallStrategy`** — uses Nest `HttpService.axiosRef` for real HTTP calls. It merges CLS-propagated headers (via `YalcGlobalClsService`), applies an optional whitelist, maps `HttpOptions` to Axios config, and supports query parameters via `URLSearchParams`.
+- **`NestLocalCallStrategy`** — uses Fastify `inject` to perform in-process HTTP-like calls against your app. Useful for local/dev or “mono” deployments where both caller and callee live in the same Nest runtime. Can optionally skip JSON parsing with `shouldSkipJsonParse`.
+- **`NestLocalEventStrategy`** — emits events through `EventEmitter2` (sync or async).
+- **Abstracts/interfaces** — `HttpAbstractStrategy` adds `get`/`post` helpers; `IHttpCallStrategy`, `HttpOptions`, `IHttpCallStrategyResponse`, `IHttpCallStrategyOptions` define the HTTP contract; `IApiCallStrategy`/`IEventStrategy` define the core contracts for calls and events.
+- **Context services** — `ContextCallServiceFactory` and `ContextEventServiceFactory` build injectable services with `getStrategy`/`setStrategy` so you can swap implementations at runtime (per environment or feature flag).
 
-Direct call strategies:
+You can also implement your own strategies by extending `HttpAbstractStrategy` or providing custom `IApiCallStrategy`/`IEventStrategy` implementations (e.g., gRPC, Kafka, RabbitMQ).
 
-* `NestLocalCallStrategy` - It uses [express/fastify inject](https://www.fastify.io/docs/latest/Guides/Testing/#benefits-of-using-fastifyinject)
-* `NestHttpCallStrategy` - It uses [NestJS axiosRef](https://docs.nestjs.com/techniques/http-module#using-axios-directly)
+## Providers (Nest wiring)
 
-Event strategies:
+Use the factory helpers to register strategies as providers in your modules:
 
-* `NestLocalEventStrategy` - It uses NestJS [Event Emitter](https://docs.nestjs.com/techniques/events#events) 
+```ts
+import {
+  NestHttpCallStrategyProvider,
+  NestLocalCallStrategyProvider,
+  NestLocalEventStrategyProvider,
+} from '@nestjs-yalc/api-strategy';
+import { HttpModule } from '@nestjs/axios';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { Module } from '@nestjs/common';
 
-NOTE: you can even implement the `IApiCallStrategy`, the `IEventStrategy` or extends the `HttpAbstractStrategy` class to create your own implementation of the strategy. For example, you could implement your own `IEventStrategy` to integrate other event-based systems such as Kafka, RabbitMQ etc.
-
-The library also provides a wrapper to define the useFactory by passing typed parameters:
-
-
-#### For the local call
-```typescript
-    NestLocalCallStrategyProvider('YOUR_LOCAL_CALL_PROVIDER_ID', {
-        NestLocalStrategy: NestLocalCallStrategy,
-        baseUrl: '/',
-    })
+@Module({
+  imports: [
+    HttpModule, // required for NestHttpCallStrategy
+    EventEmitterModule.forRoot(), // required for NestLocalEventStrategy
+  ],
+  providers: [
+    NestHttpCallStrategyProvider('HTTP_STRATEGY', {
+      baseUrl: 'https://api.example.com',
+    }),
+    NestLocalCallStrategyProvider('LOCAL_STRATEGY', {
+      baseUrl: '/', // path prefix inside the same app
+    }),
+    NestLocalEventStrategyProvider('EVENT_STRATEGY'),
+  ],
+  exports: ['HTTP_STRATEGY', 'LOCAL_STRATEGY', 'EVENT_STRATEGY'],
+})
+export class ApiStrategyModule {}
 ```
 
-NOTE: You need to import the module containing the controller you are calling via the local-strategy to make it work. It's important to understand that the http call is emulated within the same runtime scope, so you will practically import both modules in the same app (the caller and the receiver).
+Provider options:
+- `NestHttpCallStrategyProvider({ baseUrl?, NestHttpStrategy? })`
+  - Injects `HttpService` and `YalcGlobalClsService`.
+  - Respects CLS headers (filtered by `headersWhitelist` if provided).
+  - Map query params via `options.parameters`.
+- `NestLocalCallStrategyProvider({ baseUrl?, NestLocalStrategy? })`
+  - Injects `HttpAdapterHost`, `YalcGlobalClsService`, `AppConfigService`.
+  - Uses Fastify `inject`; respects CLS headers and `headersWhitelist`.
+  - `shouldSkipJsonParse` can bypass `result.json()` when the body isn’t JSON.
+- `NestLocalEventStrategyProvider({ NestLocalStrategy? })`
+  - Injects `EventEmitter2`, supports `emit` and `emitAsync`.
 
-#### For the HTTP calls
-```typescript
-    NestHttpCallStrategyProvider('YOUR_HTTP_CALL_PROVIDER_ID', {
-        NestHttpStrategy: NestHttpCallStrategy,
-        baseUrl: 'http://youdomain.com/',
-    });
+## Options reference (HTTP)
+
+`HttpOptions<TData, TParams>`:
+- `headers`: request headers (merged with CLS headers and filtered).
+- `method`: HTTP verb (defaults set by helper).
+- `signal`: `AbortSignal`.
+- `data`: request body.
+- `parameters`: query parameters (converted to `URLSearchParams`).
+
+`IHttpCallStrategyOptions`:
+- `headersWhitelist`: array of header names to propagate from CLS context.
+- `shouldSkipJsonParse(body: string)`: for `NestLocalCallStrategy`, decide whether to skip JSON parsing and return raw body.
+
+`IHttpCallStrategyResponse<T>`:
+- `data`, `status`, `statusText`, `headers`, `request?`.
+
+`HttpAbstractStrategy`:
+- `call(path, options?)`: implemented by concrete strategies.
+- `get(path, options?)`, `post(path, options?)`: convenience wrappers that set `method`.
+
+## Context services (runtime switching)
+
+```ts
+import { ContextCallServiceFactory, ContextEventServiceFactory } from '@nestjs-yalc/api-strategy';
+
+const CallService = ContextCallServiceFactory(defaultHttpStrategy);
+const EventService = ContextEventServiceFactory(defaultEventStrategy);
 ```
 
-NOTE: You need to import the `HttpModule` from the [nestjs library](https://docs.nestjs.com/techniques/http-module) to make it work
+Inject these services to `getStrategy()` or `setStrategy(newStrategy)` at runtime (e.g., env-based toggles, gradual rollout).
 
+## Usage example
 
-#### For the event strategy
-```typescript
-    NestLocalEventStrategyProvider('YOUR_LOCAL_EVENT_PROVIDER_ID', {
-        NestLocalStrategy: NestLocalEventStrategy,
-    });
+```ts
+import { Inject, Injectable } from '@nestjs/common';
+import { IHttpCallStrategy, IEventStrategy } from '@nestjs-yalc/api-strategy';
+
+@Injectable()
+export class UserService {
+  constructor(
+    @Inject('HTTP_STRATEGY') private readonly http: IHttpCallStrategy,
+    @Inject('EVENT_STRATEGY') private readonly events: IEventStrategy,
+  ) {}
+
+  async createUser(userId: string) {
+    await this.http.post('/users', { data: { id: userId } });
+    await this.events.emitAsync('user.created', { userId });
+  }
+}
 ```
 
+## Use cases
 
-### How to use it 
-
-Once you've injected the provider in your module, you can call it from any other provider/controller by doing:
-
-```typescript
-    constructor(
-    @Inject(YOUR_HTTP_CALL_PROVIDER_ID)
-    protected readonly serviceCaller: IHttpCallStrategy,
-    @Inject(YOUR_LOCAL_EVENT_PROVIDER_ID)
-    protected readonly serviceEvent: IEventStrategy,
-    ) {}
-
-    async yourMethod() {
-
-        // DIRECT CALL (strong consistency)
-        await this.serviceCaller.post('/your/endpoint', {
-            data: { resourceId: userResId },
-        });
-
-        // OR VIA EVENT (eventual consistency)
-
-        await this.serviceEvent.emitAsync('your.event.topic', {
-            resourceId: userResId,
-        });
-    }
-```
-
-## Use cases:
-
-* You need to start implementing a service-to-service communication using HTTP and switch to gRPC or TCP later on.
-* You need to develop and emulate, via code, a microservice architecture before facing the complexity of deploying all the services separately and managing the API/Events infrastructure orchestration.
-  You can then start using the local-call/local-event strategy and then switch to a different one in future.
-* You can even switch between different API strategies depending on your environment variables, this can be useful for testing purpose or development.
-
+- Start with local-call/local-event for fast dev/test in a monolith, then switch to HTTP or other transports without refactoring callers.
+- Route per-environment or per-tenant using strategy switching (via the context services).
+- Prototype service-to-service communication before introducing full API gateways/brokers.
