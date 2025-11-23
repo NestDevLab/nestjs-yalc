@@ -95,6 +95,9 @@
     "uuidv4": "^6.2.13"
   },
   "optionalDependencies": {
+    "pg": "^8.16.3",
+    "pg-cloudflare": "^1.2.7",
+    "sqlite3": "^5.1.7",
     "@graphql-tools/wrap": "^9.3.6",
     "graphql": "^16.8.1",
     "graphql-type-json": "^0.3.2",
