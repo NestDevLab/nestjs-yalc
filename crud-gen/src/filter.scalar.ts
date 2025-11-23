@@ -75,9 +75,18 @@ export class FilterScalar implements CustomScalar<string, FilterInput> {
   }
 
   serialize(value: FilterInput | string | unknown): string {
-    return typeof value !== 'object' || value === null
-      ? value
-      : this.resultMemoizeInverse.get(value);
+    if (typeof value === 'string') return value;
+
+    if (typeof value !== 'object' || value === null) {
+      return String(value ?? '');
+    }
+
+    const memoized = this.resultMemoizeInverse.get(value);
+    if (typeof memoized === 'string') {
+      return memoized;
+    }
+
+    throw new CrudGenBadFilterTypeError();
   }
 
   parseLiteral(ast: ValueNode): FilterInput {

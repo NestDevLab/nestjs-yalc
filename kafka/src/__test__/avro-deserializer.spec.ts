@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { createMock } from '@golevelup/ts-jest';
 import * as confluent from '@kafkajs/confluent-schema-registry';
 import { KafkaAvroDeserializer } from '../plugin.js';

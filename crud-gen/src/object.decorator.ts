@@ -194,6 +194,11 @@ export const hasModelObjectMetadata = (
   return Reflect.hasMetadata(CRUDGEN_OBJECT_METADATA_KEY, getPrototype(target));
 };
 
+// Backward-compatible alias
+export const CrudGenObject = ModelObject;
+export const getCrudGenObjectMetadata = getModelObjectMetadata;
+export const hasCrudGenObjectMetadata = hasModelObjectMetadata;
+
 /**
  * The options below allow to implement an include/exclude mechanism for mapped fields.
  * It can be used to deny the usage of certain fields

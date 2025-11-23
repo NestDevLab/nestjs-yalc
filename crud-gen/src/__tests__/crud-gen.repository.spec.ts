@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import {
   BaseEntity,
   EntityMetadata,
@@ -7,18 +8,19 @@ import {
 import {
   CGExtendedRepository,
   CGExtendedRepositoryFactory,
-} from '../crud-gen.repository.js';
+} from '../typeorm/generic.repository.js';
 import { QueryBuilderHelper } from '@nestjs-yalc/database/query-builder.helper.js';
-import { SortDirection } from '../crud-gen-gql.enum.js';
+import { SortDirection } from '../crud-gen.enum.js';
 import { DeepMocked } from '@golevelup/ts-jest';
 import { mockQueryBuilder } from '@nestjs-yalc/jest/common-mocks.helper.js';
 import { Alias } from 'typeorm/query-builder/Alias';
 import * as Typeorm from 'typeorm';
 import * as CrudGenHelpers from '../crud-gen.helpers.js';
 
-jest.mock('typeorm');
-jest.mock('typeorm/find-options/FindOptionsUtils');
 jest.mock('@nestjs-yalc/database/query-builder.helper');
+jest.mock('typeorm/find-options/FindOptionsUtils', () => ({
+  applyFindManyOptionsOrConditionsToQueryBuilder: jest.fn(),
+}));
 
 const fakeFindOptions = {
   take: 5,

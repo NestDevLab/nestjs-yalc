@@ -466,7 +466,12 @@ export function mapPaginationParamsToTypeORM(
     }
   };
 
-  const take = (endRow && checkMaxRow(endRow - skip)) || max;
+  const numericEndRow =
+    typeof endRow === 'number' && !Number.isNaN(endRow) ? endRow : undefined;
+  const requested =
+    typeof numericEndRow === 'number' ? numericEndRow - skip : undefined;
+
+  const take = requested !== undefined ? checkMaxRow(requested) : max;
 
   return { skip, take };
 }
@@ -477,7 +482,7 @@ export function mapSortingParamsToTypeORM<TInputType = any, TEntityType = any>(
 ) {
   const order: FindOptionsOrder<TEntityType> = {};
 
-  if (sorting) {
+  if (Array.isArray(sorting)) {
     sorting.forEach((sortParams) => {
       const col = sortParams.colId;
       const colName: keyof TEntityType = transform?.(col) ?? (col as any);

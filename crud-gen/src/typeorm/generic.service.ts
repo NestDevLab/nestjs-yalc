@@ -530,15 +530,17 @@ export class GenericService<
       const fieldMetadata = fieldMetadataList?.[propertyName];
 
       if (!fieldMetadata?.dst || !isDstExtended(fieldMetadata.dst)) {
-        newEntityWrite[propertyName] = entityRead[propertyName as any];
+        (newEntityWrite as any)[propertyName] = (entityRead as any)[
+          propertyName as any
+        ];
         continue;
       }
 
       const dst = fieldMetadata.dst;
 
-      newEntityWrite[propertyName] = dst.transformerDst?.(
+      (newEntityWrite as any)[propertyName] = dst.transformerDst?.(
         newEntityWrite,
-        entityRead[propertyName as any],
+        (entityRead as any)[propertyName as any],
       );
     }
 

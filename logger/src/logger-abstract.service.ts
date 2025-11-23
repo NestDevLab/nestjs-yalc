@@ -10,6 +10,7 @@ import {
 import { YalcGlobalClsService } from '../../app/src/cls.module.js';
 
 export interface LogMethodOptions {
+  message?: any;
   /**
    * The data is the place where you want to add the extra information
    * that are not returned back as a response but they can be sent to the logger or the event emitter.

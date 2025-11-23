@@ -10,8 +10,8 @@ import {
   isSetFilterModel,
   isTextFilterModel,
 } from '../crud-gen-type-checker.utils.js';
-import { FilterType, Operators } from '../crud-gen-gql.enum.js';
-import { FilterModel } from '../crud-gen-gql.interface.js';
+import { FilterType, Operators } from '../crud-gen.enum.js';
+import { FilterModel } from '../api-graphql/crud-gen-gql.interface.js';
 import {
   fixedCombinedOrDateFilter,
   fixedCombinedOrNumberFilter,

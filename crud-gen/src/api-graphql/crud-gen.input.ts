@@ -28,6 +28,7 @@ import {
   ITextFilterModel,
   JoinTypes,
 } from './crud-gen-gql.interface.js';
+export { JoinTypes } from './crud-gen-gql.interface.js';
 
 /**
  * @deprecated use sortModelFactory instead

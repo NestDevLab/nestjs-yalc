@@ -289,3 +289,42 @@ export function mapCrudGenParamsGql<Entity extends ObjectLiteral>(
 
   return findOptions;
 }
+
+// Legacy helper used by existing tests (compatible signature)
+export function mapCrudGenParams<Entity extends ObjectLiteral>(
+  params: ICrudGenGqlArgsOptions | undefined,
+  ctx: GqlExecutionContext | ExecutionContext,
+  args: ICrudGenBaseParams,
+  info: GraphQLResolveInfo,
+) {
+  const fieldType =
+    params?.fieldType ?? params?.fieldMap ?? params?.entityType ?? {};
+
+  let mappedFields: { keys: string[]; keysMeta?: { [key: string]: IKeyMeta } };
+  try {
+    mappedFields = GqlModelFieldsMapper(fieldType, info);
+  } catch {
+    mappedFields = { keys: [], keysMeta: {} };
+  }
+
+  return mapCrudGenParamsGql<Entity>(
+    params,
+    ctx as ExecutionContext,
+    mappedFields,
+    args,
+    { isCount: isAskingForCount(info) },
+  );
+}
+
+export {
+  getTextFilter,
+  getNumberFilter,
+  getDateFilter,
+  filterSwitch,
+  resolveFilter,
+  convertFilter,
+  createWhere,
+  removeSymbolicSelection,
+  checkFilterScope,
+  getFindOperator,
+} from '../typeorm/crud-gen-args.helpers.js';

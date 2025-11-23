@@ -1,5 +1,6 @@
+import { jest } from '@jest/globals';
 import {
-  ,
+  ModelField,
   CrudGenObject,
   getModelFieldMetadata,
   getCrudGenObjectMetadata,
@@ -27,7 +28,7 @@ describe('ObjectDecorator', () => {
   });
   it('Should decorate properly a property with ModelField', () => {
     class TestObject {
-      @(fixedModelFieldMetadata)
+      @ModelField(fixedModelFieldMetadata)
       decoratedProperty = {};
 
       property = 'notDecorated';
@@ -57,7 +58,7 @@ describe('ObjectDecorator', () => {
   it('Should copy the metadata from an object to another', () => {
     @CrudGenObject({ filters: fixedIncludefilterOption })
     class BaseDecoratedClass {
-      @({})
+      @ModelField({})
       baseDecoratedProperty: 'string';
     }
 
@@ -89,8 +90,9 @@ describe('ObjectDecorator', () => {
       .spyOn(ObjectDecorator, 'getModelFieldMetadataList')
       .mockReturnValue({});
 
-    const mockedNestGraphql = NestGraphql as jest.Mocked<typeof NestGraphql>;
-    mockedNestGraphql.addFieldMetadata = jest.fn();
+    const addFieldSpy = jest
+      .spyOn(NestGraphql as any, 'addFieldMetadata')
+      .mockImplementation(jest.fn());
 
     let gqlOptions: FieldOptions | undefined = undefined;
     let gqlType: ReturnTypeFunc | undefined = () => BaseEntity;
@@ -102,7 +104,7 @@ describe('ObjectDecorator', () => {
 
     modelFieldDecorator({}, 'propertyKey');
 
-    expect(mockedNestGraphql.addFieldMetadata).toHaveBeenCalledWith(
+    expect(addFieldSpy).toHaveBeenCalledWith(
       gqlType,
       {},
       {},
@@ -117,11 +119,12 @@ describe('ObjectDecorator', () => {
     });
 
     modelFieldDecorator({}, 'propertyKey');
-    expect(mockedNestGraphql.addFieldMetadata).toHaveBeenCalledWith(
+    expect(addFieldSpy).toHaveBeenCalledWith(
       gqlOptions,
       gqlOptions,
       {},
       'propertyKey',
     );
+    addFieldSpy.mockRestore();
   });
 });

@@ -1,10 +1,22 @@
-jest.mock('@nestjs/graphql');
-jest.mock('../crud-gen.args', () => ({
+import { jest } from '@jest/globals';
+
+jest.mock('@nestjs/graphql', () => {
+  const actual = jest.requireActual('@nestjs/graphql');
+  return {
+    ...actual,
+    Args: jest.fn((...params) => actual.Args(...params)),
+    GqlExecutionContext: {
+      ...actual.GqlExecutionContext,
+      create: jest.fn(),
+    },
+  };
+});
+jest.mock('../crud-gen.args.js', () => ({
   crudGenParamsFactory: jest.fn(),
   crudGenParamsNoPaginationFactory: jest.fn(),
 }));
 
-import * as crudGenArgsDecorator from '../crud-gen-args-gql.decorator.js';
+import * as crudGenArgsDecorator from '../api-graphql/crud-gen-args-gql.decorator.js';
 import {
   Equal,
   LessThan,
@@ -21,7 +33,7 @@ import {
   ExtraArgsStrategy,
   FilterType,
   GeneralFilters,
-} from '../crud-gen-gql.enum.js';
+} from '../crud-gen.enum.js';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import {
   mockedExecutionContext,
@@ -32,10 +44,10 @@ import {
   FilterModel,
   ICrudGenGqlArgsOptions,
   ICombinedSimpleModel,
-} from '../crud-gen-gql.interface.js';
+} from '../api-graphql/crud-gen-gql.interface.js';
 import * as graphql from '@nestjs/graphql';
-import * as CrudGenInput from '../crud-gen.input.js';
-import * as GqlCrudGenDecorator from '../gqlfields.decorator.js';
+import * as CrudGenInput from '../api-graphql/crud-gen.input.js';
+import * as GqlCrudGenDecorator from '../api-graphql/gqlfields.decorator.js';
 import * as CrudGenHelpers from '../crud-gen.helpers.js';
 import {
   CrudGenFilterNotSupportedError,
@@ -233,9 +245,10 @@ const fixedDataFilterToInclude: ICrudGenGqlArgsOptions = {
 
 const mockedInfo = createMock<GraphQLResolveInfo>();
 
-const mockCreate = (mockedNestGraphql.GqlExecutionContext.create = jest.fn());
+const mockCreate = (mockedNestGraphql().GqlExecutionContext.create = jest.fn());
 mockCreate.mockImplementation(() => ({
   getArgs: jest.fn().mockReturnValue(fixedArgsQueryParams),
+  getContext: jest.fn().mockReturnValue({}),
   getInfo: jest.fn().mockReturnValue(infoObj),
 }));
 const mockedGqlExecutionContext = GqlExecutionContext.create(

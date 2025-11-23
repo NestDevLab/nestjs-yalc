@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { FieldNode, SelectionNode } from 'graphql';
 import { GqlError, GqlErrorMsgs } from './gql.error.js';
 import { GqlComplexityHelper } from './gql-complexity.helper.js';

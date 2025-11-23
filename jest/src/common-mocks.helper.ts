@@ -1,12 +1,24 @@
 /* istanbul ignore file */
 
 import { jest } from '@jest/globals';
+import { createRequire } from 'module';
+
+// Works in both CJS and ESM test runs
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const dynamicRequire: NodeRequire =
+  typeof require === 'function'
+    ? require
+    : createRequire(
+        typeof import.meta !== 'undefined' && (import.meta as any).url
+          ? (import.meta as any).url
+          : new URL('./', `file://${process.cwd()}/`).href,
+      );
 
 let NestGraphql: any;
 
 try {
   jest.mock('@nestjs/graphql');
-  NestGraphql = require('@nestjs/graphql');
+  NestGraphql = dynamicRequire('@nestjs/graphql');
 } catch (e) {
   // ignore error
 }

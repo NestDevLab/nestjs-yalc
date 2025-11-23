@@ -1,4 +1,4 @@
-import * as $ from '../crud-gen-gql.type.js';
+import * as $ from '../api-graphql/crud-gen-gql.type.js';
 
 class Test {
   testField: string;

@@ -4,7 +4,10 @@ import {
   crudGenParamsNoPaginationFactory,
   ICrudGenParams,
 } from '../crud-gen.args.js';
-import { RowDefaultValues, SortDirection } from '../crud-gen-gql.enum.js';
+import {
+  RowDefaultValues,
+  SortDirection,
+} from '../crud-gen.enum.js';
 
 class TestEntity extends BaseEntity {
   columnId: number;

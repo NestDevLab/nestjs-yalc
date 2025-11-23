@@ -30,7 +30,7 @@ export class TestEntityRelation extends TestEntity {
     name: 'TestEntityRelation',
     referencedColumnName: 'TestEntityRelation',
   })
-  TestEntityRelation2: TestEntityRelation2;
+  TestEntityRelation2!: any;
 }
 
 export class TestEntityRelation2 extends TestEntity {
@@ -42,5 +42,5 @@ export class TestEntityRelation2 extends TestEntity {
     name: 'TestEntityRelation2',
     referencedColumnName: 'TestEntityRelation2',
   })
-  TestEntityRelation: TestEntityRelation;
+  TestEntityRelation!: any;
 }

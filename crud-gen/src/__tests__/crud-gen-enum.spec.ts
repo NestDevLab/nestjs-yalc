@@ -1,5 +1,6 @@
+import { jest } from '@jest/globals';
 import { BaseEntity } from 'typeorm';
-import { entityFieldsEnumGqlFactory } from '../crud-gen-gql.enum.js';
+import { entityFieldsEnumGqlFactory } from '../api-graphql/crud-gen-gql.enum.js';
 import * as CrudGenHelper from '../crud-gen.helpers.js';
 
 const fixedProperty = 'columId';

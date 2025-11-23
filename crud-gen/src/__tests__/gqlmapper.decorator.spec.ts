@@ -1,16 +1,26 @@
-jest.mock('@nestjs/graphql');
+import { jest } from '@jest/globals';
+jest.mock('@nestjs/graphql', () => {
+  const actual = jest.requireActual('@nestjs/graphql');
+  return {
+    ...actual,
+    GqlExecutionContext: {
+      ...actual.GqlExecutionContext,
+      create: jest.fn(),
+    },
+  };
+});
 
-import * as gqlMapper from '../gqlmapper.decorator.js';
+import * as gqlMapper from '../api-graphql/gqlmapper.decorator.js';
 import {
   mockedExecutionContext,
   mockedNestGraphql,
 } from '@nestjs-yalc/jest/common-mocks.helper.js';
 import * as graphql from '@nestjs/graphql';
-import { , CrudGenObject } from '../object.decorator.js';
+import { ModelField, CrudGenObject } from '../object.decorator.js';
 
 @CrudGenObject()
 class DummyType {
-  @({ gqlOptions: { name: 'betterName' } })
+  @ModelField({ gqlOptions: { name: 'betterName' } })
   dummyProp: string;
 }
 
@@ -20,7 +30,7 @@ const fixedInfoObj = {
   original: stringValue,
 };
 describe('Graphql decorator test', () => {
-  const mockCreate = (mockedNestGraphql.GqlExecutionContext.create = jest.fn());
+  const mockCreate = (mockedNestGraphql().GqlExecutionContext.create = jest.fn());
   mockCreate.mockImplementation(() => ({
     getArgs: jest.fn().mockReturnValue(fixedInfoObj),
   }));

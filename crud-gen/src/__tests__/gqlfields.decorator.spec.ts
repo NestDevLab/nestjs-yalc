@@ -1,10 +1,20 @@
-jest.mock('@nestjs/graphql');
+import { jest } from '@jest/globals';
+jest.mock('@nestjs/graphql', () => {
+  const actual = jest.requireActual('@nestjs/graphql');
+  return {
+    ...actual,
+    GqlExecutionContext: {
+      ...actual.GqlExecutionContext,
+      create: jest.fn(),
+    },
+  };
+});
 jest.mock('@nestjs-yalc/crud-gen/crud-gen.args', () => ({
   crudGenParamsFactory: jest.fn(),
 }));
 
 import { IFieldMapper } from '@nestjs-yalc/interfaces/maps.interface.js';
-import * as $ from '../gqlfields.decorator.js';
+import * as $ from '../api-graphql/gqlfields.decorator.js';
 import * as CrudGenHelper from '../crud-gen.helpers.js';
 import {
   mockedExecutionContext,
@@ -237,7 +247,7 @@ describe('Graphql decorator test', () => {
   // });
 
   it('Check GqlInfoGenerator', async () => {
-    const mockCreate = (mockedNestGraphql.GqlExecutionContext.create =
+    const mockCreate = (mockedNestGraphql().GqlExecutionContext.create =
       jest.fn());
     const mockGetInfo = mockCreate.mockImplementation(() => ({
       getInfo: jest.fn().mockReturnValue(infoObj),
@@ -250,7 +260,7 @@ describe('Graphql decorator test', () => {
   });
 
   it('Check GqlInfoGenerator with default value', async () => {
-    const mockCreate = (mockedNestGraphql.GqlExecutionContext.create =
+    const mockCreate = (mockedNestGraphql().GqlExecutionContext.create =
       jest.fn());
     const mockGetInfo = mockCreate.mockImplementation(() => ({
       getInfo: jest.fn().mockReturnValue(infoObj),

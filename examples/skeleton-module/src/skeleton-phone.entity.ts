@@ -9,6 +9,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { SkeletonUser } from './skeleton-user.entity.js';
 
 @Entity('skeleton-phone')
@@ -34,5 +35,5 @@ export class SkeletonPhone extends EntityWithTimestamps(BaseEntity) {
     (meta) => meta.SkeletonPhone,
   )
   @JoinColumn([{ name: 'userId', referencedColumnName: 'guid' }])
-  SkeletonUser?: SkeletonUser;
+  SkeletonUser?: Relation<SkeletonUser>;
 }

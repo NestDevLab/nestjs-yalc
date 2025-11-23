@@ -62,19 +62,11 @@ export const tsJestConfig = (tsConfPath = '', overrideTsJestConfig?: any) => {
   const config = {
     tsconfig: {
       ...(tsConfigFile?.config.compilerOptions ?? {}),
-      emitDecoratorMetadata: false,
-      experimentalDecorators: false,
       ...(tsconfig ?? {}),
     },
     diagnostics: false,
-    // Setting isolatedModules to true improves the performance but it
-    // also causes several problems with graphql typescript decorators
-    // where sometime the coverage is not collected properly.
-    // Hence, because of it, decorators must be disabled and mocked
-    // related issues:
-    // - https://github.com/istanbuljs/istanbuljs/issues/70
-    // - https://github.com/kulshekhar/ts-jest/issues/1166
-    // - https://stackoverflow.com/questions/57516328/unexpected-uncovered-branch-in-jest-coverage
+    // Setting isolatedModules to true improves performance; keep decorator
+    // settings from the project tsconfig so legacy decorators continue to compile.
     isolatedModules: true,
     ...restTsJest,
   };

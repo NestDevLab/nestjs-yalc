@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { GqlComplexityPlugin } from './gql-complexity.plugin.js';
 import { GqlComplexityHelper } from './gql-complexity.helper.js';
 

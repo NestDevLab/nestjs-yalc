@@ -1,12 +1,21 @@
-jest.mock('@nestjs/graphql');
-jest.mock('rxjs/operators');
+import { jest } from '@jest/globals';
+jest.mock('@nestjs/graphql', () => {
+  const actual = jest.requireActual('@nestjs/graphql');
+  return {
+    ...actual,
+    GqlExecutionContext: {
+      ...actual.GqlExecutionContext,
+      create: jest.fn(),
+    },
+  };
+});
 
 import { CallHandler } from '@nestjs/common';
 import * as RxjsOperators from 'rxjs/operators';
 import {
   CrudGenGqlInterceptor,
   crudGenGqlInterceptorWorker,
-} from '../crud-gen-gql.interceptor.js';
+} from '../api-graphql/crud-gen-gql.interceptor.js';
 import { createMock } from '@golevelup/ts-jest';
 import {
   mockedExecutionContext,
@@ -37,7 +46,7 @@ const infoObj = {
 describe('Crud-gen Interceptor test', () => {
   let crudGenInterceptor: CrudGenGqlInterceptor;
   const callHandler = createMock<CallHandler>();
-  const mockCreate = (mockedNestGraphql.GqlExecutionContext.create = jest.fn());
+  const mockCreate = (mockedNestGraphql().GqlExecutionContext.create = jest.fn());
   const mockGetArgs = mockCreate.mockImplementation(() => ({
     getArgs: jest.fn().mockReturnValue(infoObj),
   }));
@@ -75,7 +84,9 @@ describe('Crud-gen Interceptor test', () => {
   });
 
   it('t1', async () => {
-    const mockMap = jest.spyOn(RxjsOperators, 'map');
+    const mockMap = jest
+      .spyOn(RxjsOperators, 'map')
+      .mockImplementation((fn: any) => fn);
     crudGenInterceptor.intercept(mockedExecutionContext, callHandler);
 
     expect(mockMap).toHaveBeenCalledTimes(1);

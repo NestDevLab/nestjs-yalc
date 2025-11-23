@@ -1,8 +1,13 @@
+import { jest } from '@jest/globals';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { IFieldMapper } from '@nestjs-yalc/interfaces/maps.interface.js';
 import { GraphQLResolveInfo } from 'graphql';
 import { BaseEntity, Equal, SelectQueryBuilder } from 'typeorm';
-import { FilterType, GeneralFilters, Operators } from '../crud-gen-gql.enum.js';
+import {
+  FilterType,
+  GeneralFilters,
+  Operators,
+} from '../crud-gen.enum.js';
 import {
   CrudGenConditionNotSupportedError,
   CrudGenNotPossibleError,
@@ -14,7 +19,6 @@ import {
   columnConversion,
   isSymbolic,
   whereObjectToSqlString,
-  isAskingForCount,
   isIFieldAndFilterMapper,
   objectToFieldMapper,
   ICrudGenDependencyFactoryOptions,
@@ -31,8 +35,9 @@ import {
   formatRawSelection,
   getDestinationFieldName,
 } from '../crud-gen.helpers.js';
-import { JoinArgOptions, JoinTypes } from '../crud-gen.input.js';
-import { IWhereCondition } from '../crud-gen-gql.type.js';
+import { isAskingForCount } from '../api-graphql/crud-gen-gql.helpers.js';
+import { JoinArgOptions, JoinTypes } from '../api-graphql/crud-gen.input.js';
+import { IWhereCondition } from '../api-graphql/crud-gen-gql.type.js';
 import * as ObjectDecorator from '../object.decorator.js';
 import * as CrudGenHelpers from '../crud-gen.helpers.js';
 
@@ -47,7 +52,7 @@ import {
   TestEntityDto,
   TestEntityRelation,
 } from '../__mocks__/entity.mock.js';
-import { GenericService } from '../generic-service.service.js';
+import { GenericService } from '../typeorm/generic.service.js';
 import { GQLDataLoader } from '@nestjs-yalc/data-loader/dataloader.helper.js';
 import { Resolver } from '@nestjs/graphql';
 
@@ -160,6 +165,18 @@ describe('Crud-gen helpers', () => {
 
   beforeEach(() => {
     mockedQueryBuilder = createMock<SelectQueryBuilder<BaseEntity>>();
+    mockedQueryBuilder.connection = {
+      driver: {
+        escape: (value: any) => `\`${String(value)}\``,
+      },
+    } as any;
+    mockedQueryBuilder.expressionMap = {
+      mainAlias: {
+        metadata: {
+          columns: [],
+        },
+      },
+    } as any;
   });
 
   afterEach(() => {
@@ -814,12 +831,18 @@ describe('Crud-gen helpers', () => {
   });
 
   it('Should check formatRawSelection with onlyAlias true', () => {
-    const result = formatRawSelection('', '', 'prefix', true);
+    const result = formatRawSelection('', '', {
+      prefix: 'prefix',
+      onlyAlias: true,
+    });
     expect(result).toBe('prefix_');
   });
 
   it('Should check formatRawSelection with onlyAlias false', () => {
-    const result = formatRawSelection('selection', 'test', 'prefix');
+    const result = formatRawSelection('selection', 'test', {
+      prefix: 'prefix',
+      escapeCharacter: '`',
+    });
     expect(result).toBe('prefix.selection AS `prefix_test`');
   });
 

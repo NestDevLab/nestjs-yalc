@@ -6,7 +6,7 @@ import {
   GeneralFilters,
   Operators,
   SortDirection,
-} from '../crud-gen-gql.enum.js';
+} from '../crud-gen.enum';
 import {
   DateFilterModel,
   FilterInput,
@@ -18,8 +18,8 @@ import {
   ISetFilterModel,
   ISimpleFilterModel,
   ITextFilterModel,
-} from '../crud-gen-gql.interface.js';
-import { IWhereCondition } from '../crud-gen-gql.type.js';
+} from '../api-graphql/crud-gen-gql.interface';
+import { IWhereCondition } from '../api-graphql/crud-gen-gql.type';
 import { FilterOption, FilterOptionType } from '../object.decorator.js';
 
 const fixedKey = 'passed';

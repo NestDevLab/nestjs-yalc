@@ -1,12 +1,37 @@
+import {
+  expect,
+  describe,
+  it,
+  beforeEach,
+  jest,
+} from '@jest/globals';
 import { ExtendedBaseEntity } from '@nestjs-yalc/jest/extended-base-entity.entity.js';
 import { mockQueryBuilder } from '@nestjs-yalc/jest/common-mocks.helper.js';
-import * as ObjectDecorator from '../object.decorator.js';
+const mockGetModelFieldMetadataList = jest.fn();
+jest.mock('../object.decorator.js', () => ({
+  ...jest.requireActual('../object.decorator.js'),
+  getModelFieldMetadataList: mockGetModelFieldMetadataList,
+}));
 import { SelectQueryBuilderPatched } from '../query-builder.helpers.js';
 
 describe('QueryBuilderHelper', () => {
   let testQb: SelectQueryBuilderPatched<Partial<ExtendedBaseEntity>>;
   const mockedQb = mockQueryBuilder<Partial<ExtendedBaseEntity>>();
   beforeEach(() => {
+    mockedQb.expressionMap = {
+      clone: () => ({
+        mainAlias: undefined,
+        aliases: [],
+        parameters: {},
+        joinedAliases: [],
+        parentQueryBuilder: undefined,
+      }),
+    } as any;
+    mockedQb.connection = {
+      driver: {
+        escape: (value: any) => `"${String(value)}"`,
+      },
+    } as any;
     testQb = new SelectQueryBuilderPatched<Partial<ExtendedBaseEntity>>(
       mockedQb,
     );
@@ -21,21 +46,19 @@ describe('QueryBuilderHelper', () => {
   });
 
   it('getMany works correctly', async () => {
-    jest
-      .spyOn(ObjectDecorator, 'getModelFieldMetadataList')
-      .mockReturnValueOnce({
-        first: {
-          mode: 'derived',
-          dst: 'something',
-        },
-        second: {
-          mode: 'derived',
-        },
-        third: {
-          mode: 'regular',
-          dst: 'something',
-        },
-      });
+    mockGetModelFieldMetadataList.mockReturnValueOnce({
+      first: {
+        mode: 'derived',
+        dst: 'something',
+      },
+      second: {
+        mode: 'derived',
+      },
+      third: {
+        mode: 'regular',
+        dst: 'something',
+      },
+    });
     jest.spyOn(testQb, 'getRawAndEntities').mockResolvedValueOnce({
       entities: [{ first: 'defined', second: 'undefined', third: undefined }],
       raw: [{ first: 'defined', second: 'undefined', third: undefined }],
@@ -49,9 +72,7 @@ describe('QueryBuilderHelper', () => {
       },
     ]);
 
-    jest
-      .spyOn(ObjectDecorator, 'getModelFieldMetadataList')
-      .mockReturnValueOnce(undefined);
+    mockGetModelFieldMetadataList.mockReturnValueOnce(undefined);
     jest.spyOn(testQb, 'getRawAndEntities').mockResolvedValueOnce({
       entities: [{ first: 'defined', second: 'undefined', third: undefined }],
       raw: [{ first: 'defined', second: 'undefined', third: undefined }],
@@ -67,21 +88,19 @@ describe('QueryBuilderHelper', () => {
   });
 
   it('getOne works correctly', async () => {
-    jest
-      .spyOn(ObjectDecorator, 'getModelFieldMetadataList')
-      .mockReturnValueOnce({
-        first: {
-          mode: 'derived',
-          dst: 'something',
-        },
-        second: {
-          mode: 'derived',
-        },
-        third: {
-          mode: 'regular',
-          dst: 'something',
-        },
-      });
+    mockGetModelFieldMetadataList.mockReturnValueOnce({
+      first: {
+        mode: 'derived',
+        dst: 'something',
+      },
+      second: {
+        mode: 'derived',
+      },
+      third: {
+        mode: 'regular',
+        dst: 'something',
+      },
+    });
     jest.spyOn(testQb, 'getRawAndEntities').mockResolvedValueOnce({
       entities: [{ first: 'defined', second: 'undefined', third: undefined }],
       raw: [{ first: 'defined', second: 'undefined', third: undefined }],
@@ -93,9 +112,7 @@ describe('QueryBuilderHelper', () => {
       third: undefined,
     });
 
-    jest
-      .spyOn(ObjectDecorator, 'getModelFieldMetadataList')
-      .mockReturnValueOnce(undefined);
+    mockGetModelFieldMetadataList.mockReturnValueOnce(undefined);
     jest.spyOn(testQb, 'getRawAndEntities').mockResolvedValueOnce({
       entities: [{ first: 'defined', second: 'undefined', third: undefined }],
       raw: [{ first: 'defined', second: 'undefined', third: undefined }],
@@ -112,6 +129,6 @@ describe('QueryBuilderHelper', () => {
       raw: [],
     });
     result = await testQb.getOne();
-    expect(result).toEqual(undefined);
+    expect(result).toBeNull();
   });
 });

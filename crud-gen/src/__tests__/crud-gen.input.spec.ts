@@ -1,13 +1,36 @@
+import { jest } from '@jest/globals';
 import {
   agJoinArgFactory,
   filterExpressionInputFactory,
   RowGroup,
   SortModel,
   sortModelFactory,
-} from '../crud-gen.input.js';
-import * as CrudGenEnum from '../crud-gen-gql.enum.js';
+} from '../api-graphql/crud-gen.input.js';
+import * as CrudGenEnum from '../crud-gen.enum.js';
 import * as CrudGenHelpers from '../crud-gen.helpers.js';
 import { TestEntity, TestEntityRelation } from '../__mocks__/entity.mock.js';
+jest.mock('../api-graphql/crud-gen-gql.enum.js', () => {
+  const actual = jest.requireActual('../api-graphql/crud-gen-gql.enum.js');
+  return {
+    ...actual,
+    entityFieldsEnumFactory: jest.fn(() => ({
+      enum: { test: 'test' },
+      cached: false,
+      prototype: { name: 'Test' },
+    })),
+  };
+});
+jest.mock('../api-graphql/crud-gen-gql.enum.js', () => {
+  const actual = jest.requireActual('../api-graphql/crud-gen-gql.enum.js');
+  return {
+    ...actual,
+    entityFieldsEnumFactory: jest.fn(() => ({
+      enum: { test: 'test' },
+      cached: false,
+      prototype: { name: 'Test' },
+    })),
+  };
+});
 
 describe('Dynamic user input dto test', () => {
   const spiedEntityFieldsEnumFactory = jest.spyOn(

@@ -1,8 +1,6 @@
-import * as GenericServiceModule from '../generic-service.service.js';
-import {
-  GenericService,
-  GenericServiceFactory,
-} from '../generic-service.service.js';
+import { jest } from '@jest/globals';
+import * as GenericServiceModule from '../typeorm/generic.service.js';
+import { GenericService, GenericServiceFactory } from '../typeorm/generic.service.js';
 import {
   BaseEntity,
   Connection,
@@ -21,7 +19,7 @@ import {
 } from '../__mocks__/generic-service.mocks.js';
 import { getConnectionName } from '@nestjs-yalc/database/conn.helper.js';
 import { createMock } from '@golevelup/ts-jest';
-import { CGExtendedRepository } from '@nestjs-yalc/crud-gen/crud-gen.repository.js';
+import { CGExtendedRepository } from '../typeorm/generic.repository.js';
 import { ConnectionNotFoundError } from 'typeorm';
 import { FactoryProvider } from '@nestjs/common';
 import {
@@ -84,9 +82,9 @@ describe('GenericService', () => {
   });
 
   it('should call the factory function properly', () => {
-    const spiedGenerciService = jest
+    const mockedGenericService = jest
       .spyOn(GenericServiceModule, 'GenericService')
-      .mockImplementation(jest.fn());
+      .mockImplementation(jest.fn() as any);
 
     const result: FactoryProvider = GenericServiceFactory<BaseEntity>(
       () => BaseEntity,
@@ -96,15 +94,13 @@ describe('GenericService', () => {
     expect(result).toBeDefined();
     expect(result.useFactory()).toBeDefined();
 
-    expect(spiedGenerciService).toHaveBeenCalledTimes(1);
-
-    spiedGenerciService.mockRestore();
+    expect(mockedGenericService).toHaveBeenCalledTimes(1);
   });
 
   it('should call the factory function properly with parameters', () => {
-    const spiedGenerciService = jest
+    const mockedGenericService = jest
       .spyOn(GenericServiceModule, 'GenericService')
-      .mockImplementation(jest.fn());
+      .mockImplementation(jest.fn() as any);
 
     const result: FactoryProvider = GenericServiceFactory<BaseEntity>(
       () => BaseEntity,
@@ -116,15 +112,13 @@ describe('GenericService', () => {
     expect(result).toBeDefined();
     expect(result.useFactory()).toBeDefined();
 
-    expect(spiedGenerciService).toHaveBeenCalledTimes(1);
-
-    spiedGenerciService.mockRestore();
+    expect(mockedGenericService).toHaveBeenCalledTimes(1);
   });
 
   it('Check GenericServiceFactory provide object to work properly ', () => {
-    const spiedGenerciService = jest
+    const mockedGenericService = jest
       .spyOn(GenericServiceModule, 'GenericService')
-      .mockImplementation(jest.fn());
+      .mockImplementation(jest.fn() as any);
 
     const result: FactoryProvider = GenericServiceFactory<BaseEntity>(
       BaseEntity,
@@ -133,13 +127,13 @@ describe('GenericService', () => {
 
     expect(result).toBeDefined();
     expect(result.provide).toEqual('BaseEntityGenericService');
-    spiedGenerciService.mockRestore();
+    expect(mockedGenericService).toHaveBeenCalledTimes(1);
   });
 
   it('Should GenericServiceFactory works properly with default values ', () => {
-    const spiedGenerciService = jest
+    const mockedGenericService = jest
       .spyOn(GenericServiceModule, 'GenericService')
-      .mockImplementation(jest.fn());
+      .mockImplementation(jest.fn() as any);
 
     const result: FactoryProvider = GenericServiceFactory<BaseEntity>(
       'BaseEntity' as any,
@@ -147,7 +141,7 @@ describe('GenericService', () => {
     );
 
     expect(result).toBeDefined();
-    spiedGenerciService.mockRestore();
+    expect(mockedGenericService).toHaveBeenCalledTimes(1);
   });
 
   it('Check getServiceToken', () => {

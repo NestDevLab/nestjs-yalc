@@ -37,10 +37,14 @@ export class ConfigValueManager {
     const normalizeReturnValue = (
       returnValue: T | TDefault,
     ): ReturnOrFunctionReturnType<T> | ReturnOrFunctionReturnType<TDefault> => {
-      return typeof returnValue === 'function'
-        ? // eslint-disable-next-line @typescript-eslint/ban-types
-          (returnValue as Function)() // needed for dealing with dynamic types
-        : returnValue;
+      if (typeof returnValue === 'function') {
+        // eslint-disable-next-line @typescript-eslint/ban-types
+        return (returnValue as Function)(); // needed for dealing with dynamic types
+      }
+
+      return returnValue as
+        | ReturnOrFunctionReturnType<T>
+        | ReturnOrFunctionReturnType<TDefault>;
     };
 
     /**

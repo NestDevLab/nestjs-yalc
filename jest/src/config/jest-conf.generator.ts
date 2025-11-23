@@ -13,8 +13,8 @@ import defaultConf, {
   tsJestConfigE2E,
 } from './jest-def.config';
 // import { options as jestOptionObject } from 'jest-cli/build/cli/args';
-import _yargs from 'yargs';
-const yargs = _yargs.default;
+import yargs from 'yargs/yargs';
+import { hideBin } from 'yargs/helpers';
 
 interface IAppDep {
   name: string;
@@ -117,7 +117,7 @@ export function jestConfGenerator(
     roots: [`${rootPath}/${proj.path}`],
     maxWorkers,
     setupFiles: [
-      `${__dirname}/jest.setup.ts`,
+      `${__dirname}/jest.setup.js`,
       ...(options.extraSetupFiles ?? []),
     ],
     coverageThreshold: coverageThreshold(
@@ -156,7 +156,7 @@ export function jestConfGenerator(
   const projectSets: { [key: string]: any } = createProjectSets(projects);
 
   // use argv to catch the path argument in any position
-  const argv: any = yargs(process.argv.slice(2))
+  const argv: any = yargs(hideBin(process.argv))
     .command('$0 [paths]', 'test paths', (yargs) => {
       return yargs
         .positional('path', {

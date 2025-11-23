@@ -388,3 +388,6 @@ export function CGExtendedRepositoryFactory<Entity extends ObjectLiteral>(
 
   return repo;
 }
+
+// Backwards-compatible alias
+export { GenericTypeORMRepository as CGExtendedRepository };

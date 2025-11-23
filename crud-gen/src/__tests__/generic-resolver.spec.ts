@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { createMock } from '@golevelup/ts-jest';
 import { GQLDataLoader } from '@nestjs-yalc/data-loader/dataloader.helper.js';
 import { ModuleRef } from '@nestjs/core';
@@ -15,10 +16,10 @@ import {
   IGenericResolverMethodOptions,
   IGenericResolverOptions,
   resolverFactory,
-} from '../generic-resolver.resolver.js';
+} from '../api-graphql/generic.resolver.js';
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
 
-import { GenericService } from '../generic-service.service.js';
+import { GenericService } from '../typeorm/generic.service.js';
 import {
   TestEntityRelation,
   TestEntityRelation2,
@@ -28,12 +29,21 @@ import * as CrudGenHelpers from '../crud-gen.helpers.js';
 
 import { IModelFieldMetadata } from '../object.decorator.js';
 import { BaseEntity } from 'typeorm';
-import { CrudGenFindManyOptions } from '../crud-gen-gql.interface.js';
-import { FilterType } from '../crud-gen-gql.enum.js';
+import { CrudGenFindManyOptions } from '../api-graphql/crud-gen-gql.interface.js';
+import { FilterType } from '../crud-gen.enum.js';
 import { GqlExecutionContext, Query, Resolver } from '@nestjs/graphql';
 import { IRelationInfo } from '../crud-gen.helpers.js';
 
-jest.mock('@nestjs/graphql');
+jest.mock('@nestjs/graphql', () => {
+  const actual = jest.requireActual('@nestjs/graphql');
+  return {
+    ...actual,
+    GqlExecutionContext: {
+      ...actual.GqlExecutionContext,
+      create: jest.fn(),
+    },
+  };
+});
 
 class TestEntityDto extends TestEntityRelation {}
 class TestEntityInput extends TestEntityDto {}

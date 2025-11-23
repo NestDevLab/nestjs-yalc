@@ -29,7 +29,7 @@ Spread `userProviders.providers` into your module providers and pass `userProvid
 - Decorators: `ModelObject`, `ModelField` (mapping, relations, filters, derived fields)
 - Factories: `CrudGenDependencyFactory`, `GenericServiceFactory` (service), `DataLoaderFactory` (dataloader), `CGExtendedRepositoryFactory` (repository)
 - GraphQL helpers: argument/condition builders, extra args/inputs, generated resolvers
-- REST helpers: `CGQueryArgs`, pagination DTOs, Swagger response helper
+- REST helpers: `CGQueryArgs`, pagination DTOs, Swagger response helper, `crudRestControllerFactory` to generate controllers (list + getById) wired to your `GenericService`
 - Errors: entity CRUD errors, missing arguments/conditions
 
 > Note: some helpers are imported from subpaths (e.g., `@nestjs-yalc/crud-gen/object.decorator`, `.../crud-gen.helpers`) while the top-level `src/index.ts` export surface is being finalized.
@@ -39,4 +39,4 @@ Spread `userProviders.providers` into your module providers and pass `userProvid
 - GraphQL CRUD guide: `../docs/api-creation.md`
 - Modeling (ModelObject/ModelField): `../docs/crud-gen-modeling.md`
 - Dependency factory options: `../docs/crud-gen-factory.md`
-- REST usage: `../docs/crud-gen-rest.md`
+- REST usage: `../docs/crud-gen-rest.md` (includes controller factory); note you can also expose REST via GraphQL Sofa if you prefer automatic REST from resolvers.

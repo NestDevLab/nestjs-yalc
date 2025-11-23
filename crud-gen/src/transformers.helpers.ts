@@ -5,7 +5,9 @@ import { plainToInstance } from 'class-transformer';
 export function JsonTransformer(field: string, propertyPath: string) {
   return (dstObj: Record<any, any>, srcValue: any): any => {
     const patch = objectSetProp({}, propertyPath, srcValue);
-    return deepMerge(dstObj[field] ?? {}, patch);
+    const merged = deepMerge(dstObj[field] ?? {}, patch);
+    dstObj[field] = merged;
+    return merged;
   };
 }
 

@@ -71,7 +71,7 @@ export const CrudGenCombineDecorators = (params: ICrudGenGqlArgsOptions) => {
     }
   }
 
-  let joinArg: ParameterDecorator;
+  let joinArg: ParameterDecorator | undefined;
   /** @todo implement join */
   // if (params.entityType) {
   //   const JoinOptionInput = agJoinArgFactory(

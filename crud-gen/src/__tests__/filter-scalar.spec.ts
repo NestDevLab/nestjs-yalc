@@ -1,9 +1,13 @@
 import { ObjectValueNode, StringValueNode } from 'graphql';
-import { FilterType, GeneralFilters, Operators } from '../crud-gen-gql.enum.js';
+import {
+  FilterType,
+  GeneralFilters,
+  Operators,
+} from '../crud-gen.enum.js';
 import {
   FilterInput,
   IMultiColumnJoinOptions,
-} from '../crud-gen-gql.interface.js';
+} from '../api-graphql/crud-gen-gql.interface.js';
 import { FilterScalar } from '../filter.scalar.js';
 import { fixedSimpleTextFilter } from '../__mocks__/filter.mocks.js';
 

@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 jest.mock('@nestjs/graphql');
 
 import { GqlGetRequest, paramDecoratorToCreate } from './gqlrequest.decorator.js';
