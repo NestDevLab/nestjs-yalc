@@ -12,6 +12,7 @@
     "noUnusedLocals": true,
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
     "target": "ESNext",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
@@ -68,7 +69,12 @@
       "@nestjs-yalc/skeleton-module": ["./examples/skeleton-module/src"],
       "@nestjs-yalc/skeleton-module/*": ["./examples/skeleton-module/src/*"]
     },
-    "typeRoots": ["./node_modules/@types", "./types", "./types-extends"]
+    "types": ["node"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types",
+      "./types-extends"
+    ]
   },
   "include": ["./**/src/**/*.ts"],
   "exclude": [

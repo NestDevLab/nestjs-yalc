@@ -6,6 +6,7 @@ import {
   getGlobalPostDeployMigrationClasses,
   setGlobalMigrationClasses,
   getGlobalPreDeployMigrationClasses,
+  getGlobalMigrationClasses,
   setGlobalPostDeployMigrationClasses,
 } from '../typeorm.helpers.ts';
 import { ClassType } from '@nestjs-yalc/types/index.js';
@@ -73,6 +74,26 @@ describe('getGlobalPreDeployMigrationClasses', () => {
     global.TypeORM_Migration_classes = undefined;
 
     expect(getGlobalPreDeployMigrationClasses(connName)).toEqual([]);
+  });
+});
+
+describe('getGlobalMigrationClasses', () => {
+  it('should merge pre and post deploy classes', () => {
+    const connName = 'testConnection';
+    const pre = [{ name: 'pre' }] as ClassType<MigrationInterface>[];
+    const post = [{ name: 'post' }] as ClassType<MigrationInterface>[];
+    global.TypeORM_Migration_classes = { [connName]: pre };
+    global.TypeORM_PostDeploy_Migration_classes = { [connName]: post };
+
+    expect(getGlobalMigrationClasses(connName)).toEqual([...pre, ...post]);
+  });
+
+  it('should return empty array when none set', () => {
+    const connName = 'testConnection';
+    global.TypeORM_Migration_classes = undefined;
+    global.TypeORM_PostDeploy_Migration_classes = undefined;
+
+    expect(getGlobalMigrationClasses(connName)).toEqual([]);
   });
 });
 
