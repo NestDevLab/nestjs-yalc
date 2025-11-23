@@ -1,45 +1,82 @@
 # YalcEventModule
 
-The `YalcEventModule` is a module class that integrates various services including logging and event emitting functionalities in a NestJS application, leveraging the utilities from several other libraries and modules.
+`EventModule` wires up `YalcEventService` with an `ImprovedLoggerService` and an `EventEmitter2` using Nest providers, giving you a ready-to-use event/log/error pipeline in any NestJS app.
 
-Please read the [YalcEventService](./event-manager-service.md) documentation for more information on the service class and to learn how to use it.
+Read alongside [YalcEventService](./event-manager-service.md) for runtime behavior.
 
-## Usage
+## API
 
-To use the `YalcEventModule`, import it from its module file and use it in your NestJS application. The module offers a `forRootAsync` method to setup and configure it asynchronously.
-
-```typescript
-import { EventModule } from 'path-to-your-module-file';
+```ts
+EventModule.forRootAsync(options?: IEventModuleOptions, optionProvider?: Provider<IProviderOptions>);
 ```
 
-## Methods
+- `eventServiceToken`: provider token to export (default: `YalcEventService`).
+- `eventService`: factory `(logger, emitter, options?) => YalcEventService` to supply a custom subclass/instance.
+- `loggerProvider`: one of:
+  - an `ImprovedLoggerService` instance
+  - a Nest provider object
+  - a token (`string`) to resolve elsewhere
+  - a config object `{ context, loggerLevels?, loggerType?, options? }` passed to `AppLoggerFactory`
+  - if omitted, a logger is created via `AppLoggerFactory('default')`.
+- `eventEmitter`: optional provider for `EventEmitter2`; if omitted, the module expects an `EventEmitter2` provider to be available (e.g., from `@nestjs/event-emitter`).
+- `imports`: extra modules needed by your providers (e.g., `EventEmitterModule.forRoot()`).
+- `overrideLoggerLevels`: optional `LogLevel[]` (currently not applied by the module).
 
-### forRootAsync
+`optionProvider` is an optional provider for `IProviderOptions` (`{ logger: ImprovedLoggerService | ILoggerProviderOptionsObject; emitter: EventEmitter2 }`) so you can inject logger/emitter instances created elsewhere.
 
-A static method that helps in configuring the module with various options. It accepts two parameters:
-
-- `options?: IEventModuleOptions<TFormatter>`
-- `optionProvider?: Provider<IProviderOptions>`
-
-This method integrates various providers and configurations into the module, setting up an ecosystem for event logging and emitting.
+Exports: the resolved logger provider token and the `eventServiceToken`.
 
 ## Examples
 
-Below are examples on how you would be using this module in a NestJS application:
+Default wiring with the Nest EventEmitter module:
 
-### Setting up with Default Options
+```ts
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { EventModule } from '@nestjs-yalc/event-manager';
 
-```typescript
-EventModule.forRootAsync();
+@Module({
+  imports: [
+    EventEmitterModule.forRoot(),
+    EventModule.forRootAsync({
+      loggerProvider: { context: 'AppEvents' },
+    }),
+  ],
+})
+export class AppModule {}
 ```
 
-### Setting up with Custom Options
+Custom emitter provider and service token:
 
-```typescript
-EventModule.forRootAsync({
-  loggerProvider: {
-    context: 'MyContext',
-  },
-  eventEmitter: myEventEmitterProvider,
-});
+```ts
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventModule, YalcEventService } from '@nestjs-yalc/event-manager';
+
+class MyEventService extends YalcEventService {}
+
+@Module({
+  imports: [
+    EventModule.forRootAsync(
+      {
+        eventEmitter: {
+          provide: EventEmitter2,
+          useFactory: () =>
+            new EventEmitter2({ wildcard: true, maxListeners: 200 }),
+        },
+        eventService: (logger, emitter, options) =>
+          new MyEventService(logger, emitter, options),
+        eventServiceToken: MyEventService,
+        loggerProvider: { context: 'CustomEvents' },
+      },
+      {
+        provide: 'EVENT_OPTIONS',
+        useValue: {
+          logger: { context: 'CustomEvents' },
+        },
+      },
+    ),
+  ],
+  providers: [MyEventService],
+  exports: [MyEventService],
+})
+export class EventsModule {}
 ```

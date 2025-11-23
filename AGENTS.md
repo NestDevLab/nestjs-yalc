@@ -4,6 +4,8 @@
 - Runtime: Node 20, ESM (`type: module`, `moduleResolution: NodeNext`, TypeScript strict). Install with `npm ci` (workspaces enabled).
 - Workspaces/packages: app, crud-gen, aws-helpers, data-loader, database, errors, event-manager, field-middleware, graphql, interfaces, jest, logger, types, types-extends, utils; examples in `examples/` (skeleton-app, skeleton-module).
 - When you need package details, read `docs/README.md` and package READMEs (e.g., `crud-gen/README.md`) before changing code.
+- Documentation discipline: whenever you add or change meaningful behavior, update existing docs or create new ones that reflect the change (usage, rationale, examples) before handing off.
+- Language: write everything in English (code, comments, docs, commit messages, etc.); use non-English only for domain-specific names that cannot be translated.
 
 ## Required commands before handing off
 - Full check: `npm run ci:checks` (runs lint + build + `test:cov` with coverage thresholds).

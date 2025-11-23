@@ -1,73 +1,107 @@
 # YalcEventService
 
-The YalcEventService is a service class that provides methods to handle event logging and emitting in a NestJS application using various methods including error handling with different HTTP status codes.
+`YalcEventService` is the NestJS-facing façade over the event helpers: it injects logger + emitter, applies defaults, and exposes a rich set of logging and error helpers (with neverthrow `Result` variants) so you can keep event, log, and error handling consistent across your app.
 
-Please read the [EventModule](./event-manager-module.md) documentation for more information on the module that can be used to instantiate the service class.
+Please also see [Event helpers](./event-manager-event.md), [Event module](./event-manager-module.md), [Logger](./logger.md), and [Errors](./errors.md).
 
-Also, it might be useful to read the [Logger](./logger.md) and [Errors](./errors.md) documentation to understand how these 2 components work since they are used in the event-manager library.
+## Constructor
 
-## Usage
+```ts
+constructor(
+  loggerService: ImprovedLoggerService,
+  eventEmitter: EventEmitter2,
+  options?: { formatter?: EventNameFormatter },
+)
+```
 
-Import the YalcEventService class from its module and inject it into your service or controller through NestJS's dependency injection mechanism.
+- `formatter` becomes the default formatter when one is not provided in call-level options.
+- `loggerService` is always reused unless you explicitly disable logging with `logger: false`.
+- `eventEmitter` is injected into every call unless you override via `options.event`.
 
-```typescript
+Properties:
+
+- `logger`: the injected `ImprovedLoggerService`.
+- `emitter`: the injected `EventEmitter2`.
+- `emit` / `emitAsync`: aliases of `log` / `logAsync`.
+
+## Logging methods
+
+All methods accept `eventName: Parameters<TFormatter> | string` and optional `IEventOptions<TFormatter>`; options are merged with the constructor defaults.
+
+- `log` / `logAsync`
+- `warn` / `warnAsync`
+- `debug` / `debugAsync`
+- `verbose` / `verboseAsync`
+
+These simply delegate to the corresponding `event*` helpers, applying the injected emitter/logger.
+
+## Error methods
+
+General helpers:
+
+- `error` / `errorAsync`: raise/log using `DefaultError` by default. Decorated with `InjectTrace` to populate `stack` if none is provided.
+- `errorResult`: wraps `error` in a `neverthrow.Err`.
+- `errorFromFn`: executes a callback, returning `ok(result)` or `Err(DefaultError)` on failure.
+- `errorForward`: forward/normalize an existing error (instance or class) into a `DefaultError`, preserving/merging payloads. Logger level is inferred from the status code unless explicitly set.
+- `errorForwardResult` / `errorForwardFromFn`: neverthrow variants of forwarding helpers.
+
+HTTP-specific helpers:
+
+- `errorHttp(code, options?)`: map an HTTP status to a corresponding error class (fallback `InternalServerError`) and apply the appropriate logger level.
+- Dedicated methods for common statuses (each with `*Result` and `*FromFn` variants): `errorBadRequest`, `errorUnauthorized`, `errorPaymentRequired`, `errorForbidden`, `errorNotFound`, `errorMethodNotAllowed`, `errorNotAcceptable`, `errorConflict`, `errorGone`, `errorUnsupportedMediaType`, `errorUnprocessableEntity`, `errorTooManyRequests`, `errorInternalServerError`, `errorNotImplemented`, `errorBadGateway`, `errorServiceUnavailable`, `errorGatewayTimeout`.
+
+Each helper deep-merges the provided options with the constructor defaults, sets `errorClass` to the matching error type, and derives the logger level from the status (500+ → error, 429 → warn, 4xx → log) unless you override it.
+
+## Option handling and defaults
+
+- `buildOptions` merges call-level options with the injected emitter/formatter and logger instance. If an error instance or `cause` is provided, it ensures a `stack` is present.
+- `buildErrorOptions` guarantees an `errorClass` (default `true` → `DefaultError`).
+- `applyLoggerLevel`/`applyLoggerLevelByStatus`/`applyLoggerLevelByError` set `logger.level` automatically when not explicitly provided.
+- `applyCause` attaches the original error as `cause`, enriching the payload when forwarded.
+- Pending promises triggered by event emission are registered with the global promise tracker.
+
+## Examples
+
+Module wiring with Nest:
+
+```ts
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { EventModule } from '@nestjs-yalc/event-manager';
+
+@Module({
+  imports: [
+    EventEmitterModule.forRoot(),
+    EventModule.forRootAsync({
+      loggerProvider: { context: 'AppEvents' },
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+Usage in a provider:
+
+```ts
 import { YalcEventService } from '@nestjs-yalc/event-manager';
+
+@Injectable()
+export class UserService {
+  constructor(private readonly events: YalcEventService) {}
+
+  async create(user: CreateUserDto) {
+    try {
+      // Emit + log a success event
+      await this.events.log(['user', 'created'], {
+        data: { userId: user.id },
+        event: { await: true },
+      });
+      return user;
+    } catch (error) {
+      // Forward and log the error with merged context
+      throw this.events.errorForward('user.create.failed', error, {
+        data: { userId: user.id },
+      });
+    }
+  }
+}
 ```
-
-### Constructor
-
-The YalcEventService constructor takes in three parameters:
-
-- loggerService: ImprovedLoggerService - The logger service to handle logging functionalities.
-- eventEmitter: EventEmitter2 - Event emitter for emitting events.
-- options?: IEventServiceOptions<TFormatter> - Optional parameter for providing service options.
-
-### Properties
-
-- logger: ImprovedLoggerService - Provides access to the logger service.
-- emitter: EventEmitter2 - Provides access to the event emitter.
-- emit - Alias for the log method.
-
-### Methods
-
-#### Logging and Event Emitting
-
-- log and logAsync: Used for logging events synchronously and asynchronously respectively.
-- error and errorAsync: Used to log errors synchronously and asynchronously respectively.
-- warn and warnAsync: Used to log warnings synchronously and asynchronously respectively.
-- debug and debugAsync: Used to log debug events synchronously and asynchronously respectively.
-- verbose and verboseAsync: Used to log verbose events synchronously and asynchronously respectively.
-
-All the above methods accept the following parameters:
-
-- eventName: Parameters<TFormatter> | string - The name of the event to log.
-- options?: IEventOptions<TFormatter> - Optional parameter to provide event options.
-
-#### Error Handling Methods
-
-The following methods are used to throw HTTP errors with various status codes, aiding in semantic error handling:
-
-- errorBadRequest: Throws a 400 Bad Request error.
-- errorUnauthorized: Throws a 401 Unauthorized error.
-  ... (shortened for brevity)
-
-### Helper Methods
-
-- buildOptions: A protected method used internally to merge method options with the constructor options.
-
-### Examples
-
-```typescript
-event.log('user_signup', { detail: 'A new user signed up.' });
-```
-
-```typescript
-event.errorNotFound('resource_not_found', {
-  detail: 'The requested resource could not be found.',
-});
-```
-
-### Note
-
-Ensure to catch errors thrown by these methods in a try-catch block in your application to handle them appropriately.
-The emit method is an alias to the log method and can be used interchangeably.
