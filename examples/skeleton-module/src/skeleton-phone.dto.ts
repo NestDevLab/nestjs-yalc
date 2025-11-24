@@ -11,6 +11,27 @@ import { SkeletonUserType } from './skeleton-user.dto.js';
 @ObjectType()
 @ModelObject()
 export class SkeletonPhoneType extends SkeletonPhone {
+  constructor(data?: Partial<SkeletonPhoneType>) {
+    super();
+    if (data) {
+      Object.assign(this, data);
+    }
+  }
+
+  @ModelField({
+    gqlOptions: {
+      description: 'The phone record ID',
+    },
+  })
+  ID: number;
+
+  @ModelField({
+    gqlOptions: {
+      description: 'The phone number',
+    },
+  })
+  phoneNumber: string;
+
   @ModelField({
     gqlType: /* istanbul ignore next */ () => SkeletonUserType,
     // relation: {

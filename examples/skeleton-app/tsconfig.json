@@ -17,9 +17,21 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
+    "esModuleInterop": true,
+    "allowJs": true,
     "paths": {
       "@skeleton-app/skeleton-base-app": ["libs/skeleton-base-app/src"],
-      "@skeleton-app/skeleton-base-app/*": ["libs/skeleton-base-app/src/*"]
+      "@skeleton-app/skeleton-base-app/*": ["libs/skeleton-base-app/src/*"],
+      "@nestjs-yalc/crud-gen": ["../../crud-gen/src/index.ts"],
+      "@nestjs-yalc/crud-gen/*": ["../../crud-gen/src/*"],
+      "@nestjs-yalc/database": ["../../database/src/index.ts"],
+      "@nestjs-yalc/database/*": ["../../database/src/*"],
+      "@nestjs-yalc/utils": ["../../utils/src/index.ts"],
+      "@nestjs-yalc/utils/*": ["../../utils/src/*"],
+      "@nestjs-yalc/types": ["../../types/src/index.d.ts"],
+      "@nestjs-yalc/types/*": ["../../types/src/*"],
+      "@nestjs-yalc/skeleton-module": ["../skeleton-module/src/index.ts"],
+      "@nestjs-yalc/skeleton-module/*": ["../skeleton-module/src/*"]
     }
   },
   "include": ["apps/**/src/**/*.ts", "libs/**/src/**/*.ts"],

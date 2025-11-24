@@ -7,6 +7,16 @@
 - Documentation discipline: whenever you add or change meaningful behavior, update existing docs or create new ones that reflect the change (usage, rationale, examples) before handing off.
 - Language: write everything in English (code, comments, docs, commit messages, etc.); use non-English only for domain-specific names that cannot be translated.
 
+## Error handling and logging
+
+- Prefer using `YalcEventService` from `@nestjs-yalc/event-manager` (and the underlying `@nestjs-yalc/errors` library) for application-level errors instead of throwing raw Nest `HttpException` instances or using `console` directly.
+- When you need to log and return an HTTP-aware error, use the HTTP helpers on `YalcEventService` (for example `errorBadRequest`, `errorNotFound`, or `errorHttp`) so that:
+  - logging level is derived from the HTTP status code,
+  - a structured event payload is emitted,
+  - and the thrown error carries the correct status code and a safe response body for the client.
+- Keep internal diagnostics in `data`/`internalMessage` and client-facing messages in the `response` field to avoid leaking sensitive information.
+- Before changing error-handling behavior, read `docs/error-handling.md`, `docs/errors.md`, and `docs/event-manager-service.md` to align with the existing patterns.
+
 ## Required commands before handing off
 - Full check: `npm run ci:checks` (runs lint + build + `test:cov` with coverage thresholds).
 - During iteration you may run individually: `npm run lint:no-fix`, `npm run build`, `npm run test:cov`. Use `JEST_WORKERS` to cap workers; coverage reports land in `var/coverage/` (`test:cov:serve` serves them).

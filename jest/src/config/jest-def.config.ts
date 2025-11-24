@@ -30,7 +30,6 @@ export const tsJestConfigE2E = (
 
   const conf: any = {
     diagnostics: false,
-    isolatedModules: true,
     tsconfig: {
       ...(tsConfigFile?.config.compilerOptions ?? {}),
       ...(tsconfig ?? {}),
@@ -65,9 +64,6 @@ export const tsJestConfig = (tsConfPath = '', overrideTsJestConfig?: any) => {
       ...(tsconfig ?? {}),
     },
     diagnostics: false,
-    // Setting isolatedModules to true improves performance; keep decorator
-    // settings from the project tsconfig so legacy decorators continue to compile.
-    isolatedModules: true,
     ...restTsJest,
   };
 

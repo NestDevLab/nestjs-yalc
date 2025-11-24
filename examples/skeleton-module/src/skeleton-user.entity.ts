@@ -45,6 +45,7 @@ export class SkeletonUser extends EntityWithTimestamps(BaseEntity) {
     insert: false,
     update: false,
     type: 'varchar',
+    nullable: true,
   })
   fullName: string;
 

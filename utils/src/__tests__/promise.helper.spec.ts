@@ -40,4 +40,25 @@ describe('promise tracker test', () => {
 
     expect(promiseTracker['promises']).toHaveLength(0);
   });
+
+  it('It should run deferred callbacks after tracked promises', async () => {
+    const promiseTracker = new PromiseTracker();
+    const calls: string[] = [];
+
+    promiseTracker.add(
+      Promise.resolve('ok').then((value) => {
+        calls.push(value);
+        return value;
+      }),
+    );
+
+    promiseTracker.addDeferred(() => {
+      calls.push('deferred');
+    });
+
+    await promiseTracker.waitForAll();
+
+    expect(calls).toEqual(['ok', 'deferred']);
+    expect(promiseTracker['promises']).toHaveLength(0);
+  });
 });

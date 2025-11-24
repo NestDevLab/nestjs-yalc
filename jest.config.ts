@@ -51,26 +51,26 @@ const options: IOptions = {
   confOverrides: {
     '@nestjs-yalc/app': {
       coverageThreshold: {
-        statements: 60.76,
-        branches: 52.08,
-        functions: 52.94,
-        lines: 60.55,
+        statements: 85,
+        branches: 80,
+        functions: 85,
+        lines: 85,
       },
     },
     '@nestjs-yalc/logger': {
       coverageThreshold: {
-        statements: 98.02,
-        branches: 94.4,
-        functions: 83.87,
-        lines: 88.7,
+        statements: 99,
+        branches: 95,
+        functions: 98,
+        lines: 99,
       },
     },
     '@nestjs-yalc/utils': {
       coverageThreshold: {
-        statements: 93.44,
-        branches: 92.85,
-        functions: 87.17,
-        lines: 93.83,
+        statements: 99,
+        branches: 98,
+        functions: 99,
+        lines: 99,
       },
     },
     '@nestjs-yalc/database': {
@@ -107,10 +107,10 @@ const options: IOptions = {
     },
     '@nestjs-yalc/crud-gen': {
       coverageThreshold: {
-        statements: 60,
-        branches: 60,
-        functions: 60,
-        lines: 60,
+        statements: 84,
+        branches: 80,
+        functions: 88,
+        lines: 84,
       },
     },
     '@nestjs-yalc/skeleton-module': {

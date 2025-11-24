@@ -2,7 +2,9 @@
 
 `YalcEventService` is the NestJS-facing façade over the event helpers: it injects logger + emitter, applies defaults, and exposes a rich set of logging and error helpers (with neverthrow `Result` variants) so you can keep event, log, and error handling consistent across your app.
 
-Please also see [Event helpers](./event-manager-event.md), [Event module](./event-manager-module.md), [Logger](./logger.md), and [Errors](./errors.md).
+It is also the recommended entry point for orchestrating error logging, domain events, and HTTP-aware error responses based on the `DefaultError` hierarchy.
+
+Please also see [Event helpers](./event-manager-event.md), [Event module](./event-manager-module.md), [Logger](./logger.md), [Errors](./errors.md), and the higher-level [Error handling guide](./error-handling.md).
 
 ## Constructor
 

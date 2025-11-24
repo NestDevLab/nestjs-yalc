@@ -1,4 +1,5 @@
 import {
+  Field,
   HideField,
   InputType,
   ObjectType,
@@ -17,6 +18,34 @@ import { SkeletonPhoneType } from './skeleton-phone.dto.js';
 @ObjectType()
 @ModelObject()
 export class SkeletonUserType extends SkeletonUser {
+  constructor(data?: Partial<SkeletonUserType>) {
+    super();
+    if (data) {
+      Object.assign(this, data);
+    }
+  }
+
+  @ModelField({
+    gqlOptions: {
+      description: 'The user first name',
+    },
+  })
+  firstName: string;
+
+  @ModelField({
+    gqlOptions: {
+      description: 'The user last name',
+    },
+  })
+  lastName: string;
+
+  @ModelField({
+    gqlOptions: {
+      description: 'The user email address',
+    },
+  })
+  email: string;
+
   @ModelField<SkeletonPhoneType>({
     relation: {
       type: () => SkeletonPhoneType,
@@ -35,7 +64,6 @@ export class SkeletonUserType extends SkeletonUser {
   @ModelField({
     gqlType: returnValue(UUIDScalar),
     gqlOptions: {
-      name: 'ID',
       description: 'The user ID generated with UUID',
     },
     isRequired: true,
@@ -60,7 +88,10 @@ export class SkeletonUserCreateInput extends OmitType(
   SkeletonUserType,
   ['SkeletonPhone', 'fullName', 'createdAt', 'updatedAt'] as const,
   InputType,
-) {}
+) {
+  @Field()
+  password: string;
+}
 
 @InputType()
 @ModelObject({ copyFrom: SkeletonUserType })
@@ -71,8 +102,7 @@ export class SkeletonUserCondition extends PartialType(
 
 @InputType()
 @ModelObject({ copyFrom: SkeletonUserType })
-export class SkeletonUserUpdateInput extends OmitType(
-  SkeletonUserType,
-  ['guid', 'SkeletonPhone', 'fullName', 'createdAt', 'updatedAt'] as const,
+export class SkeletonUserUpdateInput extends PartialType(
+  SkeletonUserCreateInput,
   InputType,
 ) {}

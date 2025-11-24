@@ -4,6 +4,25 @@
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        "tsconfig": "<rootDir>/../../../tsconfig.e2e.json",
+        "diagnostics": false,
+        "astTransformers": {
+          "before": ["<rootDir>/graphql-plugin.wrapper.cjs"]
+        }
+      }
+    ]
+  },
+  "moduleNameMapper": {
+    "^p-map$": "<rootDir>/p-map.mock.ts",
+    "^@nestjs-yalc/skeleton-module$": "<rootDir>/../../../../skeleton-module/src",
+    "^@nestjs-yalc/skeleton-module/src/(.*)$": "<rootDir>/../../../../skeleton-module/src/$1",
+    "^@nestjs-yalc/([^/]+)/(.+?)\\.js$": "<rootDir>/../../../../../$1/src/$2",
+    "^@nestjs-yalc/([^/]+)/(.*)$": "<rootDir>/../../../../../$1/src/$2",
+    "^@nestjs-yalc/([^/]+)$": "<rootDir>/../../../../../$1/src",
+    "^@skeleton-app/skeleton-base-app(|/.*)$": "<rootDir>/../../../libs/skeleton-base-app/src/$1",
+    "^(\\.{1,2}/.*)\\.js$": "$1"
   }
 }

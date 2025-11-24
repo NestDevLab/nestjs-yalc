@@ -23,8 +23,9 @@ export const EntityWithTimestamps = (
      * DB insert time.
      */
     @CreateDateColumn({
-      type: 'timestamp',
-      default: returnValue('CURRENT_TIMESTAMP(6)'),
+      // use datetime for cross-database support (e.g., SQLite)
+      type: 'datetime',
+      default: returnValue('CURRENT_TIMESTAMP'),
     })
     public createdAt!: Date;
 
@@ -32,9 +33,9 @@ export const EntityWithTimestamps = (
      * DB last update time.
      */
     @UpdateDateColumn({
-      type: 'timestamp',
-      default: returnValue('CURRENT_TIMESTAMP(6)'),
-      onUpdate: 'CURRENT_TIMESTAMP(6)',
+      type: 'datetime',
+      default: returnValue('CURRENT_TIMESTAMP'),
+      onUpdate: 'CURRENT_TIMESTAMP',
     })
     public updatedAt!: Date;
   }

@@ -1,13 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import { Test } from '@nestjs/testing';
+import request from 'supertest';
 import { AppModule } from './../src/app.module';
 
-describe('AppController (e2e)', () => {
+describe('Skeleton App (e2e)', () => {
   let app: INestApplication;
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+  beforeAll(async () => {
+    const moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
@@ -15,10 +15,14 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  afterAll(async () => {
+    await app?.close();
+  });
+
+  it('returns an empty users list with pagination metadata', async () => {
+    const res = await request(app.getHttpServer()).get('/users').expect(200);
+
+    expect(res.body.list).toEqual([]);
+    expect(res.body.pageData).toMatchObject({ startRow: 0, count: 0 });
   });
 });

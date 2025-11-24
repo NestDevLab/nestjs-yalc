@@ -10,7 +10,7 @@ import {
   test,
 } from '@jest/globals';
 
-import returnValue, { returnProperty } from '../returnValue.js';
+import returnValue, { returnAsyncValue, returnProperty } from '../returnValue.js';
 
 test('returnValue should return a constant function', () => {
   class TypeTest {}
@@ -29,6 +29,11 @@ test('returnValue should return a constant function', () => {
     expect(returnTypeTest).toBeInstanceOf(Function);
     expect(returnTypeTest()).toEqual(value);
   });
+});
+
+test('returnAsyncValue should resolve the provided value', async () => {
+  const fn = returnAsyncValue('async-value');
+  await expect(fn()).resolves.toBe('async-value');
 });
 
 test('returnProperty should return a property of a class', () => {

@@ -24,6 +24,8 @@ Nest-yalc stands for Nestjs - Yet Another Library Collection
 
 - [How to use the DefaultError library](./errors.md)
 
+- [How to orchestrate errors, logging and HTTP status codes with EventManager and DefaultError](./error-handling.md)
+
 - [How to use the EventManager module library](./event-manager-module.md), [Event](./event-manager-event.md), [Service](./event-manager-service.md)
 
 - [How to use the Logger library](./logger.md)

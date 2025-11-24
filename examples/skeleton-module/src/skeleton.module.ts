@@ -2,6 +2,8 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { skeletonUserProvidersFactory } from './skeleton-user.resolver.js';
 import { skeletonPhoneProvidersFactory } from './skeleton-phone.resolver.js';
+import { SkeletonPhone } from './skeleton-phone.entity.js';
+import { SkeletonUser } from './skeleton-user.entity.js';
 
 @Module({})
 export class SkeletonModule {
@@ -12,12 +14,13 @@ export class SkeletonModule {
     return {
       module: SkeletonModule,
       imports: [
-        TypeOrmModule.forFeature(
-          [skeletonPhoneProviders.repository, skeletonUserProviders.repository],
-          dbConnection,
-        ),
+        TypeOrmModule.forFeature([SkeletonPhone, SkeletonUser], dbConnection),
       ],
       providers: [
+        ...skeletonPhoneProviders.providers,
+        ...skeletonUserProviders.providers,
+      ],
+      exports: [
         ...skeletonPhoneProviders.providers,
         ...skeletonUserProviders.providers,
       ],

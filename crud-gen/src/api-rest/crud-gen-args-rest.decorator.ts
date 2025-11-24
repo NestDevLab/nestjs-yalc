@@ -32,12 +32,11 @@ export function mapCrudGenRestParams<Entity extends ObjectLiteral>(
   params: ICrudGenGqlArgsOptions | undefined,
   ctx: ExecutionContext,
 ): CrudGenFindManyOptions {
-  const keys = ctx.getArgs();
   const args: ICrudGenBaseParams = ctx.getArgs() as any;
 
   const findParams = mapCrudGenParam<Entity>(
     params,
-    { keys, keysMeta: {} },
+    { keys: [], keysMeta: {} },
     args,
     { isCount: true },
   );

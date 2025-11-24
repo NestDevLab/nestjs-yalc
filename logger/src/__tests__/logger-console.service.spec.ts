@@ -122,4 +122,15 @@ describe('Console logger service test', () => {
 
     expect(method).toHaveBeenCalled();
   });
+
+  it('setLogLevels should validate levels and emit events', async () => {
+    const emitter = { emit: jest.fn() } as any;
+    logger.setLogLevels(LOG_LEVEL_ALL);
+    logger.error('boom', 'trace', { eventEmitter: emitter, useFallbackEvent: true });
+    expect(emitter.emit).toHaveBeenCalled();
+    emitter.emit.mockClear();
+    logger.error('skip', 'trace', { eventEmitter: emitter, event: false as any });
+    expect(emitter.emit).not.toHaveBeenCalled();
+    expect(() => logger.setLogLevels(['invalid' as any])).toThrow();
+  });
 });

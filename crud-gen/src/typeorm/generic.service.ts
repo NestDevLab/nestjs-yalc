@@ -129,6 +129,23 @@ export class GenericService<
   }
 
   /**
+   * Build a simple TypeORM where condition from primary key identifiers.
+   * Used as a fallback when extended repository helpers are not available.
+   */
+  protected buildPrimaryKeyWhere(ids: any): FindConditions<EntityRead> {
+    if (ids && typeof ids === 'object' && !Array.isArray(ids)) {
+      return ids as FindConditions<EntityRead>;
+    }
+
+    const repositoryAny: any = this.repository as any;
+    const primaryColumns = repositoryAny.metadata?.primaryColumns ?? [];
+    const primaryColumnName =
+      primaryColumns[0]?.propertyName ?? ('id' as keyof EntityRead);
+
+    return { [primaryColumnName]: ids } as FindConditions<EntityRead>;
+  }
+
+  /**
    * Switches this Service database connection to a new specified database
    * @param dbName The database name
    */
@@ -358,15 +375,32 @@ export class GenericService<
      * @todo maybe conversion is needed here as well
      */
     const ids = identifiers[0];
-    const filters = this.repository.generateFilterOnPrimaryColumn(ids);
+    const repoAny: any = this.repository as any;
 
-    return !returnEntity
-      ? true
-      : this.repository.getOneExtended(
-          { ...findOptions, where: { filters } },
-          true,
-          ReplicationMode.MASTER,
-        );
+    if (
+      typeof repoAny.generateFilterOnPrimaryColumn === 'function' &&
+      typeof repoAny.getOneExtended === 'function'
+    ) {
+      const filters = repoAny.generateFilterOnPrimaryColumn(ids);
+
+      return !returnEntity
+        ? true
+        : repoAny.getOneExtended(
+            { ...findOptions, where: { filters } },
+            true,
+            ReplicationMode.MASTER,
+          );
+    }
+
+    if (!returnEntity) {
+      return true;
+    }
+
+    const where = this.buildPrimaryKeyWhere(ids);
+
+    return this.repository.findOneOrFail({
+      where,
+    } as FindManyOptions<EntityRead>);
   }
 
   /**
@@ -419,15 +453,32 @@ export class GenericService<
      * Create where condition for the the identifiers
      */
     const ids = this.repository.getId(Object.assign(result, entityHydrated));
-    const filters = this.repository.generateFilterOnPrimaryColumn(ids);
+    const repoAny: any = this.repository as any;
 
-    return !returnEntity
-      ? true
-      : this.repository.getOneExtended(
-          { ...findOptions, where: { filters } },
-          true,
-          ReplicationMode.MASTER,
-        );
+    if (
+      typeof repoAny.generateFilterOnPrimaryColumn === 'function' &&
+      typeof repoAny.getOneExtended === 'function'
+    ) {
+      const filters = repoAny.generateFilterOnPrimaryColumn(ids);
+
+      return !returnEntity
+        ? true
+        : repoAny.getOneExtended(
+            { ...findOptions, where: { filters } },
+            true,
+            ReplicationMode.MASTER,
+          );
+    }
+
+    if (!returnEntity) {
+      return true;
+    }
+
+    const where = this.buildPrimaryKeyWhere(ids);
+
+    return this.repository.findOneOrFail({
+      where,
+    } as FindManyOptions<EntityRead>);
   }
 
   /**
@@ -500,9 +551,38 @@ export class GenericService<
     if (databaseName) this.switchDatabaseConnection(databaseName);
     if (relations) findOptions.relations = relations;
 
+    const repo: any = this.repository as any;
+
+    // Prefer extended repository methods when available.
+    if (
+      typeof repo.getManyAndCountExtended === 'function' &&
+      typeof repo.getManyExtended === 'function'
+    ) {
+      return withCount
+        ? repo.getManyAndCountExtended(findOptions)
+        : repo.getManyExtended(findOptions);
+    }
+
+    // Fallback for plain TypeORM repositories (no extended helpers):
+    // approximate using standard find/findAndCount and ignore advanced
+    // CrudGen options (filters/join) when we cannot map them safely.
+    const { where, info, extra, subQueryFilters, ...typeormOptions } =
+      findOptions;
+
+    const hasExtendedWhere =
+      !!where && typeof (where as any).filters === 'object';
+
+    const mappedFindOptions: FindManyOptions<EntityRead> = {
+      ...(typeormOptions as FindManyOptions<EntityRead>),
+      // Only apply where when it looks like a plain TypeORM where;
+      // CrudGen structured filters (with `.filters`) require the
+      // extended repository and are ignored here.
+      where: hasExtendedWhere ? undefined : (where as any),
+    };
+
     return withCount
-      ? this.repository.getManyAndCountExtended(findOptions)
-      : this.repository.getManyExtended(findOptions);
+      ? this.repository.findAndCount(mappedFindOptions)
+      : this.repository.find(mappedFindOptions);
   }
 
   protected mapEntityR2W(

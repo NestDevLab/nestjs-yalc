@@ -515,6 +515,140 @@ describe('GenericService', () => {
     });
   });
 
+  it('should create an entity using fallback repository when extended helpers are missing', async () => {
+    const plainRepo: any = {
+      target: {},
+      metadata: { primaryColumns: [{ propertyName: 'id' }] },
+      create: jest.fn((entity: any) => entity),
+      insert: jest.fn(),
+      findOneOrFail: jest.fn(),
+    };
+
+    const insertResult = new InsertResult();
+    insertResult.identifiers = [{ id: '123' }];
+
+    const mockedEntity = { id: '123' };
+
+    plainRepo.insert.mockResolvedValueOnce(insertResult);
+    plainRepo.findOneOrFail.mockResolvedValueOnce(mockedEntity);
+
+    const plainService = new GenericService<any>(plainRepo);
+
+    const result = await plainService.createEntity({});
+
+    expect(result).toBe(mockedEntity);
+    expect(plainRepo.findOneOrFail).toHaveBeenCalledWith({
+      where: { id: '123' },
+    });
+  });
+
+  it('should update an entity using fallback repository when extended helpers are missing', async () => {
+    const plainRepo: any = {
+      target: {},
+      metadata: { primaryColumns: [{ propertyName: 'id' }] },
+      find: jest.fn(),
+      update: jest.fn(),
+      getId: jest.fn(),
+      findOneOrFail: jest.fn(),
+    };
+
+    const existingEntity = { id: '123' };
+    const updatedEntity = { id: '123', updated: true };
+
+    plainRepo.find.mockResolvedValueOnce([existingEntity]);
+    plainRepo.update.mockResolvedValueOnce(new UpdateResult());
+    plainRepo.getId.mockReturnValueOnce('123');
+    plainRepo.findOneOrFail.mockResolvedValueOnce(updatedEntity);
+
+    const plainService = new GenericService<any>(plainRepo);
+
+    const result = await plainService.updateEntity({} as any, {});
+
+    expect(result).toBe(updatedEntity);
+    expect(plainRepo.findOneOrFail).toHaveBeenCalledWith({
+      where: { id: '123' },
+    });
+  });
+
+  it('should fallback to TypeORM find in getEntityListExtended when extended helpers are missing', async () => {
+    const plainRepo: any = {
+      target: {},
+      find: jest.fn(),
+    };
+
+    const mockedList = [{ id: '1' }];
+    plainRepo.find.mockResolvedValueOnce(mockedList);
+
+    const plainService = new GenericService<any>(plainRepo);
+
+    await plainService.getEntityListExtended(
+      {
+        where: { foo: 'bar' },
+        skip: 0,
+        take: 10,
+      } as any,
+      false,
+    );
+
+    const callArgs = plainRepo.find.mock.calls[0][0];
+    expect(callArgs.where).toEqual({ foo: 'bar' });
+    expect(callArgs.skip).toBe(0);
+    expect(callArgs.take).toBe(10);
+  });
+
+  it('should ignore extended where filters in fallback getEntityListExtended', async () => {
+    const plainRepo: any = {
+      target: {},
+      find: jest.fn(),
+    };
+
+    const mockedList = [{ id: '1' }];
+    plainRepo.find.mockResolvedValueOnce(mockedList);
+
+    const plainService = new GenericService<any>(plainRepo);
+
+    await plainService.getEntityListExtended(
+      {
+        where: { filters: { field: { eq: 'value' } } },
+        skip: 5,
+        take: 5,
+      } as any,
+      false,
+    );
+
+    const callArgs = plainRepo.find.mock.calls[0][0];
+    expect(callArgs.where).toBeUndefined();
+    expect(callArgs.skip).toBe(5);
+    expect(callArgs.take).toBe(5);
+  });
+
+  it('should fallback to findAndCount when withCount is true and extended helpers are missing', async () => {
+    const plainRepo: any = {
+      target: {},
+      findAndCount: jest.fn(),
+    };
+
+    const mockedList = [{ id: '1' }];
+    const mockedResult: [any[], number] = [mockedList, 1];
+    plainRepo.findAndCount.mockResolvedValueOnce(mockedResult);
+
+    const plainService = new GenericService<any>(plainRepo);
+
+    await plainService.getEntityListExtended(
+      {
+        where: { foo: 'bar' },
+        skip: 0,
+        take: 1,
+      } as any,
+      true,
+    );
+
+    const callArgs = plainRepo.findAndCount.mock.calls[0][0];
+    expect(callArgs.where).toEqual({ foo: 'bar' });
+    expect(callArgs.skip).toBe(0);
+    expect(callArgs.take).toBe(1);
+  });
+
   it.skip('test getEntityListCrudGen with specific Database', async () => {
     const testRepository = createMock<CGExtendedRepository<BaseEntity>>();
     const mockedConnection = createMock<Connection>();

@@ -5,7 +5,13 @@ logging of the error at the moment it's thrown, event triggering for application
 and defining a data object that can be logged with the message and masked.
 This mixin approach retains the original error class, allowing compatibility with NestJS exception filters and differentiation of errors by type.
 
-Also, it might be useful to read the [Event](./event-manager-event.md) and [Logger](./logger.md) documentation to understand how these 2 components work since they are used in the errors library.
+In a NestJS application, this library is typically used together with `YalcEventService` from `@nestjs-yalc/event-manager` so that a single call can:
+
+- log the error at an appropriate level derived from the HTTP status,
+- emit a structured event payload,
+- and propagate an `HttpException`-compatible error that carries both the HTTP status code and a safe response body for the client.
+
+For a full, end-to-end overview see the [Error handling guide](./error-handling.md). It is also useful to read the [Event](./event-manager-event.md) and [Logger](./logger.md) documentation to understand how these two components work since they are used in the errors library.
 
 ## Constants
 
@@ -36,7 +42,7 @@ The module exports two interfaces:
 
 ## Classes
 
-`DefaultError`: An exported class that extends the `DefaultErrorMixin` class and provides a constructor with optional parameters for a message and options for both the extended `DefaultError` and the base error class.
+`DefaultError`: An exported class that extends the `DefaultErrorMixin` class and provides a constructor with optional parameters for a message and options for both the extended `DefaultError` and the base error class. It exposes an `IBetterResponseInterface` through `getResponse()`, which is suitable to be returned to HTTP clients.
 
 ## Usage
 
