@@ -4,6 +4,7 @@
   "version": "1.3.2",
   "description": "NestJS - Yet Another Library Collection",
   "scripts": {
+    "postinstall": "node ./scripts/refresh-locks.js",
     "ci:checks": "npm run lint && npm run build && npm run test:cov",
     "build": "tsc --project ./tsconfig.json",
     "postbuild": "node ./build-dist.mjs",
