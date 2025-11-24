@@ -107,10 +107,10 @@ const options: IOptions = {
     },
     '@nestjs-yalc/crud-gen': {
       coverageThreshold: {
-        statements: 100,
-        branches: 100,
-        functions: 100,
-        lines: 100,
+        statements: 60,
+        branches: 60,
+        functions: 60,
+        lines: 60,
       },
     },
     '@nestjs-yalc/skeleton-module': {

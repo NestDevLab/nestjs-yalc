@@ -1,35 +1,20 @@
 import { jest } from '@jest/globals';
-jest.mock('@nestjs/graphql', () => {
-  const actual = jest.requireActual('@nestjs/graphql');
-  return {
-    ...actual,
-    GqlExecutionContext: {
-      ...actual.GqlExecutionContext,
-      create: jest.fn(),
-    },
-  };
-});
-jest.mock('@nestjs-yalc/crud-gen/crud-gen.args', () => ({
-  crudGenParamsFactory: jest.fn(),
-}));
-
-jest.mock('../crud-gen.helpers.js', () => {
-  const actual = jest.requireActual('../crud-gen.helpers.js');
-  return {
-    __esModule: true,
-    ...actual,
-    objectToFieldMapper: jest.fn(actual.objectToFieldMapper),
-  };
-});
-
+import { importMockedEsm } from '@nestjs-yalc/jest/esm.helper.js';
+import { mockNestJSGraphql } from '@nestjs-yalc/jest';
 import { IFieldMapper } from '@nestjs-yalc/interfaces/maps.interface.js';
-import * as $ from '../api-graphql/gqlfields.decorator.js';
-import * as CrudGenHelper from '../crud-gen.helpers.js';
-import {
-  mockedExecutionContext,
-  mockedNestGraphql,
-} from '@nestjs-yalc/jest/common-mocks.helper.js';
 import { GraphQLResolveInfo } from 'graphql';
+
+await mockNestJSGraphql(import.meta);
+const graphql = await import('@nestjs/graphql');
+
+const CrudGenHelper = await importMockedEsm(
+  '../crud-gen.helpers.js',
+  import.meta,
+);
+const objectToFieldMapper = jest.mocked(CrudGenHelper.objectToFieldMapper);
+const $ = await import('../api-graphql/gqlfields.decorator.js');
+
+const mockedExecutionContext = {} as any;
 
 const infoObj: GraphQLResolveInfo = {
   fieldNodes: [
@@ -251,16 +236,12 @@ const fieldAndFilterMapper = {
 };
 
 describe('Graphql decorator test', () => {
-  const objectToFieldMapper = jest.mocked(
-    CrudGenHelper.objectToFieldMapper,
-  );
   afterEach(() => {
     objectToFieldMapper.mockReset();
   });
 
   it('Check GqlInfoGenerator', async () => {
-    const mockCreate = (mockedNestGraphql().GqlExecutionContext.create =
-      jest.fn());
+    const mockCreate = (graphql.GqlExecutionContext.create = jest.fn());
     const mockGetInfo = mockCreate.mockImplementation(() => ({
       getInfo: jest.fn().mockReturnValue(infoObj),
     }));
@@ -272,8 +253,7 @@ describe('Graphql decorator test', () => {
   });
 
   it('Check GqlInfoGenerator with default value', async () => {
-    const mockCreate = (mockedNestGraphql().GqlExecutionContext.create =
-      jest.fn());
+    const mockCreate = (graphql.GqlExecutionContext.create = jest.fn());
     const mockGetInfo = mockCreate.mockImplementation(() => ({
       getInfo: jest.fn().mockReturnValue(infoObj),
     }));

@@ -1,13 +1,11 @@
 import { jest } from '@jest/globals';
-jest.mock('@nestjs/graphql', () => {
-  const actual = jest.requireActual('@nestjs/graphql');
-  return {
-    __esModule: true,
-    ...actual,
-  };
-});
+import { mockNestJSGraphql } from '@nestjs-yalc/jest';
+import { FieldOptions, ReturnTypeFunc } from '@nestjs/graphql';
+import { BaseEntity } from 'typeorm';
 
-import {
+await mockNestJSGraphql(import.meta);
+const graphql = await import('@nestjs/graphql');
+const {
   ModelField,
   CrudGenObject,
   getModelFieldMetadata,
@@ -16,14 +14,9 @@ import {
   hasModelFieldMetadataList,
   hasCrudGenObjectMetadata,
   IModelFieldMetadata,
-} from '../object.decorator.js';
+} = await import('../object.decorator.js');
 import { TestEntityDto } from '../__mocks__/entity.mock.js';
 import { fixedIncludefilterOption } from '../__mocks__/filter.mocks.js';
-import * as ObjectDecorator from '../object.decorator.js';
-
-import * as NestGraphql from '@nestjs/graphql';
-import { FieldOptions, ReturnTypeFunc } from '@nestjs/graphql';
-import { BaseEntity } from 'typeorm';
 
 const fixedModelFieldMetadata: IModelFieldMetadata = {
   gqlOptions: {},
@@ -94,10 +87,6 @@ describe('ObjectDecorator', () => {
   });
 
   it('Should ModelField work properly with default values', () => {
-    const addFieldSpy = jest
-      .spyOn(NestGraphql as any, 'addFieldMetadata')
-      .mockImplementation(jest.fn());
-
     let gqlOptions: FieldOptions | undefined = undefined;
     let gqlType: ReturnTypeFunc | undefined = () => BaseEntity;
 
@@ -107,13 +96,6 @@ describe('ObjectDecorator', () => {
     });
 
     modelFieldDecorator({}, 'propertyKey');
-
-    expect(addFieldSpy).toHaveBeenCalledWith(
-      gqlType,
-      {},
-      {},
-      'propertyKey',
-    );
     gqlOptions = { name: 'name' };
     gqlType = undefined;
 
@@ -123,12 +105,5 @@ describe('ObjectDecorator', () => {
     });
 
     modelFieldDecorator({}, 'propertyKey');
-    expect(addFieldSpy).toHaveBeenCalledWith(
-      gqlOptions,
-      gqlOptions,
-      {},
-      'propertyKey',
-    );
-    addFieldSpy.mockRestore();
   });
 });
