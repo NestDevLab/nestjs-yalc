@@ -1,47 +1,20 @@
 import { jest } from '@jest/globals';
+import { importMockedEsm } from '@nestjs-yalc/jest/esm.helper.js';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { IFieldMapper } from '@nestjs-yalc/interfaces/maps.interface.js';
+import type { IFieldMapper } from '@nestjs-yalc/interfaces/maps.interface.js';
 import { GraphQLResolveInfo } from 'graphql';
-import { BaseEntity, Equal, SelectQueryBuilder } from 'typeorm';
-import {
-  FilterType,
-  GeneralFilters,
-  Operators,
-} from '../crud-gen.enum.js';
+import { BaseEntity, Equal, SelectQueryBuilder, getMetadataArgsStorage } from 'typeorm';
+import { FilterType, GeneralFilters, Operators } from '../crud-gen.enum.js';
 import {
   CrudGenConditionNotSupportedError,
   CrudGenNotPossibleError,
   CrudGenStringWhereError,
 } from '../crud-gen.error.js';
-import {
-  forceFilterWorker,
-  forceFilters,
-  columnConversion,
-  isSymbolic,
-  whereObjectToSqlString,
-  isIFieldAndFilterMapper,
-  objectToFieldMapper,
-  ICrudGenDependencyFactoryOptions,
-  CrudGenDependencyFactory,
-  filterTypeToNativeType,
-  traverseFiltersAndApplyFunction,
-  isFilterExpressionInput,
-  applyJoinArguments,
-  getFieldMapperSrcByDst,
-  getProviderToken,
-  getMappedTypeProperties,
-  getTypeProperties,
-  applySelectOnFind,
-  formatRawSelection,
-  getDestinationFieldName,
-} from '../crud-gen.helpers.js';
 import { isAskingForCount } from '../api-graphql/crud-gen-gql.helpers.js';
 import { JoinArgOptions, JoinTypes } from '../api-graphql/crud-gen.input.js';
-import { IWhereCondition } from '../api-graphql/crud-gen-gql.type.js';
-import * as ObjectDecorator from '../object.decorator.js';
-import * as CrudGenHelpers from '../crud-gen.helpers.js';
-
-import {
+import type { IWhereCondition } from '../api-graphql/crud-gen-gql.type.js';
+import type { ICrudGenDependencyFactoryOptions } from '../crud-gen.helpers.js';
+import type {
   FilterOption,
   FilterOptionType,
   IModelFieldMetadata,
@@ -55,6 +28,38 @@ import {
 import { GenericService } from '../typeorm/generic.service.js';
 import { GQLDataLoader } from '@nestjs-yalc/data-loader/dataloader.helper.js';
 import { Resolver } from '@nestjs/graphql';
+
+const ObjectDecorator = await importMockedEsm(
+  '../object.decorator.js',
+  import.meta,
+);
+const { FilterOptionType } = ObjectDecorator;
+
+const CrudGenHelpers = await importMockedEsm(
+  '../crud-gen.helpers.js',
+  import.meta,
+);
+const {
+  forceFilterWorker,
+  forceFilters,
+  columnConversion,
+  isSymbolic,
+  whereObjectToSqlString,
+  isIFieldAndFilterMapper,
+  objectToFieldMapper,
+  CrudGenDependencyFactory,
+  filterTypeToNativeType,
+  traverseFiltersAndApplyFunction,
+  isFilterExpressionInput,
+  applyJoinArguments,
+  getFieldMapperSrcByDst,
+  getProviderToken,
+  getMappedTypeProperties,
+  getTypeProperties,
+  applySelectOnFind,
+  formatRawSelection,
+  getDestinationFieldName,
+} = CrudGenHelpers;
 
 const fixedKey = 'passed';
 const dbName = 'original';
@@ -206,7 +211,7 @@ describe('Crud-gen helpers', () => {
   it('should be able to use getDestinationFieldName', () => {
     const name = getDestinationFieldName({
       name: 'test',
-      transformer: (dst, src) => {},
+      transformerSrc: (dst, src) => {},
     });
 
     expect(name).toEqual('test');
@@ -351,7 +356,7 @@ describe('Crud-gen helpers', () => {
     const testData = whereObjectToSqlString<BaseEntity>(mockedQueryBuilder, {
       filters,
     });
-    expect(testData).toEqual("status = 'verified'");
+    expect(testData).toEqual("`status` = 'verified'");
   });
 
   it('should return empty sql', async () => {
@@ -699,24 +704,18 @@ describe('Crud-gen helpers', () => {
   });
 
   it('Should get the column properties from an crud-gen field with mode derived', () => {
-    const spiedgetModelFieldMetadataList = jest.spyOn(
-      ObjectDecorator,
-      'getModelFieldMetadataList',
-    );
-
-    const fieldMetadataList: { [key: string]: IModelFieldMetadata } = {
-      propertyName: {
-        mode: 'derived',
-      },
-      propertyNameRegular: {
-        mode: 'regular',
-      },
-    };
-    spiedgetModelFieldMetadataList.mockReturnValue(fieldMetadataList);
+    const { columns: metadataColumns } = getMetadataArgsStorage();
+    const initialLength = metadataColumns.length;
+    metadataColumns.push({
+      propertyName: 'propertyName',
+      target: TestEntity,
+      mode: 'derived',
+      options: {},
+    } as any);
     const columns = getTypeProperties(TestEntity);
-
     const result = columns.find((e) => e.propertyName === 'propertyName');
     expect(result).toBeDefined();
+    metadataColumns.splice(initialLength);
   });
 
   it('Should check applySelectOnFinds', () => {

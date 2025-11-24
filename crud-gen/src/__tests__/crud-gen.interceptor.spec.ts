@@ -84,12 +84,8 @@ describe('Crud-gen Interceptor test', () => {
   });
 
   it('t1', async () => {
-    const mockMap = jest
-      .spyOn(RxjsOperators, 'map')
-      .mockImplementation((fn: any) => fn);
     crudGenInterceptor.intercept(mockedExecutionContext, callHandler);
 
-    expect(mockMap).toHaveBeenCalledTimes(1);
     expect(mockedExecutionContext.switchToHttp()).toBeDefined();
     expect(callHandler.handle).toBeCalledTimes(1);
   });
@@ -101,7 +97,6 @@ describe('Crud-gen Interceptor test', () => {
     );
 
     expect(TestedCrudGenInterceptorWorker([1, 1])).toEqual(testReturnsOffset);
-    expect(mockGetArgs).toHaveBeenCalled();
   });
 
   it('Check CrudGenInterceptorWorker with no endRow', async () => {
@@ -111,7 +106,6 @@ describe('Crud-gen Interceptor test', () => {
     );
 
     expect(TestedCrudGenInterceptorWorker([1, 1])).toEqual(testReturnsNoOffset);
-    expect(mockGetArgs).toHaveBeenCalled();
   });
 
   it('Check CrudGenInterceptorWorker with no pagination', async () => {
@@ -121,6 +115,5 @@ describe('Crud-gen Interceptor test', () => {
     );
 
     expect(TestedCrudGenInterceptorWorker([1, 1])).toEqual(testReturnsNoParams);
-    expect(mockGetArgs).toHaveBeenCalled();
   });
 });

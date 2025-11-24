@@ -41,7 +41,7 @@ const options: IOptions = {
     },
   },
   // TODO: re-enable everything except types
-  skipProjects: ['types', 'types-extends', 'graphql', 'kafka', 'jest', 'crud-gen'],
+  skipProjects: ['types', 'types-extends', 'graphql', 'kafka', 'jest'],
   defaultCoverageThreshold: {
     branches: 100,
     functions: 100,
@@ -111,24 +111,6 @@ const options: IOptions = {
         branches: 100,
         functions: 100,
         lines: 100,
-      },
-      preset: 'ts-jest',
-      transform: {
-        '^.+\\.(t|j)sx?$': [
-          'ts-jest',
-          {
-            useESM: false,
-            tsconfig: {
-              rootDir: './crud-gen/src',
-              moduleResolution: 'Node',
-              module: 'CommonJS',
-            },
-          },
-        ],
-      },
-      moduleNameMapper: {
-        'source-map-support/register': 'identity-obj-proxy',
-        '^(\\.{1,2}/.*)\\.js$': '$1',
       },
     },
     '@nestjs-yalc/skeleton-module': {

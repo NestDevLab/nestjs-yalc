@@ -13,6 +13,15 @@ jest.mock('@nestjs-yalc/crud-gen/crud-gen.args', () => ({
   crudGenParamsFactory: jest.fn(),
 }));
 
+jest.mock('../crud-gen.helpers.js', () => {
+  const actual = jest.requireActual('../crud-gen.helpers.js');
+  return {
+    __esModule: true,
+    ...actual,
+    objectToFieldMapper: jest.fn(actual.objectToFieldMapper),
+  };
+});
+
 import { IFieldMapper } from '@nestjs-yalc/interfaces/maps.interface.js';
 import * as $ from '../api-graphql/gqlfields.decorator.js';
 import * as CrudGenHelper from '../crud-gen.helpers.js';
@@ -242,9 +251,12 @@ const fieldAndFilterMapper = {
 };
 
 describe('Graphql decorator test', () => {
-  // beforeEach(() => {
-  //   jest.resetAllMocks();
-  // });
+  const objectToFieldMapper = jest.mocked(
+    CrudGenHelper.objectToFieldMapper,
+  );
+  afterEach(() => {
+    objectToFieldMapper.mockReset();
+  });
 
   it('Check GqlInfoGenerator', async () => {
     const mockCreate = (mockedNestGraphql().GqlExecutionContext.create =
@@ -329,9 +341,7 @@ describe('Graphql decorator test', () => {
 
   it('Check with nested', async () => {
     const arr: IFieldMapper = { ['first']: { dst: 'specified' } };
-    jest
-      .spyOn(CrudGenHelper, 'objectToFieldMapper')
-      .mockReturnValue(fieldAndFilterMapper);
+    objectToFieldMapper.mockReturnValue(fieldAndFilterMapper);
     const GqlFieldsMapperTest = $.GqlModelFieldsMapper(arr, edgesObj);
 
     // console.log(GqlFieldsMapperTest.keys);
@@ -362,9 +372,7 @@ describe('Graphql decorator test', () => {
       ['node']: { dst: 'data -> $.id', mode: 'derived' },
     };
 
-    jest
-      .spyOn(CrudGenHelper, 'objectToFieldMapper')
-      .mockReturnValue(fieldAndFilterMapper);
+    objectToFieldMapper.mockReturnValue(fieldAndFilterMapper);
     const GqlFieldsMapperTest = $.GqlModelFieldsMapper(arr, infoObj);
 
     expect(GqlFieldsMapperTest).toBeDefined();
@@ -375,9 +383,10 @@ describe('Graphql decorator test', () => {
       ['node']: { dst: 'data -> $.id', mode: 'derived' },
     };
 
-    jest
-      .spyOn(CrudGenHelper, 'objectToFieldMapper')
-      .mockReturnValue({ ...fieldAndFilterMapper, extraInfo: undefined });
+    objectToFieldMapper.mockReturnValue({
+      ...fieldAndFilterMapper,
+      extraInfo: undefined,
+    });
     const GqlFieldsMapperTest = $.GqlModelFieldsMapper(arr, infoObj);
 
     expect(GqlFieldsMapperTest).toBeDefined();

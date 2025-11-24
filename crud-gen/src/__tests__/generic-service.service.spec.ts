@@ -38,6 +38,19 @@ describe('GenericService', () => {
   let service: GenericService<MockedEntity>;
   let mockedGetConnection: any;
   let baseEntityRepository = _baseEntityRepository;
+  const createTrackedService = () => {
+    class TrackedGenericService extends GenericService<BaseEntity> {
+      static ctor = jest.fn();
+      constructor(
+        ...args: ConstructorParameters<typeof GenericService<BaseEntity>>
+      ) {
+        super(...args);
+        TrackedGenericService.ctor(...args);
+      }
+    }
+
+    return TrackedGenericService;
+  };
 
   beforeEach(async () => {
     mockedGetConnection = jest.mocked(getConnection, true);
@@ -82,52 +95,48 @@ describe('GenericService', () => {
   });
 
   it('should call the factory function properly', () => {
-    const mockedGenericService = jest
-      .spyOn(GenericServiceModule, 'GenericService')
-      .mockImplementation(jest.fn() as any);
+    const TrackedGenericService = createTrackedService();
 
     const result: FactoryProvider = GenericServiceFactory<BaseEntity>(
       () => BaseEntity,
       'fakeConnection',
-      GenericService,
+      TrackedGenericService as any,
     );
     expect(result).toBeDefined();
-    expect(result.useFactory()).toBeDefined();
+    expect(result.useFactory()).toBeInstanceOf(TrackedGenericService);
 
-    expect(mockedGenericService).toHaveBeenCalledTimes(1);
+    expect(TrackedGenericService.ctor).toHaveBeenCalledTimes(1);
   });
 
   it('should call the factory function properly with parameters', () => {
-    const mockedGenericService = jest
-      .spyOn(GenericServiceModule, 'GenericService')
-      .mockImplementation(jest.fn() as any);
+    const TrackedGenericService = createTrackedService();
 
     const result: FactoryProvider = GenericServiceFactory<BaseEntity>(
       () => BaseEntity,
       'fakeConnection',
-      GenericService,
+      TrackedGenericService as any,
       MockedEntity,
       'fakeWriteConnection',
     );
     expect(result).toBeDefined();
-    expect(result.useFactory()).toBeDefined();
+    expect(result.useFactory()).toBeInstanceOf(TrackedGenericService);
 
-    expect(mockedGenericService).toHaveBeenCalledTimes(1);
+    expect(TrackedGenericService.ctor).toHaveBeenCalledTimes(1);
   });
 
   it('Check GenericServiceFactory provide object to work properly ', () => {
-    const mockedGenericService = jest
-      .spyOn(GenericServiceModule, 'GenericService')
-      .mockImplementation(jest.fn() as any);
+    const TrackedGenericService = createTrackedService();
 
     const result: FactoryProvider = GenericServiceFactory<BaseEntity>(
       BaseEntity,
       'fakeConnection',
+      TrackedGenericService as any,
     );
 
     expect(result).toBeDefined();
     expect(result.provide).toEqual('BaseEntityGenericService');
-    expect(mockedGenericService).toHaveBeenCalledTimes(1);
+    expect(result.useFactory()).toBeInstanceOf(TrackedGenericService);
+    expect(TrackedGenericService.ctor).toHaveBeenCalledTimes(1);
   });
 
   it('Should GenericServiceFactory works properly with default values ', () => {

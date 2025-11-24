@@ -1,4 +1,12 @@
 import { jest } from '@jest/globals';
+jest.mock('@nestjs/graphql', () => {
+  const actual = jest.requireActual('@nestjs/graphql');
+  return {
+    __esModule: true,
+    ...actual,
+  };
+});
+
 import {
   ModelField,
   CrudGenObject,
@@ -86,10 +94,6 @@ describe('ObjectDecorator', () => {
   });
 
   it('Should ModelField work properly with default values', () => {
-    jest
-      .spyOn(ObjectDecorator, 'getModelFieldMetadataList')
-      .mockReturnValue({});
-
     const addFieldSpy = jest
       .spyOn(NestGraphql as any, 'addFieldMetadata')
       .mockImplementation(jest.fn());
@@ -97,7 +101,7 @@ describe('ObjectDecorator', () => {
     let gqlOptions: FieldOptions | undefined = undefined;
     let gqlType: ReturnTypeFunc | undefined = () => BaseEntity;
 
-    let modelFieldDecorator = ({
+    let modelFieldDecorator = ModelField({
       gqlType,
       gqlOptions,
     });
@@ -113,7 +117,7 @@ describe('ObjectDecorator', () => {
     gqlOptions = { name: 'name' };
     gqlType = undefined;
 
-    modelFieldDecorator = ({
+    modelFieldDecorator = ModelField({
       gqlType,
       gqlOptions,
     });

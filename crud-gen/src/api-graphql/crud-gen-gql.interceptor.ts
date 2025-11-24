@@ -25,7 +25,7 @@ export class CrudGenGqlInterceptor<T = IFieldMapper>
 {
   intercept(context: ExecutionContext, next: CallHandler) {
     const gqlCtx = GqlExecutionContext.create(context);
-    const { startRow, endRow } = gqlCtx.getArgs();
+    const { startRow, endRow } = (gqlCtx?.getArgs?.() as any) ?? {};
     return next
       .handle()
       .pipe(map(crudGenGqlInterceptorWorker(startRow, endRow)));

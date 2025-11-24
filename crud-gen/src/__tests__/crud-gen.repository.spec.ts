@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { importMockedEsm } from '@nestjs-yalc/jest/esm.helper.js';
 import {
   BaseEntity,
   EntityMetadata,
@@ -12,10 +13,12 @@ import {
 import { QueryBuilderHelper } from '@nestjs-yalc/database/query-builder.helper.js';
 import { SortDirection } from '../crud-gen.enum.js';
 import { DeepMocked } from '@golevelup/ts-jest';
-import { mockQueryBuilder } from '@nestjs-yalc/jest/common-mocks.helper.js';
 import { Alias } from 'typeorm/query-builder/Alias';
 import * as Typeorm from 'typeorm';
-import * as CrudGenHelpers from '../crud-gen.helpers.js';
+const CrudGenHelpers = await importMockedEsm(
+  '../crud-gen.helpers.js',
+  import.meta,
+);
 
 jest.mock('@nestjs-yalc/database/query-builder.helper');
 jest.mock('typeorm/find-options/FindOptionsUtils', () => ({
@@ -105,26 +108,76 @@ describe('CrudGen Repoository', () => {
   let newCrudGenRepository: CGExtendedRepository<BaseEntity>;
   let mockedQueryBuilder: DeepMocked<SelectQueryBuilder<BaseEntity>>;
 
+  const buildQueryBuilder = () => {
+    const qb: any = {
+      alias: 'alias',
+      connection: {
+        driver: { escape: (v: any) => `\`${String(v)}\`` },
+        createQueryBuilder: jest.fn(),
+      },
+      expressionMap: {
+        mainAlias: {
+          metadata: {
+            columns: [{ propertyName: 'status', databaseName: 'status' }],
+          },
+        },
+      },
+      setFindOptions: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      offset: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      take: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      addOrderBy: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      innerJoinAndSelect: jest.fn().mockReturnThis(),
+      from: jest.fn().mockReturnThis(),
+    };
+    qb.connection.createQueryBuilder.mockReturnValue(qb);
+    qb.getCount = jest.fn().mockReturnValue(1);
+    qb.getMany = jest.fn().mockReturnValue(getManyResult);
+    qb.getManyAndCount = jest.fn().mockReturnValue([getManyResult, 1]);
+    qb.getQuery = jest.fn().mockReturnValue('SELECT * FROM fakeTable');
+    qb.getOne = jest.fn().mockResolvedValue(BaseEntity);
+    qb.getOneOrFail = jest.fn().mockResolvedValue(BaseEntity);
+    return qb as DeepMocked<SelectQueryBuilder<BaseEntity>>;
+  };
+
   beforeEach(() => {
     newCrudGenRepository = new CGExtendedRepository();
 
-    mockedQueryBuilder = mockQueryBuilder<BaseEntity>();
-    mockedQueryBuilder.getCount = jest.fn().mockReturnValue(1);
-    mockedQueryBuilder.getMany = jest.fn().mockReturnValue(getManyResult);
-    mockedQueryBuilder.getManyAndCount = jest
-      .fn()
-      .mockReturnValue([getManyResult, 1]);
-    mockedQueryBuilder.getQuery = jest
-      .fn()
-      .mockReturnValue('SELECT * FROM fakeTable');
+    mockedQueryBuilder = buildQueryBuilder();
 
     jest
       .spyOn(newCrudGenRepository, 'createQueryBuilder')
       .mockImplementation(() => mockedQueryBuilder);
 
+    const originalGetFormatted =
+      newCrudGenRepository.getFormattedCrudGenQueryBuilder.bind(
+        newCrudGenRepository,
+      );
     jest
-      .spyOn(FindOptionsUtils, 'applyFindManyOptionsOrConditionsToQueryBuilder')
-      .mockImplementation(() => mockedQueryBuilder);
+      .spyOn(newCrudGenRepository, 'getFormattedCrudGenQueryBuilder')
+      .mockImplementation((findOptions, fieldMap, qb) => {
+        const queryBuilder = qb ?? mockedQueryBuilder;
+        if (!queryBuilder.connection) {
+          (queryBuilder as any).connection = {
+            driver: { escape: (v: any) => `\`${String(v)}\`` },
+            createQueryBuilder: jest.fn().mockReturnValue(queryBuilder),
+          };
+        }
+        if (!queryBuilder.expressionMap.mainAlias) {
+          queryBuilder.expressionMap.mainAlias = {
+            metadata: { columns: [{ propertyName: 'status' }] },
+          } as any;
+        }
+        if (!queryBuilder.alias) {
+          queryBuilder.alias = 'alias';
+        }
+        return originalGetFormatted(findOptions, fieldMap, queryBuilder);
+      });
   });
 
   afterEach(() => {
@@ -362,7 +415,9 @@ describe('CrudGen Repoository', () => {
     expect(testData).toEqual(mockedQueryBuilder);
 
     const alias = new Alias();
-    alias.metadata = new EntityMetadata({} as any);
+    alias.metadata = {
+      columns: [{ propertyName: 'id', databaseName: 'id' }],
+    } as any;
     mockedQueryBuilder.expressionMap.mainAlias = alias;
 
     testData = newCrudGenRepository.getCrudGenQueryBuilder(
@@ -377,7 +432,7 @@ describe('CrudGen Repoository', () => {
 
     expect(testData).toEqual(mockedQueryBuilder);
 
-    const newQueryBuilder = mockQueryBuilder();
+    const newQueryBuilder = buildQueryBuilder();
     newQueryBuilder.expressionMap.mainAlias = alias;
     mockedQueryBuilder.expressionMap.mainAlias = null;
     mockedQueryBuilder.connection.createQueryBuilder = jest
@@ -394,7 +449,7 @@ describe('CrudGen Repoository', () => {
       },
     );
 
-    expect(testData).toEqual(mockedQueryBuilder);
+    expect(testData).toEqual(newQueryBuilder);
   });
 
   it('getOneCrudGen should return an entity correctly', async () => {
@@ -432,28 +487,24 @@ describe('CrudGen Repoository', () => {
   });
 
   it('CrudGenRepoFactory should return the repo already cached', () => {
-    const spiedEntityRepository = jest
-      .spyOn(Typeorm, 'EntityRepository')
-      .mockImplementationOnce(() => jest.fn());
+    const first = CGExtendedRepositoryFactory<BaseEntity>(BaseEntity);
+    const second = CGExtendedRepositoryFactory<BaseEntity>(BaseEntity);
 
-    let result = CGExtendedRepositoryFactory<BaseEntity>(BaseEntity);
-    expect(result).toBeDefined();
-
-    result = CGExtendedRepositoryFactory<BaseEntity>(BaseEntity);
-    expect(result).toBeDefined();
-
-    expect(spiedEntityRepository).toBeCalledTimes(1);
+    expect(first).toBeDefined();
+    expect(first).toBe(second);
   });
 
   it('Should check generateFilterOnPrimaryColumn with ids as number', () => {
     const ids = 2;
-    newCrudGenRepository.metadata = {
-      primaryColumns: [
-        {
-          propertyName: 'id',
-        },
-      ],
-    } as any;
+    Object.defineProperty(newCrudGenRepository, 'metadata', {
+      value: {
+        primaryColumns: [
+          {
+            propertyName: 'id',
+          },
+        ],
+      },
+    });
     const result = newCrudGenRepository.generateFilterOnPrimaryColumn(ids);
     expect(result).toEqual({
       id: ` = '2'`,
@@ -464,13 +515,15 @@ describe('CrudGen Repoository', () => {
     const ids = {
       id: '2',
     };
-    newCrudGenRepository.metadata = {
-      primaryColumns: [
-        {
-          propertyName: 'id',
-        },
-      ],
-    } as any;
+    Object.defineProperty(newCrudGenRepository, 'metadata', {
+      value: {
+        primaryColumns: [
+          {
+            propertyName: 'id',
+          },
+        ],
+      },
+    });
     const result = newCrudGenRepository.generateFilterOnPrimaryColumn(ids);
     expect(result).toEqual({
       id: ` = '2'`,

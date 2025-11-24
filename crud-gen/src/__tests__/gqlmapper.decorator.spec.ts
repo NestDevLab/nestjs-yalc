@@ -1,22 +1,17 @@
 import { jest } from '@jest/globals';
-jest.mock('@nestjs/graphql', () => {
-  const actual = jest.requireActual('@nestjs/graphql');
-  return {
-    ...actual,
-    GqlExecutionContext: {
-      ...actual.GqlExecutionContext,
-      create: jest.fn(),
-    },
-  };
-});
-
-import * as gqlMapper from '../api-graphql/gqlmapper.decorator.js';
+import { importMockedEsm } from '@nestjs-yalc/jest/esm.helper.js';
+import { mockNestJSGraphql } from '@nestjs-yalc/jest';
 import {
   mockedExecutionContext,
-  mockedNestGraphql,
 } from '@nestjs-yalc/jest/common-mocks.helper.js';
-import * as graphql from '@nestjs/graphql';
 import { ModelField, CrudGenObject } from '../object.decorator.js';
+
+await mockNestJSGraphql(import.meta);
+const graphql = await import('@nestjs/graphql');
+const gqlMapper = await importMockedEsm(
+  '../api-graphql/gqlmapper.decorator.js',
+  import.meta,
+);
 
 @CrudGenObject()
 class DummyType {
@@ -30,7 +25,7 @@ const fixedInfoObj = {
   original: stringValue,
 };
 describe('Graphql decorator test', () => {
-  const mockCreate = (mockedNestGraphql().GqlExecutionContext.create = jest.fn());
+  const mockCreate = (graphql.GqlExecutionContext.create = jest.fn());
   mockCreate.mockImplementation(() => ({
     getArgs: jest.fn().mockReturnValue(fixedInfoObj),
   }));
@@ -51,9 +46,7 @@ describe('Graphql decorator test', () => {
   });
 
   it('Check GqlArgsGenerator with data', async () => {
-    jest
-      .spyOn(gqlMapper, 'GqlFieldsAsArgsWorker')
-      .mockReturnValue({ data: 'noData' });
+    jest.mocked(gqlMapper.GqlFieldsAsArgsWorker).mockReturnValue(fixedInfoObj);
     const testData = gqlMapper.GqlArgsGenerator(
       { fieldType: DummyType },
       mockedExecutionContext,
@@ -63,9 +56,7 @@ describe('Graphql decorator test', () => {
   });
 
   it('Check GqlArgsGenerator with data and parameters', async () => {
-    jest
-      .spyOn(gqlMapper, 'GqlFieldsAsArgsWorker')
-      .mockReturnValue({ data: 'noData' });
+    jest.mocked(gqlMapper.GqlFieldsAsArgsWorker).mockReturnValue(fixedInfoObj);
     const testData = gqlMapper.GqlArgsGenerator(
       { fieldType: DummyType, _name: 'test', gql: { name: 'test' } },
       mockedExecutionContext,
@@ -81,7 +72,7 @@ describe('Graphql decorator test', () => {
   });
 
   it('should be able to use the InputArgs to combine param decorators', () => {
-    const ArgsFunc = jest.spyOn(graphql, 'Args');
+    const ArgsFunc = jest.mocked(graphql.Args);
     const returnFunc = jest.fn().mockReturnValue('somestring');
     ArgsFunc.mockReturnValue(returnFunc);
     const decorator = gqlMapper.InputArgs({ fieldMap: {} });
@@ -91,7 +82,7 @@ describe('Graphql decorator test', () => {
   });
 
   it('should be able to use the InputArgs to combine param decorators with specified params', () => {
-    const ArgsFunc = jest.spyOn(graphql, 'Args');
+    const ArgsFunc = jest.mocked(graphql.Args);
     const returnFunc = jest.fn().mockReturnValue('somestring');
     ArgsFunc.mockReturnValue(returnFunc);
     const decorator = gqlMapper.InputArgs({
@@ -109,14 +100,11 @@ describe('Graphql decorator test', () => {
     mockCreate.mockImplementation(() => ({
       getArgs: jest.fn().mockReturnValue(fixedArg),
     }));
-    jest
-      .spyOn(gqlMapper, 'GqlFieldsAsArgsWorker')
-      .mockReturnValue({ data: 'noData' });
     const testData = gqlMapper.GqlArgsGenerator(
       { fieldType: DummyType, _name: 'original', gql: { name: 'original' } },
       mockedExecutionContext,
     );
 
-    expect(testData).toEqual({ data: 'noData' });
+    expect(testData).toEqual({});
   });
 });

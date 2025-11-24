@@ -180,7 +180,7 @@ const defaultConf = (
       // }),
     },
     errorOnDeprecated: true,
-    // extensionsToTreatAsEsm: ['.ts'],
+    extensionsToTreatAsEsm: ['.ts'],
     // injectGlobals: false,
     ...options?.jestConf,
   };

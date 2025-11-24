@@ -1,4 +1,14 @@
 import { jest } from '@jest/globals';
+
+jest.mock('../crud-gen.helpers.js', () => {
+  const actual = jest.requireActual('../crud-gen.helpers.js') as any;
+  return {
+    __esModule: true,
+    ...actual,
+    getEntityRelations: jest.fn(),
+  };
+});
+
 import { createMock } from '@golevelup/ts-jest';
 import { GQLDataLoader } from '@nestjs-yalc/data-loader/dataloader.helper.js';
 import { ModuleRef } from '@nestjs/core';
@@ -25,6 +35,7 @@ import {
   TestEntityRelation2,
 } from '../__mocks__/entity.mock.js';
 import * as CrudGenObjectDecorator from '../object.decorator.js';
+import { CRUDGEN_FIELD_METADATA_KEY } from '../object.decorator.js';
 import * as CrudGenHelpers from '../crud-gen.helpers.js';
 
 import { IModelFieldMetadata } from '../object.decorator.js';
@@ -91,6 +102,8 @@ const customResolverInfo: IRelationInfo = {
     },
   },
 };
+
+const getEntityRelations = jest.mocked(CrudGenHelpers.getEntityRelations);
 
 const baseResolverOption: IGenericResolverOptions<TestEntityRelation> = {
   entityModel: TestEntityRelation,
@@ -257,13 +270,12 @@ describe('Generic Resolver', () => {
     createMock<GQLDataLoader<TestEntityRelation2>>();
   const mockedModuleRef = createMock<ModuleRef>();
 
-  const spiedCrudGenMetaDataList = jest.spyOn(
-    CrudGenObjectDecorator,
-    'getModelFieldMetadataList',
-  );
-
   const generateResolver = (mockedMetadataList, resolverOption) => {
-    spiedCrudGenMetaDataList.mockReturnValue(mockedMetadataList);
+    Reflect.defineMetadata(
+      CRUDGEN_FIELD_METADATA_KEY,
+      mockedMetadataList,
+      resolverOption.entityModel || TestEntityRelation,
+    );
     const ResolverClass = resolverFactory<TestEntityRelation>(resolverOption);
 
     const resolver: IGenericResolver = new ResolverClass(
@@ -391,7 +403,6 @@ describe('Generic Resolver', () => {
 
   describe('Check dataloader one-to-many relationship', () => {
     let customMetadatList: { [key: string]: IModelFieldMetadata };
-    let mockedResolverInfoList: jest.SpyInstance;
     const oneToManyResolverInfo: IRelationInfo = {
       ...customResolverInfo,
       relation: {
@@ -413,17 +424,16 @@ describe('Generic Resolver', () => {
         },
         type: () => String,
       };
-      mockedResolverInfoList = jest.spyOn(CrudGenHelpers, 'getEntityRelations');
     });
 
     afterEach(() => {
       jest.clearAllMocks();
-      mockedResolverInfoList.mockClear();
+      getEntityRelations.mockClear();
     });
 
     afterAll(() => {
       jest.restoreAllMocks();
-      mockedResolverInfoList.mockRestore();
+      getEntityRelations.mockReset();
     });
 
     it('Should load the entity relationship', async () => {
@@ -437,7 +447,7 @@ describe('Generic Resolver', () => {
         join: undefined,
       };
 
-      mockedResolverInfoList.mockReturnValue([resolveInfo]);
+      getEntityRelations.mockReturnValue([resolveInfo]);
       const resolver = generateResolver(customMetadatList, baseResolverOption);
 
       const result = await resolver[propertyRelationName](
@@ -472,7 +482,6 @@ describe('Generic Resolver', () => {
         relationType: 'one-to-one',
       },
     };
-    let mockedResolverInfoList: jest.SpyInstance;
 
     beforeEach(() => {
       customMetadatList = { ...fixedMetadataList };
@@ -488,20 +497,19 @@ describe('Generic Resolver', () => {
         },
         type: () => String,
       };
-      mockedResolverInfoList = jest.spyOn(CrudGenHelpers, 'getEntityRelations');
     });
 
     afterEach(() => {
       jest.clearAllMocks();
-      mockedResolverInfoList.mockClear();
+      getEntityRelations.mockClear();
     });
 
     afterAll(() => {
-      mockedResolverInfoList.mockRestore();
+      getEntityRelations.mockReset();
     });
 
     it('Should load the entity relationship with a one-to-one relationtype', async () => {
-      mockedResolverInfoList.mockReturnValueOnce([oneToOneResolverInfo]);
+      getEntityRelations.mockReturnValueOnce([oneToOneResolverInfo]);
       const resolver = generateResolver(customMetadatList, baseResolverOption);
 
       const result = await resolver[propertyRelationName](
@@ -512,7 +520,7 @@ describe('Generic Resolver', () => {
     });
 
     it('Should return nested field if it is already loaded', async () => {
-      mockedResolverInfoList.mockReturnValueOnce([oneToOneResolverInfo]);
+      getEntityRelations.mockReturnValueOnce([oneToOneResolverInfo]);
       const resolver = generateResolver(customMetadatList, baseResolverOption);
 
       const customEntity = {
@@ -530,7 +538,7 @@ describe('Generic Resolver', () => {
         join: undefined,
       };
 
-      mockedResolverInfoList.mockReturnValueOnce([resolveInfo]);
+      getEntityRelations.mockReturnValueOnce([resolveInfo]);
 
       const resolver = generateResolver(undefined, baseResolverOption);
       await expect(
@@ -539,7 +547,7 @@ describe('Generic Resolver', () => {
     });
 
     it('Should throw an error if we try to load a resolveField with join and resolver specified', async () => {
-      mockedResolverInfoList.mockReturnValueOnce([oneToOneResolverInfo]);
+      getEntityRelations.mockReturnValueOnce([oneToOneResolverInfo]);
       const resolver = generateResolver(customMetadatList, baseResolverOption);
       const customTestEntity = {
         [propertyRelationName]: {},
@@ -567,10 +575,6 @@ describe('Generic Resolver', () => {
         relationType: 'many-to-many',
       },
     };
-    const mockedResolverInfoList = jest.spyOn(
-      CrudGenHelpers,
-      'getEntityRelations',
-    );
 
     beforeEach(() => {
       customMetadatList = { ...fixedMetadataList };
@@ -590,16 +594,16 @@ describe('Generic Resolver', () => {
 
     afterEach(() => {
       jest.clearAllMocks();
-      mockedResolverInfoList.mockClear();
+      getEntityRelations.mockClear();
     });
 
     afterAll(() => {
       jest.restoreAllMocks();
-      mockedResolverInfoList.mockRestore();
+      getEntityRelations.mockReset();
     });
 
     it('Should load the entity relationship with a many-to-many relationtype', async () => {
-      mockedResolverInfoList.mockReturnValueOnce([manyToManyResolverInfo]);
+      getEntityRelations.mockReturnValueOnce([manyToManyResolverInfo]);
       const resolver = generateResolver(customMetadatList, baseResolverOption);
 
       const result = await resolver[propertyRelationName](
@@ -611,7 +615,7 @@ describe('Generic Resolver', () => {
     });
 
     it('Should return nested field if it is already loaded', async () => {
-      mockedResolverInfoList.mockReturnValueOnce([manyToManyResolverInfo]);
+      getEntityRelations.mockReturnValueOnce([manyToManyResolverInfo]);
 
       const resolver = generateResolver(customMetadatList, baseResolverOption);
 
@@ -628,7 +632,7 @@ describe('Generic Resolver', () => {
         join: undefined,
       };
 
-      mockedResolverInfoList.mockReturnValueOnce([resolveInfo]);
+      getEntityRelations.mockReturnValueOnce([resolveInfo]);
       const resolver = generateResolver({}, baseResolverOption);
       const result = await resolver[propertyRelationName](
         TestEntityRelation2,

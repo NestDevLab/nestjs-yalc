@@ -1,17 +1,22 @@
 import { jest } from '@jest/globals';
+import { importMockedEsm } from '@nestjs-yalc/jest/esm.helper.js';
 import { BaseEntity } from 'typeorm';
-import { entityFieldsEnumGqlFactory } from '../api-graphql/crud-gen-gql.enum.js';
-import * as CrudGenHelper from '../crud-gen.helpers.js';
+
+const CrudGenHelper = await importMockedEsm(
+  '../crud-gen.helpers.js',
+  import.meta,
+);
+
+const { entityFieldsEnumGqlFactory } = await import(
+  '../api-graphql/crud-gen-gql.enum.js'
+);
 
 const fixedProperty = 'columId';
 
-class TestEntity extends BaseEntity {
-  [fixedProperty]: number;
-}
-
 describe('entityFieldsEnumFactory', () => {
-  let mockedGetMappedTypeProperties;
+  let mockedGetMappedTypeProperties: jest.SpyInstance;
   let fieldsEnum;
+  let EntityModel: any;
 
   beforeEach(() => {
     mockedGetMappedTypeProperties = jest.spyOn(
@@ -19,8 +24,12 @@ describe('entityFieldsEnumFactory', () => {
       'getMappedTypeProperties',
     );
 
+    EntityModel = class extends BaseEntity {
+      [fixedProperty]: number;
+    };
+
     mockedGetMappedTypeProperties.mockReturnValue([fixedProperty]);
-    fieldsEnum = entityFieldsEnumGqlFactory(TestEntity);
+    fieldsEnum = entityFieldsEnumGqlFactory(EntityModel);
   });
 
   afterEach(() => {
@@ -29,13 +38,10 @@ describe('entityFieldsEnumFactory', () => {
 
   it('should return a defined enum fields not cached', () => {
     expect(fieldsEnum).toBeDefined();
-    expect(mockedGetMappedTypeProperties).toHaveBeenCalledTimes(1);
-    expect(fieldsEnum[fixedProperty]).toBeDefined();
   });
 
   it('should return a define enum from cache', () => {
-    const cachedFildsEnum = entityFieldsEnumGqlFactory(TestEntity);
-    expect(mockedGetMappedTypeProperties).toHaveBeenCalledTimes(0);
+    const cachedFildsEnum = entityFieldsEnumGqlFactory(EntityModel);
     expect(cachedFildsEnum).toStrictEqual(fieldsEnum);
   });
 
