@@ -3,6 +3,12 @@
  * Issue: https://github.com/facebook/jest/issues/13258
  * also @see https://stackoverflow.com/questions/75519950/how-can-i-avoid-a-weird-workaround-when-using-jest-and-esm-together
  *
+ * If you hit "Cannot assign to read only property X" while mocking an ESM module,
+ * use importMockedEsm in the spec to load a mockable copy before importing the SUT.
+ * This helper wraps every function in jest.fn and registers the mock via
+ * jest.unstable_mockModule, which avoids the read-only export errors that
+ * block normal jest.mock under ESM.
+ *
  * Original code:
  * @see https://gist.github.com/booya2nd/dcaa1775fd4c06cd79610e3feea6362c#file-mock-esmodule-js
  */

@@ -45,6 +45,8 @@ The main `package.json` contain some scripts to run the unit test for all the li
 It uses the jest `projects` feature in background configured by `jest.config.ts` by using a customized mechanism
 implemented in our `@nest-yalc/jest` library.
 
+**ESM mocking note:** when Jest errors with messages like “Cannot assign to read only property …” while mocking ESM modules (common with GraphQL decorators or helpers), load the module via `importMockedEsm` from `@nestjs-yalc/jest/esm.helper` before importing the SUT. `importMockedEsm` wraps functions with `jest.fn` and registers them using `jest.unstable_mockModule`, which avoids read-only export issues. Use `mockNestJSGraphql(import.meta)` for `@nestjs/graphql` convenience.
+
 To run the tests with the coverage use `npm run test:cov` and then you can check the status of the tests by running `npm run test:cov:serve`
 Then you should be able to browse the coverage reports via: [http://127.0.0.1:8080/lcov-report/](http://127.0.0.1:8080/lcov-report/)
 

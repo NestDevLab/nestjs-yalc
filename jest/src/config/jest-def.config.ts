@@ -2,7 +2,7 @@
 
 import * as path from 'path';
 import * as readTsConfig from 'get-tsconfig';
-// import { pathsToModuleNameMapper } from 'ts-jest';
+import { pathsToModuleNameMapper } from 'ts-jest';
 import { defaults } from 'jest-config';
 import type { JestConfigWithTsJest } from 'ts-jest';
 
@@ -141,8 +141,10 @@ const defaultConf = (
   options: IDefaultConfOptions = {},
   tsJestConfig: any = {},
 ): JestConfigWithTsJest => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  // const compilerOptions = require(`${dirname}/tsconfig.json`).compilerOptions;
+  const tsConfigFile = readTsConfig.getTsconfig(
+    path.join(dirname, 'tsconfig.json'),
+  );
+  const compilerOptions = tsConfigFile?.config.compilerOptions ?? {};
 
   // We need this to make sure that some esm modules are transformed
   // ref: https://github.com/nrwl/nx/issues/812
@@ -175,9 +177,10 @@ const defaultConf = (
       'source-map-support/register': 'identity-obj-proxy',
       // for ESM support
       '^(\\.{1,2}/.*)\\.js$': '$1',
-      // ...pathsToModuleNameMapper(compilerOptions.paths, {
-      //   prefix: dirname,
-      // }),
+      ...pathsToModuleNameMapper(compilerOptions.paths ?? {}, {
+        prefix: `${dirname}/`,
+        useESM: true,
+      }),
     },
     errorOnDeprecated: true,
     extensionsToTreatAsEsm: ['.ts'],

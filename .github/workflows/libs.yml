@@ -16,7 +16,7 @@ on:
 
 env:
   PROJECT_ID: libs
-  NODE_VERSION: 20
+  NODE_VERSION: 24
   # other
   GITHUB_TOKEN: ${{ secrets.READ_PACKAGE_TOKEN }}
   NODE_ENV: 'pipeline'
