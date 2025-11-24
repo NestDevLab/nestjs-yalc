@@ -69,25 +69,41 @@ for (const workspace of packages) {
     workspace === '.' ? pkgFolder : path.relative(cwd, pkgDir);
   const distDir = path.join(distRoot, relativeDir);
   if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
+  const srcDir = path.join(pkgDir, 'src');
 
   const compiledIndex = path.join(distDir, 'src', 'index.js');
+  const compiledDts = path.join(distDir, 'src', 'index.d.ts');
+  let compiledIndexExists = fs.existsSync(compiledIndex);
+  let compiledDtsExists = fs.existsSync(compiledDts);
+
+  // Ensure source output exists for packages that only ship declaration files.
+  if (!compiledIndexExists && !compiledDtsExists && fs.existsSync(srcDir)) {
+    fs.cpSync(srcDir, path.join(distDir, 'src'), { recursive: true });
+    compiledIndexExists = fs.existsSync(compiledIndex);
+    compiledDtsExists = fs.existsSync(compiledDts);
+  }
   const main =
-    pkg.main && pkg.main !== ''
-      ? toJsPath(pkg.main)
-      : fs.existsSync(compiledIndex)
-        ? './src/index.js'
+    compiledIndexExists
+      ? './src/index.js'
+      : pkg.main && pkg.main !== '' && !compiledDtsExists
+        ? toJsPath(pkg.main)
         : undefined;
-  const types = pkg.types
-    ? toDtsPath(pkg.types)
-    : pkg.typings
-      ? toDtsPath(pkg.typings)
-      : fs.existsSync(path.join(distDir, 'src', 'index.d.ts'))
-        ? './src/index.d.ts'
+  const types = compiledDtsExists
+    ? './src/index.d.ts'
+    : pkg.types
+      ? toDtsPath(pkg.types)
+      : pkg.typings
+        ? toDtsPath(pkg.typings)
         : undefined;
 
   const exportsField =
     pkg.exports !== undefined
-      ? normalizeExportTargets(pkg.exports)
+      ? normalizeExportTargets(pkg.exports, (value) => {
+          if (!compiledIndexExists && !compiledDtsExists) return value;
+          if (value.startsWith('./dist/src/')) return value.replace('./dist/src/', './src/');
+          if (value.startsWith('./dist/')) return value.replace('./dist/', './src/');
+          return value;
+        })
       : {
           '.': main,
           './*': './src/*',
@@ -114,6 +130,9 @@ for (const workspace of packages) {
     ...(pkg.dependencies ?? {}),
     tslib: tslibVersion,
   };
+
+  // Avoid shipping dev-time scripts (postinstall, etc.) in built artefacts.
+  delete distPkg.scripts;
 
   const distPkgPath = path.join(distDir, 'package.json');
   fs.writeFileSync(distPkgPath, `${JSON.stringify(distPkg, null, 2)}\n`, 'utf8');

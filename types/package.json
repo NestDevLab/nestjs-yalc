@@ -1,7 +1,7 @@
 {
   "name": "@types/nestjs-yalc",
   "type": "module",
-  "types": "./dist/src/index.d.ts",
+  "types": "./src/index.d.ts",
   "files": [
     "./src/index.d.ts",
     "./src/globals.d.ts",
@@ -10,15 +10,14 @@
     "dist"
   ],
   "exports": {
-    ".": "./dist/src/index.d.ts",
-    "./*.d.js": "./dist/src/*.d.ts",
-    "./*.js": "./dist/src/*.js",
-    "./*": "./dist/src/*"
+    ".": "./src/index.d.ts",
+    "./*.d.js": "./src/*.d.ts",
+    "./*.js": "./src/*.js",
+    "./*": "./src/*"
   },
   "version": "1.0.0",
   "description": "Type definitions for nestjs yalc",
   "author": "Drassil",
-  "main": "./dist/src/index.js",
   "dependencies": {
     "tslib": "^2.6.3"
   }
