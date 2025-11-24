@@ -192,6 +192,9 @@ describe('crudRestControllerFactory', () => {
     const service = {
       getEntityListExtended: jest.fn().mockResolvedValue(['ok']),
       getEntity: jest.fn().mockResolvedValue({ id: '1', name: 'entity' }),
+      createEntity: jest.fn(),
+      updateEntity: jest.fn(),
+      deleteEntity: jest.fn(),
     } as unknown as GenericService<TestEntity>;
 
     const decorators = [
@@ -224,5 +227,40 @@ describe('crudRestControllerFactory', () => {
     );
     expect(item).toBeInstanceOf(TestDto);
     expect(item.name).toBe('entity');
+  });
+
+  it('should map create, update and delete to GenericService write methods', async () => {
+    const service = {
+      getEntityListExtended: jest.fn(),
+      getEntity: jest.fn(),
+      createEntity: jest.fn().mockResolvedValue({ id: '1', name: 'created' }),
+      updateEntity: jest.fn().mockResolvedValue({
+        id: '1',
+        name: 'updated',
+      }),
+      deleteEntity: jest.fn().mockResolvedValue(true),
+    } as unknown as GenericService<TestEntity>;
+
+    const Controller = crudRestControllerFactory<TestEntity>({
+      entityModel: TestEntity,
+      dto: TestDto,
+    });
+
+    const controller = new Controller(service);
+
+    const created = await controller.create({ name: 'created' } as any);
+    expect(service.createEntity).toHaveBeenCalledWith({ name: 'created' });
+    expect(created).toBeDefined();
+
+    const updated = await controller.update('1', { name: 'updated' } as any);
+    expect(service.updateEntity).toHaveBeenCalledWith(
+      { id: '1' } as any,
+      { name: 'updated' } as any,
+    );
+    expect(updated).toBeDefined();
+
+    const removed = await controller.remove('1');
+    expect(service.deleteEntity).toHaveBeenCalledWith({ id: '1' } as any);
+    expect(removed).toEqual({ deleted: true });
   });
 });

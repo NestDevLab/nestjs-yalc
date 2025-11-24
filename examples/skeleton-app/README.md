@@ -1,73 +1,79 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+# Skeleton App (SQLite + NestJS-YALC)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This example app shows how to wire **NestJS-YALC** building blocks into a small SQLite-backed service. It is designed to be a clean starting point that you can copy or extend to bootstrap your own app.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- **CRUD-Gen REST**
+  - `UsersController` generated via `crudRestControllerFactory`:
+    - `GET /users` — paginated list (with `pageData`).
+    - `GET /users/:guid` — get by id.
+    - `POST /users` — create user.
+    - `PUT /users/:guid` — update user.
+    - `DELETE /users/:guid` — delete user.
+  - Backed by `SkeletonModule.register('default')` entities/services (`SkeletonUser`, `SkeletonPhone`).
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **CRUD-Gen GraphQL**
+  - Auto-generated resolvers from `examples/skeleton-module`:
+    - `SkeletonModule_createSkeletonUser`, `SkeletonModule_updateSkeletonUser`, `SkeletonModule_deleteSkeletonUser`.
+    - `SkeletonModule_getSkeletonUserGrid` with filtering and pagination.
+  - Join example: `SkeletonUserType.SkeletonPhone` resolved via dataloader.
 
-## Installation
+- **EventManager + Errors**
+  - `UsersErrorsController` demonstrates HTTP-aware errors via `YalcEventService`:
+    - `GET /users/errors/bad-request` → `errorBadRequest` (400).
+    - `GET /users/errors/not-found` → `errorNotFound` (404).
+  - Errors are logged with structured payloads and safe HTTP responses.
 
-```bash
-$ npm install
-```
+- **Logger**
+  - `UsersLoggingController` injects the event logger (`EVENT_LOGGER`) as an `ImprovedLoggerService` and logs a structured message:
+    - `GET /users-logging`.
 
-## Running the app
+- **ApiStrategy (HTTP)**
+  - `UsersProxyService` + `UsersProxyController` use `NestHttpCallStrategy`:
+    - Provider: `NestHttpCallStrategyProvider('USERS_HTTP_STRATEGY', { baseUrl: '' })`.
+    - Endpoint: `GET /users-proxy` (calls `/users` through the strategy).
+  - In e2e tests, the underlying `HttpService` is mocked to loop back into the Nest HTTP server (no real HTTP).
 
-```bash
-# development
-$ npm run start
+- **Validation + Field Middleware**
+  - DTOs in `apps/skeleton-app/src/users/users.dto.ts` use:
+    - `@StringFormatMatchValidation` with `StringFormatEnum.ALPHA` for names.
+    - `@IsEmail`, `@MinLength` for email/password.
+    - `@DateValidation` example for timestamps.
+  - `UsersValidationController`:
+    - `POST /users-validation` — validates `CreateUserDto` with a `ValidationPipe` and creates a user via `GenericService`.
 
-# watch mode
-$ npm run start:dev
+## Structure
 
-# production mode
-$ npm run start:prod
-```
+- `apps/skeleton-app/src/app.module.ts`
+  - GraphQLModule (Apollo) with `autoSchemaFile`.
+  - TypeORM SQLite in-memory DB (`SkeletonUser`, `SkeletonPhone`).
+  - Skeleton GraphQL module: `SkeletonModule.register('default')`.
+  - `UsersModule` with REST controllers and strategy wiring.
 
-## Test
+- `apps/skeleton-app/src/users`
+  - `users.rest.controller.ts` — REST CRUD via factory.
+  - `users.errors.controller.ts` — EventManager + HTTP errors.
+  - `users.proxy.service.ts` / `users.proxy.controller.ts` — ApiStrategy example.
+  - `users.logging.controller.ts` — logger example.
+  - `users.validation.controller.ts` + `users.dto.ts` — DTO + validation + field-middleware.
+  - `users.module.ts` — wires SkeletonModule, HttpModule, CLS, EventModule.
 
-```bash
-# unit tests
-$ npm run test
+## Running tests
 
-# e2e tests
-$ npm run test:e2e
+From the workspace root (`workspaces/nestjs-yalc`):
 
-# test coverage
-$ npm run test:cov
-```
+- Full checks (lint + build + unit + e2e):
+  - `npm run ci:checks`
+- Only e2e for this app:
+  - `npm run test:e2e --prefix examples/skeleton-app`
 
-## Support
+## Using this as a starting point
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- Copy `examples/skeleton-app` into your project, or use it as a template.
+- Replace `SkeletonUser`/`SkeletonPhone` with your own entities and DTOs, keeping:
+  - CRUD-Gen wiring (service + resolver + controller factory).
+  - EventManager and logger setup if you want consistent logging/error handling.
+  - ApiStrategy wiring if you need HTTP or local-call strategies.
 
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+The goal is to keep this app small, coherent, and easy to extend or clone, not a dumping ground for experiments. Each controller in `src/users` demonstrates a specific library feature in isolation.***

@@ -22,6 +22,9 @@ This guide shows how to structure a Nest monorepo that uses `nestjs-yalc` to shi
 - `deps/nestjs-yalc/` — vendored `nestjs-yalc` sources; consumed as `file:` dependencies to pin versions and avoid network fetches.
 - `utils/` — CI/build/test helpers (scripts, tsconfig references).
 - Root configs — `nest-cli.json` (project map), `tsconfig*.json`, `webpack.config.cjs`, `jest.config.ts`.
+- `examples/` — optional reference apps/modules. In this repo:
+  - `examples/skeleton-module` is a GraphQL-only module showing CRUD-Gen patterns in isolation.
+  - `examples/skeleton-app` is a small, in-memory SQLite app that wires `SkeletonModule` into REST + GraphQL, EventManager, Logger, ApiStrategy and validation; you can copy/extend it as a clean starting point for your own services.
 
 ## Dependency wiring
 - `package.json`: reference `@nestjs-yalc/*` with `file:deps/nestjs-yalc/...` to lock the toolchain.

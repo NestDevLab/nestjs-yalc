@@ -21,5 +21,5 @@ export const skeletonPhoneProvidersFactory = (dbConnection: string) =>
       prefix: 'SkeletonModule_',
     },
     service: { dbConnection },
-    dataloader: { databaseKey: 'phoneNumber' },
+    dataloader: { databaseKey: 'phoneNumber', entityModel: SkeletonPhoneType },
   });

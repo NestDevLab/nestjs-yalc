@@ -4,6 +4,7 @@ import { Test } from '@nestjs/testing';
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { HttpService } from '@nestjs/axios';
 
 describe('Crud-gen REST (SQLite) e2e', () => {
   let app: INestApplication;
@@ -16,6 +17,24 @@ describe('Crud-gen REST (SQLite) e2e', () => {
 
     app = moduleRef.createNestApplication();
     await app.init();
+
+     const httpService = app.get(HttpService);
+     jest.spyOn(httpService.axiosRef, 'request').mockImplementation(
+       async (config: any) => {
+         // Proxy the call to the in-app /users endpoint to avoid real HTTP
+         const res = await request(app.getHttpServer())
+           .get(config.url as string)
+           .set(config.headers ?? {});
+
+         return {
+           data: res.body,
+           status: res.status,
+           statusText: res.statusText,
+           headers: res.headers,
+           request: {},
+         };
+       },
+     );
   });
 
   afterAll(async () => {
@@ -70,5 +89,63 @@ describe('Crud-gen REST (SQLite) e2e', () => {
 
   it('deletes a user', async () => {
     await request(app.getHttpServer()).delete(`/users/${createdGuid}`).expect(200);
+  });
+
+  it('returns a 400 error via YalcEventService', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/users/errors/bad-request')
+      .expect(400);
+
+    expect(res.body.statusCode).toBe(400);
+  });
+
+  it('returns a 404 error via YalcEventService', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/users/errors/not-found')
+      .expect(404);
+
+    expect(res.body.statusCode).toBe(404);
+  });
+
+  it('calls users list via NestHttpCallStrategy proxy', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/users-proxy')
+      .expect(200);
+
+    expect(Array.isArray(res.body.list ?? res.body)).toBe(true);
+  });
+
+  it('validates create payload via users-validation controller', async () => {
+    const valid = await request(app.getHttpServer())
+      .post('/users-validation')
+      .send({
+        firstName: 'Valid',
+        lastName: 'User',
+        email: 'valid.user@example.com',
+        password: 'StrongP@ss1',
+      })
+      .expect(201);
+
+    expect(valid.body.guid).toBeDefined();
+  });
+
+  it('rejects invalid payload via users-validation controller', async () => {
+    await request(app.getHttpServer())
+      .post('/users-validation')
+      .send({
+        firstName: '123',
+        lastName: 'User',
+        email: 'not-an-email',
+        password: 'short',
+      })
+      .expect(400);
+  });
+
+  it('uses the improved logger via users-logging controller', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/users-logging')
+      .expect(200);
+
+    expect(res.body).toEqual({ ok: true });
   });
 });

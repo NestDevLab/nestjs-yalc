@@ -144,7 +144,12 @@ That's it! This is the bare minimum code to create a full featured GraphQL CRUD 
 
 Please refer to the documentation on how to use NestJS-Yalc CrudGen library to learn how to configure the query and mutation parameters properly.
 
-**NOTE:** You can use our library based on **graphq-sofa** in order to expose RestAPI endpoints based on the queries and mutations generated above.
+**NOTE:** You can use our library based on **graphq-sofa** in order to expose RestAPI endpoints based on the queries and mutations generated above, or you can combine GraphQL and REST the way the SQLite **skeleton app** does (see `examples/skeleton-app`), using:
+
+- `CrudGenDependencyFactory` for resolvers/services/dataloaders,
+- `crudRestControllerFactory` for REST controllers on top of the same `GenericService`,
+- EventManager + DefaultError for consistent error handling,
+- ApiStrategy for HTTP/local calls between services.
 
 However, this is a very basic and non real-world example just to show you that the system is able to generate everything on his
 own with just a TypeORM entity.
@@ -367,7 +372,7 @@ In the example above we've achieved the following:
 There are many other features available NestJS-Yalc/crud-gen, including JSON field handling, middlewares, default values and many other. Please, refer
 to the documentation of the `@ModelField` and `@ModelObject` decorator to know more.
 
-As last step, we have to define our DTO and the entity within the `CrudGenDependencyFactory`, hence the `skeleton-user.resolver.ts` will look like this:
+As last step, we have to define our DTO and the entity within the `CrudGenDependencyFactory`, hence the `skeleton-user.resolver.ts` will look like this (see also `examples/skeleton-module` and the SQLite skeleton app in `examples/skeleton-app` for a complete, runnable version):
 
 ```typescript
 export const skeletonUserProvidersFactory = (dbConnection: string) =>

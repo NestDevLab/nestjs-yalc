@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { GraphQLModule } from '@nestjs/graphql';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SkeletonModule } from '@nestjs-yalc/skeleton-module';
 import { SkeletonPhone } from '@nestjs-yalc/skeleton-module/src/skeleton-phone.entity';
@@ -16,7 +15,6 @@ import { UsersModule } from './users/users.module';
       autoSchemaFile: true,
       path: '/graphql',
     }),
-    EventEmitterModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: ':memory:',

@@ -72,6 +72,56 @@ describe('Crud-gen GraphQL (SQLite) e2e', () => {
     expect(grid.pageData.count).toBeGreaterThanOrEqual(1);
   });
 
+  it('resolves user phones via GraphQL join', async () => {
+    // create a user with a phone via REST to keep it simple
+    const restUserGuid = randomUUID();
+    await request(app.getHttpServer())
+      .post('/users')
+      .send({
+        guid: restUserGuid,
+        firstName: 'Join',
+        lastName: 'User',
+        email: `join.user.${restUserGuid}@example.com`,
+        password: 'P@ssw0rd!',
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/users')
+      .send({
+        guid: randomUUID(),
+        firstName: 'Join',
+        lastName: 'PhoneUser',
+        email: `join.phone.${restUserGuid}@example.com`,
+        password: 'P@ssw0rd!',
+      })
+      .expect(201);
+
+    const res = await request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `
+          query {
+            SkeletonModule_getSkeletonUserGrid(firstName: "Join") {
+              nodes {
+                guid
+                email
+                SkeletonPhone {
+                  nodes { phoneNumber }
+                  pageData { count }
+                }
+              }
+            }
+          }
+        `,
+      })
+      .expect(200);
+
+    expect(res.body.errors).toBeUndefined();
+    const grid = res.body.data.SkeletonModule_getSkeletonUserGrid;
+    expect(grid).toBeDefined();
+  });
+
   it('updates and deletes the user via GraphQL', async () => {
     const updateRes = await request(app.getHttpServer())
       .post('/graphql')

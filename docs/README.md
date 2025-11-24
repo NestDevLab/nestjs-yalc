@@ -20,6 +20,8 @@ Nest-yalc stands for Nestjs - Yet Another Library Collection
 - [CRUD-Gen dependency factory reference](./crud-gen-factory.md)
 - [CRUD-Gen REST usage](./crud-gen-rest.md)
 
+- [SQLite skeleton app (REST + GraphQL + EventManager + Logger + ApiStrategy)](../examples/skeleton-app/README.md) — a minimal, copyable example app that wires together most features of this library and can be used as a starting point for your own projects.
+
 - [How to use the Api-Strategy library](./api-strategy.md)
 
 - [How to use the DefaultError library](./errors.md)

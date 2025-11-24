@@ -16,7 +16,18 @@ GraphQL is the primary focus, but CRUD-Gen includes REST helpers for pagination/
 - Apply `CGQueryArgs` to controller methods to receive mapped `CrudGenFindManyOptions`.
 - Pair with your service (e.g., a `GenericService` created via `CrudGenDependencyFactory`) and return `PaginatedResultDto`.
 - Swagger: decorate with `ApiOkResponsePaginated(MyDto)` to document the paginated shape.
-- If you want a ready-made REST controller, use `crudRestControllerFactory({ entityModel, dto?, path?, decorators?, query? })`, then register the returned class inside your module `controllers`. It wires list + getById using the `GenericService` and the same sorting/pagination helpers.
+- If you want a ready-made REST controller, use:
+  - `crudRestControllerFactory({ entityModel, dto?, path?, decorators?, query?, idField?, readonly?, mutations? })`
+  - register the returned class inside your module `controllers`.
+  - By default it wires **full CRUD** using `GenericService`:
+    - `GET /path` → `getEntityListExtended` (with pagination helpers)
+    - `GET /path/:id` → `getEntity`
+    - `POST /path` → `createEntity`
+    - `PUT /path/:id` → `updateEntity`
+    - `DELETE /path/:id` → `deleteEntity` (returns `{ deleted: boolean }`)
+  - Set `readonly: true` to expose only the read endpoints (`GET` list + `GET :id`).
+  - Use `mutations?: { create?: { disabled?: boolean; decorators?: IDecoratorType[] }; update?: { ... }; delete?: { ... } }` to disable individual write endpoints or attach guards/interceptors specifically to them.
+  - See `examples/skeleton-app` for a minimal REST module (`UsersModule`) that wires `SkeletonModule.register('default')`, the REST factory, EventManager, ApiStrategy, and validation into a clean starting point.
 
 ## Notes
 - Filters via REST are not fully implemented yet (placeholders exist in the DTO factories); prefer GraphQL for advanced filters.
