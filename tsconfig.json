@@ -69,7 +69,9 @@
       "@nestjs-yalc/kafka": ["./kafka/src/index.ts"],
       "@nestjs-yalc/kafka/*": ["./kafka/src/*"],
       "@nestjs-yalc/skeleton-module": ["./examples/skeleton-module/src/index.ts"],
-      "@nestjs-yalc/skeleton-module/*": ["./examples/skeleton-module/src/*"]
+      "@nestjs-yalc/skeleton-module/*": ["./examples/skeleton-module/src/*"],
+      "nestjs-yalc": ["./types/src/index.d.ts"],
+      "nestjs-yalc/*": ["./types/src/*"]
     },
     "types": ["node", "fast-redact"],
     "typeRoots": [

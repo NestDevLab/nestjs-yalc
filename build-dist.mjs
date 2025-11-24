@@ -27,21 +27,25 @@ const toDtsPath = (value) => {
   return normalizeRelPath(value.replace(/\.ts$/i, '.d.ts'));
 };
 
-const normalizeExportTargets = (target) => {
+const normalizeExportTargets = (target, mapPath) => {
   if (typeof target === 'string') {
-    if (target.endsWith('.d.ts')) return normalizeRelPath(target);
-    if (target.endsWith('.ts')) return toJsPath(target);
-    return normalizeRelPath(target);
+    let value = normalizeRelPath(target);
+    if (value.endsWith('.d.ts')) {
+      // keep .d.ts as-is
+    } else if (value.endsWith('.ts')) {
+      value = toJsPath(value);
+    }
+    return mapPath ? mapPath(value) : value;
   }
 
   if (Array.isArray(target)) {
-    return target.map((value) => normalizeExportTargets(value));
+    return target.map((value) => normalizeExportTargets(value, mapPath));
   }
 
   if (target && typeof target === 'object') {
     const normalized = {};
     for (const [key, value] of Object.entries(target)) {
-      normalized[key] = normalizeExportTargets(value);
+      normalized[key] = normalizeExportTargets(value, mapPath);
     }
     return normalized;
   }
@@ -98,6 +102,7 @@ for (const workspace of packages) {
     types,
     typings: undefined,
     exports: exportsField,
+    files: Array.from(new Set([...(pkg.files ?? []), 'src'])),
   };
 
   const tslibVersion =

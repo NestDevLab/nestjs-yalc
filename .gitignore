@@ -2,3 +2,4 @@ node_modules
 docs/compodoc/jestcoverage
 var/*
 !var/asl-test.cjs
+dist

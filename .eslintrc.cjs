@@ -20,6 +20,7 @@ module.exports = {
     '**/__tests__',
     '**/__mocks__',
     '**/jest.config.ts',
+    '**/dist/**',
     'var',
   ],
   overrides: [

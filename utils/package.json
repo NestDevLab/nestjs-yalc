@@ -3,15 +3,22 @@
   "version": "1.0.0",
   "type": "module",
   "description": "",
-  "main": "src/index.ts",
+  "main": "./dist/src/index.js",
   "exports": {
-    "./*.js": "./src/*.ts",
-    "./*": "./src/*",
-    ".": "./src/index.ts"
+    "./*.js": "./dist/src/*.js",
+    "./*": "./dist/src/*",
+    ".": "./dist/src/index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "types": "./dist/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "tslib": "^2.6.3"
+  }
 }
