@@ -73,11 +73,11 @@
       "nestjs-yalc": ["./types/src/index.d.ts"],
       "nestjs-yalc/*": ["./types/src/*"]
     },
-    "types": ["node", "fast-redact"],
-    "typeRoots": [
-      "./node_modules/@types",
-      "./types",
-      "./types-extends"
+    "types": [
+      "node",
+      "fast-redact",
+      "@types/nestjs-yalc",
+      "@types/nestjs-yalc-extends"
     ]
   },
   "include": ["./**/src/**/*.ts"],
