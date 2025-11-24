@@ -70,3 +70,7 @@ the nestjs-yalc directory structure is flat to let it be integrated in other pro
 - examples/ ->
 - docs/ -> used for the the github pages markdown
 - [other_libraries]/
+
+### Repo-specific utilities
+- `var/asl-test.cjs`: manual AsyncLocalStorage sanity check (Fastify + ALS). Not used by builds/tests; run manually if you need to confirm ALS behaviour across injected requests.
+- `build-dist.mjs`: local pack script that writes `dist/package.json` for each package with exports pointing at compiled output. Source `package.json` files stay untouched; the dist `package.json` is generated after `npm run build`. This is a repo-specific helper (not standard npm) to keep local file-based consumption aligned with the compiled layout.
