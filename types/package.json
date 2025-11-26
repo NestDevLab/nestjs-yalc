@@ -1,19 +1,18 @@
 {
   "name": "@types/nestjs-yalc",
   "type": "module",
-  "types": "./src/index.d.ts",
+  "types": "./dist/src/index.d.ts",
   "files": [
-    "./src/index.d.ts",
-    "./src/globals.d.ts",
-    "./src/globals.enum.ts",
-    "./src/modules.d.ts",
-    "dist"
+    "./dist/src/index.d.ts",
+    "./dist/src/globals.d.ts",
+    "./dist/src/globals.enum.ts",
+    "./dist/src/modules.d.ts"
   ],
   "exports": {
-    ".": "./src/index.d.ts",
-    "./*.d.js": "./src/*.d.ts",
-    "./*.js": "./src/*.js",
-    "./*": "./src/*"
+    ".": "./dist/src/index.d.ts",
+    "./*.d.js": "./dist/src/*.d.ts",
+    "./*.js": "./dist/src/*.js",
+    "./*": "./dist/src/*"
   },
   "version": "1.0.0",
   "description": "Type definitions for nestjs yalc",

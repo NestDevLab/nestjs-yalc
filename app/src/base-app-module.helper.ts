@@ -24,7 +24,7 @@ import {
   getAppLoggerToken,
 } from './app-config.service.js';
 import { AppContextModule } from './app-context.module.js';
-import { NODE_ENV } from '@nestjs-yalc/types/global.enum.js';
+import { NODE_ENV } from './global.enum.js';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import Joi from 'joi';
 import { MODULE_OPTIONS_TOKEN } from '@nestjs/common/cache/cache.module-definition.js';
