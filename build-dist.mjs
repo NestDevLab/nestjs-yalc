@@ -13,7 +13,8 @@ const workspaces = Array.isArray(rootPkg.workspaces) ? rootPkg.workspaces : [];
 
 const normalizeRelPath = (value) => {
   const normalized = value.replace(/\\/g, '/');
-  if (normalized.startsWith('./') || normalized.startsWith('../')) return normalized;
+  if (normalized.startsWith('./') || normalized.startsWith('../'))
+    return normalized;
   return `./${normalized}`;
 };
 
@@ -82,26 +83,27 @@ for (const workspace of packages) {
     compiledIndexExists = fs.existsSync(compiledIndex);
     compiledDtsExists = fs.existsSync(compiledDts);
   }
-  const main =
-    compiledIndexExists
-      ? './src/index.js'
-      : pkg.main && pkg.main !== '' && !compiledDtsExists
-        ? toJsPath(pkg.main)
-        : undefined;
+  const main = compiledIndexExists
+    ? './src/index.js'
+    : pkg.main && pkg.main !== '' && !compiledDtsExists
+    ? toJsPath(pkg.main)
+    : undefined;
   const types = compiledDtsExists
     ? './src/index.d.ts'
     : pkg.types
-      ? toDtsPath(pkg.types)
-      : pkg.typings
-        ? toDtsPath(pkg.typings)
-        : undefined;
+    ? toDtsPath(pkg.types)
+    : pkg.typings
+    ? toDtsPath(pkg.typings)
+    : undefined;
 
   const exportsField =
     pkg.exports !== undefined
       ? normalizeExportTargets(pkg.exports, (value) => {
           if (!compiledIndexExists && !compiledDtsExists) return value;
-          if (value.startsWith('./dist/src/')) return value.replace('./dist/src/', './src/');
-          if (value.startsWith('./dist/')) return value.replace('./dist/', './src/');
+          if (value.startsWith('./dist/src/'))
+            return value.replace('./dist/src/', './src/');
+          if (value.startsWith('./dist/'))
+            return value.replace('./dist/', './src/');
           return value;
         })
       : {
@@ -135,5 +137,9 @@ for (const workspace of packages) {
   delete distPkg.scripts;
 
   const distPkgPath = path.join(distDir, 'package.json');
-  fs.writeFileSync(distPkgPath, `${JSON.stringify(distPkg, null, 2)}\n`, 'utf8');
+  fs.writeFileSync(
+    distPkgPath,
+    `${JSON.stringify(distPkg, null, 2)}\n`,
+    'utf8',
+  );
 }
