@@ -1,9 +1,8 @@
 import { envToArray } from '@nestjs-yalc/utils/env.helper.js';
 import { LogLevel } from '@nestjs/common';
 import fastRedact from 'fast-redact';
-import lodash from 'lodash';
+import { isEmpty } from 'lodash-es';
 import { LOG_LEVEL_ALL, LoggerDefContext } from './logger.enum.js';
-const { isEmpty } = lodash;
 
 export function maskDataInObject(data?: any, paths?: string[], trace?: any) {
   if (typeof data === 'string') data = { message: data };

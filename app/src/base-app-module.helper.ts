@@ -32,7 +32,7 @@ import { EventModule } from '@nestjs-yalc/event-manager/index.js';
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
 import { YalcClsModule } from './cls.module.js';
 import { IYalcControllerStaticInterface } from './yalc-controller.interface.js';
-import _ from 'lodash';
+import * as _ from 'lodash-es';
 import { IGlobalOptions } from './app-bootstrap-base.helper.js';
 import { getEnvLoggerLevels } from '@nestjs-yalc/logger/logger.helper.js';
 

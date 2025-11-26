@@ -40,7 +40,7 @@ export const decryptSsmVariable = async (
 
   const ssm = new SSMClient();
   try {
-    const dataPromise = ssm.send(
+    const dataPromise: Promise<GetParameterCommandOutput> = ssm.send(
       new GetParameterCommand({
         Name: toDecrypt,
         WithDecryption: true,

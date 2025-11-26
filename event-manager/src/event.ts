@@ -15,7 +15,7 @@ import { getYalcGlobalEventEmitter } from './global-emitter.js';
 import { AppLoggerFactory } from '@nestjs-yalc/logger/logger.factory.js';
 import { isClass } from '@nestjs-yalc/utils/class.helper.js';
 import { deepMergeWithoutArrayConcat } from '@nestjs-yalc/utils/object.helper.js';
-import _ from 'lodash';
+import * as _ from 'lodash-es';
 import { globalPromiseTracker } from '@nestjs-yalc/utils/promise.helper.js';
 
 interface IEventEmitterOptions<
@@ -53,7 +53,7 @@ export interface IEventPayload {
    * This is used to log the error information.
    * NOTE: eventName and config are redundant here.
    */
-  errorInfo?: IErrorPayload;
+  errorInfo?: IErrorPayload | null;
 }
 
 export interface IEventOptions<

@@ -7,10 +7,15 @@ import type {
   IImprovedLoggerOptions,
   ImprovedLoggerService,
 } from './logger-abstract.service.js';
-import _ from 'lodash';
+import * as _ from 'lodash-es';
 import { getEnvLoggerLevels } from './logger.helper.js';
 
-export const AppLoggerFactory = _.memoize(
+export const AppLoggerFactory: (
+  context: string,
+  loggerLevels?: LogLevel[],
+  loggerType?: string,
+  options?: IImprovedLoggerOptions,
+) => ImprovedLoggerService = _.memoize(
   (
     context: string,
     loggerLevels: LogLevel[] = LOG_LEVEL_DEFAULT,
@@ -56,6 +61,10 @@ export const AppLoggerFactory = _.memoize(
 
     return logger;
   },
-  (context, loggerLevels, loggerType, options) =>
-    `${context}-${loggerLevels?.join('-')}-${loggerType}-${options}`,
+  (
+    context: string,
+    loggerLevels: LogLevel[] | undefined,
+    loggerType: string | undefined,
+    options: IImprovedLoggerOptions | undefined,
+  ): string => `${context}-${loggerLevels?.join('-')}-${loggerType}-${options}`,
 );

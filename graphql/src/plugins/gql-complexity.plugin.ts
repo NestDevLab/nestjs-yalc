@@ -1,13 +1,13 @@
-import { Plugin } from '@nestjs/apollo';
+import { Injectable } from '@nestjs/common';
 import {
   GraphQLRequestListener,
   ApolloServerPlugin,
 } from 'apollo-server-plugin-base';
 import { GqlComplexityHelper } from './gql-complexity.helper.js';
 
-@Plugin()
+@Injectable()
 export class GqlComplexityPlugin implements ApolloServerPlugin {
-  async requestDidStart(): Promise<GraphQLRequestListener> {
+  async requestDidStart(): Promise<GraphQLRequestListener<any>> {
     return {
       async didResolveOperation({
         document,

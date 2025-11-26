@@ -1,12 +1,11 @@
 import { ClassType } from '@nestjs-yalc/types/globals.d.js';
 import { DynamicModule, Type } from '@nestjs/common';
 import { StandaloneAppBootstrap } from './app-bootstrap-standalone.helper.js';
-import lodash from 'lodash';
+import { curry } from 'lodash-es';
 import {
   BaseAppBootstrap,
   IGlobalOptions,
 } from './app-bootstrap-base.helper.js';
-const { curry } = lodash;
 
 export function isDynamicModule(module: any): module is DynamicModule {
   return module.module !== undefined;
