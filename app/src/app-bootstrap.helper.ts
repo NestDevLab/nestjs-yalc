@@ -237,7 +237,7 @@ export class AppBootstrap<
     /**
      * Hot reload @see https://docs.nestjs.com/recipes/hot-reload#hot-module-replacement-1
      */
-    const hmr = (module as any).hot;
+    const hmr = typeof module !== 'undefined' ? (module as any).hot : undefined;
     if (hmr) {
       // eslint-disable-next-line no-console
       console.debug('Hot reload enabled. Reloading...');
