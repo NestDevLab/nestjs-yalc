@@ -13,15 +13,26 @@ import { filterHeaders } from '../header-whitelist.helper.js';
 import { AppConfigService } from '@nestjs-yalc/app/app-config.service.js';
 import { MAIN_APP_CONFIG_SERVICE } from '@nestjs-yalc/app/def.const.js';
 
+export type NestLocalCallStrategyOptions = IHttpCallStrategyOptions & {
+  internalRequestHeader?: string;
+  internalRequestToken?: string;
+};
+
 export class NestLocalCallStrategy extends HttpAbstractStrategy {
+  private readonly internalHeader: string;
+  private readonly internalToken?: string;
+
   constructor(
     protected readonly adapterHost: HttpAdapterHost,
     protected readonly clsService: YalcGlobalClsService,
     protected readonly configService: AppConfigService,
     private baseUrl = '',
-    protected readonly options: IHttpCallStrategyOptions = {},
+    protected readonly options: NestLocalCallStrategyOptions = {},
   ) {
     super();
+    this.internalHeader = options.internalRequestHeader ?? 'x-internal-request-token';
+    this.internalToken =
+      options.internalRequestToken ?? (configService as any)?.values?.internalRequestToken;
   }
 
   async call<
@@ -33,14 +44,14 @@ export class NestLocalCallStrategy extends HttpAbstractStrategy {
     options?: HttpOptions<TOptData, TParams>,
   ): Promise<IHttpCallStrategyResponse<TResData>> {
     const instance: FastifyAdapter = this.adapterHost.httpAdapter.getInstance();
-    const clsHeaders = filterHeaders(
-      this.clsService.get('headers'),
-      this.options.headersWhitelist,
-    );
-    const headers = {
+    const clsHeaders = filterHeaders(this.clsService.get('headers'), this.options.headersWhitelist);
+    const headers: Record<string, any> = {
       ...clsHeaders,
-      ...options?.headers,
+      ...(options?.headers ?? {}),
     };
+    if (this.internalHeader && this.internalToken && !headers[this.internalHeader]) {
+      headers[this.internalHeader] = this.internalToken;
+    }
     /**
      * We need this to do a type check on the options and
      * implement the mapping from HttpOptions to InjectOptions;
@@ -97,6 +108,9 @@ export class NestLocalCallStrategy extends HttpAbstractStrategy {
 export interface NestLocalCallStrategyProviderOptions {
   baseUrl?: string;
   NestLocalStrategy?: ClassType<NestLocalCallStrategy>;
+  headersWhitelist?: string[];
+  internalRequestHeader?: string;
+  internalRequestToken?: string;
 }
 
 /**
@@ -123,6 +137,7 @@ export const NestLocalCallStrategyProvider = (
       clsService,
       configService,
       _options.baseUrl,
+      _options,
     );
   },
   inject: [HttpAdapterHost, YalcGlobalClsService, MAIN_APP_CONFIG_SERVICE],

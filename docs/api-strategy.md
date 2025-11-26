@@ -23,6 +23,7 @@ import {
   NestHttpCallStrategyProvider,
   NestLocalCallStrategyProvider,
   NestLocalEventStrategyProvider,
+  // Accept the same options, including headersWhitelist/internalRequestHeader/internalRequestToken
 } from '@nestjs-yalc/api-strategy';
 import { HttpModule } from '@nestjs/axios';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -36,9 +37,13 @@ import { Module } from '@nestjs/common';
   providers: [
     NestHttpCallStrategyProvider('HTTP_STRATEGY', {
       baseUrl: 'https://api.example.com',
+      internalRequestToken: process.env.INTERNAL_REQUEST_TOKEN,
+      internalRequestHeader: 'x-internal-request-token',
     }),
     NestLocalCallStrategyProvider('LOCAL_STRATEGY', {
       baseUrl: '/', // path prefix inside the same app
+      internalRequestToken: process.env.INTERNAL_REQUEST_TOKEN,
+      internalRequestHeader: 'x-internal-request-token',
     }),
     NestLocalEventStrategyProvider('EVENT_STRATEGY'),
   ],
@@ -48,13 +53,14 @@ export class ApiStrategyModule {}
 ```
 
 Provider options:
-- `NestHttpCallStrategyProvider({ baseUrl?, NestHttpStrategy? })`
+- `NestHttpCallStrategyProvider({ baseUrl?, headersWhitelist?, internalRequestHeader?, internalRequestToken?, NestHttpStrategy? })`
   - Injects `HttpService` and `YalcGlobalClsService`.
   - Respects CLS headers (filtered by `headersWhitelist` if provided).
   - Map query params via `options.parameters`.
-- `NestLocalCallStrategyProvider({ baseUrl?, NestLocalStrategy? })`
+- `NestLocalCallStrategyProvider({ baseUrl?, headersWhitelist?, internalRequestHeader?, internalRequestToken?, NestLocalStrategy? })`
   - Injects `HttpAdapterHost`, `YalcGlobalClsService`, `AppConfigService`.
   - Uses Fastify `inject`; respects CLS headers and `headersWhitelist`.
+  - Adds `internalRequestToken` header when provided (or from `AppConfigService.values.internalRequestToken`).
   - `shouldSkipJsonParse` can bypass `result.json()` when the body isn’t JSON.
 - `NestLocalEventStrategyProvider({ NestLocalStrategy? })`
   - Injects `EventEmitter2`, supports `emit` and `emitAsync`.

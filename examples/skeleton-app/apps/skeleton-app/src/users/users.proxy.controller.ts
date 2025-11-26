@@ -10,4 +10,10 @@ export class UsersProxyController {
     const res = await this.proxyService.fetchUsers();
     return res.data;
   }
+
+  @Get('phones')
+  async listPhones() {
+    const res = await this.proxyService.fetchPhones();
+    return res.data;
+  }
 }
