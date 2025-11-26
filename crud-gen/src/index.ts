@@ -30,6 +30,7 @@ export {
 } from './api-rest/crud-gen-rest.dto.js';
 export * from './api-rest/crud-gen-rest.interceptor.js';
 export * from './api-rest/crud-gen-rest.controller.factory.js';
+export * from './api-rest/odata-query.interface.js';
 
 export * from './typeorm/generic.repository.js';
 export * from './typeorm/generic.service.js';

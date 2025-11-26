@@ -9,6 +9,8 @@ import {
   Put,
   Delete,
   Body,
+  Query,
+  BadRequestException,
 } from '@nestjs/common';
 import type {
   CrudGenFindManyOptions,
@@ -24,6 +26,11 @@ import type { ClassType } from '@nestjs-yalc/types/globals.d.js';
 import { yalcPlainToInstance } from '../transformers.helpers.js';
 import { getProviderToken } from '../crud-gen.helpers.js';
 import type { IDecoratorType } from '@nestjs-yalc/interfaces';
+import {
+  parseODataQueryParams,
+  type ODataQueryParams,
+} from './odata-query.interface.js';
+import type { FindOptionsOrder } from 'typeorm';
 
 export interface CrudRestMutationOptions {
   disabled?: boolean;
@@ -58,6 +65,13 @@ export interface CrudRestControllerOptions<Entity extends Record<string, any>> {
    * Field used for `GET :id`. Defaults to `id`.
    */
   idField?: keyof Entity & string;
+  /**
+   * OData-like façade options.
+   * - allowedExpands: validate $expand values against this allowlist.
+   */
+  odata?: {
+    allowedExpands?: string[];
+  };
   decorators?: IDecoratorType[];
   /**
    * When true, only read endpoints are generated (GET list + GET :id).
@@ -104,9 +118,16 @@ export function crudRestControllerFactory<Entity extends Record<string, any>>(
       buildCrudGenRestSimpleMapperInterceptor(dto, true),
     )
     async list(
+      @Query() rawQuery: Record<string, unknown>,
       @CGQueryArgs(query) findOptions: CrudGenFindManyOptions<Entity>,
     ) {
-      return this.service.getEntityListExtended(findOptions, true);
+      const { options: mapped, withCount } = this.mapQuery(
+        rawQuery,
+        findOptions,
+      );
+      return withCount
+        ? this.service.getEntityListExtended(mapped, true)
+        : this.service.getEntityListExtended(mapped, false);
     }
 
     @Get(':id')
@@ -143,6 +164,85 @@ export function crudRestControllerFactory<Entity extends Record<string, any>>(
     async remove(id: string) {
       await this.service.deleteEntity({ [idField]: id } as any);
       return { deleted: true };
+    }
+
+    mapQuery(
+      rawQuery: Record<string, unknown>,
+      legacy: CrudGenFindManyOptions<Entity>,
+    ): { options: CrudGenFindManyOptions<Entity>; withCount: boolean } {
+      if (this.hasODataParams(rawQuery)) {
+        const params = parseODataQueryParams(rawQuery);
+        return {
+          options: this.mapODataToFindOptions(params),
+          withCount: params.count ?? true,
+        };
+      }
+      return { options: legacy, withCount: true };
+    }
+
+    hasODataParams(rawQuery: Record<string, unknown>): boolean {
+      const keys = [
+        '$select',
+        '$filter',
+        '$orderby',
+        '$top',
+        '$skip',
+        '$count',
+        '$expand',
+      ];
+      return keys.some((key) => rawQuery[key] !== undefined);
+    }
+
+    mapODataToFindOptions(
+      params: ODataQueryParams,
+    ): CrudGenFindManyOptions<Entity> {
+      const findOptions: CrudGenFindManyOptions<Entity> = {};
+
+      if (params.select?.length) {
+        findOptions.select = params.select as Array<keyof Entity & string>;
+      }
+
+      if (params.orderBy?.length) {
+        const order: FindOptionsOrder<Entity> = {};
+        for (const { field, direction } of params.orderBy) {
+          order[field as keyof Entity] = direction.toUpperCase() as any;
+        }
+        findOptions.order = order;
+      }
+
+      if (typeof params.top === 'number') {
+        findOptions.take = params.top;
+      }
+
+      if (typeof params.skip === 'number') {
+        findOptions.skip = params.skip;
+      }
+
+      if (params.expand?.length) {
+        const allowed = options.odata?.allowedExpands;
+        if (allowed) {
+          const invalid = params.expand.filter(
+            (value) => !allowed.includes(value),
+          );
+          if (invalid.length) {
+            throw new BadRequestException(
+              `Unsupported $expand value(s): ${invalid.join(', ')}`,
+            );
+          }
+        }
+        findOptions.relations = params.expand as string[];
+      }
+
+      if (params.filter) {
+        findOptions.extra = {
+          ...(findOptions.extra as any),
+          odata: {
+            filter: params.filter,
+          },
+        } as any;
+      }
+
+      return findOptions;
     }
   }
 

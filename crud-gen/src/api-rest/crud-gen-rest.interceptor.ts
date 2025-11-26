@@ -22,10 +22,26 @@ export function crudGenRestPaginationInterceptorWorker<T>(
   startRow?: number,
   endRow?: number,
 ) {
-  return ([page, count]: [T, number]) => {
+  return (data: [T, number] | T) => {
+    if (
+      Array.isArray(data) &&
+      data.length === 2 &&
+      typeof data[1] === 'number'
+    ) {
+      const [page, count] = data as [T, number];
+      return {
+        list: page,
+        pageData: { count, startRow: startRow ?? 0, endRow: endRow ?? count },
+      };
+    }
+
+    const list = data as unknown as T[];
+    const count = Array.isArray(list) ? list.length : 0;
+    const start = startRow ?? 0;
+    const computedEnd = endRow ?? start + count;
     return {
-      list: page,
-      pageData: { count, startRow: startRow ?? 0, endRow: endRow ?? count },
+      list,
+      pageData: { count, startRow: start, endRow: computedEnd },
     };
   };
 }

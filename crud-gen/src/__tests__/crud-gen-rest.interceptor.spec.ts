@@ -213,7 +213,7 @@ describe('crudRestControllerFactory', () => {
 
     const controller = new Controller(service);
 
-    const listResult = await controller.list({} as any);
+    const listResult = await controller.list({} as any, {} as any);
     expect(service.getEntityListExtended).toHaveBeenCalledWith({}, true);
     expect(listResult).toEqual(['ok']);
 
@@ -262,5 +262,55 @@ describe('crudRestControllerFactory', () => {
     const removed = await controller.remove('1');
     expect(service.deleteEntity).toHaveBeenCalledWith({ id: '1' } as any);
     expect(removed).toEqual({ deleted: true });
+  });
+
+  it('maps OData query params and validates expand allowlist', async () => {
+    const service = {
+      getEntityListExtended: jest.fn().mockResolvedValue(['ok']),
+      getEntity: jest.fn(),
+      createEntity: jest.fn(),
+      updateEntity: jest.fn(),
+      deleteEntity: jest.fn(),
+    } as unknown as GenericService<TestEntity>;
+
+    const Controller = crudRestControllerFactory<TestEntity>({
+      entityModel: TestEntity,
+      dto: TestDto,
+      odata: { allowedExpands: ['relations'] },
+    });
+
+    const controller = new Controller(service);
+
+    const odataQuery = {
+      $select: 'id,name',
+      $orderby: 'name desc',
+      $top: '5',
+      $skip: '10',
+      $count: 'false',
+      $expand: 'relations',
+      $filter: 'name eq "John"',
+    } as any;
+
+    await controller.list(odataQuery, {} as any);
+
+    expect(service.getEntityListExtended).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: ['id', 'name'],
+        order: { name: 'DESC' },
+        take: 5,
+        skip: 10,
+        relations: ['relations'],
+        extra: expect.objectContaining({
+          odata: expect.objectContaining({
+            filter: 'name eq "John"',
+          }),
+        }),
+      }),
+      false,
+    );
+
+    await expect(
+      controller.list({ $expand: 'invalid' } as any, {} as any),
+    ).rejects.toThrow('Unsupported $expand');
   });
 });
