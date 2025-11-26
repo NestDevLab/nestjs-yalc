@@ -94,4 +94,71 @@ describe('NestHttpCallStrategy', () => {
     });
     expect(result).toBeDefined();
   });
+
+  it('should add internal request token header when provided', async () => {
+    const requestSpy = jest.fn().mockResolvedValue({ data: '{}' });
+    const axiosRef = createMock<AxiosInstance>({
+      request: requestSpy as any,
+    });
+    httpService = createMock<HttpService>({
+      axiosRef,
+    });
+
+    const instance = new NestHttpCallStrategy(
+      httpService,
+      clsService,
+      'http://localhost:3000',
+      {
+        internalRequestHeader: 'x-internal-token',
+        internalRequestToken: 'test-token-123',
+      },
+    );
+
+    await instance.call('/test', {
+      method: 'GET',
+    });
+
+    expect(requestSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'x-internal-token': 'test-token-123',
+        }),
+      }),
+    );
+  });
+
+  it('should not override existing internal request token header', async () => {
+    const requestSpy = jest.fn().mockResolvedValue({ data: '{}' });
+    const axiosRef = createMock<AxiosInstance>({
+      request: requestSpy as any,
+    });
+    httpService = createMock<HttpService>({
+      axiosRef,
+    });
+
+    const instance = new NestHttpCallStrategy(
+      httpService,
+      clsService,
+      'http://localhost:3000',
+      {
+        internalRequestHeader: 'x-internal-token',
+        internalRequestToken: 'test-token-123',
+      },
+    );
+
+    await instance.call('/test', {
+      method: 'GET',
+      headers: {
+        'x-internal-token': 'user-provided-token',
+      },
+    });
+
+    expect(requestSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'x-internal-token': 'user-provided-token',
+        }),
+      }),
+    );
+  });
 });

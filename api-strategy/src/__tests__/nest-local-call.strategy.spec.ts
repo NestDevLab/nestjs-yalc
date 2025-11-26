@@ -169,4 +169,95 @@ describe('NestLocalCallStrategy', () => {
 
     expect(result.data).toMatchObject({});
   });
+
+  it('should add internal request token header when provided', async () => {
+    const injectSpy = jest.fn().mockResolvedValue({
+      body: '{}',
+      json: () => ({}),
+    });
+    adapterHost = createMock<HttpAdapterHost>({
+      httpAdapter: {
+        getInstance: () =>
+          createMock<FastifyAdapter>({
+            inject: injectSpy as any,
+          }),
+      },
+    });
+
+    const configService = {
+      values: {
+        internalRequestToken: 'test-token-123',
+      },
+    };
+
+    const instance = new NestLocalCallStrategy(
+      adapterHost,
+      clsService,
+      // @ts-expect-error minimal config for test
+      configService,
+      '',
+      {
+        internalRequestHeader: 'x-internal-token',
+      },
+    );
+
+    await instance.call('/test', {
+      method: 'GET',
+    });
+
+    expect(injectSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'x-internal-token': 'test-token-123',
+        }),
+      }),
+    );
+  });
+
+  it('should not override existing internal request token header', async () => {
+    const injectSpy = jest.fn().mockResolvedValue({
+      body: '{}',
+      json: () => ({}),
+    });
+    adapterHost = createMock<HttpAdapterHost>({
+      httpAdapter: {
+        getInstance: () =>
+          createMock<FastifyAdapter>({
+            inject: injectSpy as any,
+          }),
+      },
+    });
+
+    const configService = {
+      values: {
+        internalRequestToken: 'test-token-123',
+      },
+    };
+
+    const instance = new NestLocalCallStrategy(
+      adapterHost,
+      clsService,
+      // @ts-expect-error minimal config for test
+      configService,
+      '',
+      {
+        internalRequestHeader: 'x-internal-token',
+      },
+    );
+
+    await instance.call('/test', {
+      method: 'GET',
+      headers: {
+        'x-internal-token': 'user-provided-token',
+      },
+    });
+
+    expect(injectSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'x-internal-token': 'user-provided-token',
+        }),
+      }),
+    );
+  });
 });
