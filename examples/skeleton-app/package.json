@@ -35,7 +35,7 @@
     "@nestjs-yalc/logger": "file:../../logger",
     "@nestjs-yalc/skeleton-module": "file:../skeleton-module",
     "@nestjs-yalc/utils": "file:../../utils",
-    "@nestjs/common": "^9.4.3",
+    "@nestjs/common": "^11.1.9",
     "@nestjs/core": "^9.4.3",
     "@nestjs/platform-express": "^9.4.3",
     "@types/nestjs-yalc": "file:../../types",
@@ -44,7 +44,7 @@
     "rxjs": "^7.8.0"
   },
   "devDependencies": {
-    "@nestjs/cli": "^9.5.0",
+    "@nestjs/cli": "^11.0.12",
     "@nestjs/schematics": "^9.0.4",
     "@nestjs/testing": "^9.4.3",
     "@types/express": "^4.17.16",
