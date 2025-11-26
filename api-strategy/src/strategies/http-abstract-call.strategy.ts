@@ -96,7 +96,7 @@ export interface IHttpCallStrategy extends IApiCallStrategy {
    * // POST request with typed request/response
    * interface CreateUserDto { name: string; email: string; }
    * interface UserResponse { id: number; name: string; email: string; }
-   * 
+   *
    * const response = await strategy.call<CreateUserDto, {}, UserResponse>('/users', {
    *   method: 'POST',
    *   data: { name: 'John', email: 'john@example.com' }
@@ -120,7 +120,7 @@ export interface IHttpCallStrategy extends IApiCallStrategy {
    * ```typescript
    * // GET request with query parameters
    * interface UserListResponse { users: Array<{ id: number; name: string }>; total: number; }
-   * 
+   *
    * const response = await strategy.get<never, { page: string; limit: string }, UserListResponse>(
    *   '/users',
    *   { parameters: { page: '1', limit: '10' } }
@@ -145,7 +145,7 @@ export interface IHttpCallStrategy extends IApiCallStrategy {
    * // POST request with body and query parameters
    * interface CreateOrderDto { productId: number; quantity: number; }
    * interface OrderResponse { orderId: string; total: number; }
-   * 
+   *
    * const response = await strategy.post<CreateOrderDto, { notify: string }, OrderResponse>(
    *   '/orders',
    *   {
