@@ -26,7 +26,8 @@ export class NestHttpCallStrategy extends HttpAbstractStrategy {
     protected readonly options: NestHttpCallStrategyOptions = {},
   ) {
     super();
-    this.internalHeader = options.internalRequestHeader ?? 'x-internal-request-token';
+    this.internalHeader =
+      options.internalRequestHeader ?? 'x-internal-request-token';
     this.internalToken = options.internalRequestToken;
   }
 
@@ -34,12 +35,19 @@ export class NestHttpCallStrategy extends HttpAbstractStrategy {
     path: string,
     options?: HttpOptions<TOptData, TParams>,
   ): Promise<IHttpCallStrategyResponse<TResData>> {
-    const clsHeaders = filterHeaders(this.clsService.get('headers'), this.options.headersWhitelist);
+    const clsHeaders = filterHeaders(
+      this.clsService.get('headers'),
+      this.options.headersWhitelist,
+    );
     const headers: Record<string, any> = {
       ...clsHeaders,
       ...(options?.headers ?? {}),
     };
-    if (this.internalHeader && this.internalToken && !headers[this.internalHeader]) {
+    if (
+      this.internalHeader &&
+      this.internalToken &&
+      !headers[this.internalHeader]
+    ) {
       headers[this.internalHeader] = this.internalToken;
     }
     /**

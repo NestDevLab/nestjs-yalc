@@ -23,7 +23,9 @@ export class UsersProxyService {
     return this.httpStrategy.get(url);
   }
 
-  async createPhone(payload: Record<string, unknown>): Promise<IHttpCallStrategyResponse<unknown>> {
+  async createPhone(
+    payload: Record<string, unknown>,
+  ): Promise<IHttpCallStrategyResponse<unknown>> {
     const base = process.env.SKELETON_BASE_URL ?? '';
     const url = base ? `${base}/phones` : '/phones';
     return this.httpStrategy.post(url, { data: payload });

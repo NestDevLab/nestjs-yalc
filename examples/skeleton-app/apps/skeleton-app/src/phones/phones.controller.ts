@@ -1,5 +1,8 @@
 import { crudRestControllerFactory } from '@nestjs-yalc/crud-gen/api-rest/crud-gen-rest.controller.factory';
-import { SkeletonPhone, SkeletonPhoneType } from '@nestjs-yalc/skeleton-module/src/skeleton-phone.dto';
+import {
+  SkeletonPhone,
+  SkeletonPhoneType,
+} from '@nestjs-yalc/skeleton-module/src/skeleton-phone.dto';
 
 export const PhonesController = crudRestControllerFactory<SkeletonPhone>({
   entityModel: SkeletonPhone,
