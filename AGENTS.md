@@ -1,6 +1,6 @@
 # NestJS YALC — AI Agent Guide
 
-- Scope: this file applies when working in `workspaces/nestjs-yalc`. Run commands from that directory.
+- Scope: this file applies when working in `nestjs-yalc`. Run commands from that directory.
 - Runtime: Node 20, ESM (`type: module`, `moduleResolution: NodeNext`, TypeScript strict). Install with `npm ci` (workspaces enabled).
 - Workspaces/packages: app, crud-gen, aws-helpers, data-loader, database, errors, event-manager, field-middleware, graphql, interfaces, jest, logger, types, types-extends, utils; examples in `examples/` (skeleton-app, skeleton-module).
 - When you need package details, read `docs/README.md` and package READMEs (e.g., `crud-gen/README.md`) before changing code.

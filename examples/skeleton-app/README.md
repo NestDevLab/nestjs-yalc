@@ -61,8 +61,6 @@ This example app shows how to wire **NestJS-YALC** building blocks into a small 
 
 ## Running tests
 
-From the workspace root (`workspaces/nestjs-yalc`):
-
 - Full checks (lint + build + unit + e2e):
   - `npm run ci:checks`
 - Only e2e for this app:

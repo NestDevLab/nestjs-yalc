@@ -3,7 +3,7 @@
 Factory-driven CRUD generator for NestJS with TypeORM and GraphQL/REST helpers (resolvers/controllers, services, dataloaders, repositories, DTO/field mapping).
 
 ## Install & build (from repo root)
-- `cd workspaces/nestjs-yalc && npm ci`
+- `npm ci`
 - Build: `npm run build`
 - Tests/coverage: `npm run test:cov` (uses Jest projects; set `JEST_WORKERS` to limit parallelism)
 
