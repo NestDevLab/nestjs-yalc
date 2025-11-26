@@ -23,6 +23,7 @@
     "^@nestjs-yalc/([^/]+)/(.*)$": "<rootDir>/../../../../../$1/src/$2",
     "^@nestjs-yalc/([^/]+)$": "<rootDir>/../../../../../$1/src",
     "^@skeleton-app/skeleton-base-app(|/.*)$": "<rootDir>/../../../libs/skeleton-base-app/src/$1",
+    "^lodash-es$": "lodash",
     "^(\\.{1,2}/.*)\\.js$": "$1"
   }
 }

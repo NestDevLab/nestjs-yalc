@@ -75,9 +75,7 @@
     },
     "types": [
       "node",
-      "fast-redact",
-      "@types/nestjs-yalc",
-      "@types/nestjs-yalc-extends"
+      "fast-redact"
     ]
   },
   "include": ["./**/src/**/*.ts"],

@@ -87,7 +87,8 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
-      "^@skeleton-app/skeleton-base-app(|/.*)$": "<rootDir>/libs/skeleton-base-app/src/$1"
+      "^@skeleton-app/skeleton-base-app(|/.*)$": "<rootDir>/libs/skeleton-base-app/src/$1",
+      "^lodash-es$": "lodash"
     }
   }
 }
