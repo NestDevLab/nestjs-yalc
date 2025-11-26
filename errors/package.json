@@ -19,6 +19,7 @@
     "dist"
   ],
   "dependencies": {
+    "@nestjs-yalc/crud-gen": "file:../crud-gen",
     "tslib": "^2.6.3"
   }
 }

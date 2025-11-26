@@ -19,6 +19,13 @@
     "dist"
   ],
   "dependencies": {
+    "@nestjs-yalc/database": "file:../database",
+    "@nestjs-yalc/field-middleware": "file:../field-middleware",
+    "@nestjs-yalc/graphql": "file:../graphql",
+    "@nestjs-yalc/interfaces": "file:../interfaces",
+    "@nestjs-yalc/types": "file:../types",
+    "@nestjs-yalc/utils": "file:../utils",
+    "@nestjs-yalc/data-loader": "file:../data-loader",
     "tslib": "^2.6.3"
   }
 }
