@@ -27,6 +27,11 @@ import { UnwrapResultInterceptor } from './unwrap-result.interceptor.js';
 
 export interface ICreateOptions {
   enableSwagger?: boolean;
+  /**
+   * Path segment (without leading slash) where Swagger UI/JSON is exposed.
+   * Defaults to "api".
+   */
+  swaggerPath?: string;
   filters?: ExceptionFilter[];
   validationPipeOptions?: ValidationPipeOptions;
   /**
@@ -44,6 +49,7 @@ export class AppBootstrap<
 > extends BaseAppBootstrap<NestFastifyApplication> {
   private fastifyInstance?: FastifyInstance;
   protected isSwaggerEnabled: boolean = false;
+  protected swaggerPath = 'api';
 
   constructor(appAlias: string, module: any, options?: TGlobalOptions) {
     super(appAlias, module, { globalsOptions: options });
@@ -177,13 +183,16 @@ export class AppBootstrap<
     this.getApp().useGlobalFilters(...filters);
 
     if (options?.enableSwagger) {
+      const swaggerPath = sanitizeSwaggerPath(options.swaggerPath);
+      this.swaggerPath = swaggerPath;
       this.setSwaggerEnabled(true);
       const document = SwaggerModule.createDocument(
         this.getApp(),
         this.buildSwaggerConfig().build(),
       );
-      SwaggerModule.setup('api', this.getApp(), document, {
-        jsonDocumentUrl: '/api/json',
+      SwaggerModule.setup(swaggerPath, this.getApp(), document, {
+        jsonDocumentUrl: `/${swaggerPath}/json`,
+        useGlobalPrefix: true,
       });
     }
 
@@ -225,10 +234,11 @@ export class AppBootstrap<
       if (this.isSwaggerEnabled) {
         // eslint-disable-next-line no-console
         console.debug(`Swagger ${this.appAlias} listening on
-        http://localhost:${port}${apiPrefix}/api
-        http://127.0.0.1:${port}${apiPrefix}/api
-        http://${domain}:${port}${apiPrefix}/api
-        ${address}/api`);
+        http://localhost:${port}${apiPrefix}/${this.swaggerPath}
+        http://127.0.0.1:${port}${apiPrefix}/${this.swaggerPath}
+        http://${domain}:${port}${apiPrefix}/${this.swaggerPath}
+        ${address}/${this.swaggerPath}
+        JSON: http://localhost:${port}${apiPrefix}/${this.swaggerPath}/json`);
       }
 
       callback?.(port, host, domain);
@@ -245,4 +255,9 @@ export class AppBootstrap<
       hmr.dispose(() => this.closeApp());
     }
   }
+}
+
+function sanitizeSwaggerPath(path?: string): string {
+  const normalized = (path ?? 'api').replace(/^\/+/, '').replace(/\/+$/, '');
+  return normalized || 'api';
 }
