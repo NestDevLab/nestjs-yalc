@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "paths": {
+      "@nestjs-yalc/crud-gen": ["../../crud-gen/src/index.ts"],
+      "@nestjs-yalc/crud-gen/*": ["../../crud-gen/src/*"],
+      "@nestjs-yalc/database": ["../../database/src/index.ts"],
+      "@nestjs-yalc/database/*": ["../../database/src/*"],
+      "@nestjs-yalc/utils": ["../../utils/src/index.ts"],
+      "@nestjs-yalc/utils/*": ["../../utils/src/*"],
+      "@nestjs-yalc/types": ["../../types/src/index.d.ts"],
+      "@nestjs-yalc/types/*": ["../../types/src/*"],
+      "@nestjs-yalc/task-system-module": ["../task-system-module/src/index.ts"],
+      "@nestjs-yalc/task-system-module/*": ["../task-system-module/src/*"]
+    }
+  },
+  "include": ["apps/**/src/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "apps/**/*.spec.ts",
+    "apps/**/*.test.ts"
+  ]
+}

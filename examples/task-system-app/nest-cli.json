@@ -1,0 +1,21 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/task-system-app/src",
+  "monorepo": true,
+  "root": "apps/task-system-app",
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/task-system-app/tsconfig.app.json"
+  },
+  "projects": {
+    "task-system-app": {
+      "type": "application",
+      "root": "apps/task-system-app",
+      "entryFile": "main",
+      "sourceRoot": "apps/task-system-app/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/task-system-app/tsconfig.app.json"
+      }
+    }
+  }
+}

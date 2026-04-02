@@ -1,0 +1,16 @@
+{
+  "name": "@nestjs-yalc/task-system-module",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Real-world task system module for nestjs-yalc examples",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*.js": "./src/*.ts",
+    "./*": "./src/*"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}
