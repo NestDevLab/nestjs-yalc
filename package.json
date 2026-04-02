@@ -69,6 +69,7 @@
     "@aws-sdk/client-ssm": "^3.931.0",
     "@fastify/cookie": "^8.3.0",
     "@jorgebodega/typeorm-seeding": "^6.0.1",
+    "@nestjs/platform-express": "^9.4.3",
     "@types/node-fetch": "^2.6.2",
     "apollo-server-plugin-base": "^3.7.1",
     "aws-lambda-fastify": "^2.2.0",

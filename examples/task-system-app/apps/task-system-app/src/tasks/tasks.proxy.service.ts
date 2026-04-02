@@ -4,7 +4,7 @@ import { IHttpCallStrategy } from '@nestjs-yalc/api-strategy';
 @Injectable()
 export class TasksProxyService {
   constructor(
-    @Inject('TASKS_HTTP_STRATEGY') private readonly http: IHttpCallStrategy,
+    @Inject('TASKS_HTTP_STRATEGY') private readonly http: IApiCallStrategy,
   ) {}
 
   async listTasks() {

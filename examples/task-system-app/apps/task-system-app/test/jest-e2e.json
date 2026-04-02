@@ -15,6 +15,8 @@
   "moduleNameMapper": {
     "^@nestjs-yalc/task-system-module$": "<rootDir>/../../../../task-system-module/src",
     "^@nestjs-yalc/task-system-module/src/(.*)$": "<rootDir>/../../../../task-system-module/src/$1",
+    "^@nestjs/(.*)$": "<rootDir>/../../../../../node_modules/@nestjs/$1",
+    "^typeorm$": "<rootDir>/../../../../../node_modules/typeorm",
     "^p-map$": "<rootDir>/p-map.mock.ts",
     "^lodash-es$": "lodash",
     "^@nestjs-yalc/([^/]+)/(.+?)\\.js$": "<rootDir>/../../../../../$1/src/$2",

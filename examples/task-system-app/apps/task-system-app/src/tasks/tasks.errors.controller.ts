@@ -16,7 +16,7 @@ export class TasksErrorsController {
   @Get('not-found')
   notFound() {
     throw this.events.errorNotFound('tasks.resource.not-found', {
-      response: 'Task not found',
+      response: { message: 'Task not found' },
       data: { area: 'tasks' },
     });
   }

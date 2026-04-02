@@ -90,10 +90,11 @@ Keep this checklist updated while implementing. Mark items as `[x]` when complet
 - [x] Create initial scaffold for `examples/task-system-module`
 - [x] Create initial scaffold for `examples/task-system-app`
 - [x] Open branch/PR for the scaffold work
-- [ ] Make `task-system-app` boot successfully
-- [ ] Fix `CrudGenDependencyFactory` + `TypeORM` + DI wiring in the YALC-correct way
-- [ ] Make the first minimal REST vertical slice work for `projects` and `tasks`
-- [ ] Get the initial e2e suite green
+- [x] Make `task-system-app` boot successfully
+- [x] Fix `CrudGenDependencyFactory` + `TypeORM` + DI wiring in the YALC-correct way
+- [x] Make the first minimal REST vertical slice work for `projects` and `tasks`
+- [x] Get the initial e2e suite green
+- [ ] Make the example build cleanly in addition to passing e2e
 - [ ] Commit and push the first bootable/passing version
 
 ### Next after vertical slice is green
@@ -200,20 +201,21 @@ Add repository-level checks so this app validates:
 
 ### Current blocker
 
-The remaining work is not conceptual anymore; it is **framework-level wiring**.
+The original DI/bootstrap blocker has been resolved for the initial vertical slice.
 
 Current observed blocker family:
 
-- DI / TypeORM / CRUD-gen integration issues in the new standalone example
+- build/webpack/TypeScript pathing issues for the standalone example when compiling against `@nestjs-yalc/*` source packages in the monorepo
+- some remaining app-specific type mismatches are being cleaned up while preserving the YALC patterns
 
-This is exactly the right place to fix things, because the goal is to make the example align with `nestjs-yalc`'s true intended usage instead of building a fake demo.
+The runtime/e2e slice is now working; the remaining work is to make the example build cleanly and then harden it further.
 
 ## Next concrete actions
 
-1. Inspect the exact expected `CrudGenDependencyFactory` + `TypeOrmModule` wiring path in existing working examples/tests.
-2. Fix repository provider registration for the standalone task-system app.
-3. Re-run e2e until bootstrap succeeds.
-4. Lock the minimal passing vertical slice.
+1. Finish cleaning the standalone example build/webpack/TypeScript pathing so `npm run build` succeeds.
+2. Commit and push the first passing vertical slice (`projects` + `tasks`, e2e green).
+3. Add more focused unit/integration coverage around the working slice.
+4. Harden `event-manager` usage and per-module logging configuration where appropriate.
 5. Only then expand domain complexity.
 
 ## PR strategy
