@@ -79,6 +79,32 @@ But **not** part of this example app.
 - Provider-specific semantics stay out of the core model.
 - The app must work even if no external consumer exists.
 
+## Implementation checklist
+
+Keep this checklist updated while implementing. Mark items as `[x]` when completed, add sub-items when needed, and adjust wording only if scope really changes.
+
+### Active now
+
+- [x] Define architecture and constraints for a standalone `task-system-app`
+- [x] Add planning/documentation files to the repo
+- [x] Create initial scaffold for `examples/task-system-module`
+- [x] Create initial scaffold for `examples/task-system-app`
+- [x] Open branch/PR for the scaffold work
+- [ ] Make `task-system-app` boot successfully
+- [ ] Fix `CrudGenDependencyFactory` + `TypeORM` + DI wiring in the YALC-correct way
+- [ ] Make the first minimal REST vertical slice work for `projects` and `tasks`
+- [ ] Get the initial e2e suite green
+- [ ] Commit and push the first bootable/passing version
+
+### Next after vertical slice is green
+
+- [ ] Harden tests (unit + integration + e2e)
+- [ ] Add `events` module
+- [ ] Add `sync` module and external refs model
+- [ ] Add `areas` / `inbox` if still justified after core domain stabilizes
+- [ ] Integrate the example into repo CI/CD checks
+- [ ] Prepare the external OpenClaw-side integration layer separately
+
 ## Delivery phases
 
 ### Phase 0 — foundation and docs
