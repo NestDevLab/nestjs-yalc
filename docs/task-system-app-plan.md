@@ -105,12 +105,12 @@ Keep this checklist updated while implementing. Mark items as `[x]` when complet
 - [x] Add `events` module
 - [x] Add `sync` module and external refs model
 - [x] Refactor `sync` into `ExternalRef` + `SyncState`
-- [ ] Add full GraphQL coverage
-  - [ ] expose GraphQL CRUD for `projects`
-  - [ ] expose GraphQL CRUD for `tasks`
-  - [ ] expose GraphQL CRUD for `events`
-  - [ ] expose GraphQL CRUD for `sync`
-  - [ ] add GraphQL integration/e2e tests for all exposed slices
+- [x] Add full GraphQL coverage
+  - [x] expose GraphQL CRUD for `projects`
+  - [x] expose GraphQL CRUD for `tasks`
+  - [x] expose GraphQL CRUD for `events`
+  - [x] expose GraphQL CRUD for `sync`
+  - [x] add GraphQL integration/e2e tests for all exposed slices
 - [ ] Add `areas` / `inbox` if still justified after core domain stabilizes
 - [ ] Integrate the example into repo CI/CD checks
 - [ ] Prepare the external OpenClaw-side integration layer separately
@@ -237,7 +237,9 @@ The runtime/e2e slice is now working and the example now builds cleanly as well;
 
 ### Next implementation target
 
-- Refactor the standalone `sync` slice into the conceptually correct model.
+- Add deeper integration coverage around `event-manager` and GraphQL-backed CRUD slices.
+- Keep growing the sync model only through conceptually separate domain pieces.
+- Delay provider-specific Google integration until the generic sync domain is strong enough.
 - Separate **external mapping/identity** from **operational sync state**.
 - Keep the sync domain provider-agnostic before touching provider-specific Google integration.
 - Continue implementing incrementally on top of these correct domain boundaries.

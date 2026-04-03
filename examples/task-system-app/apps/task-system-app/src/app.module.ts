@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar';
 import {
   TaskSystemModule,
   TaskEvent,
@@ -15,6 +18,11 @@ import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: true,
+      path: '/graphql',
+    }),
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: ':memory:',
@@ -34,5 +42,6 @@ import { TasksModule } from './tasks/tasks.module';
     EventsModule,
     SyncModule,
   ],
+  providers: [UUIDScalar],
 })
 export class AppModule {}
