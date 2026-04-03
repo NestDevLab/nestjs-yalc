@@ -7,4 +7,7 @@ export * from './task-item.resolver.js';
 export * from './task-event.entity.js';
 export * from './task-event.dto.js';
 export * from './task-event.resolver.js';
+export * from './task-sync-ref.entity.js';
+export * from './task-sync-ref.dto.js';
+export * from './task-sync-ref.resolver.js';
 export * from './task-system.module.js';

@@ -11,6 +11,7 @@ describe('Task System App e2e', () => {
   let createdProjectGuid: string;
   let createdTaskGuid: string;
   let createdEventGuid: string;
+  let createdSyncRefGuid: string;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -140,6 +141,47 @@ describe('Task System App e2e', () => {
     expect(res.body.status).toBe('done');
   });
 
+  it('creates a sync reference for the task', async () => {
+    const guid = randomUUID();
+    const res = await request(app.getHttpServer())
+      .post('/sync-refs')
+      .send({
+        guid,
+        internalType: 'task',
+        internalId: createdTaskGuid,
+        provider: 'google-tasks',
+        account: 'default',
+        container: 'primary',
+        externalId: 'google-task-123',
+        syncState: 'active',
+      })
+      .expect(201);
+
+    createdSyncRefGuid = res.body.guid;
+    expect(res.body.internalType).toBe('task');
+    expect(res.body.internalId).toBe(createdTaskGuid);
+    expect(res.body.provider).toBe('google-tasks');
+  });
+
+  it('lists sync references', async () => {
+    const res = await request(app.getHttpServer()).get('/sync-refs').expect(200);
+    expect(res.body.list.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('updates sync state and last error', async () => {
+    await request(app.getHttpServer())
+      .put(`/sync-refs/${createdSyncRefGuid}`)
+      .send({ syncState: 'error', lastError: 'Provider timeout' })
+      .expect(200);
+
+    const res = await request(app.getHttpServer())
+      .get(`/sync-refs/${createdSyncRefGuid}`)
+      .expect(200);
+
+    expect(res.body.syncState).toBe('error');
+    expect(res.body.lastError).toBe('Provider timeout');
+  });
+
   it('returns a 400 error via YalcEventService', async () => {
     const res = await request(app.getHttpServer())
       .get('/tasks/errors/bad-request')
@@ -189,6 +231,12 @@ describe('Task System App e2e', () => {
 
     expect(res.body.ok).toBe(true);
     expect(typeof res.body.projectId).toBe('string');
+  });
+
+  it('deletes the sync reference', async () => {
+    await request(app.getHttpServer())
+      .delete(`/sync-refs/${createdSyncRefGuid}`)
+      .expect(200);
   });
 
   it('deletes the event', async () => {

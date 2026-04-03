@@ -103,7 +103,7 @@ Keep this checklist updated while implementing. Mark items as `[x]` when complet
   - [x] add initial focused unit tests for task/project domain event services
   - [ ] add deeper integration coverage around event-manager/module wiring
 - [ ] Add `events` module
-- [ ] Add `sync` module and external refs model
+- [x] Add `sync` module and external refs model
 - [ ] Add `areas` / `inbox` if still justified after core domain stabilizes
 - [ ] Integrate the example into repo CI/CD checks
 - [ ] Prepare the external OpenClaw-side integration layer separately
@@ -228,14 +228,15 @@ The runtime/e2e slice is now working and the example now builds cleanly as well;
 
 ### Next implementation target
 
-- Start the standalone `events` module as the next real domain slice.
-- Keep `Event` explicitly separate from `Task`.
-- Ship the first `events` slice with entity/DTO/module/REST/e2e before touching `sync`.
+- Start the standalone `sync` module as the next real domain slice.
+- Keep external references and sync state provider-agnostic.
+- Ship the first `sync` slice with entity/DTO/module/REST/e2e before touching provider-specific Google integration.
 
 ### In progress notes
 
-- `event-manager` is now being extended beyond demo/error endpoints toward module-specific domain event emission for `tasks` and `projects`.
-- The next hardening step after this is to reduce duplicated setup and add more focused tests around the new event/logging services.
+- `event-manager` has been extended beyond demo/error endpoints toward module-specific domain event emission for `tasks` and `projects`.
+- The example app now supports standalone CRUD slices for `projects`, `tasks`, `events`, and `sync` references.
+- The next hardening step after this is to reduce duplicated setup and add more focused integration tests around event/logging/sync wiring.
 
 ## PR strategy
 
