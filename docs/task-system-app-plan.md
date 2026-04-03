@@ -100,6 +100,8 @@ Keep this checklist updated while implementing. Mark items as `[x]` when complet
 ### Next after vertical slice is green
 
 - [ ] Harden tests (unit + integration + e2e)
+  - [x] add initial focused unit tests for task/project domain event services
+  - [ ] add deeper integration coverage around event-manager/module wiring
 - [ ] Add `events` module
 - [ ] Add `sync` module and external refs model
 - [ ] Add `areas` / `inbox` if still justified after core domain stabilizes
