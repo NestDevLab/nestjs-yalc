@@ -3,12 +3,14 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TaskEvent } from './task-event.entity.js';
 import { taskEventProvidersFactory } from './task-event.resolver.js';
+import { TaskExternalRef } from './task-external-ref.entity.js';
+import { taskExternalRefProvidersFactory } from './task-external-ref.resolver.js';
 import { TaskItem } from './task-item.entity.js';
 import { taskItemProvidersFactory } from './task-item.resolver.js';
 import { TaskProject } from './task-project.entity.js';
 import { taskProjectProvidersFactory } from './task-project.resolver.js';
-import { TaskSyncRef } from './task-sync-ref.entity.js';
-import { taskSyncRefProvidersFactory } from './task-sync-ref.resolver.js';
+import { TaskSyncState } from './task-sync-state.entity.js';
+import { taskSyncStateProvidersFactory } from './task-sync-state.resolver.js';
 
 @Global()
 @Module({})
@@ -17,13 +19,15 @@ export class TaskSystemModule {
     const taskProjectProviders = taskProjectProvidersFactory(dbConnection);
     const taskItemProviders = taskItemProvidersFactory(dbConnection);
     const taskEventProviders = taskEventProvidersFactory(dbConnection);
-    const taskSyncRefProviders = taskSyncRefProvidersFactory(dbConnection);
+    const taskExternalRefProviders =
+      taskExternalRefProvidersFactory(dbConnection);
+    const taskSyncStateProviders = taskSyncStateProvidersFactory(dbConnection);
 
     return {
       module: TaskSystemModule,
       imports: [
         TypeOrmModule.forFeature(
-          [TaskProject, TaskItem, TaskEvent, TaskSyncRef],
+          [TaskProject, TaskItem, TaskEvent, TaskExternalRef, TaskSyncState],
           dbConnection,
         ),
       ],
@@ -35,13 +39,15 @@ export class TaskSystemModule {
         ...taskProjectProviders.providers,
         ...taskItemProviders.providers,
         ...taskEventProviders.providers,
-        ...taskSyncRefProviders.providers,
+        ...taskExternalRefProviders.providers,
+        ...taskSyncStateProviders.providers,
       ],
       exports: [
         ...taskProjectProviders.providers,
         ...taskItemProviders.providers,
         ...taskEventProviders.providers,
-        ...taskSyncRefProviders.providers,
+        ...taskExternalRefProviders.providers,
+        ...taskSyncStateProviders.providers,
       ],
     };
   }

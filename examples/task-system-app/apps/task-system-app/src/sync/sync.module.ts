@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
-import { SyncController } from './sync.rest.controller';
+import { ExternalRefsController } from './external-refs.rest.controller';
+import { SyncStatesController } from './sync-states.rest.controller';
 
 @Module({
-  controllers: [SyncController],
+  controllers: [ExternalRefsController, SyncStatesController],
 })
 export class SyncModule {}

@@ -11,7 +11,8 @@ describe('Task System App e2e', () => {
   let createdProjectGuid: string;
   let createdTaskGuid: string;
   let createdEventGuid: string;
-  let createdSyncRefGuid: string;
+  let createdExternalRefGuid: string;
+  let createdSyncStateGuid: string;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -49,7 +50,7 @@ describe('Task System App e2e', () => {
         guid,
         name: 'Open backlog redesign',
         description: 'Reference project for the task system app',
-        status: 'active'
+        status: 'active',
       })
       .expect(201);
 
@@ -67,7 +68,7 @@ describe('Task System App e2e', () => {
         title: 'Define task system boundaries',
         description: 'Keep the backend standalone and provider-agnostic',
         status: 'todo',
-        projectId: createdProjectGuid
+        projectId: createdProjectGuid,
       })
       .expect(201);
 
@@ -79,7 +80,10 @@ describe('Task System App e2e', () => {
   it('lists tasks with pagination metadata', async () => {
     const res = await request(app.getHttpServer()).get('/tasks').expect(200);
     expect(res.body.list.length).toBeGreaterThanOrEqual(1);
-    expect(res.body.pageData).toMatchObject({ startRow: 0, count: expect.any(Number) });
+    expect(res.body.pageData).toMatchObject({
+      startRow: 0,
+      count: expect.any(Number),
+    });
   });
 
   it('updates task status', async () => {
@@ -141,10 +145,10 @@ describe('Task System App e2e', () => {
     expect(res.body.status).toBe('done');
   });
 
-  it('creates a sync reference for the task', async () => {
+  it('creates an external reference for the task', async () => {
     const guid = randomUUID();
     const res = await request(app.getHttpServer())
-      .post('/sync-refs')
+      .post('/external-refs')
       .send({
         guid,
         internalType: 'task',
@@ -153,32 +157,55 @@ describe('Task System App e2e', () => {
         account: 'default',
         container: 'primary',
         externalId: 'google-task-123',
-        syncState: 'active',
       })
       .expect(201);
 
-    createdSyncRefGuid = res.body.guid;
+    createdExternalRefGuid = res.body.guid;
     expect(res.body.internalType).toBe('task');
     expect(res.body.internalId).toBe(createdTaskGuid);
     expect(res.body.provider).toBe('google-tasks');
   });
 
-  it('lists sync references', async () => {
-    const res = await request(app.getHttpServer()).get('/sync-refs').expect(200);
+  it('lists external references', async () => {
+    const res = await request(app.getHttpServer()).get('/external-refs').expect(200);
+    expect(res.body.list.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('creates a sync state for the external reference', async () => {
+    const guid = randomUUID();
+    const res = await request(app.getHttpServer())
+      .post('/sync-states')
+      .send({
+        guid,
+        externalRefId: createdExternalRefGuid,
+        status: 'active',
+        lastDirection: 'push',
+        remoteVersion: 'v1',
+        localVersionHash: 'hash-1',
+      })
+      .expect(201);
+
+    createdSyncStateGuid = res.body.guid;
+    expect(res.body.externalRefId).toBe(createdExternalRefGuid);
+    expect(res.body.status).toBe('active');
+  });
+
+  it('lists sync states', async () => {
+    const res = await request(app.getHttpServer()).get('/sync-states').expect(200);
     expect(res.body.list.length).toBeGreaterThanOrEqual(1);
   });
 
   it('updates sync state and last error', async () => {
     await request(app.getHttpServer())
-      .put(`/sync-refs/${createdSyncRefGuid}`)
-      .send({ syncState: 'error', lastError: 'Provider timeout' })
+      .put(`/sync-states/${createdSyncStateGuid}`)
+      .send({ status: 'error', lastError: 'Provider timeout' })
       .expect(200);
 
     const res = await request(app.getHttpServer())
-      .get(`/sync-refs/${createdSyncRefGuid}`)
+      .get(`/sync-states/${createdSyncStateGuid}`)
       .expect(200);
 
-    expect(res.body.syncState).toBe('error');
+    expect(res.body.status).toBe('error');
     expect(res.body.lastError).toBe('Provider timeout');
   });
 
@@ -233,17 +260,27 @@ describe('Task System App e2e', () => {
     expect(typeof res.body.projectId).toBe('string');
   });
 
-  it('deletes the sync reference', async () => {
+  it('deletes the sync state', async () => {
     await request(app.getHttpServer())
-      .delete(`/sync-refs/${createdSyncRefGuid}`)
+      .delete(`/sync-states/${createdSyncStateGuid}`)
+      .expect(200);
+  });
+
+  it('deletes the external reference', async () => {
+    await request(app.getHttpServer())
+      .delete(`/external-refs/${createdExternalRefGuid}`)
       .expect(200);
   });
 
   it('deletes the event', async () => {
-    await request(app.getHttpServer()).delete(`/events/${createdEventGuid}`).expect(200);
+    await request(app.getHttpServer())
+      .delete(`/events/${createdEventGuid}`)
+      .expect(200);
   });
 
   it('deletes the task', async () => {
-    await request(app.getHttpServer()).delete(`/tasks/${createdTaskGuid}`).expect(200);
+    await request(app.getHttpServer())
+      .delete(`/tasks/${createdTaskGuid}`)
+      .expect(200);
   });
 });

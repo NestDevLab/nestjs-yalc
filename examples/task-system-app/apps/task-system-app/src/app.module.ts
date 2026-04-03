@@ -3,9 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   TaskSystemModule,
   TaskEvent,
+  TaskExternalRef,
   TaskItem,
   TaskProject,
-  TaskSyncRef,
+  TaskSyncState,
 } from '@nestjs-yalc/task-system-module';
 import { EventsModule } from './events/events.module';
 import { ProjectsModule } from './projects/projects.module';
@@ -18,7 +19,13 @@ import { TasksModule } from './tasks/tasks.module';
       type: 'sqlite',
       database: ':memory:',
       dropSchema: true,
-      entities: [TaskItem, TaskProject, TaskEvent, TaskSyncRef],
+      entities: [
+        TaskItem,
+        TaskProject,
+        TaskEvent,
+        TaskExternalRef,
+        TaskSyncState,
+      ],
       synchronize: true,
     }),
     TaskSystemModule.register('default'),
