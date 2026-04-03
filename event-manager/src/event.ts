@@ -265,7 +265,8 @@ export function event<
       : { level: logger, instance: undefined };
 
     const loggerConfig = {
-      instance: (_instance ?? AppLoggerFactory('Event')) as ImprovedLoggerService,
+      instance: (_instance ??
+        AppLoggerFactory('Event')) as ImprovedLoggerService,
       level: (_level ?? 'log') as LogLevel,
       ...rest,
     };

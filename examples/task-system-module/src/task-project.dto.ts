@@ -1,5 +1,14 @@
-import { Field, InputType, ObjectType, OmitType, PartialType } from '@nestjs/graphql';
-import { ModelField, ModelObject } from '@nestjs-yalc/crud-gen/object.decorator.js';
+import {
+  Field,
+  InputType,
+  ObjectType,
+  OmitType,
+  PartialType,
+} from '@nestjs/graphql';
+import {
+  ModelField,
+  ModelObject,
+} from '@nestjs-yalc/crud-gen/object.decorator.js';
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
 import { TaskProject } from './task-project.entity.js';
@@ -40,8 +49,14 @@ export class TaskProjectCreateInput extends OmitType(
 
 @InputType()
 @ModelObject({ copyFrom: TaskProjectType })
-export class TaskProjectCondition extends PartialType(TaskProjectCreateInput, InputType) {}
+export class TaskProjectCondition extends PartialType(
+  TaskProjectCreateInput,
+  InputType,
+) {}
 
 @InputType()
 @ModelObject({ copyFrom: TaskProjectType })
-export class TaskProjectUpdateInput extends PartialType(TaskProjectCreateInput, InputType) {}
+export class TaskProjectUpdateInput extends PartialType(
+  TaskProjectCreateInput,
+  InputType,
+) {}

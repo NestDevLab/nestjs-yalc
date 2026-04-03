@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TaskSystemModule, TaskItem, TaskProject } from '@nestjs-yalc/task-system-module';
+import {
+  TaskSystemModule,
+  TaskItem,
+  TaskProject,
+} from '@nestjs-yalc/task-system-module';
 import { TasksModule } from './tasks/tasks.module';
 import { ProjectsModule } from './projects/projects.module';
 

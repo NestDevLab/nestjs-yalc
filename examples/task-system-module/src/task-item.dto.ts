@@ -1,5 +1,14 @@
-import { Field, InputType, ObjectType, OmitType, PartialType } from '@nestjs/graphql';
-import { ModelField, ModelObject } from '@nestjs-yalc/crud-gen/object.decorator.js';
+import {
+  Field,
+  InputType,
+  ObjectType,
+  OmitType,
+  PartialType,
+} from '@nestjs/graphql';
+import {
+  ModelField,
+  ModelObject,
+} from '@nestjs-yalc/crud-gen/object.decorator.js';
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
 import { TaskItem } from './task-item.entity.js';
@@ -29,7 +38,10 @@ export class TaskItemType extends TaskItem {
   @Field()
   status: string;
 
-  @ModelField({ gqlType: returnValue(UUIDScalar), gqlOptions: { nullable: true } })
+  @ModelField({
+    gqlType: returnValue(UUIDScalar),
+    gqlOptions: { nullable: true },
+  })
   @Field(() => UUIDScalar, { nullable: true })
   projectId?: string | null;
 
@@ -48,8 +60,14 @@ export class TaskItemCreateInput extends OmitType(
 
 @InputType()
 @ModelObject({ copyFrom: TaskItemType })
-export class TaskItemCondition extends PartialType(TaskItemCreateInput, InputType) {}
+export class TaskItemCondition extends PartialType(
+  TaskItemCreateInput,
+  InputType,
+) {}
 
 @InputType()
 @ModelObject({ copyFrom: TaskItemType })
-export class TaskItemUpdateInput extends PartialType(TaskItemCreateInput, InputType) {}
+export class TaskItemUpdateInput extends PartialType(
+  TaskItemCreateInput,
+  InputType,
+) {}

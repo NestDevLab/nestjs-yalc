@@ -113,6 +113,10 @@ export class ConfigValueManager {
       k: normalizeKeys(keys),
       v: undefined,
     };
-    return this.value(currentKey, _tuple, value) as ReturnOrFunctionReturnType<T>;
+    return this.value(
+      currentKey,
+      _tuple,
+      value,
+    ) as ReturnOrFunctionReturnType<T>;
   };
 }

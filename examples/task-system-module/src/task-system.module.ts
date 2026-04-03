@@ -15,7 +15,9 @@ export class TaskSystemModule {
 
     return {
       module: TaskSystemModule,
-      imports: [TypeOrmModule.forFeature([TaskProject, TaskItem], dbConnection)],
+      imports: [
+        TypeOrmModule.forFeature([TaskProject, TaskItem], dbConnection),
+      ],
       providers: [
         {
           provide: EventEmitter2,
@@ -24,7 +26,10 @@ export class TaskSystemModule {
         ...taskProjectProviders.providers,
         ...taskItemProviders.providers,
       ],
-      exports: [...taskProjectProviders.providers, ...taskItemProviders.providers],
+      exports: [
+        ...taskProjectProviders.providers,
+        ...taskItemProviders.providers,
+      ],
     };
   }
 }
