@@ -220,6 +220,11 @@ The runtime/e2e slice is now working and the example now builds cleanly as well;
 3. Add explicit domain events for `tasks` and `projects` where useful.
 4. Only then expand domain complexity (`events`, `sync`, etc.).
 
+### In progress notes
+
+- `event-manager` is now being extended beyond demo/error endpoints toward module-specific domain event emission for `tasks` and `projects`.
+- The next hardening step after this is to reduce duplicated setup and add more focused tests around the new event/logging services.
+
 ## PR strategy
 
 Open a **draft PR** early once the scaffold is in a reviewable state, so progress is visible.

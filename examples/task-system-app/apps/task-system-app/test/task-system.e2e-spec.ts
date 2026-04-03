@@ -130,6 +130,25 @@ describe('Task System App e2e', () => {
     expect(res.body).toEqual({ ok: true });
   });
 
+  it('emits task domain events with module-specific logging', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/tasks-events')
+      .expect(200);
+
+    expect(res.body.ok).toBe(true);
+    expect(typeof res.body.taskId).toBe('string');
+    expect(typeof res.body.projectId).toBe('string');
+  });
+
+  it('emits project domain events with module-specific logging', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/projects-logging')
+      .expect(200);
+
+    expect(res.body.ok).toBe(true);
+    expect(typeof res.body.projectId).toBe('string');
+  });
+
   it('deletes the task', async () => {
     await request(app.getHttpServer()).delete(`/tasks/${createdTaskGuid}`).expect(200);
   });
