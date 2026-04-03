@@ -94,8 +94,8 @@ Keep this checklist updated while implementing. Mark items as `[x]` when complet
 - [x] Fix `CrudGenDependencyFactory` + `TypeORM` + DI wiring in the YALC-correct way
 - [x] Make the first minimal REST vertical slice work for `projects` and `tasks`
 - [x] Get the initial e2e suite green
-- [ ] Make the example build cleanly in addition to passing e2e
-- [ ] Commit and push the first bootable/passing version
+- [x] Make the example build cleanly in addition to passing e2e
+- [x] Commit and push the first bootable/passing version
 
 ### Next after vertical slice is green
 
@@ -198,6 +198,9 @@ Add repository-level checks so this app validates:
 - standalone example structure added
 - first REST/controller/test scaffolding written
 - first real e2e run attempted
+- bootstrap/DI wiring fixed for the initial vertical slice
+- example now boots, builds, and passes its initial e2e suite
+- the first bootable/passing version has been committed and pushed
 
 ### Current blocker
 
@@ -212,11 +215,10 @@ The runtime/e2e slice is now working and the example now builds cleanly as well;
 
 ## Next concrete actions
 
-1. Finish cleaning the standalone example build/webpack/TypeScript pathing so `npm run build` succeeds.
-2. Commit and push the first passing vertical slice (`projects` + `tasks`, e2e green).
-3. Add more focused unit/integration coverage around the working slice.
-4. Harden `event-manager` usage and per-module logging configuration where appropriate.
-5. Only then expand domain complexity.
+1. Add more focused unit/integration coverage around the working slice.
+2. Harden `event-manager` usage and per-module logging configuration where appropriate.
+3. Add explicit domain events for `tasks` and `projects` where useful.
+4. Only then expand domain complexity (`events`, `sync`, etc.).
 
 ## PR strategy
 
