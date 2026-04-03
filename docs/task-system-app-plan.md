@@ -208,7 +208,7 @@ Current observed blocker family:
 - build/webpack/TypeScript pathing issues for the standalone example when compiling against `@nestjs-yalc/*` source packages in the monorepo
 - some remaining app-specific type mismatches are being cleaned up while preserving the YALC patterns
 
-The runtime/e2e slice is now working; the remaining work is to make the example build cleanly and then harden it further.
+The runtime/e2e slice is now working and the example now builds cleanly as well; the remaining work is to harden and extend it further.
 
 ## Next concrete actions
 

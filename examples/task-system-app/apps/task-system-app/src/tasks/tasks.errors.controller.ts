@@ -8,7 +8,7 @@ export class TasksErrorsController {
   @Get('bad-request')
   badRequest() {
     throw this.events.errorBadRequest('tasks.validation.failed', {
-      response: 'Invalid task payload',
+      response: { message: 'Invalid task payload' },
       data: { area: 'tasks' },
     });
   }
