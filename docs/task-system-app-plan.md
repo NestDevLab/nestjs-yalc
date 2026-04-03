@@ -222,6 +222,16 @@ The runtime/e2e slice is now working and the example now builds cleanly as well;
 3. Add explicit domain events for `tasks` and `projects` where useful.
 4. Only then expand domain complexity (`events`, `sync`, etc.).
 
+### Newly completed
+
+- [x] add first standalone `events` slice (entity/DTO/module/REST/e2e)
+
+### Next implementation target
+
+- Start the standalone `events` module as the next real domain slice.
+- Keep `Event` explicitly separate from `Task`.
+- Ship the first `events` slice with entity/DTO/module/REST/e2e before touching `sync`.
+
 ### In progress notes
 
 - `event-manager` is now being extended beyond demo/error endpoints toward module-specific domain event emission for `tasks` and `projects`.
@@ -243,6 +253,10 @@ The project is successful when:
 
 - `examples/task-system-app` is runnable standalone;
 - it demonstrates correct `nestjs-yalc` patterns;
+- it has meaningful e2e coverage;
+- it is valuable even without OpenClaw;
+- OpenClaw can later extend it without changing its core identity.
+terns;
 - it has meaningful e2e coverage;
 - it is valuable even without OpenClaw;
 - OpenClaw can later extend it without changing its core identity.

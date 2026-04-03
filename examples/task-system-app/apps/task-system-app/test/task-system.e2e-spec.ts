@@ -10,6 +10,7 @@ describe('Task System App e2e', () => {
   let app: INestApplication;
   let createdProjectGuid: string;
   let createdTaskGuid: string;
+  let createdEventGuid: string;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -98,6 +99,47 @@ describe('Task System App e2e', () => {
     expect(res.body.list.length).toBeGreaterThanOrEqual(1);
   });
 
+  it('creates an event linked to the project', async () => {
+    const guid = randomUUID();
+    const res = await request(app.getHttpServer())
+      .post('/events')
+      .send({
+        guid,
+        title: 'Architecture review call',
+        description: 'Review the first standalone event slice',
+        status: 'scheduled',
+        startAt: '2026-04-03T09:00:00.000Z',
+        endAt: '2026-04-03T10:00:00.000Z',
+        allDay: false,
+        projectId: createdProjectGuid,
+        location: 'Discord',
+      })
+      .expect(201);
+
+    createdEventGuid = res.body.guid;
+    expect(createdEventGuid).toBe(guid);
+    expect(res.body.projectId).toBe(createdProjectGuid);
+    expect(res.body.title).toBe('Architecture review call');
+  });
+
+  it('lists events', async () => {
+    const res = await request(app.getHttpServer()).get('/events').expect(200);
+    expect(res.body.list.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('updates event status', async () => {
+    await request(app.getHttpServer())
+      .put(`/events/${createdEventGuid}`)
+      .send({ status: 'done' })
+      .expect(200);
+
+    const res = await request(app.getHttpServer())
+      .get(`/events/${createdEventGuid}`)
+      .expect(200);
+
+    expect(res.body.status).toBe('done');
+  });
+
   it('returns a 400 error via YalcEventService', async () => {
     const res = await request(app.getHttpServer())
       .get('/tasks/errors/bad-request')
@@ -147,6 +189,10 @@ describe('Task System App e2e', () => {
 
     expect(res.body.ok).toBe(true);
     expect(typeof res.body.projectId).toBe('string');
+  });
+
+  it('deletes the event', async () => {
+    await request(app.getHttpServer()).delete(`/events/${createdEventGuid}`).expect(200);
   });
 
   it('deletes the task', async () => {
