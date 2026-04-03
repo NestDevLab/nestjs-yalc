@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { IHttpCallStrategy } from '@nestjs-yalc/api-strategy';
+import { IApiCallStrategy } from '@nestjs-yalc/api-strategy';
 
 @Injectable()
 export class TasksProxyService {
