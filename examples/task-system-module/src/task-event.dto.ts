@@ -12,6 +12,7 @@ import {
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
 import { TaskEvent } from './task-event.entity.js';
+import { TaskProjectType } from './task-project.dto.js';
 
 @ObjectType()
 @ModelObject()
@@ -57,6 +58,9 @@ export class TaskEventType extends TaskEvent {
   @Field(() => UUIDScalar, { nullable: true })
   projectId?: string | null;
 
+  @Field(() => TaskProjectType, { nullable: true })
+  project?: TaskProjectType | null;
+
   @ModelField({ gqlOptions: { nullable: true } })
   @Field({ nullable: true })
   location?: string | null;
@@ -66,7 +70,7 @@ export class TaskEventType extends TaskEvent {
 @ModelObject()
 export class TaskEventCreateInput extends OmitType(
   TaskEventType,
-  ['createdAt', 'updatedAt'] as const,
+  ['createdAt', 'updatedAt', 'project'] as const,
   InputType,
 ) {}
 

@@ -111,6 +111,13 @@ Keep this checklist updated while implementing. Mark items as `[x]` when complet
   - [x] expose GraphQL CRUD for `events`
   - [x] expose GraphQL CRUD for `sync`
   - [x] add GraphQL integration/e2e tests for all exposed slices
+- [ ] Add GraphQL capability coverage for distinctive YALC features
+  - [ ] join coverage (where supported: left/inner/right or actual supported variants)
+  - [ ] virtual field coverage
+  - [ ] JSON field coverage with nested property access
+  - [ ] GraphQL filtering/sorting/pagination coverage beyond baseline CRUD
+  - [ ] GraphQL error behavior coverage for advanced queries
+- [ ] Improve `nestjs-yalc` documentation whenever capability discovery reveals missing or unclear feature docs
 - [ ] Add `areas` / `inbox` if still justified after core domain stabilizes
 - [ ] Integrate the example into repo CI/CD checks
 - [ ] Prepare the external OpenClaw-side integration layer separately
@@ -237,7 +244,8 @@ The runtime/e2e slice is now working and the example now builds cleanly as well;
 
 ### Next implementation target
 
-- Add deeper integration coverage around `event-manager` and GraphQL-backed CRUD slices.
+- Build a GraphQL capability matrix for the features that make `nestjs-yalc` valuable beyond plain CRUD.
+- Start with the most framework-distinctive coverage: joins/relations, virtual fields, and JSON field access.
 - Keep growing the sync model only through conceptually separate domain pieces.
 - Delay provider-specific Google integration until the generic sync domain is strong enough.
 - Separate **external mapping/identity** from **operational sync state**.

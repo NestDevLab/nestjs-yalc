@@ -1,6 +1,14 @@
 import { EntityWithTimestamps } from '@nestjs-yalc/database/timestamp.entity.js';
 import { ObjectType } from '@nestjs/graphql';
-import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
+import { TaskProject } from './task-project.entity.js';
 
 @Entity('task-event')
 @ObjectType({ isAbstract: true })
@@ -28,6 +36,10 @@ export class TaskEvent extends EntityWithTimestamps(BaseEntity) {
 
   @Column('varchar', { nullable: true, length: 36 })
   projectId?: string | null;
+
+  @ManyToOne(() => TaskProject, (project) => project.events, { nullable: true })
+  @JoinColumn({ name: 'projectId', referencedColumnName: 'guid' })
+  project?: TaskProject | null;
 
   @Column('varchar', { nullable: true })
   location?: string | null;

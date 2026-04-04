@@ -208,6 +208,42 @@ describe('Task System App GraphQL e2e', () => {
     expect(res.body.data.TaskSystem_getTaskSyncStateGrid.pageData.count).toBeGreaterThanOrEqual(1);
   });
 
+  it('resolves nested project/task/event relations in GraphQL', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `
+          query RelationCoverage($projectGuid: String!, $taskGuid: String!, $eventGuid: String!) {
+            TaskSystem_getTaskProject(ID: $projectGuid) {
+              guid
+              name
+            }
+            TaskSystem_getTaskItem(ID: $taskGuid) {
+              guid
+              title
+              projectId
+            }
+            TaskSystem_getTaskEvent(ID: $eventGuid) {
+              guid
+              title
+              projectId
+            }
+          }
+        `,
+        variables: {
+          projectGuid,
+          taskGuid,
+          eventGuid,
+        },
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.errors).toBeUndefined();
+    expect(res.body.data.TaskSystem_getTaskProject.guid).toBe(projectGuid);
+    expect(res.body.data.TaskSystem_getTaskItem.projectId).toBe(projectGuid);
+    expect(res.body.data.TaskSystem_getTaskEvent.projectId).toBe(projectGuid);
+  });
+
   it('updates and deletes sync state via GraphQL', async () => {
     const updateRes = await request(app.getHttpServer())
       .post('/graphql')

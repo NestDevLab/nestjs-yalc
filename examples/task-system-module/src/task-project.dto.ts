@@ -11,6 +11,8 @@ import {
 } from '@nestjs-yalc/crud-gen/object.decorator.js';
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
+import { TaskEventType } from './task-event.dto.js';
+import { TaskItemType } from './task-item.dto.js';
 import { TaskProject } from './task-project.entity.js';
 
 @ObjectType()
@@ -37,13 +39,19 @@ export class TaskProjectType extends TaskProject {
   @ModelField({})
   @Field()
   status: string;
+
+  @Field(() => [TaskItemType], { nullable: true })
+  tasks?: TaskItemType[];
+
+  @Field(() => [TaskEventType], { nullable: true })
+  events?: TaskEventType[];
 }
 
 @InputType()
 @ModelObject()
 export class TaskProjectCreateInput extends OmitType(
   TaskProjectType,
-  ['createdAt', 'updatedAt'] as const,
+  ['createdAt', 'updatedAt', 'tasks', 'events'] as const,
   InputType,
 ) {}
 

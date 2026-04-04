@@ -35,6 +35,10 @@ export { JoinTypes } from './crud-gen-gql.interface.js';
  */
 @InputType()
 export class SortModel<T = any> implements ISortModel<T> {
+  @Field(
+    /* istanbul ignore next */
+    () => String,
+  )
   colId!: string;
   @Field(
     /* istanbul ignore next */
@@ -54,7 +58,7 @@ export function sortModelFactory<Entity>(entityModel: ClassType<Entity>) {
   class SortModel implements ISortModelStrict<typeof fieldsEnum> {
     @Field(
       /* istanbul ignore next */
-      () => fieldsEnum,
+      () => String,
     )
     colId!: keyof typeof fieldsEnum;
     @Field(
@@ -72,7 +76,17 @@ export function sortModelFactory<Entity>(entityModel: ClassType<Entity>) {
 
 @InputType()
 export class RowGroup {
+  @Field(
+    /* istanbul ignore next */
+    () => String,
+  )
   colId!: string;
+
+  @Field(
+    /* istanbul ignore next */
+    () => String,
+    { nullable: true },
+  )
   aggFunc!: string;
 }
 
@@ -92,7 +106,7 @@ export function filterExpressionInputFactory<Entity>(
     type!: GeneralFilters;
     @Field(
       /* istanbul ignore next */
-      () => FieldEnum,
+      () => String,
     )
     field!: string;
     filter!: string;
@@ -105,7 +119,7 @@ export function filterExpressionInputFactory<Entity>(
     type!: GeneralFilters;
     @Field(
       /* istanbul ignore next */
-      () => FieldEnum,
+      () => String,
     )
     field!: string;
     filter!: number;
@@ -119,7 +133,7 @@ export function filterExpressionInputFactory<Entity>(
     type!: GeneralFilters;
     @Field(
       /* istanbul ignore next */
-      () => FieldEnum,
+      () => String,
     )
     field!: string;
     dateFrom!: string;
@@ -133,7 +147,7 @@ export function filterExpressionInputFactory<Entity>(
     values!: string[];
     @Field(
       /* istanbul ignore next */
-      () => FieldEnum,
+      () => String,
     )
     field!: string;
   }

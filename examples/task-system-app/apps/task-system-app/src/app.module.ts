@@ -12,6 +12,11 @@ import {
   TaskSyncState,
 } from '@nestjs-yalc/task-system-module';
 import { EventsModule } from './events/events.module';
+import {
+  TaskEventRelationsResolver,
+  TaskItemRelationsResolver,
+  TaskProjectRelationsResolver,
+} from './graphql-relations.resolver';
 import { ProjectsModule } from './projects/projects.module';
 import { SyncModule } from './sync/sync.module';
 import { TasksModule } from './tasks/tasks.module';
@@ -36,12 +41,18 @@ import { TasksModule } from './tasks/tasks.module';
       ],
       synchronize: true,
     }),
+    TypeOrmModule.forFeature([TaskProject, TaskItem, TaskEvent]),
     TaskSystemModule.register('default'),
     TasksModule,
     ProjectsModule,
     EventsModule,
     SyncModule,
   ],
-  providers: [UUIDScalar],
+  providers: [
+    UUIDScalar,
+    TaskItemRelationsResolver,
+    TaskEventRelationsResolver,
+    TaskProjectRelationsResolver,
+  ],
 })
 export class AppModule {}
