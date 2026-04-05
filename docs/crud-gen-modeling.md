@@ -66,13 +66,15 @@ project?: TaskProjectType | null;
 ```
 
 ### One-to-many arrays vs connection objects
-If a DTO field is declared as a plain array GraphQL field (for example `@Field(() => [TaskItemType])`), CRUD-Gen now treats it as an array relation and does not force the GraphQL `Connection` wrapper for that field resolver.
+If a DTO field is declared as a plain array GraphQL field (for example `@Field(() => [TaskItemType])`), CRUD-Gen treats that relation field as an array relation and does not wrap it in the GraphQL `Connection` shape.
 
 Use this when you want:
 - `project.tasks: [TaskItemType]`
 - `project.events: [TaskEventType]`
 
 instead of a `nodes/pageData` connection shape.
+
+By contrast, top-level generated grid queries still return connection-style wrappers.
 
 ### Practical rule of thumb
 If a nested GraphQL relation is requested and the parent object needs a foreign key that the client did not explicitly ask for, prefer declaring `ModelField.relation` correctly instead of writing a custom resolver first. CRUD-Gen is designed to fill in that missing source key automatically when relation metadata is available.
@@ -87,8 +89,10 @@ For generated GraphQL grid queries, the public args contract includes:
 Notes:
 - For generated GraphQL grid queries, `filters` uses the generated GraphQL DTO-specific input type (for example `TaskItemTypeFilterExpressionInput`), not the legacy raw `FilterScalar` name.
 - The filter model is built around `expressions` / `childExpressions`, with typed branches such as `text`, `number`, `date`, and `set`.
+- `field` and `sorting.colId` are runtime strings in the schema; do not assume enum validation at the GraphQL schema layer.
 - `startRow` and `endRow` are real GraphQL args on paginated grid queries and drive the `pageData.startRow/endRow` response metadata.
 - If these pagination args are missing from the schema, treat that as a framework regression rather than an application-level limitation.
+- Count behavior is selection-sensitive: selecting `pageData.count` can trigger a different repository path than queries that only ask for `nodes`.
 - Advanced structured filtering (`filters` with `expressions` / `childExpressions`) requires the extended repository path. When CRUD-Gen falls back to a plain TypeORM repository, these extended query features now fail explicitly instead of being ignored silently.
 
 ## Plain fallback vs extended repository
@@ -107,7 +111,8 @@ Supported reliably:
 Not supported as full CRUD-Gen semantics:
 - structured GraphQL filters
 - advanced join/subquery behavior
-- relation-loading flows that depend on extended repository semantics
+- dataloader/relation-loading flows that depend on extended repository semantics
+- richer helper metadata encoded in `where.filters`
 
 ### Extended repository path
 Use this when the repository exposes the CRUD-Gen extended helpers.

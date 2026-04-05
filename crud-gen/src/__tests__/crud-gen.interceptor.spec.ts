@@ -116,4 +116,22 @@ describe('Crud-gen Interceptor test', () => {
 
     expect(TestedCrudGenInterceptorWorker([1, 1])).toEqual(testReturnsNoParams);
   });
+
+  it('passes through plain array payloads unchanged', async () => {
+    const TestedCrudGenInterceptorWorker = crudGenGqlInterceptorWorker(
+      0,
+      10,
+    );
+
+    expect(TestedCrudGenInterceptorWorker([1, 2, 3] as any)).toEqual([1, 2, 3]);
+  });
+
+  it('passes through non-tuple object payloads unchanged', async () => {
+    const TestedCrudGenInterceptorWorker = crudGenGqlInterceptorWorker(
+      0,
+      10,
+    );
+
+    expect(TestedCrudGenInterceptorWorker({ ok: true } as any)).toEqual({ ok: true });
+  });
 });

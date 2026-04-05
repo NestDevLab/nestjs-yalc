@@ -106,7 +106,12 @@ export interface IDependencyObject<Entity> {
 }
 ```
 
-These 2 properties should eventually added to your `TypeORM.forFeature` method and the NestJS providers list available in your module.
+These 2 properties are used differently:
+
+- `providers` should be added to your NestJS module providers list.
+- `repository` is the repository class returned by the factory and is mainly useful as a token/reference for advanced customization.
+
+For the normal TypeORM module wiring shown in the live examples, register the **entity classes** with `TypeOrmModule.forFeature(...)`, not the factory-returned repository class.
 
 Example:
 
@@ -118,23 +123,24 @@ export class AppModule {
   static register(dbConnection: string): DynamicModule {
     return {
       module: UserModule,
-      imports: [
-        TypeOrmModule.forFeature([userPhoneProviders.repository], 'default'),
-      ],
-      providers: [...userPhoneProviders.providers],
+      imports: [TypeOrmModule.forFeature([UserPhone], dbConnection)],
+      providers: [...userPhoneProvidersDeps.providers],
+      exports: [...userPhoneProvidersDeps.providers],
     };
   }
 }
 ```
 
-**NOTE:** Also remember to add the `UserPhone` Entity to the entity list of your TypeORM configurations.
+**NOTE:** Also remember to add the `UserPhone` entity to the entity list of your TypeORM configuration.
 
 That's it! This is the bare minimum code to create a full featured GraphQL CRUD based on a single entity, the operations generated are the following:
 
 #### Queries:
 
-- `getUserPhone(ID):` It returns a single UserPhone resource selected by the ID
-- `getUserPhoneGrid(sorting, filters, startRow, endRow, join):` It returns a list of user phones that can be sorted, filtered, paginated and joined.
+- `getUserPhone(ID):` returns a single `UserPhone` resource selected by the ID.
+- `getUserPhoneGrid(sorting, filters, startRow, endRow, join):` returns a GraphQL **connection-style wrapper** with `nodes` and `pageData`, not a raw list.
+
+At the GraphQL schema level, generated grid queries are the place where pagination args such as `startRow` / `endRow` belong.
 
 #### Mutations:
 
@@ -232,8 +238,8 @@ export class SkeletonUser extends EntityWithTimestamps(BaseEntity) {
     relation: {
       type: () => UserPhone,
       relationType: 'one-to-many',
-      sourceKey: { dst: 'guid' },
-      targetKey: { dst: 'userId' },
+      sourceKey: { dst: 'guid', alias: 'guid' },
+      targetKey: { dst: 'userId', alias: 'userId' },
     },
   })
   @OneToMany(() => UserPhone, (meta) => meta.SkeletonUser)
@@ -263,24 +269,27 @@ export class UserPhone extends EntityWithTimestamps(BaseEntity) {
   @Column('varchar', { length: 36 })
   userId: string;
 
-  @ModelField<UserPhone>({
+  @ModelField<SkeletonUser>({
     relation: {
-      type: () => UserPhone,
-      relationType: 'one-to-many',
-      sourceKey: { dst: 'guid', alias: 'guid' },
-      targetKey: { dst: 'userId', alias: 'userId' },
+      type: () => SkeletonUser,
+      relationType: 'many-to-one',
+      sourceKey: { dst: 'userId', alias: 'userId' },
+      targetKey: { dst: 'guid', alias: 'guid' },
     },
   })
-  @OneToOne(() => SkeletonUser, (meta) => meta.SkeletonPhone)
+  @ManyToOne(() => SkeletonUser, (meta) => meta.UserPhone)
   @JoinColumn([{ name: 'userId', referencedColumnName: 'guid' }])
   SkeletonUser?: SkeletonUser;
 }
 ```
 
-**NOTE 1:** most of the time you can avoid to use the `@ModelField` decorator since the CrudGen system is able to automatically detect it by the TypeORM decorators, however, with the `@ModelField` you can specify more options to include some edge cases. You could even only use ModelField instead
-if you only need the dataloader and not the join feature.
+**NOTE 1:** basic TypeORM relation decorators are often enough for very simple cases, but `@ModelField` is no longer just an optional hint. In practice it becomes part of the execution contract when you need:
+- custom GraphQL names/types
+- explicit `sourceKey` / `targetKey` aliases
+- reliable dataloader token resolution via `relation.type`
+- relation fields declared on DTOs rather than entities
 
-**NOTE 2:** It's a good practice to define the `@ModelField` within a DTO instead of an entity. It's always better to separate this 2 concepts. In the example above we used the entities for simplicity
+**NOTE 2:** Prefer defining `@ModelField` on DTOs / GraphQL types rather than on entities. The examples above use entities for brevity, but real applications should usually separate persistence concerns from GraphQL exposure.
 
 #### Define DTO with field visibility, validation, mapping, and value manipulation
 
@@ -292,7 +301,7 @@ what should not be changed from the entity and redefine some properties instead 
 
 We can create a `skeleton-user.type.ts` with the following code and move all the GraphQL related decorators within this file.
 
-Also we have to change the `@ObjectType` decorator on our entity to this: `@ObjectType({ isAbstract: true })` and remove the `@ModelObject` one.
+Also change the entity GraphQL decoration to `@ObjectType({ isAbstract: true })` if the DTO/type becomes the public GraphQL object. Keep `@ModelObject` metadata where needed for CRUD-Gen mapping reuse.
 
 Example:
 

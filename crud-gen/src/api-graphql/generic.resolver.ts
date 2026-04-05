@@ -304,11 +304,14 @@ export function defineFieldResolver<Entity extends Record<string, any> = any>(
           nullable: resolverInfo.agField?.gqlOptions?.nullable,
         },
       )(resolver.prototype, resolverInfo.relation.propertyName, descriptor);
-      UseInterceptors(new CrudGenGqlInterceptor())(
-        resolver.prototype,
-        resolverInfo.relation.propertyName,
-        descriptor,
-      );
+
+      if (!isArrayGraphType) {
+        UseInterceptors(new CrudGenGqlInterceptor())(
+          resolver.prototype,
+          resolverInfo.relation.propertyName,
+          descriptor,
+        );
+      }
 
       Parent()(resolver.prototype, resolverInfo.relation.propertyName, 0);
 
@@ -511,10 +514,15 @@ export function defineGetGridResource<Entity>(
       findOptions: CrudGenFindManyOptions,
     ): Promise<[Entity[], number]> {
       const service = <GenericService<Entity>>this.service;
+      const where = findOptions?.where as any;
       const hasStructuredFilters =
-        !!findOptions?.where &&
-        typeof (findOptions.where as any).filters === 'object' &&
-        Object.keys((findOptions.where as any).filters).length > 0;
+        !!where &&
+        typeof where === 'object' &&
+        ((typeof where.filters === 'object' &&
+          Object.keys(where.filters ?? {}).length > 0) ||
+          'operator' in where ||
+          'expressions' in where ||
+          'childExpressions' in where);
 
       if (hasStructuredFilters && !service.supportsExtendedRepository()) {
         throw new CrudGenError(

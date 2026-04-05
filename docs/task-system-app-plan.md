@@ -112,14 +112,14 @@ Keep this checklist updated while implementing. Mark items as `[x]` when complet
   - [x] expose GraphQL CRUD for `sync`
   - [x] add GraphQL integration/e2e tests for all exposed slices
 - [ ] Add GraphQL capability coverage for distinctive YALC features
-  - [ ] join coverage (where supported: left/inner/right or actual supported variants)
+  - [x] join coverage (validated on actual supported GraphQL join args / enum values)
   - [ ] virtual field coverage
   - [ ] JSON field coverage with nested property access
   - [ ] GraphQL filtering/sorting/pagination coverage beyond baseline CRUD
     - [x] sorting coverage on task grids
     - [ ] filtering coverage (blocked in this example because plain-repository fallback now fails explicitly on structured filters; needs extended repository path to test end-to-end)
     - [x] pagination coverage on grid queries
-  - [ ] GraphQL error behavior coverage for advanced queries
+  - [x] GraphQL error behavior coverage for advanced queries
 - [ ] Improve `nestjs-yalc` documentation whenever capability discovery reveals missing or unclear feature docs
 - [ ] Add `areas` / `inbox` if still justified after core domain stabilizes
 - [ ] Integrate the example into repo CI/CD checks

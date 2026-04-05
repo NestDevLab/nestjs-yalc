@@ -269,6 +269,34 @@ describe('Task System App GraphQL e2e', () => {
     expect(res.body.data.TaskSystem_getTaskEvent.projectId).toBe(projectGuid);
   });
 
+  it('exposes GraphQL join args on task grids', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `
+          query TaskItemGridJoinArgs {
+            __type(name: "Query") {
+              fields {
+                name
+                args { name }
+              }
+            }
+          }
+        `,
+      })
+      .expect(200);
+
+    expect(res.body.errors).toBeUndefined();
+    const gridField = res.body.data.__type.fields.find(
+      (field: any) => field.name === 'TaskSystem_getTaskItemGrid',
+    );
+    const argNames = gridField.args.map((arg: any) => arg.name);
+    expect(argNames).toContain('join');
+    expect(argNames).toContain('sorting');
+    expect(argNames).toContain('startRow');
+    expect(argNames).toContain('endRow');
+  });
+
   it('supports GraphQL sorting on task grids', async () => {
     const res = await request(app.getHttpServer())
       .post('/graphql')
@@ -290,6 +318,90 @@ describe('Task System App GraphQL e2e', () => {
     expect(res.body.data.TaskSystem_getTaskItemGrid.pageData.count).toBeGreaterThanOrEqual(2);
     expect(res.body.data.TaskSystem_getTaskItemGrid.nodes[0].guid).toBe(secondaryTaskGuid);
     expect(res.body.data.TaskSystem_getTaskItemGrid.nodes[0].title).toBe('Aaa First Task');
+  });
+
+  it('accepts GraphQL join args on task grids', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `
+          query JoinedTaskGrid {
+            TaskSystem_getTaskItemGrid(
+              join: { project: { joinType: LEFT_JOIN } }
+              sorting: [{ colId: "title", sort: ASC }]
+            ) {
+              pageData { count }
+              nodes { guid title projectId }
+            }
+          }
+        `,
+      })
+      .expect(200);
+
+    expect(res.body.errors).toBeUndefined();
+    expect(res.body.errors).toBeUndefined();
+    expect(res.body.data.TaskSystem_getTaskItemGrid.pageData.count).toBeGreaterThanOrEqual(2);
+    expect(res.body.data.TaskSystem_getTaskItemGrid.nodes.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('rejects structured GraphQL filters on plain fallback grids', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `
+          query FilteredTasks($filters: TaskItemTypeFilterExpressionInput) {
+            TaskSystem_getTaskItemGrid(filters: $filters) {
+              pageData { count }
+              nodes { guid title }
+            }
+          }
+        `,
+        variables: {
+          filters: {
+            operator: "AND",
+            expressions: [
+              {
+                text: {
+                  field: "title",
+                  filterType: "TEXT",
+                  type: "CONTAINS",
+                  filter: "Aaa"
+                }
+              }
+            ]
+          },
+        },
+      })
+      .expect(200);
+
+    expect(res.body.data).toBeNull();
+    expect(res.body.errors).toBeDefined();
+    expect(res.body.errors[0].message).toContain(
+      'Structured GraphQL filters require an extended repository',
+    );
+  });
+
+  it('rejects invalid GraphQL join enum values', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `
+          query InvalidJoinEnum {
+            TaskSystem_getTaskItemGrid(
+              join: { project: { joinType: LEFT } }
+            ) {
+              pageData { count }
+              nodes { guid }
+            }
+          }
+        `,
+      })
+      .expect(400);
+
+    expect(res.body.errors).toBeDefined();
+    expect(res.body.errors[0].message).toContain(
+      'Value "LEFT" does not exist in "JoinTypes" enum',
+    );
   });
 
   it('supports GraphQL pagination on task grids', async () => {
