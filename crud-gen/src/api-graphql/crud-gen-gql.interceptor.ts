@@ -13,7 +13,11 @@ export function crudGenGqlInterceptorWorker<T>(
   endRow: number,
 ) {
   return (value: [T, number] | T) => {
-    if (!Array.isArray(value) || value.length !== 2 || typeof value[1] !== 'number') {
+    if (
+      !Array.isArray(value) ||
+      value.length !== 2 ||
+      typeof value[1] !== 'number'
+    ) {
       return value;
     }
 

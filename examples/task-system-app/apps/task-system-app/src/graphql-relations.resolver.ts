@@ -20,7 +20,9 @@ export class TaskItemRelationsResolver {
   @ResolveField(() => TaskProjectType, { nullable: true })
   async project(@Parent() task: TaskItem) {
     if (!task.projectId) return null;
-    const project = await this.projectRepository.findOneBy({ guid: task.projectId });
+    const project = await this.projectRepository.findOneBy({
+      guid: task.projectId,
+    });
     return project ? new TaskProjectType(project) : null;
   }
 }
@@ -35,7 +37,9 @@ export class TaskEventRelationsResolver {
   @ResolveField(() => TaskProjectType, { nullable: true })
   async project(@Parent() event: TaskEvent) {
     if (!event.projectId) return null;
-    const project = await this.projectRepository.findOneBy({ guid: event.projectId });
+    const project = await this.projectRepository.findOneBy({
+      guid: event.projectId,
+    });
     return project ? new TaskProjectType(project) : null;
   }
 }
@@ -57,7 +61,9 @@ export class TaskProjectRelationsResolver {
 
   @ResolveField(() => [TaskEventType], { nullable: true })
   async events(@Parent() project: TaskProject) {
-    const events = await this.eventRepository.findBy({ projectId: project.guid });
+    const events = await this.eventRepository.findBy({
+      projectId: project.guid,
+    });
     return events.map((event) => new TaskEventType(event));
   }
 }

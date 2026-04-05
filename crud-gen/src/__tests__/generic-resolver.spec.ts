@@ -246,6 +246,67 @@ let undefinedExtraResolverOptions: IGenericResolverOptions<TestEntityRelation> =
 
 const mockedResponse = {};
 
+describe('defineGetGridResource', () => {
+  const queryName = 'gridQuery';
+
+  const makeResolverClass = () =>
+    class GridResolverClass {
+      service: any;
+    };
+
+  it('throws on structured filters when extended repository support is missing', async () => {
+    const GridResolverClass = makeResolverClass();
+    defineGetGridResource(
+      queryName,
+      TestEntityRelation,
+      GridResolverClass as any,
+      {},
+    );
+
+    const resolver = new (GridResolverClass as any)();
+    resolver.service = {
+      supportsExtendedRepository: jest.fn().mockReturnValue(false),
+      getEntityListExtended: jest.fn(),
+    };
+
+    await expect(
+      resolver[queryName]({
+        where: {
+          operator: 'AND',
+          expressions: [],
+        },
+      }),
+    ).rejects.toThrow(
+      'Structured GraphQL filters require an extended repository',
+    );
+  });
+
+  it('delegates to service for basic grid queries', async () => {
+    const GridResolverClass = makeResolverClass();
+    defineGetGridResource(
+      queryName,
+      TestEntityRelation,
+      GridResolverClass as any,
+      {},
+    );
+
+    const expected = [[new TestEntityRelation()], 1];
+    const resolver = new (GridResolverClass as any)();
+    resolver.service = {
+      supportsExtendedRepository: jest.fn().mockReturnValue(false),
+      getEntityListExtended: jest.fn().mockResolvedValue(expected),
+    };
+
+    await expect(resolver[queryName]({ where: { id: 1 } })).resolves.toEqual(
+      expected,
+    );
+    expect(resolver.service.getEntityListExtended).toHaveBeenCalledWith(
+      { where: { id: 1 } },
+      true,
+    );
+  });
+});
+
 describe.skip('Generic Resolver', () => {
   const mockedGenericService = createMock<GenericService<TestEntityRelation>>();
   const mockedTestEntityRelationDL =
