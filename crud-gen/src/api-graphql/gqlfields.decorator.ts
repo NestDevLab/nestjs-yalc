@@ -50,6 +50,35 @@ export const GqlModelFieldsMapper = (
     if (item.name.value === 'pageData' && item.selectionSet) return;
 
     if (item.selectionSet) {
+      const relationField = mapper.field[item.name.value] as
+        | (FieldMapperProperty & {
+            relation?: { sourceKey?: { dst: string; alias: string } };
+          })
+        | undefined;
+      const sourceKey = relationField?.relation?.sourceKey;
+
+      if (sourceKey) {
+        const normalizedPath = path ? path : '';
+        const relationKey = `${normalizedPath}${sourceKey.dst}`;
+
+        if (!normalizedPath) {
+          if (!keys.includes(relationKey)) {
+            keys.push(relationKey);
+          }
+        } else if (!keys.includes(relationKey) && !keysMeta[relationKey]) {
+          keysMeta[relationKey] = {
+            fieldMapper: relationField,
+            isNested: true,
+            rawSelect: formatRawSelectionWithoutAlias(
+              sourceKey.dst,
+              normalizedPath.endsWith('.')
+                ? normalizedPath.slice(0, -1)
+                : normalizedPath,
+            ),
+          };
+        }
+      }
+
       item.selectionSet.selections.forEach((subItem: any) => {
         /**
          * if it's a nested item, then recurse

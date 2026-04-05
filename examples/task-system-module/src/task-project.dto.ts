@@ -12,7 +12,9 @@ import {
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
 import { TaskEventType } from './task-event.dto.js';
+import { TaskEvent } from './task-event.entity.js';
 import { TaskItemType } from './task-item.dto.js';
+import { TaskItem } from './task-item.entity.js';
 import { TaskProject } from './task-project.entity.js';
 
 @ObjectType()
@@ -40,9 +42,29 @@ export class TaskProjectType extends TaskProject {
   @Field()
   status: string;
 
+  @ModelField({
+    gqlType: returnValue([TaskItemType]),
+    gqlOptions: { nullable: true },
+    relation: {
+      relationType: 'one-to-many',
+      sourceKey: { dst: 'guid', alias: 'guid' },
+      targetKey: { dst: 'projectId', alias: 'projectId' },
+      type: returnValue(TaskItem),
+    },
+  })
   @Field(() => [TaskItemType], { nullable: true })
   tasks?: TaskItemType[];
 
+  @ModelField({
+    gqlType: returnValue([TaskEventType]),
+    gqlOptions: { nullable: true },
+    relation: {
+      relationType: 'one-to-many',
+      sourceKey: { dst: 'guid', alias: 'guid' },
+      targetKey: { dst: 'projectId', alias: 'projectId' },
+      type: returnValue(TaskEvent),
+    },
+  })
   @Field(() => [TaskEventType], { nullable: true })
   events?: TaskEventType[];
 }

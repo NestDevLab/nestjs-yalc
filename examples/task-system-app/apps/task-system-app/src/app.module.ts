@@ -12,11 +12,6 @@ import {
   TaskSyncState,
 } from '@nestjs-yalc/task-system-module';
 import { EventsModule } from './events/events.module';
-import {
-  TaskEventRelationsResolver,
-  TaskItemRelationsResolver,
-  TaskProjectRelationsResolver,
-} from './graphql-relations.resolver';
 import { ProjectsModule } from './projects/projects.module';
 import { SyncModule } from './sync/sync.module';
 import { TasksModule } from './tasks/tasks.module';
@@ -48,11 +43,6 @@ import { TasksModule } from './tasks/tasks.module';
     EventsModule,
     SyncModule,
   ],
-  providers: [
-    UUIDScalar,
-    TaskItemRelationsResolver,
-    TaskEventRelationsResolver,
-    TaskProjectRelationsResolver,
-  ],
+  providers: [UUIDScalar],
 })
 export class AppModule {}

@@ -97,7 +97,7 @@ export function filterExpressionInputFactory<Entity>(
   let cached;
   if ((cached = filterExpressionInputCache.get(entityModel))) return cached;
 
-  const FieldEnum = entityFieldsEnumGqlFactory(entityModel);
+  entityFieldsEnumGqlFactory(entityModel);
 
   @InputType(`${entityModel.name}FilterTextInput`)
   class FilterText implements ITextFilterModel {

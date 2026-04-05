@@ -328,6 +328,50 @@ describe('Graphql decorator test', () => {
     expect(GqlFieldsMapperTest.keys).toEqual([]);
   });
 
+  it('Auto-adds relation source key for top-level nested relation selections', () => {
+    const relationInfo: GraphQLResolveInfo = {
+      fieldNodes: [
+        {
+          selectionSet: {
+            selections: [
+              {
+                kind: 'Field',
+                name: { kind: 'Name', value: 'project' },
+                selectionSet: {
+                  kind: 'SelectionSet',
+                  selections: [
+                    {
+                      kind: 'Field',
+                      name: { kind: 'Name', value: 'guid' },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    } as any;
+
+    const arr: IFieldMapper = {
+      project: {
+        dst: 'project',
+        relation: {
+          relationType: 'many-to-one',
+          sourceKey: { dst: 'projectId', alias: 'projectId' },
+          targetKey: { dst: 'guid', alias: 'guid' },
+          type: () => Object,
+        },
+      },
+      projectId: { dst: 'projectId' },
+    };
+
+    objectToFieldMapper.mockReturnValue({ field: arr, extraInfo: {} });
+    const result = $.GqlModelFieldsMapper(arr, relationInfo);
+
+    expect(result.keys).toEqual(expect.arrayContaining(['projectId']));
+  });
+
   it('Check GqlModelFieldsMapper with undefined values', () => {
     const arr: IFieldMapper = { ['first']: { dst: 'specified' } };
     const custominfo = {

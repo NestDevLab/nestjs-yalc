@@ -455,6 +455,33 @@ describe.skip('Generic Resolver', () => {
       // Need to restore the original not-mocked implementation
       spiedGetPropertyDescriptor.mockRestore();
     });
+
+    it('Should return a plain array when gqlType declares an array relation field', async () => {
+      const resolveInfo: IRelationInfo = {
+        ...oneToManyResolverInfo,
+        relation: {
+          ...oneToManyResolverInfo.relation,
+          relationType: 'one-to-many',
+        },
+        agField: {
+          ...customMetadatList[propertyRelationName],
+          gqlType: () => [TestEntityDto],
+          gqlOptions: { nullable: true },
+        },
+        join: undefined,
+      };
+
+      getEntityRelations.mockReturnValue([resolveInfo]);
+      const resolver = generateResolver(customMetadatList, baseResolverOption);
+
+      const result = await resolver[propertyRelationName](
+        TestEntityRelation2,
+        {},
+      );
+
+      expect(Array.isArray(result)).toBe(true);
+      expect(result[0]).toBeInstanceOf(TestEntityRelation2);
+    });
   });
 
   describe('Check dataloader one-to-one relationship', () => {

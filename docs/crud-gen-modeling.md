@@ -34,3 +34,45 @@ This page explains the two key decorators used by CRUD-Gen to describe how your 
 - Entities vs DTOs: keep persistence concerns on entities and GraphQL-facing shape on DTOs; use `copyFrom` to avoid duplication.
 - Hidden data: prefer `HideField` (from `@nestjs/graphql`) on DTOs for sensitive columns and keep the entity mapped for persistence.
 - Relations: if a relation is already described via TypeORM decorators, only add `ModelField` when you need custom aliases or defaults.
+
+## Relation metadata: important hidden behavior
+CRUD-Gen can do more with `ModelField.relation` than just influence joins. When relation metadata is present on DTO fields, the GraphQL layer uses it to:
+- build/override nested field resolvers
+- map the correct dataloader lookup keys via `sourceKey` / `targetKey`
+- auto-select the source foreign key required to resolve nested relations such as `task.project`
+
+This means relation metadata should be considered part of the GraphQL execution contract, not just a repository hint.
+
+### Recommended pattern for DTO relations
+Use:
+- `gqlType` for the GraphQL DTO/object type you want to expose
+- `relation.type` for the underlying entity/dataloader type used by CRUD-Gen internally
+
+Example:
+
+```ts
+@ModelField({
+  gqlType: returnValue(TaskProjectType),
+  gqlOptions: { nullable: true },
+  relation: {
+    relationType: 'many-to-one',
+    sourceKey: { dst: 'projectId', alias: 'projectId' },
+    targetKey: { dst: 'guid', alias: 'guid' },
+    type: returnValue(TaskProject),
+  },
+})
+@Field(() => TaskProjectType, { nullable: true })
+project?: TaskProjectType | null;
+```
+
+### One-to-many arrays vs connection objects
+If a DTO field is declared as a plain array GraphQL field (for example `@Field(() => [TaskItemType])`), CRUD-Gen now treats it as an array relation and does not force the GraphQL `Connection` wrapper for that field resolver.
+
+Use this when you want:
+- `project.tasks: [TaskItemType]`
+- `project.events: [TaskEventType]`
+
+instead of a `nodes/pageData` connection shape.
+
+### Practical rule of thumb
+If a nested GraphQL relation is requested and the parent object needs a foreign key that the client did not explicitly ask for, prefer declaring `ModelField.relation` correctly instead of writing a custom resolver first. CRUD-Gen is designed to fill in that missing source key automatically when relation metadata is available.

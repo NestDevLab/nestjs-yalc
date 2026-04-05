@@ -217,16 +217,18 @@ describe('Task System App GraphQL e2e', () => {
             TaskSystem_getTaskProject(ID: $projectGuid) {
               guid
               name
+              tasks { guid title projectId }
+              events { guid title projectId }
             }
             TaskSystem_getTaskItem(ID: $taskGuid) {
               guid
               title
-              projectId
+              project { guid name }
             }
             TaskSystem_getTaskEvent(ID: $eventGuid) {
               guid
               title
-              projectId
+              project { guid name }
             }
           }
         `,
@@ -240,8 +242,12 @@ describe('Task System App GraphQL e2e', () => {
     expect(res.status).toBe(200);
     expect(res.body.errors).toBeUndefined();
     expect(res.body.data.TaskSystem_getTaskProject.guid).toBe(projectGuid);
-    expect(res.body.data.TaskSystem_getTaskItem.projectId).toBe(projectGuid);
-    expect(res.body.data.TaskSystem_getTaskEvent.projectId).toBe(projectGuid);
+    expect(res.body.data.TaskSystem_getTaskProject.tasks.length).toBeGreaterThanOrEqual(1);
+    expect(res.body.data.TaskSystem_getTaskProject.events.length).toBeGreaterThanOrEqual(1);
+    expect(res.body.data.TaskSystem_getTaskProject.tasks[0].projectId).toBe(projectGuid);
+    expect(res.body.data.TaskSystem_getTaskProject.events[0].projectId).toBe(projectGuid);
+    expect(res.body.data.TaskSystem_getTaskItem.project.guid).toBe(projectGuid);
+    expect(res.body.data.TaskSystem_getTaskEvent.project.guid).toBe(projectGuid);
   });
 
   it('updates and deletes sync state via GraphQL', async () => {
