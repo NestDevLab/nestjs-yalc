@@ -19,7 +19,7 @@ import {
   QueryFailedError,
 } from 'typeorm';
 import { FindManyOptions, FindOptionsWhere as FindConditions } from 'typeorm';
-import { GenericTypeORMRepository } from '@nestjs-yalc/crud-gen/typeorm/generic.repository.js';
+import { type GenericTypeORMRepository } from '@nestjs-yalc/crud-gen/typeorm/generic.repository.js';
 import {
   CrudGenFindManyOptions,
   ICrudGenSimpleParams,
@@ -561,32 +561,6 @@ export class GenericService<
       return withCount
         ? repo.getManyAndCountExtended(findOptions)
         : repo.getManyExtended(findOptions);
-    }
-
-    const hasDerivedSelection =
-      !!findOptions.extra?._keysMeta &&
-      Object.keys(findOptions.extra._keysMeta).length > 0;
-
-    // Plain repositories can still satisfy simple read-path derived selections
-    // by reusing the query-builder formatting logic without advertising full
-    // extended-repository support for structured grid queries.
-    if (
-      hasDerivedSelection &&
-      typeof (repo as any).createQueryBuilder === 'function'
-    ) {
-      const queryBuilder =
-        GenericTypeORMRepository.prototype.getFormattedCrudGenQueryBuilder.call(
-          repo,
-          findOptions,
-        );
-
-      if (withCount) {
-        const entities = await queryBuilder.getMany();
-        const count = await queryBuilder.getCount();
-        return [entities, count];
-      }
-
-      return queryBuilder.getMany();
     }
 
     // Fallback for plain TypeORM repositories (no extended helpers):

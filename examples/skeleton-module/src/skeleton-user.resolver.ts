@@ -145,7 +145,10 @@ export class SkeletonUserResolver extends resolverFactory({
     description: "It's the combination of firstName and lastName",
   })
   fullName(@Parent() parent: SkeletonUserType): string {
-    return parent.fullName ?? [parent.firstName, parent.lastName].filter(Boolean).join(' ');
+    return (
+      parent.fullName ??
+      [parent.firstName, parent.lastName].filter(Boolean).join(' ')
+    );
   }
 }
 
