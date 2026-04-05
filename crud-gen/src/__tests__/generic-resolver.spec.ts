@@ -305,6 +305,82 @@ describe('defineGetGridResource', () => {
       true,
     );
   });
+
+  it('allows structured filters when extended repository support exists', async () => {
+    const GridResolverClass = makeResolverClass();
+    defineGetGridResource(
+      queryName,
+      TestEntityRelation,
+      GridResolverClass as any,
+      {},
+    );
+
+    const expected = [[new TestEntityRelation()], 1];
+    const resolver = new (GridResolverClass as any)();
+    resolver.service = {
+      supportsExtendedRepository: jest.fn().mockReturnValue(true),
+      getEntityListExtended: jest.fn().mockResolvedValue(expected),
+    };
+
+    await expect(
+      resolver[queryName]({
+        where: {
+          operator: 'AND',
+          expressions: [],
+        },
+      }),
+    ).resolves.toEqual(expected);
+  });
+
+  it('allows where.filters objects when extended repository support exists', async () => {
+    const GridResolverClass = makeResolverClass();
+    defineGetGridResource(
+      queryName,
+      TestEntityRelation,
+      GridResolverClass as any,
+      {},
+    );
+
+    const expected = [[new TestEntityRelation()], 1];
+    const resolver = new (GridResolverClass as any)();
+    resolver.service = {
+      supportsExtendedRepository: jest.fn().mockReturnValue(true),
+      getEntityListExtended: jest.fn().mockResolvedValue(expected),
+    };
+
+    await expect(
+      resolver[queryName]({
+        where: {
+          filters: {
+            foo: { eq: 'bar' },
+          },
+        },
+      }),
+    ).resolves.toEqual(expected);
+  });
+
+  it('delegates to service when query options expose any extra args metadata', async () => {
+    const GridResolverClass = makeResolverClass();
+    defineGetGridResource(
+      queryName,
+      TestEntityRelation,
+      GridResolverClass as any,
+      {
+        extraArgs: {},
+      } as any,
+    );
+
+    const expected = [[new TestEntityRelation()], 1];
+    const resolver = new (GridResolverClass as any)();
+    resolver.service = {
+      supportsExtendedRepository: jest.fn().mockReturnValue(true),
+      getEntityListExtended: jest.fn().mockResolvedValue(expected),
+    };
+
+    await expect(resolver[queryName]({ where: { foo: 'bar' } })).resolves.toEqual(
+      expected,
+    );
+  });
 });
 
 describe.skip('Generic Resolver', () => {
