@@ -117,10 +117,11 @@ Keep this checklist updated while implementing. Mark items as `[x]` when complet
     - [x] framework-level coverage for derived-field hydration / selection / denyFilter behavior
     - [x] example-level GraphQL e2e read coverage for derived field (`fullName`)
     - [ ] optional future expansion: sorting/filtering semantics on derived fields where supported by repository path
-  - [x] JSON field coverage with nested property access
-    - [x] JSON scalar round-trip (create/read/update)
-    - [x] JSON exposure on GraphQL grids
-    - [x] nested property capability probe on dot-path sorting
+  - [ ] JSON field coverage with nested property access
+    - [ ] deferred: current `task-system` example does not expose a dedicated JSON-backed CRUD model yet
+    - [ ] when added, cover JSON scalar round-trip (create/read/update)
+    - [ ] when added, cover JSON exposure on GraphQL grids
+    - [ ] when added, probe nested dot-path sorting/filtering semantics honestly
   - [ ] GraphQL filtering/sorting/pagination coverage beyond baseline CRUD
     - [x] sorting coverage on task grids
     - [ ] filtering coverage (blocked in this example because plain-repository fallback now fails explicitly on structured filters; needs extended repository path to test end-to-end)
@@ -285,8 +286,6 @@ The project is successful when:
 - it demonstrates correct `nestjs-yalc` patterns;
 - it has meaningful e2e coverage;
 - it is valuable even without OpenClaw;
-- OpenClaw can later extend it without changing its core identity.
-terns;
 - it has meaningful e2e coverage;
 - it is valuable even without OpenClaw;
 - OpenClaw can later extend it without changing its core identity.

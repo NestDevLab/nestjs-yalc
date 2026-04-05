@@ -43,6 +43,7 @@ export class TaskSystemModule {
         ...taskSyncStateProviders.providers,
       ],
       exports: [
+        EventEmitter2,
         ...taskProjectProviders.providers,
         ...taskItemProviders.providers,
         ...taskEventProviders.providers,

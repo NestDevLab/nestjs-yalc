@@ -592,6 +592,11 @@ export class GenericService<
 
   supportsExtendedRepository(): boolean {
     const repo: any = this.repository as any;
+
+    if (typeof repo.supportsExtendedRepository === 'function') {
+      return !!repo.supportsExtendedRepository();
+    }
+
     return (
       typeof repo.getManyAndCountExtended === 'function' &&
       typeof repo.getManyExtended === 'function'

@@ -23,6 +23,10 @@ export class GenericTypeORMRepository<
 > extends Repository<Entity> {
   protected entity!: EntityClassOrSchema;
 
+  supportsExtendedRepository(): boolean {
+    return true;
+  }
+
   /**
    * @todo we should create a class helper/adapter for the findOptions and move this method there
    */

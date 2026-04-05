@@ -643,6 +643,18 @@ describe('GenericService', () => {
     expect(extendedService.supportsExtendedRepository()).toBe(true);
   });
 
+  it('should prefer explicit repository capability checks when available', () => {
+    const extendedRepo: any = {
+      target: {},
+      find: jest.fn(),
+      supportsExtendedRepository: jest.fn(() => true),
+    };
+
+    const extendedService = new GenericService<any>(extendedRepo);
+    expect(extendedService.supportsExtendedRepository()).toBe(true);
+    expect(extendedRepo.supportsExtendedRepository).toHaveBeenCalled();
+  });
+
   it('should fallback to findAndCount when withCount is true and extended helpers are missing', async () => {
     const plainRepo: any = {
       target: {},

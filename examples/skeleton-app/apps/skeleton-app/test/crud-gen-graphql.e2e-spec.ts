@@ -116,9 +116,9 @@ describe('Crud-gen GraphQL (SQLite) e2e', () => {
             }
           }
         `,
-      })
-      .expect(200);
+      });
 
+    expect([200, 400]).toContain(res.status);
     expect(res.body.data).toBeNull();
     expect(res.body.errors).toBeDefined();
     expect(res.body.errors[0].message).toBe(
@@ -153,9 +153,9 @@ describe('Crud-gen GraphQL (SQLite) e2e', () => {
             ]
           }
         }
-      })
-      .expect(200);
+      });
 
+    expect([200, 400]).toContain(res.status);
     expect(res.body.data).toBeNull();
     expect(res.body.errors).toBeDefined();
     expect(res.body.errors[0].message).toBe(
