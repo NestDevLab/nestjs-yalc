@@ -281,6 +281,9 @@ describe.skip('Generic Resolver', () => {
     };
   };
   beforeEach(() => {
+    (mockedGenericService as any).supportsExtendedRepository = jest
+      .fn()
+      .mockReturnValue(true);
     mockedModuleRef.resolve.mockResolvedValue(mockedTestEntityRelation2DL);
     mockedTestEntityRelation2DL.getSearchKey.mockReturnValue('id');
     mockedTestEntityRelation2DL.loadOneToMany.mockResolvedValue([
@@ -358,6 +361,26 @@ describe.skip('Generic Resolver', () => {
       baseResolverOptionNoPrefix,
     );
     expect(resolver).toBeDefined();
+  });
+
+  it('Should reject structured filters on grid queries when extended repository support is missing', async () => {
+    GqlExecutionContext.create = jest.fn().mockImplementation(() => ({
+      getContext: jest.fn().mockReturnValue({ response: mockedResponse }),
+    }));
+
+    (mockedGenericService as any).supportsExtendedRepository.mockReturnValue(false);
+    const resolver = generateResolver(fixedMetadataList, baseResolverOption);
+
+    await expect(
+      resolver[queriesName.getGridResource]({
+        where: {
+          operator: 'AND',
+          expressions: [],
+        },
+      } as any),
+    ).rejects.toThrow(
+      'Structured GraphQL filters require an extended repository',
+    );
   });
 
   it('Should create a resolver with the default options', async () => {

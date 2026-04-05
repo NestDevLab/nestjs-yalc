@@ -621,6 +621,28 @@ describe('GenericService', () => {
     expect(callArgs.take).toBe(5);
   });
 
+  it('should report supportsExtendedRepository false for plain repositories', () => {
+    const plainRepo: any = {
+      target: {},
+      find: jest.fn(),
+    };
+
+    const plainService = new GenericService<any>(plainRepo);
+    expect(plainService.supportsExtendedRepository()).toBe(false);
+  });
+
+  it('should report supportsExtendedRepository true when extended helpers exist', () => {
+    const extendedRepo: any = {
+      target: {},
+      find: jest.fn(),
+      getManyExtended: jest.fn(),
+      getManyAndCountExtended: jest.fn(),
+    };
+
+    const extendedService = new GenericService<any>(extendedRepo);
+    expect(extendedService.supportsExtendedRepository()).toBe(true);
+  });
+
   it('should fallback to findAndCount when withCount is true and extended helpers are missing', async () => {
     const plainRepo: any = {
       target: {},
