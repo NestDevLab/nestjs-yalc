@@ -703,6 +703,26 @@ describe('Crud-gen helpers', () => {
     expect(result[0]).toBe('id');
   });
 
+  it('Should exclude mapped type property when denyFilter is true', () => {
+    jest.spyOn(CrudGenHelpers, 'objectToFieldMapper').mockReturnValueOnce({
+      field: {
+        id: {
+          denyFilter: false,
+          dst: 'id',
+        },
+        fullName: {
+          denyFilter: true,
+          dst: 'full_name_expr',
+          mode: 'derived',
+        },
+      },
+    });
+
+    const result = getMappedTypeProperties(TestEntity);
+    expect(result).toContain('id');
+    expect(result).not.toContain('fullName');
+  });
+
   it('Should get the column properties from an crud-gen field with mode derived', () => {
     const { columns: metadataColumns } = getMetadataArgsStorage();
     const initialLength = metadataColumns.length;

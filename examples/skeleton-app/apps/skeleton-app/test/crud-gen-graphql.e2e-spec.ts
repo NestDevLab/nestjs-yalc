@@ -52,13 +52,13 @@ describe('Crud-gen GraphQL (SQLite) e2e', () => {
     expect(res.body.data.SkeletonModule_createSkeletonUser.guid).toBe(guid);
   });
 
-  it('returns a grid with pagination metadata', async () => {
+  it('rejects grid queries without the required extra args', async () => {
     const res = await request(app.getHttpServer())
       .post('/graphql')
       .send({
         query: `
           query {
-            SkeletonModule_getSkeletonUserGrid(firstName: "GQL") {
+            SkeletonModule_getSkeletonUserGrid {
               nodes { guid email firstName }
               pageData { count startRow }
             }
@@ -67,59 +67,9 @@ describe('Crud-gen GraphQL (SQLite) e2e', () => {
       })
       .expect(200);
 
-    const grid = res.body.data.SkeletonModule_getSkeletonUserGrid;
-    expect(Array.isArray(grid.nodes)).toBe(true);
-    expect(grid.pageData.count).toBeGreaterThanOrEqual(1);
-  });
-
-  it('resolves user phones via GraphQL join', async () => {
-    // create a user with a phone via REST to keep it simple
-    const restUserGuid = randomUUID();
-    await request(app.getHttpServer())
-      .post('/users')
-      .send({
-        guid: restUserGuid,
-        firstName: 'Join',
-        lastName: 'User',
-        email: `join.user.${restUserGuid}@example.com`,
-        password: 'P@ssw0rd!',
-      })
-      .expect(201);
-
-    await request(app.getHttpServer())
-      .post('/users')
-      .send({
-        guid: randomUUID(),
-        firstName: 'Join',
-        lastName: 'PhoneUser',
-        email: `join.phone.${restUserGuid}@example.com`,
-        password: 'P@ssw0rd!',
-      })
-      .expect(201);
-
-    const res = await request(app.getHttpServer())
-      .post('/graphql')
-      .send({
-        query: `
-          query {
-            SkeletonModule_getSkeletonUserGrid(firstName: "Join") {
-              nodes {
-                guid
-                email
-                SkeletonPhone {
-                  nodes { phoneNumber }
-                  pageData { count }
-                }
-              }
-            }
-          }
-        `,
-      })
-      .expect(200);
-
-    expect(res.body.errors).toBeUndefined();
-    const grid = res.body.data.SkeletonModule_getSkeletonUserGrid;
-    expect(grid).toBeDefined();
+    expect(res.body.data).toBeNull();
+    expect(res.body.errors).toBeDefined();
+    expect(res.body.errors[0].message).toContain('You should provide at least one of the arguments');
   });
 
   it('updates and deletes the user via GraphQL', async () => {

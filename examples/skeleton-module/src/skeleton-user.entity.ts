@@ -34,7 +34,7 @@ export class SkeletonUser extends EntityWithTimestamps(BaseEntity) {
   // because it instructs TypeORM on how to select
   // the resource
   @ModelField({
-    dst: `CONCAT(firstName,' ', lastName)`,
+    dst: "CONCAT(firstName,' ', lastName)",
     mode: 'derived',
     isSymbolic: true,
   })

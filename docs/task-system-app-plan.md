@@ -113,7 +113,9 @@ Keep this checklist updated while implementing. Mark items as `[x]` when complet
   - [x] add GraphQL integration/e2e tests for all exposed slices
 - [ ] Add GraphQL capability coverage for distinctive YALC features
   - [x] join coverage (validated on actual supported GraphQL join args / enum values)
-  - [ ] virtual field coverage
+  - [~] virtual field coverage
+    - [x] framework-level coverage for derived-field hydration / selection / denyFilter behavior
+    - [ ] example-level GraphQL e2e coverage (currently blocked by pre-existing skeleton-app test harness/plugin issue)
   - [ ] JSON field coverage with nested property access
   - [ ] GraphQL filtering/sorting/pagination coverage beyond baseline CRUD
     - [x] sorting coverage on task grids
