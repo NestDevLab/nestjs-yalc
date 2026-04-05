@@ -1,9 +1,6 @@
 import { DynamicModule, Module } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { createRequire } from 'node:module';
-
-const require = createRequire(import.meta.url);
-const eventEmitter2Token = () => require('eventemitter2').EventEmitter2;
 import { skeletonUserProvidersFactory } from './skeleton-user.resolver.js';
 import { skeletonPhoneProvidersFactory } from './skeleton-phone.resolver.js';
 import { SkeletonPhone } from './skeleton-phone.entity.js';
@@ -22,17 +19,14 @@ export class SkeletonModule {
       ],
       providers: [
         {
-          provide: eventEmitter2Token(),
-          useFactory: () => {
-            const EventEmitter2 = eventEmitter2Token();
-            return new EventEmitter2();
-          },
+          provide: EventEmitter2,
+          useValue: new EventEmitter2(),
         },
         ...skeletonPhoneProviders.providers,
         ...skeletonUserProviders.providers,
       ],
       exports: [
-        eventEmitter2Token(),
+        EventEmitter2,
         ...skeletonPhoneProviders.providers,
         ...skeletonUserProviders.providers,
       ],
