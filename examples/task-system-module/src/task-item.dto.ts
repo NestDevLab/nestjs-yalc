@@ -54,7 +54,7 @@ export class TaskItemType extends TaskItem {
       relationType: 'many-to-one',
       sourceKey: { dst: 'projectId', alias: 'projectId' },
       targetKey: { dst: 'guid', alias: 'guid' },
-      type: returnValue(TaskProject),
+      type: () => TaskProject,
     },
   })
   @Field(() => TaskProjectType, { nullable: true })

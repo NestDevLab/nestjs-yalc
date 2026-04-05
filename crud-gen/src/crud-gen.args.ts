@@ -22,7 +22,16 @@ export function crudGenParamsFactory(
 
   @ArgsType()
   class CrudGenParams implements ICrudGenBaseParams {
+    @Field(() => Number, {
+      nullable: true,
+      defaultValue: defaultValues?.startRow ?? RowDefaultValues.START_ROW,
+    })
     startRow: number = defaultValues?.startRow ?? RowDefaultValues.START_ROW;
+
+    @Field(() => Number, {
+      nullable: true,
+      defaultValue: defaultValues?.endRow ?? RowDefaultValues.END_ROW,
+    })
     endRow: number = defaultValues?.endRow ?? RowDefaultValues.END_ROW;
     @Field(returnValue(SortType), {
       nullable: true,

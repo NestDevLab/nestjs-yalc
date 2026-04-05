@@ -596,20 +596,19 @@ describe('GenericService', () => {
     expect(callArgs.take).toBe(10);
   });
 
-  it('should ignore extended where filters in fallback getEntityListExtended', async () => {
+  it('should sanitize fallback where.filters metadata before delegating to TypeORM', async () => {
     const plainRepo: any = {
       target: {},
       find: jest.fn(),
     };
 
-    const mockedList = [{ id: '1' }];
-    plainRepo.find.mockResolvedValueOnce(mockedList);
+    plainRepo.find.mockResolvedValueOnce([{ id: '1' }]);
 
     const plainService = new GenericService<any>(plainRepo);
 
     await plainService.getEntityListExtended(
       {
-        where: { filters: { field: { eq: 'value' } } },
+        where: { foo: 'bar', filters: {} },
         skip: 5,
         take: 5,
       } as any,
@@ -617,7 +616,7 @@ describe('GenericService', () => {
     );
 
     const callArgs = plainRepo.find.mock.calls[0][0];
-    expect(callArgs.where).toBeUndefined();
+    expect(callArgs.where).toEqual({ foo: 'bar' });
     expect(callArgs.skip).toBe(5);
     expect(callArgs.take).toBe(5);
   });

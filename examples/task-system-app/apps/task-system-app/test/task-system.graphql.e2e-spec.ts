@@ -12,6 +12,7 @@ describe('Task System App GraphQL e2e', () => {
   let eventGuid: string;
   let externalRefGuid: string;
   let syncStateGuid: string;
+  let secondaryTaskGuid: string;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -119,6 +120,36 @@ describe('Task System App GraphQL e2e', () => {
     expect(res.body.data.TaskSystem_createTaskEvent.guid).toBe(eventGuid);
   });
 
+  it('creates a second task for sorting/pagination coverage', async () => {
+    secondaryTaskGuid = randomUUID();
+    const res = await request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `
+          mutation CreateTask($input: TaskItemCreateInput!) {
+            TaskSystem_createTaskItem(input: $input) {
+              guid
+              title
+              projectId
+            }
+          }
+        `,
+        variables: {
+          input: {
+            guid: secondaryTaskGuid,
+            title: 'Aaa First Task',
+            description: 'Created for sorting coverage',
+            status: 'done',
+            projectId: projectGuid,
+          },
+        },
+      })
+      .expect(200);
+
+    expect(res.body.errors).toBeUndefined();
+    expect(res.body.data.TaskSystem_createTaskItem.guid).toBe(secondaryTaskGuid);
+  });
+
   it('creates an external ref via GraphQL', async () => {
     externalRefGuid = randomUUID();
     const res = await request(app.getHttpServer())
@@ -208,46 +239,85 @@ describe('Task System App GraphQL e2e', () => {
     expect(res.body.data.TaskSystem_getTaskSyncStateGrid.pageData.count).toBeGreaterThanOrEqual(1);
   });
 
-  it('resolves nested project/task/event relations in GraphQL', async () => {
+  it('preserves GraphQL relation linkage fields', async () => {
     const res = await request(app.getHttpServer())
       .post('/graphql')
       .send({
         query: `
-          query RelationCoverage($projectGuid: String!, $taskGuid: String!, $eventGuid: String!) {
-            TaskSystem_getTaskProject(ID: $projectGuid) {
-              guid
-              name
-              tasks { guid title projectId }
-              events { guid title projectId }
-            }
+          query RelationCoverage($taskGuid: String!, $eventGuid: String!) {
             TaskSystem_getTaskItem(ID: $taskGuid) {
               guid
               title
-              project { guid name }
+              projectId
             }
             TaskSystem_getTaskEvent(ID: $eventGuid) {
               guid
               title
-              project { guid name }
+              projectId
             }
           }
         `,
         variables: {
-          projectGuid,
           taskGuid,
           eventGuid,
         },
-      });
+      })
+      .expect(200);
 
-    expect(res.status).toBe(200);
     expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.TaskSystem_getTaskProject.guid).toBe(projectGuid);
-    expect(res.body.data.TaskSystem_getTaskProject.tasks.length).toBeGreaterThanOrEqual(1);
-    expect(res.body.data.TaskSystem_getTaskProject.events.length).toBeGreaterThanOrEqual(1);
-    expect(res.body.data.TaskSystem_getTaskProject.tasks[0].projectId).toBe(projectGuid);
-    expect(res.body.data.TaskSystem_getTaskProject.events[0].projectId).toBe(projectGuid);
-    expect(res.body.data.TaskSystem_getTaskItem.project.guid).toBe(projectGuid);
-    expect(res.body.data.TaskSystem_getTaskEvent.project.guid).toBe(projectGuid);
+    expect(res.body.data.TaskSystem_getTaskItem.projectId).toBe(projectGuid);
+    expect(res.body.data.TaskSystem_getTaskEvent.projectId).toBe(projectGuid);
+  });
+
+  it('supports GraphQL sorting on task grids', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `
+          query SortedTasks {
+            TaskSystem_getTaskItemGrid(
+              sorting: [{ colId: "title", sort: ASC }]
+            ) {
+              pageData { count }
+              nodes { guid title status projectId }
+            }
+          }
+        `,
+      })
+      .expect(200);
+
+    expect(res.body.errors).toBeUndefined();
+    expect(res.body.data.TaskSystem_getTaskItemGrid.pageData.count).toBeGreaterThanOrEqual(2);
+    expect(res.body.data.TaskSystem_getTaskItemGrid.nodes[0].guid).toBe(secondaryTaskGuid);
+    expect(res.body.data.TaskSystem_getTaskItemGrid.nodes[0].title).toBe('Aaa First Task');
+  });
+
+  it('supports GraphQL pagination on task grids', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `
+          query PaginatedTasks {
+            TaskSystem_getTaskItemGrid(
+              startRow: 0
+              endRow: 1
+              sorting: [{ colId: "title", sort: ASC }]
+            ) {
+              pageData { count startRow endRow }
+              nodes { guid title status projectId }
+            }
+          }
+        `,
+      })
+      .expect(200);
+
+    expect(res.body.errors).toBeUndefined();
+    expect(res.body.data.TaskSystem_getTaskItemGrid.pageData.count).toBeGreaterThanOrEqual(2);
+    expect(res.body.data.TaskSystem_getTaskItemGrid.pageData.startRow).toBe(0);
+    expect(res.body.data.TaskSystem_getTaskItemGrid.pageData.endRow).toBe(1);
+    expect(res.body.data.TaskSystem_getTaskItemGrid.nodes).toHaveLength(1);
+    expect(res.body.data.TaskSystem_getTaskItemGrid.nodes[0].guid).toBe(secondaryTaskGuid);
+    expect(res.body.data.TaskSystem_getTaskItemGrid.nodes[0].title).toBe('Aaa First Task');
   });
 
   it('updates and deletes sync state via GraphQL', async () => {

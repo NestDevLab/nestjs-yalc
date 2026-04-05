@@ -49,7 +49,7 @@ export class TaskProjectType extends TaskProject {
       relationType: 'one-to-many',
       sourceKey: { dst: 'guid', alias: 'guid' },
       targetKey: { dst: 'projectId', alias: 'projectId' },
-      type: returnValue(TaskItem),
+      type: () => TaskItem,
     },
   })
   @Field(() => [TaskItemType], { nullable: true })
@@ -62,7 +62,7 @@ export class TaskProjectType extends TaskProject {
       relationType: 'one-to-many',
       sourceKey: { dst: 'guid', alias: 'guid' },
       targetKey: { dst: 'projectId', alias: 'projectId' },
-      type: returnValue(TaskEvent),
+      type: () => TaskEvent,
     },
   })
   @Field(() => [TaskEventType], { nullable: true })

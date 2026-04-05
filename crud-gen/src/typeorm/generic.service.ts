@@ -564,25 +564,38 @@ export class GenericService<
     }
 
     // Fallback for plain TypeORM repositories (no extended helpers):
-    // approximate using standard find/findAndCount and ignore advanced
-    // CrudGen options (filters/join) when we cannot map them safely.
+    // keep support minimal, but sanitize internal helper artifacts such as
+    // empty `where.filters` before delegating to TypeORM.
     const { where, info, extra, subQueryFilters, ...typeormOptions } =
       findOptions;
 
-    const hasExtendedWhere =
-      !!where && typeof (where as any).filters === 'object';
+    const sanitizedWhere =
+      where && typeof where === 'object' && !Array.isArray(where)
+        ? (() => {
+            const clone = { ...(where as any) };
+            if ('filters' in clone) {
+              delete clone.filters;
+            }
+            return Object.keys(clone).length ? clone : undefined;
+          })()
+        : (where as any);
 
     const mappedFindOptions: FindManyOptions<EntityRead> = {
       ...(typeormOptions as FindManyOptions<EntityRead>),
-      // Only apply where when it looks like a plain TypeORM where;
-      // CrudGen structured filters (with `.filters`) require the
-      // extended repository and are ignored here.
-      where: hasExtendedWhere ? undefined : (where as any),
+      where: sanitizedWhere as any,
     };
 
     return withCount
       ? this.repository.findAndCount(mappedFindOptions)
       : this.repository.find(mappedFindOptions);
+  }
+
+  supportsExtendedRepository(): boolean {
+    const repo: any = this.repository as any;
+    return (
+      typeof repo.getManyAndCountExtended === 'function' &&
+      typeof repo.getManyExtended === 'function'
+    );
   }
 
   protected mapEntityR2W(

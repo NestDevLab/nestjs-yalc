@@ -76,3 +76,47 @@ instead of a `nodes/pageData` connection shape.
 
 ### Practical rule of thumb
 If a nested GraphQL relation is requested and the parent object needs a foreign key that the client did not explicitly ask for, prefer declaring `ModelField.relation` correctly instead of writing a custom resolver first. CRUD-Gen is designed to fill in that missing source key automatically when relation metadata is available.
+
+## GraphQL grid args: sorting, filters, pagination
+For generated GraphQL grid queries, the public args contract includes:
+- `sorting`
+- `filters`
+- `startRow`
+- `endRow`
+
+Notes:
+- For generated GraphQL grid queries, `filters` uses the generated GraphQL DTO-specific input type (for example `TaskItemTypeFilterExpressionInput`), not the legacy raw `FilterScalar` name.
+- The filter model is built around `expressions` / `childExpressions`, with typed branches such as `text`, `number`, `date`, and `set`.
+- `startRow` and `endRow` are real GraphQL args on paginated grid queries and drive the `pageData.startRow/endRow` response metadata.
+- If these pagination args are missing from the schema, treat that as a framework regression rather than an application-level limitation.
+- Advanced structured filtering (`filters` with `expressions` / `childExpressions`) requires the extended repository path. When CRUD-Gen falls back to a plain TypeORM repository, these extended query features now fail explicitly instead of being ignored silently.
+
+## Plain fallback vs extended repository
+CRUD-Gen has two execution modes at runtime:
+
+### Plain TypeORM fallback
+Use this when only standard repository methods are available (`find`, `findAndCount`, etc.).
+
+Supported reliably:
+- simple `where`
+- sorting
+- pagination
+- basic GraphQL grid queries
+- linkage fields such as `projectId`
+
+Not supported as full CRUD-Gen semantics:
+- structured GraphQL filters
+- advanced join/subquery behavior
+- relation-loading flows that depend on extended repository semantics
+
+### Extended repository path
+Use this when the repository exposes the CRUD-Gen extended helpers.
+
+Required for:
+- structured GraphQL filters
+- advanced query semantics (`where.filters`, subqueries, advanced joins)
+- full richer CRUD-Gen behavior beyond plain TypeORM find/findAndCount
+
+Rule of thumb:
+- if a feature needs CRUD-Gen-specific query semantics, treat it as **extended-repository-only**
+- do not re-implement those semantics in the plain fallback unless you intentionally want to duplicate the extended repository engine

@@ -510,10 +510,19 @@ export function defineGetGridResource<Entity>(
     value: async function (
       findOptions: CrudGenFindManyOptions,
     ): Promise<[Entity[], number]> {
-      return (<GenericService<Entity>>this.service).getEntityListExtended(
-        findOptions,
-        true,
-      );
+      const service = <GenericService<Entity>>this.service;
+      const hasStructuredFilters =
+        !!findOptions?.where &&
+        typeof (findOptions.where as any).filters === 'object' &&
+        Object.keys((findOptions.where as any).filters).length > 0;
+
+      if (hasStructuredFilters && !service.supportsExtendedRepository()) {
+        throw new CrudGenError(
+          'Structured GraphQL filters require an extended repository; plain TypeORM fallback only supports basic grid queries.',
+        );
+      }
+
+      return service.getEntityListExtended(findOptions, true);
     },
   });
 
