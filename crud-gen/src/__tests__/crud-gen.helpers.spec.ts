@@ -720,7 +720,7 @@ describe('Crud-gen helpers', () => {
 
     const result = getMappedTypeProperties(TestEntity);
     expect(result).toContain('id');
-    expect(result).not.toContain('fullName');
+    expect(result).not.toContain('full_name_expr');
   });
 
   it('Should get the column properties from an crud-gen field with mode derived', () => {
