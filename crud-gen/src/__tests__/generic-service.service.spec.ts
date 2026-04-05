@@ -20,7 +20,10 @@ import {
 } from '../__mocks__/generic-service.mocks.js';
 import { getConnectionName } from '@nestjs-yalc/database/conn.helper.js';
 import { createMock } from '@golevelup/ts-jest';
-import { CGExtendedRepository } from '../typeorm/generic.repository.js';
+import {
+  CGExtendedRepository,
+  GenericTypeORMRepository,
+} from '../typeorm/generic.repository.js';
 import { ConnectionNotFoundError } from 'typeorm';
 import { FactoryProvider } from '@nestjs/common';
 import {
@@ -619,6 +622,45 @@ describe('GenericService', () => {
     expect(callArgs.where).toEqual({ foo: 'bar' });
     expect(callArgs.skip).toBe(5);
     expect(callArgs.take).toBe(5);
+  });
+
+  it('should use query-builder fallback for derived selections on plain repositories', async () => {
+    const getMany = jest.fn().mockResolvedValue([{ id: '1', fullName: 'A B' }]);
+    const getCount = jest.fn().mockResolvedValue(1);
+    const fakeQueryBuilder = { getMany, getCount };
+    const plainRepo: any = {
+      target: {},
+      createQueryBuilder: jest.fn(),
+    };
+
+    const queryBuilderSpy = jest
+      .spyOn(
+        GenericTypeORMRepository.prototype,
+        'getFormattedCrudGenQueryBuilder',
+      )
+      .mockReturnValue(fakeQueryBuilder as any);
+
+    const plainService = new GenericService<any>(plainRepo);
+
+    const result = await plainService.getEntityListExtended(
+      {
+        extra: {
+          _keysMeta: {
+            fullName: {
+              rawSelect: 'CONCAT(firstName, lastName)',
+              isNested: false,
+              fieldMapper: { _propertyName: 'fullName', mode: 'derived' },
+            },
+          },
+        },
+      } as any,
+      false,
+    );
+
+    expect(queryBuilderSpy).toHaveBeenCalled();
+    expect(result).toEqual([{ id: '1', fullName: 'A B' }]);
+
+    queryBuilderSpy.mockRestore();
   });
 
   it('should report supportsExtendedRepository false for plain repositories', () => {
