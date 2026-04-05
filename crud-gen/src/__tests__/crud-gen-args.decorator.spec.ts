@@ -88,6 +88,28 @@ describe('Crud-gen args decorator (esm-safe)', () => {
     expect(() => crudGenArgsDecorator.convertFilter(filter)).not.toThrow();
   });
 
+  it('convertFilter throws on invalid nested child expressions shape', () => {
+    const filter = {
+      operator: 'AND',
+      childExpressions: [
+        {
+          operator: 'OR',
+          expressions: [
+            {
+              text: {
+                field: 'field',
+                filterType: FilterType.TEXT,
+                type: GeneralFilters.EQUALS,
+                filter: 'abc',
+              },
+            },
+          ],
+        },
+      ],
+    } as any;
+    expect(() => crudGenArgsDecorator.convertFilter(filter)).toThrow();
+  });
+
   it('createWhere handles null input', () => {
     const result = crudGenArgsDecorator.createWhere(null as any, {}, '');
     expect(result).toEqual({ filters: {} });
@@ -121,6 +143,15 @@ describe('Crud-gen args decorator (esm-safe)', () => {
     ).toThrow();
   });
 
+  it('checkFilterScope allows empty include scope without filters', () => {
+    expect(() =>
+      crudGenArgsDecorator.checkFilterScope(
+        { filters: {} } as any,
+        { type: 'INCLUDE', fields: ['allowed'] } as any,
+      ),
+    ).not.toThrow();
+  });
+
   it('mapCrudGenParams respects extra args strategy', () => {
     const params = {
       ...fixedArgsOptions,
@@ -141,5 +172,54 @@ describe('Crud-gen args decorator (esm-safe)', () => {
         mockedInfo,
       ),
     ).toThrow();
+  });
+
+  it('mapCrudGenParams rejects multiple extra args in ONLY_ONE mode', () => {
+    const params = {
+      ...fixedArgsOptions,
+      extraArgsStrategy: ExtraArgsStrategy.ONLY_ONE,
+      extraArgs: {
+        foo: {
+          filterType: FilterType.TEXT,
+          filterCondition: GeneralFilters.EQUALS,
+          options: {},
+        },
+        bar: {
+          filterType: FilterType.TEXT,
+          filterCondition: GeneralFilters.EQUALS,
+          options: {},
+        },
+      },
+    } as any;
+
+    expect(() =>
+      crudGenArgsDecorator.mapCrudGenParams(
+        params,
+        createMock(),
+        { ...fixedArgsQueryParams, foo: 'x', bar: 'y' } as any,
+        mockedInfo,
+      ),
+    ).toThrow('You must define only one extra arguments');
+  });
+
+  it('mapCrudGenParams stores virtual extra args in extra.args', () => {
+    const params = {
+      ...fixedArgsOptions,
+      extraArgs: {
+        virtualFoo: {
+          filterCondition: GeneralFilters.VIRTUAL,
+          options: {},
+        },
+      },
+    } as any;
+
+    const result = crudGenArgsDecorator.mapCrudGenParams(
+      params,
+      createMock(),
+      { ...fixedArgsQueryParams, virtualFoo: 'abc' } as any,
+      mockedInfo,
+    );
+
+    expect(result.extra.args.virtualFoo).toBe('abc');
   });
 });
