@@ -35,6 +35,40 @@ This page explains the two key decorators used by CRUD-Gen to describe how your 
 - Hidden data: prefer `HideField` (from `@nestjs/graphql`) on DTOs for sensitive columns and keep the entity mapped for persistence.
 - Relations: if a relation is already described via TypeORM decorators, only add `ModelField` when you need custom aliases or defaults.
 
+## Derived / virtual-like fields
+CRUD-Gen supports fields that are not simple persisted columns but are computed or symbolic at query time.
+
+Typical example:
+
+```ts
+@ModelField({
+  dst: "CONCAT(firstName,' ', lastName)",
+  mode: 'derived',
+  isSymbolic: true,
+  denyFilter: true,
+})
+@Field(() => String, { nullable: true })
+fullName?: string;
+```
+
+### What the flags mean
+- `mode: 'derived'` → the field is produced from a query-time expression rather than mapped as a regular persisted column.
+- `isSymbolic: true` → the `dst` expression should be treated as symbolic SQL/query-builder output, not as a simple column name.
+- `denyFilter: true` → CRUD-Gen should not expose this field as filterable metadata.
+
+### What is reliably supported
+- query-time hydration of the field in repository/query-builder paths
+- GraphQL selection of the field when the DTO/type exposes it
+- use in framework-level mapping and selection helpers
+
+### What should be validated per example/backend
+- sorting by the derived field
+- whether the example app is using the repository path that actually materializes the expression
+- whether the GraphQL example is exercising plain fallback or an extended repository path
+
+### Important caution
+A derived field being present in the DTO does **not** automatically mean every example app can query/filter/sort it end-to-end. Whether it works at runtime depends on the actual repository/query path used by that example.
+
 ## Relation metadata: important hidden behavior
 CRUD-Gen can do more with `ModelField.relation` than just influence joins. When relation metadata is present on DTO fields, the GraphQL layer uses it to:
 - build/override nested field resolvers

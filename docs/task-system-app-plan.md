@@ -113,10 +113,14 @@ Keep this checklist updated while implementing. Mark items as `[x]` when complet
   - [x] add GraphQL integration/e2e tests for all exposed slices
 - [ ] Add GraphQL capability coverage for distinctive YALC features
   - [x] join coverage (validated on actual supported GraphQL join args / enum values)
-  - [~] virtual field coverage
+  - [x] virtual field coverage
     - [x] framework-level coverage for derived-field hydration / selection / denyFilter behavior
-    - [ ] example-level GraphQL e2e coverage (currently blocked by pre-existing skeleton-app test harness/plugin issue)
-  - [ ] JSON field coverage with nested property access
+    - [x] example-level GraphQL e2e read coverage for derived field (`fullName`)
+    - [ ] optional future expansion: sorting/filtering semantics on derived fields where supported by repository path
+  - [x] JSON field coverage with nested property access
+    - [x] JSON scalar round-trip (create/read/update)
+    - [x] JSON exposure on GraphQL grids
+    - [x] nested property capability probe on dot-path sorting
   - [ ] GraphQL filtering/sorting/pagination coverage beyond baseline CRUD
     - [x] sorting coverage on task grids
     - [ ] filtering coverage (blocked in this example because plain-repository fallback now fails explicitly on structured filters; needs extended repository path to test end-to-end)

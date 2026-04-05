@@ -288,8 +288,30 @@ export class UserPhone extends EntityWithTimestamps(BaseEntity) {
 - explicit `sourceKey` / `targetKey` aliases
 - reliable dataloader token resolution via `relation.type`
 - relation fields declared on DTOs rather than entities
+- derived / symbolic fields that are not plain persisted columns
 
 **NOTE 2:** Prefer defining `@ModelField` on DTOs / GraphQL types rather than on entities. The examples above use entities for brevity, but real applications should usually separate persistence concerns from GraphQL exposure.
+
+## Derived / symbolic field example
+You can also describe a computed field with `@ModelField`.
+
+```ts
+@ModelField({
+  dst: "CONCAT(firstName,' ', lastName)",
+  mode: 'derived',
+  isSymbolic: true,
+  denyFilter: true,
+})
+@Field(() => String, { nullable: true })
+fullName?: string;
+```
+
+This tells CRUD-Gen that:
+- the field is computed from a query-time expression
+- the destination is symbolic rather than a simple column name
+- the field should not be exposed as filterable metadata
+
+Treat these fields as a framework feature that still depends on the actual repository/query path used by the application. A DTO declaration alone does not guarantee that every example app can sort/filter the field end-to-end.
 
 #### Define DTO with field visibility, validation, mapping, and value manipulation
 
