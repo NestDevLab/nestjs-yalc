@@ -12,10 +12,18 @@ It follows the same `CrudGenDependencyFactory` pattern used by
 `examples/task-system-module`, so each entity exposes the usual auto-wired
 service, dataloader, and GraphQL resolver providers.
 
+## PR 2 additions
+
+- typed record and relation enums for status and relation semantics
+- `OmniDocumentEntity` as the first concrete record family built on
+  `OmniRecordEntity`
+
 ## Entities
 
 - `OmniNamedEntity`: basic named records with `externalId`, `title`, and `slug`.
 - `OmniRecordEntity`: richer records with `kind`, `status`, and `payload`.
+- `OmniDocumentEntity`: concrete document-like records with document subtype,
+  content, source URL, and publication timestamp.
 - `OmniRelationEntity`: directional links between two Omni records.
 - `OmniExternalRefEntity`: provider-specific mappings between internal records
   and external systems.

@@ -12,24 +12,28 @@ import {
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import {
+  IsDate,
   IsEnum,
+  IsIn,
   IsObject,
   IsOptional,
   IsString,
+  IsUrl,
   IsUUID,
   MaxLength,
 } from 'class-validator';
 import { GraphQLJSONObject } from 'graphql-type-json';
 import type { Relation } from 'typeorm';
-import { OmniRecordEntity } from './base/omni-record.entity.js';
+import { OmniDocumentEntity } from './omni-document.entity.js';
+import { OmniDocumentKind } from './omni-document-kind.enum.js';
+import { OmniRecordStatus } from './omni-record-status.enum.js';
 import { OmniRelationEntity } from './base/omni-relation.entity.js';
 import { OmniRelationType } from './omni-relation.dto.js';
-import { OmniRecordStatus } from './omni-record-status.enum.js';
 
 @ObjectType()
 @ModelObject()
-export class OmniRecordType extends OmniRecordEntity {
-  constructor(data?: Partial<OmniRecordType>) {
+export class OmniDocumentType extends OmniDocumentEntity {
+  constructor(data?: Partial<OmniDocumentType>) {
     super();
     if (data) {
       Object.assign(this, data);
@@ -64,7 +68,7 @@ export class OmniRecordType extends OmniRecordEntity {
   @ModelField({})
   @Field()
   @IsString()
-  @MaxLength(64)
+  @IsIn([OmniDocumentKind.Document])
   kind!: string;
 
   @ModelField({})
@@ -106,26 +110,63 @@ export class OmniRecordType extends OmniRecordEntity {
   })
   @Field(() => [OmniRelationType], { nullable: true })
   incomingRelations?: Relation<OmniRelationType[]>;
+
+  @ModelField({})
+  @Field()
+  @IsEnum(OmniDocumentKind)
+  documentKind!: OmniDocumentKind;
+
+  @ModelField({ gqlOptions: { nullable: true } })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  content?: string | null;
+
+  @ModelField({ gqlOptions: { nullable: true } })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @MaxLength(128)
+  contentMimeType?: string | null;
+
+  @ModelField({ gqlOptions: { nullable: true } })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsUrl()
+  @MaxLength(2048)
+  sourceUrl?: string | null;
+
+  @ModelField({ gqlOptions: { nullable: true } })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsDate()
+  publishedAt?: Date | null;
 }
 
 @InputType()
 @ModelObject()
-export class OmniRecordCreateInput extends OmitType(
-  OmniRecordType,
-  ['createdAt', 'updatedAt', 'outgoingRelations', 'incomingRelations'] as const,
+export class OmniDocumentCreateInput extends OmitType(
+  OmniDocumentType,
+  [
+    'createdAt',
+    'updatedAt',
+    'kind',
+    'outgoingRelations',
+    'incomingRelations',
+  ] as const,
   InputType,
 ) {}
 
 @InputType()
-@ModelObject({ copyFrom: OmniRecordType })
-export class OmniRecordCondition extends PartialType(
-  OmniRecordCreateInput,
+@ModelObject({ copyFrom: OmniDocumentType })
+export class OmniDocumentCondition extends PartialType(
+  OmniDocumentCreateInput,
   InputType,
 ) {}
 
 @InputType()
-@ModelObject({ copyFrom: OmniRecordType })
-export class OmniRecordUpdateInput extends PartialType(
-  OmniRecordCreateInput,
+@ModelObject({ copyFrom: OmniDocumentType })
+export class OmniDocumentUpdateInput extends PartialType(
+  OmniDocumentCreateInput,
   InputType,
 ) {}

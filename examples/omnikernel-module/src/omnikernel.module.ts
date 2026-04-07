@@ -5,6 +5,8 @@ import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
 import { OmniNamedEntity } from './base/omni-named.entity.js';
 import { OmniRecordEntity } from './base/omni-record.entity.js';
 import { OmniRelationEntity } from './base/omni-relation.entity.js';
+import { OmniDocumentEntity } from './omni-document.entity.js';
+import { omniDocumentProvidersFactory } from './omni-document.resolver.js';
 import { omniExternalRefProvidersFactory } from './omni-external-ref.resolver.js';
 import { omniNamedProvidersFactory } from './omni-named.resolver.js';
 import { omniRecordProvidersFactory } from './omni-record.resolver.js';
@@ -17,6 +19,7 @@ export class OmniKernelModule {
     const omniNamedProviders = omniNamedProvidersFactory(dbConnection);
     const omniRecordProviders = omniRecordProvidersFactory(dbConnection);
     const omniRelationProviders = omniRelationProvidersFactory(dbConnection);
+    const omniDocumentProviders = omniDocumentProvidersFactory(dbConnection);
     const omniExternalRefProviders =
       omniExternalRefProvidersFactory(dbConnection);
 
@@ -28,6 +31,7 @@ export class OmniKernelModule {
             OmniNamedEntity,
             OmniRecordEntity,
             OmniRelationEntity,
+            OmniDocumentEntity,
             OmniExternalRefEntity,
           ],
           dbConnection,
@@ -41,6 +45,7 @@ export class OmniKernelModule {
         ...omniNamedProviders.providers,
         ...omniRecordProviders.providers,
         ...omniRelationProviders.providers,
+        ...omniDocumentProviders.providers,
         ...omniExternalRefProviders.providers,
       ],
       exports: [
@@ -48,6 +53,7 @@ export class OmniKernelModule {
         ...omniNamedProviders.providers,
         ...omniRecordProviders.providers,
         ...omniRelationProviders.providers,
+        ...omniDocumentProviders.providers,
         ...omniExternalRefProviders.providers,
       ],
     };
