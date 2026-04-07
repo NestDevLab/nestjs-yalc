@@ -16,9 +16,6 @@ export class OmniRecordEntity extends OmniNamedEntity {
   @Column('simple-json', { nullable: true })
   payload?: Record<string, unknown> | null;
 
-  @Column('simple-json', { nullable: true })
-  aiContext?: Record<string, unknown> | null;
-
   @OneToMany(() => OmniRelationEntity, (relation) => relation.sourceRecord)
   outgoingRelations?: Relation<OmniRelationEntity[]>;
 

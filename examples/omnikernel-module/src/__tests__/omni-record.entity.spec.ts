@@ -23,7 +23,7 @@ describe('OmniRecordEntity', () => {
 
     expect(table?.name).toBe('omni-record');
     expect(entityColumns).toEqual(
-      expect.arrayContaining(['kind', 'status', 'payload', 'aiContext']),
+      expect.arrayContaining(['kind', 'status', 'payload']),
     );
     expect(relations).toEqual(
       expect.arrayContaining(['outgoingRelations', 'incomingRelations']),

@@ -82,15 +82,6 @@ export class OmniRecordType extends OmniRecordEntity {
   payload?: Record<string, unknown> | null;
 
   @ModelField({
-    gqlType: returnValue(GraphQLJSONObject),
-    gqlOptions: { nullable: true },
-  })
-  @Field(() => GraphQLJSONObject, { nullable: true })
-  @IsOptional()
-  @IsObject()
-  aiContext?: Record<string, unknown> | null;
-
-  @ModelField({
     gqlType: returnValue([OmniRelationType]),
     gqlOptions: { nullable: true },
     relation: {

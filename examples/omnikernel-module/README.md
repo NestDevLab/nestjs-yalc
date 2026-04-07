@@ -15,8 +15,7 @@ service, dataloader, and GraphQL resolver providers.
 ## Entities
 
 - `OmniNamedEntity`: basic named records with `externalId`, `title`, and `slug`.
-- `OmniRecordEntity`: richer records with `kind`, `status`, `payload`, and
-  `aiContext`.
+- `OmniRecordEntity`: richer records with `kind`, `status`, and `payload`.
 - `OmniRelationEntity`: directional links between two Omni records.
 - `OmniExternalRefEntity`: provider-specific mappings between internal records
   and external systems.
