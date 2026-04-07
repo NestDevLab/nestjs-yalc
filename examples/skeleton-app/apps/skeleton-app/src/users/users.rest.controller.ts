@@ -1,8 +1,6 @@
 import { crudRestControllerFactory } from '@nestjs-yalc/crud-gen/api-rest/crud-gen-rest.controller.factory';
-import {
-  SkeletonUser,
-  SkeletonUserType,
-} from '@nestjs-yalc/skeleton-module/src/skeleton-user.dto';
+import { SkeletonUserType } from '@nestjs-yalc/skeleton-module/src/skeleton-user.dto';
+import { SkeletonUser } from '@nestjs-yalc/skeleton-module/src/skeleton-user.entity';
 import { CreateUserDto, UpdateUserDto } from './users.dto';
 
 export const UsersController = crudRestControllerFactory<SkeletonUser>({

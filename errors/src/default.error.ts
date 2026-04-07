@@ -599,9 +599,10 @@ export const errorToDefaultError = (
 
   let cause: any;
   try {
+    const errorCause = (error as Error & { cause?: unknown }).cause;
     // Test if it can be safely stringified
-    JSON.stringify(error.cause);
-    cause = error.cause;
+    JSON.stringify(errorCause);
+    cause = errorCause;
     // eslint-disable-next-line no-empty
   } catch (e) {}
 

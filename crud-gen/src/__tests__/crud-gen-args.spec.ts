@@ -51,6 +51,14 @@ describe('Crud-gen args', () => {
     expect(instance.endRow).toBe(defaultValues.endRow);
   });
 
+  it('Should keep pagination properties on the generated graphql args class', async () => {
+    const crudGenArgs = crudGenParamsFactory(undefined, TestEntity);
+    const instance = new crudGenArgs();
+
+    expect(Object.prototype.hasOwnProperty.call(instance, 'startRow')).toBe(true);
+    expect(Object.prototype.hasOwnProperty.call(instance, 'endRow')).toBe(true);
+  });
+
   it('Should generate crudGen params without pagination', async () => {
     const crudGenArgs = crudGenParamsNoPaginationFactory(
       {

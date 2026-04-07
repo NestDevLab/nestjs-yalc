@@ -6,8 +6,8 @@ import { SkeletonModule } from '@nestjs-yalc/skeleton-module';
 import { SkeletonPhone } from '@nestjs-yalc/skeleton-module/src/skeleton-phone.entity';
 import { SkeletonUser } from '@nestjs-yalc/skeleton-module/src/skeleton-user.entity';
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar';
-import { UsersModule } from './users/users.module';
 import { PhonesModule } from './phones/phones.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -23,7 +23,6 @@ import { PhonesModule } from './phones/phones.module';
       entities: [SkeletonUser, SkeletonPhone],
       synchronize: true,
     }),
-    // Provides GraphQL resolvers + services from the skeleton module
     SkeletonModule.register('default'),
     UsersModule,
     PhonesModule,

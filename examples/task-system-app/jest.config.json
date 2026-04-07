@@ -1,0 +1,28 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".spec.ts$",
+  "transform": {
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        "tsconfig": "<rootDir>/tsconfig.json",
+        "diagnostics": false
+      }
+    ]
+  },
+  "moduleNameMapper": {
+    "^@nestjs-yalc/task-system-module$": "<rootDir>/../task-system-module/src",
+    "^@nestjs-yalc/task-system-module/src/(.*)$": "<rootDir>/../task-system-module/src/$1",
+    "^@nestjs/(.*)$": "<rootDir>/../../node_modules/@nestjs/$1",
+    "^typeorm$": "<rootDir>/../../node_modules/typeorm",
+    "^p-map$": "<rootDir>/apps/task-system-app/test/p-map.mock.ts",
+    "^lodash-es$": "lodash",
+    "^@nestjs-yalc/([^/]+)/(.+?)\\.js$": "<rootDir>/../../$1/src/$2",
+    "^@nestjs-yalc/([^/]+)/(.*)$": "<rootDir>/../../$1/src/$2",
+    "^@nestjs-yalc/([^/]+)$": "<rootDir>/../../$1/src",
+    "^(\\.{1,2}/.*)\\.js$": "$1"
+  },
+  "testPathIgnorePatterns": ["/node_modules/", "/dist/", ".e2e-spec.ts$"]
+}

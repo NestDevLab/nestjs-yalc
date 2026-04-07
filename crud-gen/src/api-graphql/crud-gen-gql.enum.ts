@@ -25,19 +25,19 @@ registerEnumType(SortDirection, {
   name: 'SortDirection',
 });
 
-const fieldsEnumCache = new WeakMap();
+const fieldsEnumGraphqlRegistrationCache = new WeakMap();
 export function entityFieldsEnumGqlFactory<Entity>(
   entityModel: ClassType<Entity> | AnyFunction,
 ): { [index: string]: string } {
   const prototype = !isClass(entityModel) ? entityModel.prototype : entityModel;
   const res = entityFieldsEnumFactory(entityModel);
 
-  if (!res.cached)
+  if (!fieldsEnumGraphqlRegistrationCache.get(prototype)) {
     registerEnumType(res.enum, {
       name: `${res.prototype.name}FieldEnum`,
     });
-
-  fieldsEnumCache.set(prototype, res.enum);
+    fieldsEnumGraphqlRegistrationCache.set(prototype, true);
+  }
 
   return res.enum;
 }
