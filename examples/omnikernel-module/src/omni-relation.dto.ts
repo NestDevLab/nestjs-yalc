@@ -12,7 +12,7 @@ import {
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import {
-  IsIn,
+  IsEnum,
   IsObject,
   IsOptional,
   IsString,
@@ -24,6 +24,8 @@ import type { Relation } from 'typeorm';
 import { OmniRecordEntity } from './base/omni-record.entity.js';
 import { OmniRelationEntity } from './base/omni-relation.entity.js';
 import { OmniRecordType } from './omni-record.dto.js';
+import { OmniRelationKind } from './omni-relation-kind.enum.js';
+import { OmniRelationStatus } from './omni-relation-status.enum.js';
 
 @ObjectType()
 @ModelObject()
@@ -78,15 +80,13 @@ export class OmniRelationType extends OmniRelationEntity {
 
   @ModelField({})
   @Field()
-  @IsString()
-  @MaxLength(64)
-  kind!: string;
+  @IsEnum(OmniRelationKind)
+  kind!: OmniRelationKind;
 
   @ModelField({})
   @Field()
-  @IsString()
-  @IsIn(['active', 'inactive', 'archived'])
-  status!: string;
+  @IsEnum(OmniRelationStatus)
+  status!: OmniRelationStatus;
 
   @ModelField({
     gqlType: returnValue(GraphQLJSONObject),
