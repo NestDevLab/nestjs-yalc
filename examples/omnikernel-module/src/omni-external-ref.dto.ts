@@ -1,0 +1,106 @@
+import {
+  Field,
+  InputType,
+  ObjectType,
+  OmitType,
+  PartialType,
+} from '@nestjs/graphql';
+import {
+  ModelField,
+  ModelObject,
+} from '@nestjs-yalc/crud-gen/object.decorator.js';
+import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
+import returnValue from '@nestjs-yalc/utils/returnValue.js';
+import {
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
+import { GraphQLJSONObject } from 'graphql-type-json';
+import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
+
+@ObjectType()
+@ModelObject()
+export class OmniExternalRefType extends OmniExternalRefEntity {
+  constructor(data?: Partial<OmniExternalRefType>) {
+    super();
+    if (data) {
+      Object.assign(this, data);
+    }
+  }
+
+  @ModelField({ gqlType: returnValue(UUIDScalar), isRequired: true })
+  @Field(() => UUIDScalar)
+  @IsUUID()
+  guid!: string;
+
+  @ModelField({})
+  @Field()
+  @IsString()
+  @MaxLength(64)
+  internalType!: string;
+
+  @ModelField({ gqlType: returnValue(UUIDScalar), isRequired: true })
+  @Field(() => UUIDScalar)
+  @IsUUID()
+  internalId!: string;
+
+  @ModelField({})
+  @Field()
+  @IsString()
+  @MaxLength(128)
+  provider!: string;
+
+  @ModelField({ gqlOptions: { nullable: true } })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @MaxLength(128)
+  account?: string | null;
+
+  @ModelField({ gqlOptions: { nullable: true } })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @MaxLength(128)
+  container?: string | null;
+
+  @ModelField({})
+  @Field()
+  @IsString()
+  @MaxLength(255)
+  externalId!: string;
+
+  @ModelField({
+    gqlType: returnValue(GraphQLJSONObject),
+    gqlOptions: { nullable: true },
+  })
+  @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
+  payload?: Record<string, unknown> | null;
+}
+
+@InputType()
+@ModelObject()
+export class OmniExternalRefCreateInput extends OmitType(
+  OmniExternalRefType,
+  ['createdAt', 'updatedAt'] as const,
+  InputType,
+) {}
+
+@InputType()
+@ModelObject({ copyFrom: OmniExternalRefType })
+export class OmniExternalRefCondition extends PartialType(
+  OmniExternalRefCreateInput,
+  InputType,
+) {}
+
+@InputType()
+@ModelObject({ copyFrom: OmniExternalRefType })
+export class OmniExternalRefUpdateInput extends PartialType(
+  OmniExternalRefCreateInput,
+  InputType,
+) {}
