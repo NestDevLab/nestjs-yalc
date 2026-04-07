@@ -494,23 +494,53 @@ describe('GenericService', () => {
 
   it('test getEntityListCrudGen with count', async () => {
     const mockedCountedList: [BaseEntity[], number] = [[new BaseEntity()], 1];
-    baseEntityRepository.findAndCount.mockResolvedValue(mockedCountedList);
-    await service.getEntityListExtended({}, true);
-    expect(baseEntityRepository.getManyAndCountExtended).toBeCalledWith({});
+    const repo: any = {
+      target: MockedEntity,
+      getCrudGenCapabilities: jest.fn(() => ({
+        extendedQueries: true,
+        structuredGraphqlFilters: true,
+      })),
+      getManyAndCountExtended: jest.fn().mockResolvedValue(mockedCountedList),
+      getManyExtended: jest.fn(),
+    };
+    const testService = new GenericService(repo);
+
+    await testService.getEntityListExtended({}, true);
+    expect(repo.getManyAndCountExtended).toBeCalledWith({});
   });
 
   it('test getEntityListCrudGen with false count', async () => {
     const mockedList: BaseEntity[] = [new BaseEntity()];
-    baseEntityRepository.find.mockResolvedValue(mockedList);
-    await service.getEntityListExtended({}, false);
-    expect(baseEntityRepository.getManyExtended).toBeCalledWith({});
+    const repo: any = {
+      target: MockedEntity,
+      getCrudGenCapabilities: jest.fn(() => ({
+        extendedQueries: true,
+        structuredGraphqlFilters: true,
+      })),
+      getManyExtended: jest.fn().mockResolvedValue(mockedList),
+      getManyAndCountExtended: jest.fn(),
+    };
+    const testService = new GenericService(repo);
+
+    await testService.getEntityListExtended({}, false);
+    expect(repo.getManyExtended).toBeCalledWith({});
   });
 
   it('test getEntityListCrudGen with relations', async () => {
     const mockedList: BaseEntity[] = [new BaseEntity()];
-    baseEntityRepository.find.mockResolvedValue(mockedList);
-    await service.getEntityListExtended({}, false, ['RelatedEntity']);
-    expect(baseEntityRepository.getManyExtended).toBeCalledWith({
+    const repo: any = {
+      target: MockedEntity,
+      getCrudGenCapabilities: jest.fn(() => ({
+        extendedQueries: true,
+        structuredGraphqlFilters: true,
+      })),
+      getManyExtended: jest.fn().mockResolvedValue(mockedList),
+      getManyAndCountExtended: jest.fn(),
+    };
+    const testService = new GenericService(repo);
+
+    await testService.getEntityListExtended({}, false, ['RelatedEntity']);
+    expect(repo.getManyExtended).toBeCalledWith({
       relations: ['RelatedEntity'],
     });
   });
@@ -647,12 +677,47 @@ describe('GenericService', () => {
     const extendedRepo: any = {
       target: {},
       find: jest.fn(),
-      supportsExtendedRepository: jest.fn(() => true),
+      getCrudGenCapabilities: jest.fn(() => ({
+        extendedQueries: true,
+        structuredGraphqlFilters: true,
+      })),
     };
 
     const extendedService = new GenericService<any>(extendedRepo);
     expect(extendedService.supportsExtendedRepository()).toBe(true);
-    expect(extendedRepo.supportsExtendedRepository).toHaveBeenCalled();
+    expect(extendedRepo.getCrudGenCapabilities).toHaveBeenCalled();
+  });
+
+  it('should expose structured GraphQL filter capability separately', () => {
+    const repo: any = {
+      target: {},
+      find: jest.fn(),
+      getCrudGenCapabilities: jest.fn(() => ({
+        extendedQueries: false,
+        structuredGraphqlFilters: true,
+      })),
+    };
+
+    const service = new GenericService<any>(repo);
+    expect(service.supportsExtendedRepository()).toBe(false);
+    expect(service.supportsStructuredGraphqlFilters()).toBe(true);
+  });
+
+  it('should throw when a repository declares extended support without required methods', async () => {
+    const repo: any = {
+      target: {},
+      find: jest.fn(),
+      getCrudGenCapabilities: jest.fn(() => ({
+        extendedQueries: true,
+        structuredGraphqlFilters: true,
+      })),
+    };
+
+    const service = new GenericService<any>(repo);
+
+    await expect(service.getEntityListExtended({} as any, false)).rejects.toThrow(
+      'Repository declares extended query support but does not implement the required extended query methods.',
+    );
   });
 
   it('should fallback to findAndCount when withCount is true and extended helpers are missing', async () => {

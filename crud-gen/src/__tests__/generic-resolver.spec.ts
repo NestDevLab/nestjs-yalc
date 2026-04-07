@@ -318,7 +318,7 @@ describe('defineGetGridResource', () => {
     const expected = [[new TestEntityRelation()], 1];
     const resolver = new (GridResolverClass as any)();
     resolver.service = {
-      supportsExtendedRepository: jest.fn().mockReturnValue(true),
+      supportsStructuredGraphqlFilters: jest.fn().mockReturnValue(true),
       getEntityListExtended: jest.fn().mockResolvedValue(expected),
     };
 
@@ -344,7 +344,7 @@ describe('defineGetGridResource', () => {
     const expected = [[new TestEntityRelation()], 1];
     const resolver = new (GridResolverClass as any)();
     resolver.service = {
-      supportsExtendedRepository: jest.fn().mockReturnValue(true),
+      supportsStructuredGraphqlFilters: jest.fn().mockReturnValue(true),
       getEntityListExtended: jest.fn().mockResolvedValue(expected),
     };
 
@@ -373,7 +373,7 @@ describe('defineGetGridResource', () => {
     const expected = [[new TestEntityRelation()], 1];
     const resolver = new (GridResolverClass as any)();
     resolver.service = {
-      supportsExtendedRepository: jest.fn().mockReturnValue(true),
+      supportsStructuredGraphqlFilters: jest.fn().mockReturnValue(true),
       getEntityListExtended: jest.fn().mockResolvedValue(expected),
     };
 

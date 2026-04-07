@@ -18,13 +18,31 @@ import '../query-builder.helpers.js'; // must be imported here
 
 export const AG_GRID_MAIN_ALIAS = 'CrudGenMainAlias';
 
+export interface CrudGenRepositoryCapabilities {
+  extendedQueries: boolean;
+  structuredGraphqlFilters: boolean;
+}
+
+export const PLAIN_CRUD_GEN_REPOSITORY_CAPABILITIES: CrudGenRepositoryCapabilities =
+  {
+    extendedQueries: false,
+    structuredGraphqlFilters: false,
+  };
+
 export class GenericTypeORMRepository<
   Entity extends ObjectLiteral,
 > extends Repository<Entity> {
   protected entity!: EntityClassOrSchema;
 
+  getCrudGenCapabilities(): CrudGenRepositoryCapabilities {
+    return {
+      extendedQueries: true,
+      structuredGraphqlFilters: true,
+    };
+  }
+
   supportsExtendedRepository(): boolean {
-    return true;
+    return this.getCrudGenCapabilities().extendedQueries;
   }
 
   /**

@@ -19,7 +19,11 @@ import {
   QueryFailedError,
 } from 'typeorm';
 import { FindManyOptions, FindOptionsWhere as FindConditions } from 'typeorm';
-import { type GenericTypeORMRepository } from '@nestjs-yalc/crud-gen/typeorm/generic.repository.js';
+import {
+  type CrudGenRepositoryCapabilities,
+  type GenericTypeORMRepository,
+  PLAIN_CRUD_GEN_REPOSITORY_CAPABILITIES,
+} from '@nestjs-yalc/crud-gen/typeorm/generic.repository.js';
 import {
   CrudGenFindManyOptions,
   ICrudGenSimpleParams,
@@ -552,12 +556,18 @@ export class GenericService<
     if (relations) findOptions.relations = relations;
 
     const repo: any = this.repository as any;
+    const capabilities = this.getCrudGenRepositoryCapabilities();
 
-    // Prefer extended repository methods when available.
-    if (
-      typeof repo.getManyAndCountExtended === 'function' &&
-      typeof repo.getManyExtended === 'function'
-    ) {
+    if (capabilities.extendedQueries) {
+      if (
+        typeof repo.getManyAndCountExtended !== 'function' ||
+        typeof repo.getManyExtended !== 'function'
+      ) {
+        throw new ReferenceError(
+          'Repository declares extended query support but does not implement the required extended query methods.',
+        );
+      }
+
       return withCount
         ? repo.getManyAndCountExtended(findOptions)
         : repo.getManyExtended(findOptions);
@@ -590,17 +600,38 @@ export class GenericService<
       : this.repository.find(mappedFindOptions);
   }
 
-  supportsExtendedRepository(): boolean {
+  getCrudGenRepositoryCapabilities(): CrudGenRepositoryCapabilities {
     const repo: any = this.repository as any;
 
-    if (typeof repo.supportsExtendedRepository === 'function') {
-      return !!repo.supportsExtendedRepository();
+    if (typeof repo.getCrudGenCapabilities === 'function') {
+      const explicitCapabilities = repo.getCrudGenCapabilities();
+
+      if (explicitCapabilities && typeof explicitCapabilities === 'object') {
+        return {
+          ...PLAIN_CRUD_GEN_REPOSITORY_CAPABILITIES,
+          ...explicitCapabilities,
+        };
+      }
     }
 
-    return (
-      typeof repo.getManyAndCountExtended === 'function' &&
-      typeof repo.getManyExtended === 'function'
-    );
+    const legacyExtendedSupport =
+      typeof repo.supportsExtendedRepository === 'function'
+        ? !!repo.supportsExtendedRepository()
+        : typeof repo.getManyAndCountExtended === 'function' &&
+          typeof repo.getManyExtended === 'function';
+
+    return {
+      extendedQueries: legacyExtendedSupport,
+      structuredGraphqlFilters: legacyExtendedSupport,
+    };
+  }
+
+  supportsExtendedRepository(): boolean {
+    return this.getCrudGenRepositoryCapabilities().extendedQueries;
+  }
+
+  supportsStructuredGraphqlFilters(): boolean {
+    return this.getCrudGenRepositoryCapabilities().structuredGraphqlFilters;
   }
 
   protected mapEntityR2W(

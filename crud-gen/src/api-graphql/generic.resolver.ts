@@ -524,7 +524,12 @@ export function defineGetGridResource<Entity>(
           'expressions' in where ||
           'childExpressions' in where);
 
-      if (hasStructuredFilters && !service.supportsExtendedRepository()) {
+      const supportsStructuredGraphqlFilters =
+        typeof (service as any).supportsStructuredGraphqlFilters === 'function'
+          ? !!(service as any).supportsStructuredGraphqlFilters()
+          : !!service.supportsExtendedRepository();
+
+      if (hasStructuredFilters && !supportsStructuredGraphqlFilters) {
         throw new CrudGenError(
           'Structured GraphQL filters require an extended repository; plain TypeORM fallback only supports basic grid queries.',
         );
