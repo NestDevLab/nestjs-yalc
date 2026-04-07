@@ -304,7 +304,7 @@ describe('Task System App GraphQL e2e', () => {
         query: `
           query SortedTasks {
             TaskSystem_getTaskItemGrid(
-              sorting: [{ colId: "title", sort: ASC }]
+              sorting: [{ colId: title, sort: ASC }]
             ) {
               pageData { count }
               nodes { guid title status projectId }
@@ -328,7 +328,7 @@ describe('Task System App GraphQL e2e', () => {
           query JoinedTaskGrid {
             TaskSystem_getTaskItemGrid(
               join: { project: { joinType: LEFT_JOIN } }
-              sorting: [{ colId: "title", sort: ASC }]
+              sorting: [{ colId: title, sort: ASC }]
             ) {
               pageData { count }
               nodes { guid title projectId }
@@ -413,7 +413,7 @@ describe('Task System App GraphQL e2e', () => {
             TaskSystem_getTaskItemGrid(
               startRow: 0
               endRow: 1
-              sorting: [{ colId: "title", sort: ASC }]
+              sorting: [{ colId: title, sort: ASC }]
             ) {
               pageData { count startRow endRow }
               nodes { guid title status projectId }

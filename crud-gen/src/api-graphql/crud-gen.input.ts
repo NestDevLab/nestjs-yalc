@@ -57,7 +57,7 @@ export function sortModelFactory<Entity>(entityModel: ClassType<Entity>) {
   class SortModel implements ISortModelStrict<typeof fieldsEnum> {
     @Field(
       /* istanbul ignore next */
-      () => String,
+      () => fieldsEnum,
     )
     colId!: keyof typeof fieldsEnum;
     @Field(
@@ -96,7 +96,7 @@ export function filterExpressionInputFactory<Entity>(
   let cached;
   if ((cached = filterExpressionInputCache.get(entityModel))) return cached;
 
-  entityFieldsEnumGqlFactory(entityModel);
+  const fieldsEnum = entityFieldsEnumGqlFactory(entityModel);
 
   @InputType(`${entityModel.name}FilterTextInput`)
   class FilterText implements ITextFilterModel {
@@ -116,7 +116,7 @@ export function filterExpressionInputFactory<Entity>(
 
     @Field(
       /* istanbul ignore next */
-      () => String,
+      () => fieldsEnum,
     )
     field!: string;
 
@@ -146,7 +146,7 @@ export function filterExpressionInputFactory<Entity>(
 
     @Field(
       /* istanbul ignore next */
-      () => String,
+      () => fieldsEnum,
     )
     field!: string;
 
@@ -183,7 +183,7 @@ export function filterExpressionInputFactory<Entity>(
 
     @Field(
       /* istanbul ignore next */
-      () => String,
+      () => fieldsEnum,
     )
     field!: string;
 
@@ -220,7 +220,7 @@ export function filterExpressionInputFactory<Entity>(
 
     @Field(
       /* istanbul ignore next */
-      () => String,
+      () => fieldsEnum,
     )
     field!: string;
   }
