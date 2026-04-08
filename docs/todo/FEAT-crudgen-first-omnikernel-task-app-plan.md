@@ -196,8 +196,10 @@ Goal:
 - make OmniKernel a truly solid CrudGen composition backend
 
 Checklist:
-- [ ] Audit current OmniKernel entities/services/repositories against CrudGen needs
-- [ ] Identify gaps for CrudGen compatibility
+- [x] Audit current OmniKernel entities/services/repositories against CrudGen needs
+  - Initial analysis drafted in `docs/todo/FEAT-omnikernel-crudgen-gap-analysis.md`
+- [x] Identify gaps for CrudGen compatibility
+  - Initial analysis drafted in `docs/todo/FEAT-omnikernel-crudgen-gap-analysis.md`
   - [ ] derived/virtual fields
   - [ ] join semantics
   - [ ] relation traversal
@@ -225,7 +227,8 @@ Goal:
 Checklist:
 - [ ] Remove handwritten CRUD REST controllers where CrudGen can replace them
 - [ ] Remove handwritten GraphQL CRUD resolvers where CrudGen can replace them
-- [ ] Rebuild task-app around `CrudGenDependencyFactory`
+- [x] Rebuild task-app plan around `CrudGenDependencyFactory`
+  - Initial per-resource refactor map drafted in `docs/todo/FEAT-task-app-crudgen-refactor-map.md`
 - [ ] Use `crudRestControllerFactory` where the path is standard CRUD
 - [ ] Use `resolverFactory` where the path is standard GraphQL CRUD/grid
 - [ ] Keep custom code only for real domain behavior
@@ -307,7 +310,7 @@ This effort is done when all of the following are true:
 - [x] initial capability matrix drafted
 - [ ] deep source audit still in progress
 - [ ] docs overhaul in progress (initial matrix + decision-guide pass started)
-- [ ] OmniKernel hardening not started yet
+- [ ] OmniKernel hardening in analysis phase (initial gap analysis drafted)
 - [ ] task-app CrudGen-first refactor not started yet
 - [ ] API strategy/event-manager integration pass not started yet
 - [ ] spec-folder normalization not started yet
