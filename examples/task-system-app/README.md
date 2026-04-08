@@ -175,29 +175,28 @@ If implemented well, this app becomes:
 - a durable CI/e2e validation target;
 - a reusable standalone backend for task and project management.
 
-## OmniKernel adoption slice
+## OmniKernel backend
 
-The task app now includes an explicit OmniKernel adapter layer for the first
-adoption slice.
+The task app now runs on an OmniKernel-backed persistence model.
 
-Current scope:
+Current mapping:
 
-- REST writes for `projects`, `tasks`, and `external-refs` persist into
-  OmniKernel entities through a dedicated adapter layer
-- project containers map to `OmniCollectionEntity`
-- task items map to `OmniRecordEntity` with `kind = 'task'`
-- external refs map to `OmniExternalRefEntity`
-- project membership uses canonical `contains` relations
-- optional task cross-links use `references` and `related_to`
-- the same REST writes also mirror to the legacy task tables for temporary
-  compatibility with the unchanged event and GraphQL slices during migration
+- projects/containers -> `OmniCollectionEntity`
+- tasks -> `OmniRecordEntity` with `kind = 'task'`
+- events -> `OmniRecordEntity` with `kind = 'event'`
+- sync states -> `OmniRecordEntity` with `kind = 'sync-state'`
+- external refs -> `OmniExternalRefEntity`
 
-Current non-goal:
+Canonical relations used by the app:
 
-- the generated GraphQL CRUD layer still uses the legacy task-system module
-  entities for now; the OmniKernel adoption is intentionally incremental and
-  focused on a reviewable adapter-backed REST path first
+- `contains` for project membership
+- `references` for task cross-links
+- `related_to` for loose task associations
 
-The adapter lives under
-`apps/task-system-app/src/omni-task-app/` and keeps the mapping rules explicit
-instead of scattering Omni-specific logic through controllers.
+This runtime no longer mirrors writes to the legacy task-system tables; the
+app now uses Omni entities/services as its persistence substrate for both REST
+and GraphQL flows.
+
+The Omni-specific mapping and orchestration logic lives under
+`apps/task-system-app/src/omni-task-app/` to keep the domain translation
+explicit instead of scattering Omni-specific behavior across the app surface.

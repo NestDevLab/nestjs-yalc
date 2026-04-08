@@ -1,10 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { EventEmitter } from 'node:events';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { EventModule } from '@nestjs-yalc/event-manager';
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar';
 import {
   OmniCollectionEntity,
@@ -25,6 +22,7 @@ import { OmniTaskAppModule } from './omni-task-app/omni-task-app.module';
 import { ProjectsModule } from './projects/projects.module';
 import { SyncModule } from './sync/sync.module';
 import { TasksModule } from './tasks/tasks.module';
+import { TaskAppEventModule } from './task-app-event.module';
 
 @Module({
   imports: [
@@ -33,12 +31,7 @@ import { TasksModule } from './tasks/tasks.module';
       autoSchemaFile: true,
       path: '/graphql',
     }),
-    EventModule.forRootAsync({
-      eventEmitter: {
-        provide: EventEmitter2,
-        useValue: new EventEmitter2(),
-      },
-    }),
+    TaskAppEventModule,
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: ':memory:',
@@ -61,10 +54,6 @@ import { TasksModule } from './tasks/tasks.module';
   ],
   providers: [
     UUIDScalar,
-    {
-      provide: EventEmitter,
-      useValue: new EventEmitter(),
-    },
     TaskSystemGraphqlResolver,
     TaskItemRelationsResolver,
     TaskEventRelationsResolver,

@@ -1,8 +1,5 @@
 import { Global, Module } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { EventEmitter } from 'node:events';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { EventModule } from '@nestjs-yalc/event-manager';
 import {
   OmniCollectionEntity,
   OmniExternalRefEntity,
@@ -19,12 +16,6 @@ import { TaskAppOmniTaskService } from './task-app-omni-task.service';
 @Global()
 @Module({
   imports: [
-    EventModule.forRootAsync({
-      eventEmitter: {
-        provide: EventEmitter2,
-        useValue: new EventEmitter2(),
-      },
-    }),
     TypeOrmModule.forFeature(
       [
         OmniRecordEntity,
@@ -36,10 +27,6 @@ import { TaskAppOmniTaskService } from './task-app-omni-task.service';
     ),
   ],
   providers: [
-    {
-      provide: EventEmitter,
-      useValue: new EventEmitter(),
-    },
     TaskAppOmniMapper,
     TaskAppOmniProjectService,
     TaskAppOmniTaskService,

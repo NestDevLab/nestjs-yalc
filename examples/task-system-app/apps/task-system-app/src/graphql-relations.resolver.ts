@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import {
   Args,
   Mutation,
@@ -128,7 +129,10 @@ export class TaskSystemGraphqlResolver {
     @Args('conditions') conditions: TaskProjectCondition,
     @Args('input') input: TaskProjectUpdateInput,
   ) {
-    return this.projectService.update(conditions.guid!, input);
+    return this.projectService.update(
+      this.requireGuid(conditions, 'TaskProjectCondition'),
+      input,
+    );
   }
 
   @Mutation(() => TaskItemType, { name: 'TaskSystem_updateTaskItem' })
@@ -136,7 +140,10 @@ export class TaskSystemGraphqlResolver {
     @Args('conditions') conditions: TaskItemCondition,
     @Args('input') input: TaskItemUpdateInput,
   ) {
-    return this.taskService.update(conditions.guid!, input);
+    return this.taskService.update(
+      this.requireGuid(conditions, 'TaskItemCondition'),
+      input,
+    );
   }
 
   @Mutation(() => TaskEventType, { name: 'TaskSystem_updateTaskEvent' })
@@ -144,7 +151,10 @@ export class TaskSystemGraphqlResolver {
     @Args('conditions') conditions: TaskEventCondition,
     @Args('input') input: TaskEventUpdateInput,
   ) {
-    return this.eventService.update(conditions.guid!, input);
+    return this.eventService.update(
+      this.requireGuid(conditions, 'TaskEventCondition'),
+      input,
+    );
   }
 
   @Mutation(() => TaskExternalRefType, {
@@ -154,7 +164,10 @@ export class TaskSystemGraphqlResolver {
     @Args('conditions') conditions: TaskExternalRefCondition,
     @Args('input') input: TaskExternalRefUpdateInput,
   ) {
-    return this.externalRefService.update(conditions.guid!, input);
+    return this.externalRefService.update(
+      this.requireGuid(conditions, 'TaskExternalRefCondition'),
+      input,
+    );
   }
 
   @Mutation(() => TaskSyncStateType, {
@@ -164,26 +177,35 @@ export class TaskSystemGraphqlResolver {
     @Args('conditions') conditions: TaskSyncStateCondition,
     @Args('input') input: TaskSyncStateUpdateInput,
   ) {
-    return this.syncStateService.update(conditions.guid!, input);
+    return this.syncStateService.update(
+      this.requireGuid(conditions, 'TaskSyncStateCondition'),
+      input,
+    );
   }
 
   @Mutation(() => Boolean, { name: 'TaskSystem_deleteTaskProject' })
   async deleteTaskProject(
     @Args('conditions') conditions: TaskProjectCondition,
   ) {
-    await this.projectService.delete(conditions.guid!);
+    await this.projectService.delete(
+      this.requireGuid(conditions, 'TaskProjectCondition'),
+    );
     return true;
   }
 
   @Mutation(() => Boolean, { name: 'TaskSystem_deleteTaskItem' })
   async deleteTaskItem(@Args('conditions') conditions: TaskItemCondition) {
-    await this.taskService.delete(conditions.guid!);
+    await this.taskService.delete(
+      this.requireGuid(conditions, 'TaskItemCondition'),
+    );
     return true;
   }
 
   @Mutation(() => Boolean, { name: 'TaskSystem_deleteTaskEvent' })
   async deleteTaskEvent(@Args('conditions') conditions: TaskEventCondition) {
-    await this.eventService.delete(conditions.guid!);
+    await this.eventService.delete(
+      this.requireGuid(conditions, 'TaskEventCondition'),
+    );
     return true;
   }
 
@@ -191,7 +213,9 @@ export class TaskSystemGraphqlResolver {
   async deleteTaskExternalRef(
     @Args('conditions') conditions: TaskExternalRefCondition,
   ) {
-    await this.externalRefService.delete(conditions.guid!);
+    await this.externalRefService.delete(
+      this.requireGuid(conditions, 'TaskExternalRefCondition'),
+    );
     return true;
   }
 
@@ -199,7 +223,10 @@ export class TaskSystemGraphqlResolver {
   async deleteTaskSyncState(
     @Args('conditions') conditions: TaskSyncStateCondition,
   ) {
-    return this.syncStateService.delete(conditions.guid!);
+    await this.syncStateService.delete(
+      this.requireGuid(conditions, 'TaskSyncStateCondition'),
+    );
+    return true;
   }
 
   @Query(() => TaskProjectType, { name: 'TaskSystem_getTaskProject' })
@@ -265,7 +292,7 @@ export class TaskSystemGraphqlResolver {
       throw new CrudGenError('Invalid join type');
     }
 
-    const page = await this.taskService.list({ startRow: 0, endRow: 1000 });
+    const page = await this.taskService.list({ startRow, endRow, sorting });
     const nodes = [...page.nodes];
 
     if (sorting?.length) {
@@ -292,7 +319,7 @@ export class TaskSystemGraphqlResolver {
 
     return {
       pageData: {
-        count: nodes.length,
+        count: page.pageData.count,
         startRow: safeStart,
         endRow: safeStart + pagedNodes.length,
       },
@@ -326,5 +353,18 @@ export class TaskSystemGraphqlResolver {
     @Args('endRow', { nullable: true }) endRow?: number,
   ) {
     return this.syncStateService.list({ startRow, endRow });
+  }
+
+  private requireGuid(
+    conditions: { guid?: string | null },
+    inputName: string,
+  ): string {
+    if (!conditions.guid) {
+      throw new BadRequestException(
+        `${inputName}.guid is required for this operation`,
+      );
+    }
+
+    return conditions.guid;
   }
 }

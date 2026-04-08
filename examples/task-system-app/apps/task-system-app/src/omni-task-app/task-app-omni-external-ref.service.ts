@@ -97,8 +97,8 @@ export class TaskAppOmniExternalRefService {
     });
 
     const entity = this.externalRefRepository.create({
-      ...(existing ? { guid: existing.guid } : {}),
       ...this.mapper.mapExternalRefToOmniExternalRef(input),
+      guid: existing?.guid ?? input.guid,
     });
     const storedRef = await this.externalRefRepository.save(entity);
 

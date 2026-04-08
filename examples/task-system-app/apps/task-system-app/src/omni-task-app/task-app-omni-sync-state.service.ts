@@ -106,7 +106,7 @@ export class TaskAppOmniSyncStateService {
       guid,
       kind: this.mapper.syncStateKind,
     });
-    return true;
+    return { deleted: true };
   }
 
   private async getSyncStateRecordOrFail(guid: string) {

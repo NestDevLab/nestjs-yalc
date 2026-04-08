@@ -17,6 +17,10 @@ import {
 import { TaskItemType } from './task-app.types';
 import { TaskAppOmniProjectService } from './task-app-omni-project.service';
 
+type TaskListQuery = TaskOmniPageQuery & {
+  sorting?: Array<{ colId: string; sort?: 'ASC' | 'DESC' }>;
+};
+
 @Injectable()
 export class TaskAppOmniTaskService {
   constructor(
@@ -29,33 +33,32 @@ export class TaskAppOmniTaskService {
     private readonly projectService: TaskAppOmniProjectService,
   ) {}
 
-  async list(query: TaskOmniPageQuery = {}) {
+  async list(query: TaskListQuery = {}) {
     const pagination = this.mapper.parsePageQuery(query);
 
     if (query.projectId) {
       await this.projectService.ensureProjectExists(query.projectId);
-      const members = await this.getCollectionMembers(query.projectId);
-      const tasks = members.filter(
-        (record): record is OmniRecordEntity =>
-          record.kind === this.mapper.taskKind,
-      );
-      const paged = tasks.slice(
-        pagination.startRow,
-        pagination.startRow + pagination.take,
+      const [tasks, count] = await this.getCollectionMembersByKind(
+        query.projectId,
+        this.mapper.taskKind,
+        pagination.skip,
+        pagination.take,
       );
 
       return this.mapper.buildPage(
-        paged.map((task) =>
+        tasks.map((task) =>
           this.mapper.mapOmniRecordToTask(task, query.projectId),
         ),
         pagination.startRow,
-        tasks.length,
+        count,
       );
     }
 
+    const order = this.buildRecordOrder(query.sorting);
+
     const [records, count] = await this.recordRepository.findAndCount({
       order: {
-        createdAt: 'ASC',
+        ...(order ?? { createdAt: 'ASC' }),
       },
       skip: pagination.skip,
       take: pagination.take,
@@ -207,24 +210,58 @@ export class TaskAppOmniTaskService {
     return record;
   }
 
-  private async getCollectionMembers(collectionId: string) {
-    const relations = await this.relationRepository.find({
-      where: {
-        sourceRecordId: collectionId,
-        kind: OmniRelationKind.Contains,
-        status: OmniRelationStatus.Active,
-      },
-      relations: {
-        targetRecord: true,
-      },
-      order: {
-        createdAt: 'ASC',
-      },
-    });
+  private async getCollectionMembersByKind(
+    collectionId: string,
+    recordKind: string,
+    skip: number,
+    take: number,
+  ): Promise<[OmniRecordEntity[], number]> {
+    const baseQuery = this.relationRepository
+      .createQueryBuilder('relation')
+      .innerJoinAndSelect('relation.targetRecord', 'targetRecord')
+      .where('relation.sourceRecordId = :collectionId', { collectionId })
+      .andWhere('relation.kind = :relationKind', {
+        relationKind: OmniRelationKind.Contains,
+      })
+      .andWhere('relation.status = :relationStatus', {
+        relationStatus: OmniRelationStatus.Active,
+      })
+      .andWhere('targetRecord.kind = :recordKind', { recordKind });
 
-    return relations
-      .map((relation) => relation.targetRecord)
-      .filter((record): record is OmniRecordEntity => !!record);
+    const count = await baseQuery.clone().getCount();
+    const relations = await baseQuery
+      .orderBy('relation.createdAt', 'ASC')
+      .skip(skip)
+      .take(take)
+      .getMany();
+
+    return [
+      relations
+        .map((relation) => relation.targetRecord)
+        .filter((record): record is OmniRecordEntity => !!record),
+      count,
+    ];
+  }
+
+  private buildRecordOrder(
+    sorting?: Array<{ colId: string; sort?: 'ASC' | 'DESC' }>,
+  ) {
+    if (!sorting?.length) {
+      return null;
+    }
+
+    const order: Record<string, 'ASC' | 'DESC'> = {};
+    const sortableColumns = new Set(['guid', 'title', 'slug', 'createdAt']);
+
+    for (const sort of sorting) {
+      if (!sortableColumns.has(sort.colId)) {
+        continue;
+      }
+
+      order[sort.colId] = sort.sort === 'DESC' ? 'DESC' : 'ASC';
+    }
+
+    return Object.keys(order).length > 0 ? order : null;
   }
 
   private async getProjectIds(taskIds: string[]) {
