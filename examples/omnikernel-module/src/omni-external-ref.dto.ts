@@ -29,7 +29,7 @@ export class OmniExternalRefType extends OmniExternalRefEntity {
   @IsUUID()
   guid!: string;
 
-  @ModelField({})
+  @ModelField({ gqlType: returnValue(String) })
   @IsString()
   @MaxLength(64)
   internalType!: string;
@@ -38,24 +38,30 @@ export class OmniExternalRefType extends OmniExternalRefEntity {
   @IsUUID()
   internalId!: string;
 
-  @ModelField({})
+  @ModelField({ gqlType: returnValue(String) })
   @IsString()
   @MaxLength(128)
   provider!: string;
 
-  @ModelField({ gqlOptions: { nullable: true } })
+  @ModelField({
+    gqlType: returnValue(String),
+    gqlOptions: { nullable: true },
+  })
   @IsOptional()
   @IsString()
   @MaxLength(128)
   account?: string | null;
 
-  @ModelField({ gqlOptions: { nullable: true } })
+  @ModelField({
+    gqlType: returnValue(String),
+    gqlOptions: { nullable: true },
+  })
   @IsOptional()
   @IsString()
   @MaxLength(128)
   container?: string | null;
 
-  @ModelField({})
+  @ModelField({ gqlType: returnValue(String) })
   @IsString()
   @MaxLength(255)
   externalId!: string;

@@ -65,7 +65,7 @@ Still open before the full OmniKernel PR is done:
 - concrete external reference workflows
 - higher-level service/query helpers
 - task-application adoption once the kernel is stable
-- CI integration for OmniKernel tests
+- repo-level CI integration for OmniKernel tests
 - final documentation and review cleanup
 
 ## Task Completion Checklist
@@ -99,8 +99,8 @@ Use this checklist every time a concrete OmniKernel task is completed:
 - [x] Decide whether base `OmniRecordEntity` writes need explicit STI discriminator
   tests.
 - [x] Add integration-style tests for record/document persistence invariants.
-- Integrate OmniKernel tests into the repo-level Jest/CI flow, or document
-  clearly why they remain example-local.
+- [x] Integrate OmniKernel tests into the repo-level Jest/CI flow with root
+  Jest project discovery and package-level TS config files.
 
 ## Workstream 2 — Organization Layer
 

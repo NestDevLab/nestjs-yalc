@@ -38,24 +38,30 @@ export class OmniDocumentType extends OmniDocumentEntity {
   @IsUUID()
   guid!: string;
 
-  @ModelField({ gqlOptions: { nullable: true } })
+  @ModelField({
+    gqlType: returnValue(String),
+    gqlOptions: { nullable: true },
+  })
   @IsOptional()
   @IsString()
   @MaxLength(128)
   externalId?: string | null;
 
-  @ModelField({})
+  @ModelField({ gqlType: returnValue(String) })
   @IsString()
   @MaxLength(255)
   title!: string;
 
-  @ModelField({ gqlOptions: { nullable: true } })
+  @ModelField({
+    gqlType: returnValue(String),
+    gqlOptions: { nullable: true },
+  })
   @IsOptional()
   @IsString()
   @MaxLength(255)
   slug?: string | null;
 
-  @ModelField({})
+  @ModelField({ gqlType: returnValue(String) })
   @IsString()
   @IsIn([OmniDocumentKind.Document])
   kind!: string;
@@ -73,7 +79,7 @@ export class OmniDocumentType extends OmniDocumentEntity {
   payload?: Record<string, unknown> | null;
 
   @ModelField({
-    gqlType: returnValue([OmniRelationType]),
+    gqlType: () => [OmniRelationType],
     gqlOptions: { nullable: true },
     relation: {
       relationType: 'one-to-many',
@@ -85,7 +91,7 @@ export class OmniDocumentType extends OmniDocumentEntity {
   outgoingRelations?: Relation<OmniRelationType[]>;
 
   @ModelField({
-    gqlType: returnValue([OmniRelationType]),
+    gqlType: () => [OmniRelationType],
     gqlOptions: { nullable: true },
     relation: {
       relationType: 'one-to-many',
@@ -100,24 +106,36 @@ export class OmniDocumentType extends OmniDocumentEntity {
   @IsEnum(OmniDocumentKind)
   documentKind!: OmniDocumentKind;
 
-  @ModelField({ gqlOptions: { nullable: true } })
+  @ModelField({
+    gqlType: returnValue(String),
+    gqlOptions: { nullable: true },
+  })
   @IsOptional()
   @IsString()
   content?: string | null;
 
-  @ModelField({ gqlOptions: { nullable: true } })
+  @ModelField({
+    gqlType: returnValue(String),
+    gqlOptions: { nullable: true },
+  })
   @IsOptional()
   @IsString()
   @MaxLength(128)
   contentMimeType?: string | null;
 
-  @ModelField({ gqlOptions: { nullable: true } })
+  @ModelField({
+    gqlType: returnValue(String),
+    gqlOptions: { nullable: true },
+  })
   @IsOptional()
   @IsUrl()
   @MaxLength(2048)
   sourceUrl?: string | null;
 
-  @ModelField({ gqlOptions: { nullable: true } })
+  @ModelField({
+    gqlType: returnValue(Date),
+    gqlOptions: { nullable: true },
+  })
   @IsOptional()
   @IsDate()
   publishedAt?: Date | null;

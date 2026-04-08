@@ -22,18 +22,24 @@ export class OmniNamedType extends OmniNamedEntity {
   @IsUUID()
   guid!: string;
 
-  @ModelField({ gqlOptions: { nullable: true } })
+  @ModelField({
+    gqlType: returnValue(String),
+    gqlOptions: { nullable: true },
+  })
   @IsOptional()
   @IsString()
   @MaxLength(128)
   externalId?: string | null;
 
-  @ModelField({})
+  @ModelField({ gqlType: returnValue(String) })
   @IsString()
   @MaxLength(255)
   title!: string;
 
-  @ModelField({ gqlOptions: { nullable: true } })
+  @ModelField({
+    gqlType: returnValue(String),
+    gqlOptions: { nullable: true },
+  })
   @IsOptional()
   @IsString()
   @MaxLength(255)

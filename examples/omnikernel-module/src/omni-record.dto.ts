@@ -34,24 +34,30 @@ export class OmniRecordType extends OmniRecordEntity {
   @IsUUID()
   guid!: string;
 
-  @ModelField({ gqlOptions: { nullable: true } })
+  @ModelField({
+    gqlType: returnValue(String),
+    gqlOptions: { nullable: true },
+  })
   @IsOptional()
   @IsString()
   @MaxLength(128)
   externalId?: string | null;
 
-  @ModelField({})
+  @ModelField({ gqlType: returnValue(String) })
   @IsString()
   @MaxLength(255)
   title!: string;
 
-  @ModelField({ gqlOptions: { nullable: true } })
+  @ModelField({
+    gqlType: returnValue(String),
+    gqlOptions: { nullable: true },
+  })
   @IsOptional()
   @IsString()
   @MaxLength(255)
   slug?: string | null;
 
-  @ModelField({})
+  @ModelField({ gqlType: returnValue(String) })
   @IsString()
   @MaxLength(64)
   kind!: string;
@@ -69,7 +75,7 @@ export class OmniRecordType extends OmniRecordEntity {
   payload?: Record<string, unknown> | null;
 
   @ModelField({
-    gqlType: returnValue([OmniRelationType]),
+    gqlType: () => [OmniRelationType],
     gqlOptions: { nullable: true },
     relation: {
       relationType: 'one-to-many',
@@ -81,7 +87,7 @@ export class OmniRecordType extends OmniRecordEntity {
   outgoingRelations?: Relation<OmniRelationType[]>;
 
   @ModelField({
-    gqlType: returnValue([OmniRelationType]),
+    gqlType: () => [OmniRelationType],
     gqlOptions: { nullable: true },
     relation: {
       relationType: 'one-to-many',

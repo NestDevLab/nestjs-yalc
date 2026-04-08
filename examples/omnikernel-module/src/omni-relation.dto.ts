@@ -33,7 +33,7 @@ export class OmniRelationType extends OmniRelationEntity {
   sourceRecordId!: string;
 
   @ModelField({
-    gqlType: returnValue(OmniRecordType),
+    gqlType: () => OmniRecordType,
     gqlOptions: { nullable: false },
     relation: {
       relationType: 'many-to-one',
@@ -49,7 +49,7 @@ export class OmniRelationType extends OmniRelationEntity {
   targetRecordId!: string;
 
   @ModelField({
-    gqlType: returnValue(OmniRecordType),
+    gqlType: () => OmniRecordType,
     gqlOptions: { nullable: false },
     relation: {
       relationType: 'many-to-one',

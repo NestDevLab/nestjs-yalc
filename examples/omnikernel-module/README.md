@@ -98,3 +98,6 @@ export class AppModule {}
   databases.
 - GraphQL DTOs include `class-validator` decorators as usage examples for input
   validation.
+- The package now includes `tsconfig.lib.json` / `tsconfig.dev.json` so the
+  root repo Jest config can discover `@nestjs-yalc/omnikernel-module` as a
+  first-class test project during CI runs.
