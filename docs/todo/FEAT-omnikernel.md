@@ -96,9 +96,9 @@ Use this checklist every time a concrete OmniKernel task is completed:
 
 - [x] Enforce `OmniDocumentEntity.kind` at the service/write layer, not only through
   DTO shape or class defaults.
-- Decide whether base `OmniRecordEntity` writes need explicit STI discriminator
+- [x] Decide whether base `OmniRecordEntity` writes need explicit STI discriminator
   tests.
-- Add integration-style tests for record/document persistence invariants.
+- [x] Add integration-style tests for record/document persistence invariants.
 - Integrate OmniKernel tests into the repo-level Jest/CI flow, or document
   clearly why they remain example-local.
 
