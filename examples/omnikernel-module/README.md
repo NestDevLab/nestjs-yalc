@@ -34,6 +34,13 @@ It follows the same `CrudGenDependencyFactory` pattern used across the example
 modules in this repository, so each entity exposes the usual auto-wired
 service, dataloader, and GraphQL resolver providers.
 
+The module now also includes workflow/query helpers for:
+
+- syncing document and collection external references through a typed
+  `OmniExternalRefService`
+- traversing collection membership and document external refs through
+  `OmniKernelQueryService`
+
 ## Final Objective
 
 The final OmniKernel module should demonstrate a coherent end state where:
@@ -85,6 +92,22 @@ record by accident.
   reverse meaning is already carried by relation direction
 - `derived_from` is currently reserved for document-to-document lineage
 - `references` and `related_to` remain the flexible cross-record graph links
+
+## External Ref Workflows
+
+- `internalType` is now explicit through `OmniExternalRefInternalType`
+- document sync helpers use `document` as the internal target type
+- collection sync helpers use `collection` as the internal target type
+- upserts are keyed by provider, externalId, account, and container
+
+## Query Layer
+
+- `OmniKernelQueryService.getCollectionMembers(collectionId)` returns the
+  records linked by canonical collection `contains` relations
+- `OmniKernelQueryService.getDocumentCollections(documentId)` resolves the
+  parent collections for a document
+- `OmniKernelQueryService.getDocumentExternalRefs(documentId, provider?)`
+  resolves the external sync mappings for a document
 
 ## Entities
 

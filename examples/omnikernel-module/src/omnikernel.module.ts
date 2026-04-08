@@ -12,6 +12,10 @@ import { omniExternalRefProvidersFactory } from './omni-external-ref.resolver.js
 import { omniNamedProvidersFactory } from './omni-named.resolver.js';
 import { omniRecordProvidersFactory } from './omni-record.resolver.js';
 import { omniRelationProvidersFactory } from './omni-relation.resolver.js';
+import {
+  OmniKernelQueryService,
+  omniKernelQueryServiceProviderFactory,
+} from './omnikernel.query.service.js';
 
 @Module({})
 export class OmniKernelModule {
@@ -24,6 +28,8 @@ export class OmniKernelModule {
     const omniDocumentProviders = omniDocumentProvidersFactory(dbConnection);
     const omniExternalRefProviders =
       omniExternalRefProvidersFactory(dbConnection);
+    const omniKernelQueryServiceProvider =
+      omniKernelQueryServiceProviderFactory(dbConnection);
 
     return {
       module: OmniKernelModule,
@@ -47,6 +53,7 @@ export class OmniKernelModule {
         ...omniCollectionProviders.providers,
         ...omniDocumentProviders.providers,
         ...omniExternalRefProviders.providers,
+        omniKernelQueryServiceProvider,
       ],
       exports: [
         ...omniNamedProviders.providers,
@@ -55,6 +62,8 @@ export class OmniKernelModule {
         ...omniCollectionProviders.providers,
         ...omniDocumentProviders.providers,
         ...omniExternalRefProviders.providers,
+        omniKernelQueryServiceProvider,
+        OmniKernelQueryService,
       ],
     };
   }

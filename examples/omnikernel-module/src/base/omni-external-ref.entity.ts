@@ -1,12 +1,16 @@
 import { ObjectType } from '@nestjs/graphql';
 import { Column, Entity } from 'typeorm';
 import { OmniBaseEntity } from './omni-base.entity.js';
+import { OmniExternalRefInternalType } from '../omni-external-ref-internal-type.enum.js';
 
 @Entity('omni-external-ref')
 @ObjectType({ isAbstract: true })
 export class OmniExternalRefEntity extends OmniBaseEntity {
-  @Column('varchar', { length: 64 })
-  internalType!: string;
+  @Column('varchar', {
+    enum: Object.values(OmniExternalRefInternalType),
+    length: 64,
+  })
+  internalType!: OmniExternalRefInternalType;
 
   @Column('varchar', { length: 36 })
   internalId!: string;

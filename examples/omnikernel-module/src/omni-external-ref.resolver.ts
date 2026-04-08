@@ -6,6 +6,7 @@ import {
   OmniExternalRefUpdateInput,
 } from './omni-external-ref.dto.js';
 import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
+import { OmniExternalRefService } from './omni-external-ref.service.js';
 
 export const omniExternalRefProvidersFactory = (dbConnection: string) =>
   CrudGenDependencyFactory<OmniExternalRefEntity>({
@@ -22,6 +23,7 @@ export const omniExternalRefProvidersFactory = (dbConnection: string) =>
     service: {
       dbConnection,
       entityModel: OmniExternalRefEntity,
+      providerClass: OmniExternalRefService,
     },
     dataloader: { databaseKey: 'guid' },
   });

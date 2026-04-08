@@ -1,5 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import 'reflect-metadata';
+const { OmniKernelQueryService } = await import('../omnikernel.query.service.js');
 
 const omniNamedProvidersFactory = jest.fn(() => ({ providers: ['named'] }));
 const omniRecordProvidersFactory = jest.fn(() => ({ providers: ['record'] }));
@@ -56,6 +57,7 @@ describe('OmniKernelModule', () => {
         'collection',
         'document',
         'external-ref',
+        expect.objectContaining({ provide: OmniKernelQueryService }),
       ]),
     );
   });

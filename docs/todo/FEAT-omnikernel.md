@@ -58,12 +58,12 @@ Already completed in PR `#123`:
 - first concrete document slice
 - first organization and collection slice
 - first explicit relation semantics slice
+- typed external-ref workflow slice
+- higher-level query helper slice
 - review-driven fixes already applied
 
 Still open before the full OmniKernel PR is done:
 
-- concrete external reference workflows
-- higher-level service/query helpers
 - task-application adoption once the kernel is stable
 - repo-level CI integration for OmniKernel tests
 - final documentation and review cleanup
@@ -126,19 +126,19 @@ Use this checklist every time a concrete OmniKernel task is completed:
 
 ## Workstream 4 — External Reference Workflows
 
-- Decide which internal entities can be referenced externally in the example.
-- Formalize `internalType` values as constants or enums if needed.
-- Add example DTO/service usage for document external synchronization.
-- Add validation and lookup tests for external refs.
-- Document example provider/account/container usage.
+- [x] Decide which internal entities can be referenced externally in the example.
+- [x] Formalize `internalType` values through `OmniExternalRefInternalType`.
+- [x] Add example service usage for document and collection external synchronization.
+- [x] Add validation and lookup tests for external refs.
+- [x] Document example provider/account/container usage.
 
 ## Workstream 5 — Service and Query Layer
 
-- Add example higher-level service helpers for common OmniKernel queries.
-- Add document traversal helpers through relations.
-- Add collection membership query examples.
-- Decide whether dedicated read/query services belong in the example.
-- Add tests for non-trivial query flows.
+- [x] Add example higher-level service helpers for common OmniKernel queries.
+- [x] Add document traversal helpers through relations.
+- [x] Add collection membership query examples.
+- [x] Decide that dedicated read/query services do belong in the example and expose `OmniKernelQueryService`.
+- [x] Add tests for non-trivial query flows.
 
 ## Workstream 6 — Task Application Adoption
 

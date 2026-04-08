@@ -6,6 +6,7 @@ import {
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import {
+  IsEnum,
   IsObject,
   IsOptional,
   IsString,
@@ -14,6 +15,7 @@ import {
 } from 'class-validator';
 import { GraphQLJSONObject } from 'graphql-type-json';
 import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
+import { OmniExternalRefInternalType } from './omni-external-ref-internal-type.enum.js';
 
 @ObjectType()
 @ModelObject()
@@ -29,10 +31,9 @@ export class OmniExternalRefType extends OmniExternalRefEntity {
   @IsUUID()
   guid!: string;
 
-  @ModelField({ gqlType: returnValue(String) })
-  @IsString()
-  @MaxLength(64)
-  internalType!: string;
+  @ModelField({ gqlType: returnValue(OmniExternalRefInternalType) })
+  @IsEnum(OmniExternalRefInternalType)
+  internalType!: OmniExternalRefInternalType;
 
   @ModelField({ gqlType: returnValue(UUIDScalar), isRequired: true })
   @IsUUID()

@@ -16,7 +16,14 @@ const { OmniCollectionEntity } = await import('../omni-collection.entity.js');
 const { OmniCollectionService } = await import('../omni-collection.service.js');
 const { OmniDocumentEntity } = await import('../omni-document.entity.js');
 const { OmniDocumentService } = await import('../omni-document.service.js');
+const { OmniExternalRefInternalType } = await import(
+  '../omni-external-ref-internal-type.enum.js'
+);
+const { OmniExternalRefService } = await import(
+  '../omni-external-ref.service.js'
+);
 const relationSemantics = await import('../omni-relation-semantics.js');
+const { OmniKernelQueryService } = await import('../omnikernel.query.service.js');
 const { omniCollectionProvidersFactory } = await import(
   '../omni-collection.resolver.js'
 );
@@ -62,7 +69,7 @@ describe('OmniKernel public API', () => {
     });
     const externalRef = new externalRefDto.OmniExternalRefType({
       guid: '47eaf320-9fbe-4f2e-9a0a-c2c4cbdb2d9e',
-      internalType: 'record',
+      internalType: OmniExternalRefInternalType.Document,
       internalId: 'b7df87c7-b8b8-43a3-99c0-811024a48b39',
       provider: 'github',
       externalId: '123',
@@ -181,6 +188,15 @@ describe('OmniKernel public API', () => {
           provider.provide === OmniDocumentService,
         ),
     ).toBe(true);
+    expect(
+      externalRef.providers.some(
+        (provider) =>
+          typeof provider === 'object' &&
+          provider !== null &&
+          'provide' in provider &&
+          provider.provide === OmniExternalRefService,
+      ),
+    ).toBe(true);
     expect(OmniCollectionEntity).toBe(omnikernelPublicApi.OmniCollectionEntity);
     expect(OmniDocumentEntity).toBe(omnikernelPublicApi.OmniDocumentEntity);
   });
@@ -209,6 +225,12 @@ describe('OmniKernel public API', () => {
     );
     expect(omnikernelPublicApi.isAllowedOmniRelation).toBe(
       relationSemantics.isAllowedOmniRelation,
+    );
+    expect(omnikernelPublicApi.OmniExternalRefInternalType).toBe(
+      OmniExternalRefInternalType,
+    );
+    expect(omnikernelPublicApi.OmniKernelQueryService).toBe(
+      OmniKernelQueryService,
     );
   });
 });
