@@ -1,9 +1,9 @@
 import { ObjectType } from '@nestjs/graphql';
 import { Column, Entity, OneToMany, TableInheritance } from 'typeorm';
 import type { Relation } from 'typeorm';
-import { OmniNamedEntity } from './omni-named.entity.js';
-import { OmniRelationEntity } from './omni-relation.entity.js';
-import { OmniRecordStatus } from '../omni-record-status.enum.js';
+import { OmniNamedEntity } from './omni-named.entity';
+import { OmniRelationEntity } from './omni-relation.entity';
+import { OmniRecordStatus } from '../omni-record-status.enum';
 
 @Entity('omni-record')
 @TableInheritance({
@@ -15,17 +15,18 @@ import { OmniRecordStatus } from '../omni-record-status.enum.js';
 })
 @ObjectType({ isAbstract: true })
 export class OmniRecordEntity extends OmniNamedEntity {
-  @Column('varchar', { length: 64 })
+  @Column({ type: 'varchar', length: 64 })
   kind!: string;
 
-  @Column('varchar', {
+  @Column({
+    type: 'varchar',
     default: OmniRecordStatus.Draft,
     enum: Object.values(OmniRecordStatus),
     length: 32,
   })
   status!: OmniRecordStatus;
 
-  @Column('simple-json', { nullable: true })
+  @Column({ type: 'simple-json', nullable: true })
   payload?: Record<string, unknown> | null;
 
   @OneToMany(() => OmniRelationEntity, (relation) => relation.sourceRecord)

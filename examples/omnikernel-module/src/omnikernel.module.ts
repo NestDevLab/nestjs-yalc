@@ -1,21 +1,21 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
-import { OmniNamedEntity } from './base/omni-named.entity.js';
-import { OmniRecordEntity } from './base/omni-record.entity.js';
-import { OmniRelationEntity } from './base/omni-relation.entity.js';
-import { OmniCollectionEntity } from './omni-collection.entity.js';
-import { omniCollectionProvidersFactory } from './omni-collection.resolver.js';
-import { OmniDocumentEntity } from './omni-document.entity.js';
-import { omniDocumentProvidersFactory } from './omni-document.resolver.js';
-import { omniExternalRefProvidersFactory } from './omni-external-ref.resolver.js';
-import { omniNamedProvidersFactory } from './omni-named.resolver.js';
-import { omniRecordProvidersFactory } from './omni-record.resolver.js';
-import { omniRelationProvidersFactory } from './omni-relation.resolver.js';
+import { OmniExternalRefEntity } from './base/omni-external-ref.entity';
+import { OmniNamedEntity } from './base/omni-named.entity';
+import { OmniRecordEntity } from './base/omni-record.entity';
+import { OmniRelationEntity } from './base/omni-relation.entity';
+import { OmniCollectionEntity } from './omni-collection.entity';
+import { omniCollectionProvidersFactory } from './omni-collection.resolver';
+import { OmniDocumentEntity } from './omni-document.entity';
+import { omniDocumentProvidersFactory } from './omni-document.resolver';
+import { omniExternalRefProvidersFactory } from './omni-external-ref.resolver';
+import { omniNamedProvidersFactory } from './omni-named.resolver';
+import { omniRecordProvidersFactory } from './omni-record.resolver';
+import { omniRelationProvidersFactory } from './omni-relation.resolver';
 import {
   OmniKernelQueryService,
   omniKernelQueryServiceProviderFactory,
-} from './omnikernel.query.service.js';
+} from './omnikernel.query.service';
 
 @Module({})
 export class OmniKernelModule {

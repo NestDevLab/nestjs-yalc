@@ -2,11 +2,11 @@ import { InputType, ObjectType, OmitType, PartialType } from '@nestjs/graphql';
 import {
   ModelField,
   ModelObject,
-} from '@nestjs-yalc/crud-gen/object.decorator.js';
-import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
-import returnValue from '@nestjs-yalc/utils/returnValue.js';
+} from '@nestjs-yalc/crud-gen/object.decorator';
+import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar';
+import returnValue from '@nestjs-yalc/utils/returnValue';
 import { IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
-import { OmniNamedEntity } from './base/omni-named.entity.js';
+import { OmniNamedEntity } from './base/omni-named.entity';
 
 @ObjectType()
 @ModelObject()

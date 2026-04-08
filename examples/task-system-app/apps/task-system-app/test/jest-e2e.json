@@ -13,6 +13,8 @@
     ]
   },
   "moduleNameMapper": {
+    "^@nestjs-yalc/omnikernel-module$": "<rootDir>/../../../../omnikernel-module/src",
+    "^@nestjs-yalc/omnikernel-module/src/(.*)$": "<rootDir>/../../../../omnikernel-module/src/$1",
     "^@nestjs-yalc/task-system-module$": "<rootDir>/../../../../task-system-module/src",
     "^@nestjs-yalc/task-system-module/src/(.*)$": "<rootDir>/../../../../task-system-module/src/$1",
     "^@nestjs/(.*)$": "<rootDir>/../../../../../node_modules/@nestjs/$1",

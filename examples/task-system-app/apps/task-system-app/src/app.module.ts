@@ -4,6 +4,14 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar';
 import {
+  OmniCollectionEntity,
+  OmniDocumentEntity,
+  OmniExternalRefEntity,
+  OmniNamedEntity,
+  OmniRecordEntity,
+  OmniRelationEntity,
+} from '@nestjs-yalc/omnikernel-module';
+import {
   TaskSystemModule,
   TaskEvent,
   TaskExternalRef,
@@ -17,6 +25,7 @@ import {
   TaskItemRelationsResolver,
   TaskProjectRelationsResolver,
 } from './graphql-relations.resolver';
+import { OmniTaskAppModule } from './omni-task-app/omni-task-app.module';
 import { ProjectsModule } from './projects/projects.module';
 import { SyncModule } from './sync/sync.module';
 import { TasksModule } from './tasks/tasks.module';
@@ -38,11 +47,18 @@ import { TasksModule } from './tasks/tasks.module';
         TaskEvent,
         TaskExternalRef,
         TaskSyncState,
+        OmniNamedEntity,
+        OmniRecordEntity,
+        OmniRelationEntity,
+        OmniCollectionEntity,
+        OmniDocumentEntity,
+        OmniExternalRefEntity,
       ],
       synchronize: true,
     }),
     TypeOrmModule.forFeature([TaskProject, TaskItem, TaskEvent]),
     TaskSystemModule.register('default'),
+    OmniTaskAppModule,
     TasksModule,
     ProjectsModule,
     EventsModule,

@@ -104,6 +104,21 @@ describe('Task System App e2e', () => {
     expect(res.body.list.length).toBeGreaterThanOrEqual(1);
   });
 
+  it('lists project tasks via Omni collection membership', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`/projects/${createdProjectGuid}/tasks`)
+      .expect(200);
+
+    expect(res.body.list).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          guid: createdTaskGuid,
+          projectId: createdProjectGuid,
+        }),
+      ]),
+    );
+  });
+
   it('creates an event linked to the project', async () => {
     const guid = randomUUID();
     const res = await request(app.getHttpServer())

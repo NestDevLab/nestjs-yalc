@@ -1,6 +1,6 @@
-import { OmniCollectionKind } from './omni-collection-kind.enum.js';
-import { OmniDocumentKind } from './omni-document-kind.enum.js';
-import { OmniRelationKind } from './omni-relation-kind.enum.js';
+import { OmniCollectionKind } from './omni-collection-kind.enum';
+import { OmniDocumentKind } from './omni-document-kind.enum';
+import { OmniRelationKind } from './omni-relation-kind.enum';
 
 export interface OmniRelationSemanticsInput {
   sourceKind: string;

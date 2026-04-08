@@ -1,11 +1,11 @@
-import { CrudGenDependencyFactory } from '@nestjs-yalc/crud-gen/crud-gen.helpers.js';
+import { CrudGenDependencyFactory } from '@nestjs-yalc/crud-gen/crud-gen.helpers';
 import {
   OmniNamedCondition,
   OmniNamedCreateInput,
   OmniNamedType,
   OmniNamedUpdateInput,
-} from './omni-named.dto.js';
-import { OmniNamedEntity } from './base/omni-named.entity.js';
+} from './omni-named.dto';
+import { OmniNamedEntity } from './base/omni-named.entity';
 
 export const omniNamedProvidersFactory = (dbConnection: string) =>
   CrudGenDependencyFactory<OmniNamedEntity>({
