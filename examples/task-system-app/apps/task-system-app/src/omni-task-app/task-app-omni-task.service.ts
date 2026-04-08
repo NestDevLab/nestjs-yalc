@@ -3,19 +3,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { YalcEventService } from '@nestjs-yalc/event-manager';
 import { randomUUID } from 'node:crypto';
 import {
-  OmniKernelQueryService,
   OmniRecordEntity,
   OmniRelationEntity,
   OmniRelationKind,
   OmniRelationStatus,
 } from '@nestjs-yalc/omnikernel-module';
-import { TaskItem, TaskItemType } from '@nestjs-yalc/task-system-module';
 import { In, Repository } from 'typeorm';
 import {
   TaskAppOmniMapper,
   type TaskItemOmniWriteInput,
   type TaskOmniPageQuery,
 } from './task-app-omni.mapper';
+import { TaskItemType } from './task-app.types';
 import { TaskAppOmniProjectService } from './task-app-omni-project.service';
 
 @Injectable()
@@ -25,11 +24,8 @@ export class TaskAppOmniTaskService {
     private readonly recordRepository: Repository<OmniRecordEntity>,
     @InjectRepository(OmniRelationEntity)
     private readonly relationRepository: Repository<OmniRelationEntity>,
-    @InjectRepository(TaskItem)
-    private readonly legacyTaskRepository: Repository<TaskItem>,
     private readonly events: YalcEventService,
     private readonly mapper: TaskAppOmniMapper,
-    private readonly omniKernelQueryService: OmniKernelQueryService,
     private readonly projectService: TaskAppOmniProjectService,
   ) {}
 
@@ -38,9 +34,7 @@ export class TaskAppOmniTaskService {
 
     if (query.projectId) {
       await this.projectService.ensureProjectExists(query.projectId);
-      const members = await this.omniKernelQueryService.getCollectionMembers(
-        query.projectId,
-      );
+      const members = await this.getCollectionMembers(query.projectId);
       const tasks = members.filter(
         (record): record is OmniRecordEntity =>
           record.kind === this.mapper.taskKind,
@@ -113,16 +107,6 @@ export class TaskAppOmniTaskService {
       this.mapper.mapTaskToOmniRecord(input),
     );
     await this.recordRepository.save(record);
-    await this.legacyTaskRepository.save(
-      this.legacyTaskRepository.create({
-        description: input.description ?? null,
-        dueAt: input.dueAt ? new Date(input.dueAt) : null,
-        guid: input.guid,
-        projectId: input.projectId ?? null,
-        status: input.status ?? 'todo',
-        title: input.title,
-      }),
-    );
     await this.syncContainsRelation(record.guid, input.projectId ?? null);
     await this.syncTaskRelations(
       record.guid,
@@ -159,19 +143,6 @@ export class TaskAppOmniTaskService {
       { guid, kind: this.mapper.taskKind },
       this.mapper.mapTaskToOmniRecord(merged),
     );
-    await this.legacyTaskRepository.update(
-      { guid },
-      {
-        description: merged.description ?? null,
-        dueAt: merged.dueAt ? new Date(merged.dueAt) : null,
-        projectId:
-          input.projectId !== undefined
-            ? input.projectId ?? null
-            : current.projectId,
-        status: merged.status,
-        title: merged.title,
-      },
-    );
 
     if (Object.prototype.hasOwnProperty.call(input, 'projectId')) {
       if (input.projectId) {
@@ -207,7 +178,6 @@ export class TaskAppOmniTaskService {
       guid,
       kind: this.mapper.taskKind,
     });
-    await this.legacyTaskRepository.delete({ guid });
     return { deleted: true };
   }
 
@@ -235,6 +205,26 @@ export class TaskAppOmniTaskService {
     }
 
     return record;
+  }
+
+  private async getCollectionMembers(collectionId: string) {
+    const relations = await this.relationRepository.find({
+      where: {
+        sourceRecordId: collectionId,
+        kind: OmniRelationKind.Contains,
+        status: OmniRelationStatus.Active,
+      },
+      relations: {
+        targetRecord: true,
+      },
+      order: {
+        createdAt: 'ASC',
+      },
+    });
+
+    return relations
+      .map((relation) => relation.targetRecord)
+      .filter((record): record is OmniRecordEntity => !!record);
   }
 
   private async getProjectIds(taskIds: string[]) {

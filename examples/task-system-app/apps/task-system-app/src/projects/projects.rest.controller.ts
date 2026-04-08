@@ -8,9 +8,9 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { TaskProject } from '@nestjs-yalc/task-system-module';
 import { TaskAppOmniProjectService } from '../omni-task-app/task-app-omni-project.service';
 import { TaskAppOmniTaskService } from '../omni-task-app/task-app-omni-task.service';
+import { TaskProjectCreateInput } from '../omni-task-app/task-app.types';
 
 @Controller('projects')
 export class ProjectsController {
@@ -36,7 +36,7 @@ export class ProjectsController {
 
     return {
       ...project,
-      tasks: (await this.tasks.list({ projectId: id })).list,
+      tasks: (await this.tasks.list({ projectId: id })).nodes,
     };
   }
 
@@ -52,12 +52,15 @@ export class ProjectsController {
   }
 
   @Post()
-  async create(@Body() body: Partial<TaskProject>) {
+  async create(@Body() body: Partial<TaskProjectCreateInput>) {
     return this.projects.create(body);
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() body: Partial<TaskProject>) {
+  async update(
+    @Param('id') id: string,
+    @Body() body: Partial<TaskProjectCreateInput>,
+  ) {
     return this.projects.update(id, body);
   }
 

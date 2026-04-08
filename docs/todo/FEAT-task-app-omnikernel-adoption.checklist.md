@@ -11,40 +11,54 @@ Source of truth:
 
 - [x] Introduce an explicit adapter module/service layer
   - Added `apps/task-system-app/src/omni-task-app/`
-  - Mapping logic kept out of controllers
+  - Mapping logic kept out of controllers and GraphQL resolvers
 
 - [x] Map containers to `OmniCollectionEntity`
   - Projects persist through Omni collections
-  - Human-facing fields mapped via title/slug/summary
+  - Human-facing fields mapped via title/slug/summary/payload
 
 - [x] Map tasks to `OmniRecordEntity`
   - Tasks persist with `kind = 'task'`
-  - Task-specific fields stay in disciplined `payload`
+  - Task-specific fields live in disciplined `payload`
   - No `OmniTaskEntity` introduced
 
 - [x] Map external refs to `OmniExternalRefEntity`
   - Task refs use `internalType = record`
   - Provider/account/container/externalId preserved
-  - Omni external-ref helper workflows are used for internal-record lookup / upsert paths where applicable
 
 - [x] Use canonical Omni relations only
-  - `contains` for collection -> task membership
+  - `contains` for collection membership
   - `references` for task cross-links
-  - `related_to` for loose associations
+  - `related_to` for loose task associations
   - No `belongs_to` introduced
 
-- [x] Wire at least one real OmniKernel-backed read path
+- [x] Add Omni-only modeling for the remaining task-app concepts
+  - Events now persist as `OmniRecordEntity(kind='event')`
+  - Sync states now persist as `OmniRecordEntity(kind='sync-state')`
+
+- [x] Wire real OmniKernel-backed REST read paths
   - `GET /tasks?projectId=...`
   - `GET /projects/:id/tasks`
+  - `GET /events`
+  - `GET /sync-states`
+  - `GET /external-refs`
 
-- [x] Wire at least one real OmniKernel-backed write path
+- [x] Wire real OmniKernel-backed REST write paths
   - `POST/PUT /projects`
   - `POST/PUT /tasks`
+  - `POST/PUT /events`
+  - `POST/PUT /sync-states`
   - `POST/PUT /external-refs`
 
-- [x] Keep the migration incremental and reversible
-  - REST slice writes through Omni adapter layer
-  - Legacy task tables still mirrored for compatibility with unchanged slices
+- [x] Remove legacy task-app storage usage
+  - Removed task-app dependence on legacy task-system entities/tables for runtime persistence
+  - Removed dual write to legacy task tables
+  - Task app now uses Omni entities/repositories only
+
+- [x] Switch GraphQL task-app API to Omni-backed resolvers
+  - Added local GraphQL-compatible `TaskSystem_*` resolvers backed by Omni services
+  - Preserved the outward GraphQL contract while replacing the storage backend
+  - Added Omni-backed relation resolution for `project.tasks`, `project.events`, `task.project`, `event.project`
 
 - [x] Add tests for mapping layer
   - `task-app-omni.mapper.spec.ts`
@@ -56,29 +70,30 @@ Source of truth:
   - `task-app-omni.integration.spec.ts`
   - Covers `references` and `related_to`
 
-- [x] Add tests for external-ref sync flow
-  - `task-app-omni.integration.spec.ts`
+- [x] Add tests for GraphQL compatibility
+  - `test/task-system.graphql.e2e-spec.ts`
+  - create/read/update/delete paths now run on Omni-backed resolvers
+  - join/sort/pagination compatibility preserved
 
-- [x] Add docs for the adoption slice
+- [x] Add docs/checklist updates for the migration
   - `examples/task-system-app/README.md`
+  - `docs/todo/FEAT-task-app-omnikernel-adoption.checklist.md`
 
-- [x] Run repo validation relevant to this slice
+- [x] Run repo validation relevant to this switchover
+  - `npm run lint` ✅
   - `npm test -- --runInBand --no-watchman` ✅
   - `npm run test:e2e -- --runInBand --no-watchman` ✅
-  - Re-run after refinement: still green ✅
-
-- [x] Full example-app build validation green
-  - Fixed OmniKernel example source compatibility issues required by the task-app adoption slice
   - `npm run build` ✅
-  - `npm run lint && npm test -- --runInBand --no-watchman && npm run test:e2e -- --runInBand --no-watchman && npm run build` ✅
+  - Combined pipeline run ✅
 
 ## Current focus
 
-- [x] Establish initial adoption slice
-- [x] Ensure mappings follow the markdown rules exactly
-- [x] Final PR polish / commit shaping / PR body prep ready
+- [x] Initial Omni adoption slice
+- [x] Full GraphQL switchover
+- [x] Remove dual write / legacy persistence
+- [x] Full pipeline green
 
 ## Notes
 
-- This checklist is meant to stay updated during the implementation work.
-- If scope starts expanding beyond the markdown plan, split the follow-up instead of broadening this PR.
+- The task app now uses Omni entities as its only persistence substrate.
+- GraphQL compatibility is preserved intentionally even though the backend implementation is no longer the legacy task-system module.

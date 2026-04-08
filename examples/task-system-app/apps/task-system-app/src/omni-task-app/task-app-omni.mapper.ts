@@ -8,15 +8,19 @@ import {
   OmniRecordStatus,
 } from '@nestjs-yalc/omnikernel-module';
 import {
-  TaskExternalRef,
+  TaskEventCreateInput,
+  TaskEventType,
+  TaskExternalRefCreateInput,
   TaskExternalRefType,
-  TaskItem,
+  TaskItemCreateInput,
   TaskItemType,
-  TaskProject,
+  TaskProjectCreateInput,
   TaskProjectType,
-} from '@nestjs-yalc/task-system-module';
+  TaskSyncStateCreateInput,
+  TaskSyncStateType,
+} from './task-app.types';
 
-export interface TaskItemOmniWriteInput extends Partial<TaskItem> {
+export interface TaskItemOmniWriteInput extends Partial<TaskItemCreateInput> {
   referenceIds?: string[];
   relatedToIds?: string[];
 }
@@ -31,9 +35,11 @@ export interface TaskOmniPageQuery {
 @Injectable()
 export class TaskAppOmniMapper {
   readonly taskKind = 'task';
+  readonly eventKind = 'event';
+  readonly syncStateKind = 'sync-state';
 
   mapProjectToOmniCollection(
-    input: Partial<TaskProject>,
+    input: Partial<TaskProjectCreateInput>,
   ): Partial<OmniCollectionEntity> {
     const projectStatus = input.status ?? 'active';
     return {
@@ -53,9 +59,10 @@ export class TaskAppOmniMapper {
   mapOmniCollectionToProject(
     collection: OmniCollectionEntity,
     tasks?: TaskItemType[],
+    events?: TaskEventType[],
   ): TaskProjectType {
     const payload = this.getPayload(collection);
-    return new TaskProjectType({
+    return {
       guid: collection.guid,
       name: collection.title,
       description: collection.summary ?? null,
@@ -63,11 +70,13 @@ export class TaskAppOmniMapper {
         this.getPayloadString(payload, 'projectStatus') ??
         this.mapOmniStatusToDomainStatus(collection.status),
       tasks,
-      events: [],
-    });
+      events,
+    };
   }
 
-  mapTaskToOmniRecord(input: Partial<TaskItem>): Partial<OmniRecordEntity> {
+  mapTaskToOmniRecord(
+    input: Partial<TaskItemCreateInput>,
+  ): Partial<OmniRecordEntity> {
     const taskStatus = input.status ?? 'todo';
     return {
       guid: input.guid,
@@ -88,7 +97,7 @@ export class TaskAppOmniMapper {
     projectId?: string | null,
   ): TaskItemType {
     const payload = this.getPayload(record);
-    return new TaskItemType({
+    return {
       guid: record.guid,
       title: record.title,
       description: this.getPayloadString(payload, 'description'),
@@ -97,11 +106,90 @@ export class TaskAppOmniMapper {
         this.mapOmniStatusToDomainStatus(record.status),
       projectId: projectId ?? null,
       dueAt: this.getPayloadDate(payload, 'dueAt'),
-    });
+    };
+  }
+
+  mapEventToOmniRecord(
+    input: Partial<TaskEventCreateInput>,
+  ): Partial<OmniRecordEntity> {
+    const eventStatus = input.status ?? 'scheduled';
+    return {
+      guid: input.guid,
+      title: input.title ?? 'Untitled event',
+      slug: this.slugify(input.title),
+      kind: this.eventKind,
+      status: this.mapDomainStatusToOmniStatus(eventStatus),
+      payload: {
+        allDay: input.allDay ?? false,
+        description: input.description ?? null,
+        endAt: this.normalizeDateInput(input.endAt),
+        eventStatus,
+        location: input.location ?? null,
+        startAt: this.normalizeDateInput(input.startAt),
+      },
+    };
+  }
+
+  mapOmniRecordToEvent(
+    record: OmniRecordEntity,
+    projectId?: string | null,
+  ): TaskEventType {
+    const payload = this.getPayload(record);
+    return {
+      guid: record.guid,
+      title: record.title,
+      description: this.getPayloadString(payload, 'description'),
+      status:
+        this.getPayloadString(payload, 'eventStatus') ??
+        this.mapOmniStatusToDomainStatus(record.status),
+      startAt: this.getPayloadDate(payload, 'startAt') ?? new Date(0),
+      endAt: this.getPayloadDate(payload, 'endAt'),
+      allDay: this.getPayloadBoolean(payload, 'allDay') ?? false,
+      projectId: projectId ?? null,
+      location: this.getPayloadString(payload, 'location'),
+    };
+  }
+
+  mapSyncStateToOmniRecord(
+    input: Partial<TaskSyncStateCreateInput>,
+  ): Partial<OmniRecordEntity> {
+    const syncStatus = input.status ?? 'active';
+    return {
+      guid: input.guid,
+      title: `Sync state ${input.guid ?? 'unknown'}`,
+      slug: this.slugify(input.guid),
+      kind: this.syncStateKind,
+      status: this.mapDomainStatusToOmniStatus(syncStatus),
+      payload: {
+        externalRefId: input.externalRefId,
+        lastDirection: input.lastDirection ?? null,
+        lastError: input.lastError ?? null,
+        lastSyncedAt: this.normalizeDateInput(input.lastSyncedAt),
+        localVersionHash: input.localVersionHash ?? null,
+        remoteVersion: input.remoteVersion ?? null,
+        syncStatus,
+      },
+    };
+  }
+
+  mapOmniRecordToSyncState(record: OmniRecordEntity): TaskSyncStateType {
+    const payload = this.getPayload(record);
+    return {
+      guid: record.guid,
+      externalRefId: this.getPayloadString(payload, 'externalRefId') ?? '',
+      status:
+        this.getPayloadString(payload, 'syncStatus') ??
+        this.mapOmniStatusToDomainStatus(record.status),
+      lastSyncedAt: this.getPayloadDate(payload, 'lastSyncedAt'),
+      lastDirection: this.getPayloadString(payload, 'lastDirection'),
+      remoteVersion: this.getPayloadString(payload, 'remoteVersion'),
+      localVersionHash: this.getPayloadString(payload, 'localVersionHash'),
+      lastError: this.getPayloadString(payload, 'lastError'),
+    };
   }
 
   mapExternalRefToOmniExternalRef(
-    input: Partial<TaskExternalRef>,
+    input: Partial<TaskExternalRefCreateInput>,
   ): Partial<OmniExternalRefEntity> {
     const legacyInternalType =
       input.internalType ??
@@ -125,7 +213,7 @@ export class TaskAppOmniMapper {
 
   mapOmniExternalRefToTask(ref: OmniExternalRefEntity): TaskExternalRefType {
     const payload = this.getPayload(ref);
-    return new TaskExternalRefType({
+    return {
       guid: ref.guid,
       internalType:
         this.getPayloadString(payload, 'legacyInternalType') ??
@@ -135,7 +223,7 @@ export class TaskAppOmniMapper {
       account: ref.account ?? null,
       container: ref.container ?? null,
       externalId: ref.externalId,
-    });
+    };
   }
 
   mapTaskExternalRefInternalType(
@@ -149,6 +237,8 @@ export class TaskAppOmniMapper {
         return OmniExternalRefInternalType.Document;
       case 'record':
       case 'task':
+      case 'event':
+      case 'sync-state':
       case undefined:
       case null:
         return OmniExternalRefInternalType.Record;
@@ -183,6 +273,7 @@ export class TaskAppOmniMapper {
       case 'active':
       case 'in_progress':
       case 'scheduled':
+      case 'error':
       default:
         return OmniRecordStatus.Active;
     }
@@ -226,12 +317,13 @@ export class TaskAppOmniMapper {
     };
   }
 
-  buildPage<T>(list: T[], startRow: number, count: number) {
+  buildPage<T>(nodes: T[], startRow: number, count: number) {
     return {
-      list,
+      list: nodes,
+      nodes,
       pageData: {
         count,
-        endRow: startRow + list.length,
+        endRow: startRow + nodes.length,
         startRow,
       },
     };
@@ -284,5 +376,13 @@ export class TaskAppOmniMapper {
 
     const parsed = new Date(value);
     return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  private getPayloadBoolean(
+    payload: Record<string, unknown>,
+    key: string,
+  ): boolean | null {
+    const value = payload[key];
+    return typeof value === 'boolean' ? value : null;
   }
 }

@@ -8,7 +8,6 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { TaskItem } from '@nestjs-yalc/task-system-module';
 import { TaskAppOmniTaskService } from '../omni-task-app/task-app-omni-task.service';
 import { type TaskItemOmniWriteInput } from '../omni-task-app/task-app-omni.mapper';
 
@@ -27,15 +26,12 @@ export class TasksController {
   }
 
   @Post()
-  async create(@Body() body: TaskItemOmniWriteInput & Partial<TaskItem>) {
+  async create(@Body() body: TaskItemOmniWriteInput) {
     return this.tasks.create(body);
   }
 
   @Put(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() body: TaskItemOmniWriteInput & Partial<TaskItem>,
-  ) {
+  async update(@Param('id') id: string, @Body() body: TaskItemOmniWriteInput) {
     return this.tasks.update(id, body);
   }
 

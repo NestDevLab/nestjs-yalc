@@ -5,15 +5,14 @@ import {
   OmniCollectionEntity,
   OmniExternalRefEntity,
   OmniExternalRefInternalType,
-  OmniExternalRefService,
   OmniRecordEntity,
 } from '@nestjs-yalc/omnikernel-module';
-import { TaskExternalRef } from '@nestjs-yalc/task-system-module';
 import { Repository } from 'typeorm';
 import {
   TaskAppOmniMapper,
   type TaskOmniPageQuery,
 } from './task-app-omni.mapper';
+import { TaskExternalRefCreateInput } from './task-app.types';
 
 @Injectable()
 export class TaskAppOmniExternalRefService {
@@ -22,9 +21,8 @@ export class TaskAppOmniExternalRefService {
     private readonly recordRepository: Repository<OmniRecordEntity>,
     @InjectRepository(OmniCollectionEntity)
     private readonly collectionRepository: Repository<OmniCollectionEntity>,
-    @InjectRepository(TaskExternalRef)
-    private readonly legacyExternalRefRepository: Repository<TaskExternalRef>,
-    private readonly externalRefService: OmniExternalRefService,
+    @InjectRepository(OmniExternalRefEntity)
+    private readonly externalRefRepository: Repository<OmniExternalRefEntity>,
     private readonly events: YalcEventService,
     private readonly mapper: TaskAppOmniMapper,
   ) {}
@@ -38,11 +36,16 @@ export class TaskAppOmniExternalRefService {
       : undefined;
 
     if (query.internalId && internalType) {
-      const refs = await this.externalRefService.findForInternalRecord(
-        internalType,
-        query.internalId,
-        query.provider,
-      );
+      const refs = await this.externalRefRepository.find({
+        where: {
+          internalType,
+          internalId: query.internalId,
+          ...(query.provider ? { provider: query.provider } : {}),
+        },
+        order: {
+          createdAt: 'ASC',
+        },
+      });
       const pagedRefs = refs.slice(skip, skip + take);
 
       return this.mapper.buildPage(
@@ -52,20 +55,18 @@ export class TaskAppOmniExternalRefService {
       );
     }
 
-    const [refs, count] = await this.externalRefService
-      .getRepository()
-      .findAndCount({
-        order: {
-          createdAt: 'ASC',
-        },
-        skip,
-        take,
-        where: {
-          ...(query.internalId ? { internalId: query.internalId } : {}),
-          ...(internalType ? { internalType } : {}),
-          ...(query.provider ? { provider: query.provider } : {}),
-        },
-      });
+    const [refs, count] = await this.externalRefRepository.findAndCount({
+      order: {
+        createdAt: 'ASC',
+      },
+      skip,
+      take,
+      where: {
+        ...(query.internalId ? { internalId: query.internalId } : {}),
+        ...(internalType ? { internalType } : {}),
+        ...(query.provider ? { provider: query.provider } : {}),
+      },
+    });
 
     return this.mapper.buildPage(
       refs.map((ref) => this.mapper.mapOmniExternalRefToTask(ref)),
@@ -79,36 +80,34 @@ export class TaskAppOmniExternalRefService {
     return this.mapper.mapOmniExternalRefToTask(ref);
   }
 
-  async create(input: Partial<TaskExternalRef>) {
+  async create(input: Partial<TaskExternalRefCreateInput>) {
     this.validateExternalRefInput(input);
     await this.ensureInternalTargetExists(
       this.mapper.mapTaskExternalRefInternalType(input.internalType),
       input.internalId!,
     );
 
-    const storedRef = await this.externalRefService.upsertExternalRef(
-      this.mapper.mapExternalRefToOmniExternalRef(input) as Parameters<
-        OmniExternalRefService['upsertExternalRef']
-      >[0],
-    );
-    await this.legacyExternalRefRepository.save(
-      this.legacyExternalRefRepository.create({
+    const existing = await this.externalRefRepository.findOne({
+      where: {
+        provider: input.provider!,
+        externalId: input.externalId!,
         account: input.account ?? null,
         container: input.container ?? null,
-        externalId: input.externalId,
-        guid: storedRef.guid,
-        internalId: input.internalId,
-        internalType: input.internalType ?? 'task',
-        provider: input.provider,
-      }),
-    );
+      },
+    });
+
+    const entity = this.externalRefRepository.create({
+      ...(existing ? { guid: existing.guid } : {}),
+      ...this.mapper.mapExternalRefToOmniExternalRef(input),
+    });
+    const storedRef = await this.externalRefRepository.save(entity);
 
     return this.getById(storedRef.guid);
   }
 
-  async update(guid: string, input: Partial<TaskExternalRef>) {
+  async update(guid: string, input: Partial<TaskExternalRefCreateInput>) {
     const current = await this.getById(guid);
-    const merged: Partial<TaskExternalRef> = {
+    const merged: Partial<TaskExternalRefCreateInput> = {
       account:
         input.account !== undefined ? input.account : current.account ?? null,
       container:
@@ -127,20 +126,9 @@ export class TaskAppOmniExternalRefService {
       merged.internalId!,
     );
 
-    await this.externalRefService.updateEntity(
+    await this.externalRefRepository.update(
       { guid },
       this.mapper.mapExternalRefToOmniExternalRef(merged),
-    );
-    await this.legacyExternalRefRepository.update(
-      { guid },
-      {
-        account: merged.account ?? null,
-        container: merged.container ?? null,
-        externalId: merged.externalId,
-        internalId: merged.internalId,
-        internalType: merged.internalType,
-        provider: merged.provider,
-      },
     );
 
     return this.getById(guid);
@@ -148,12 +136,11 @@ export class TaskAppOmniExternalRefService {
 
   async delete(guid: string) {
     await this.getExternalRefOrFail(guid);
-    await this.externalRefService.deleteEntity({ guid });
-    await this.legacyExternalRefRepository.delete({ guid });
+    await this.externalRefRepository.delete({ guid });
     return { deleted: true };
   }
 
-  private validateExternalRefInput(input: Partial<TaskExternalRef>) {
+  private validateExternalRefInput(input: Partial<TaskExternalRefCreateInput>) {
     if (
       !input.guid ||
       !input.internalId ||
@@ -176,7 +163,7 @@ export class TaskAppOmniExternalRefService {
   }
 
   private async getExternalRefOrFail(guid: string) {
-    const ref = await this.externalRefService.getRepository().findOne({
+    const ref = await this.externalRefRepository.findOne({
       where: {
         guid,
       },

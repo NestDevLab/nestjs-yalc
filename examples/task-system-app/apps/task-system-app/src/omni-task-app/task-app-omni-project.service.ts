@@ -6,12 +6,12 @@ import {
   OmniCollectionKind,
   OmniRelationEntity,
 } from '@nestjs-yalc/omnikernel-module';
-import { TaskProject, TaskProjectType } from '@nestjs-yalc/task-system-module';
 import { Repository } from 'typeorm';
 import {
   TaskAppOmniMapper,
   type TaskOmniPageQuery,
 } from './task-app-omni.mapper';
+import { TaskProjectCreateInput, TaskProjectType } from './task-app.types';
 
 @Injectable()
 export class TaskAppOmniProjectService {
@@ -20,8 +20,6 @@ export class TaskAppOmniProjectService {
     private readonly collectionRepository: Repository<OmniCollectionEntity>,
     @InjectRepository(OmniRelationEntity)
     private readonly relationRepository: Repository<OmniRelationEntity>,
-    @InjectRepository(TaskProject)
-    private readonly legacyProjectRepository: Repository<TaskProject>,
     private readonly events: YalcEventService,
     private readonly mapper: TaskAppOmniMapper,
   ) {}
@@ -53,7 +51,9 @@ export class TaskAppOmniProjectService {
     return this.mapper.mapOmniCollectionToProject(collection);
   }
 
-  async create(input: Partial<TaskProject>): Promise<TaskProjectType> {
+  async create(
+    input: Partial<TaskProjectCreateInput>,
+  ): Promise<TaskProjectType> {
     if (!input.guid || !input.name) {
       throw this.events.errorBadRequest('projects.omni.create.invalid', {
         data: {
@@ -70,23 +70,15 @@ export class TaskAppOmniProjectService {
       this.mapper.mapProjectToOmniCollection(input),
     );
     await this.collectionRepository.save(entity);
-    await this.legacyProjectRepository.save(
-      this.legacyProjectRepository.create({
-        description: input.description ?? null,
-        guid: input.guid,
-        name: input.name,
-        status: input.status ?? 'active',
-      }),
-    );
     return this.getById(entity.guid);
   }
 
   async update(
     guid: string,
-    input: Partial<TaskProject>,
+    input: Partial<TaskProjectCreateInput>,
   ): Promise<TaskProjectType> {
     const current = await this.getCollectionOrFail(guid);
-    const merged: Partial<TaskProject> = {
+    const merged: Partial<TaskProjectCreateInput> = {
       guid,
       description:
         input.description !== undefined
@@ -101,14 +93,6 @@ export class TaskAppOmniProjectService {
       { guid },
       this.mapper.mapProjectToOmniCollection(merged),
     );
-    await this.legacyProjectRepository.update(
-      { guid },
-      {
-        description: merged.description ?? null,
-        name: merged.name,
-        status: merged.status,
-      },
-    );
 
     return this.getById(guid);
   }
@@ -122,7 +106,6 @@ export class TaskAppOmniProjectService {
       targetRecordId: guid,
     });
     await this.collectionRepository.delete({ guid });
-    await this.legacyProjectRepository.delete({ guid });
     return { deleted: true };
   }
 

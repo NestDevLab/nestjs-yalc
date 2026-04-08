@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter } from 'node:events';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { EventModule } from '@nestjs-yalc/event-manager';
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar';
 import {
   OmniCollectionEntity,
@@ -11,19 +14,12 @@ import {
   OmniRecordEntity,
   OmniRelationEntity,
 } from '@nestjs-yalc/omnikernel-module';
-import {
-  TaskSystemModule,
-  TaskEvent,
-  TaskExternalRef,
-  TaskItem,
-  TaskProject,
-  TaskSyncState,
-} from '@nestjs-yalc/task-system-module';
 import { EventsModule } from './events/events.module';
 import {
   TaskEventRelationsResolver,
   TaskItemRelationsResolver,
   TaskProjectRelationsResolver,
+  TaskSystemGraphqlResolver,
 } from './graphql-relations.resolver';
 import { OmniTaskAppModule } from './omni-task-app/omni-task-app.module';
 import { ProjectsModule } from './projects/projects.module';
@@ -37,16 +33,17 @@ import { TasksModule } from './tasks/tasks.module';
       autoSchemaFile: true,
       path: '/graphql',
     }),
+    EventModule.forRootAsync({
+      eventEmitter: {
+        provide: EventEmitter2,
+        useValue: new EventEmitter2(),
+      },
+    }),
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: ':memory:',
       dropSchema: true,
       entities: [
-        TaskItem,
-        TaskProject,
-        TaskEvent,
-        TaskExternalRef,
-        TaskSyncState,
         OmniNamedEntity,
         OmniRecordEntity,
         OmniRelationEntity,
@@ -56,8 +53,6 @@ import { TasksModule } from './tasks/tasks.module';
       ],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([TaskProject, TaskItem, TaskEvent]),
-    TaskSystemModule.register('default'),
     OmniTaskAppModule,
     TasksModule,
     ProjectsModule,
@@ -66,6 +61,11 @@ import { TasksModule } from './tasks/tasks.module';
   ],
   providers: [
     UUIDScalar,
+    {
+      provide: EventEmitter,
+      useValue: new EventEmitter(),
+    },
+    TaskSystemGraphqlResolver,
     TaskItemRelationsResolver,
     TaskEventRelationsResolver,
     TaskProjectRelationsResolver,
