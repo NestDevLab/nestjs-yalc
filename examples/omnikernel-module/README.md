@@ -1,7 +1,28 @@
 # OmniKernel Module
 
-`@nestjs-yalc/omnikernel-module` is a foundational example module that models a
-generic knowledge kernel with:
+`@nestjs-yalc/omnikernel-module` is an example module for building a
+graph-shaped content and knowledge layer on top of `nestjs-yalc`.
+
+The idea behind OmniKernel is simple:
+
+- store generic records that can represent many domain objects,
+- specialize some of those records into richer concrete types such as documents,
+- connect records through typed relations,
+- and map internal entities to external systems through stable references.
+
+In practical terms, the finished OmniKernel example is meant to become a
+reference module for systems that need:
+
+- documents and other structured records,
+- collections or containers for organizing those records,
+- typed graph links between entities,
+- and synchronization hooks toward external providers.
+
+This example is intentionally not AI-specific. The goal is to provide a generic
+kernel for content, graph, and synchronization concerns that other modules can
+build on.
+
+Today, the module already models:
 
 - named entities for reusable lookup records,
 - records for structured domain objects,
@@ -11,6 +32,18 @@ generic knowledge kernel with:
 It follows the same `CrudGenDependencyFactory` pattern used across the example
 modules in this repository, so each entity exposes the usual auto-wired
 service, dataloader, and GraphQL resolver providers.
+
+## Final Objective
+
+The final OmniKernel module should demonstrate a coherent end state where:
+
+- generic records provide the common storage model,
+- documents become the first concrete record family,
+- collections organize and group documents,
+- typed relations express navigation across the graph,
+- external refs make sync scenarios explicit,
+- and higher-level services show how to query and traverse the model in a real
+  application.
 
 ## Document Slice Additions
 
