@@ -7,6 +7,7 @@ import { OmniCollectionEntity } from './omni-collection.entity.js';
 import { OmniExternalRefInternalType } from './omni-external-ref-internal-type.enum.js';
 import { OmniRelationKind } from './omni-relation-kind.enum.js';
 import { OmniRelationStatus } from './omni-relation-status.enum.js';
+import { isOmniCollectionRecordKind } from './omni-relation-semantics.js';
 
 export class OmniKernelQueryService {
   constructor(
@@ -49,9 +50,12 @@ export class OmniKernelQueryService {
       },
     });
 
-    return relations.map(
-      (relation) => relation.sourceRecord as OmniCollectionEntity,
-    );
+    return relations
+      .map((relation) => relation.sourceRecord)
+      .filter(
+        (record): record is OmniCollectionEntity =>
+          !!record && isOmniCollectionRecordKind(record.kind),
+      );
   }
 
   async getDocumentExternalRefs(documentId: string, provider?: string) {

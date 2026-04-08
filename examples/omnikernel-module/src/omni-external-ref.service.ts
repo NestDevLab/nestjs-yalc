@@ -1,4 +1,4 @@
-import { GenericService } from '../../../crud-gen/src/typeorm/generic.service.js';
+import { GenericService } from '@nestjs-yalc/crud-gen/typeorm/generic.service.js';
 import type { DeepPartial } from 'typeorm';
 import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
 import { OmniExternalRefInternalType } from './omni-external-ref-internal-type.enum.js';
@@ -13,6 +13,15 @@ export interface OmniExternalRefLookup {
 export interface OmniExternalRefSyncInput extends OmniExternalRefLookup {
   payload?: Record<string, unknown> | null;
 }
+
+export type OmniExternalRefUpsertInput = Omit<
+  DeepPartial<OmniExternalRefEntity>,
+  'provider' | 'externalId' | 'internalType' | 'internalId'
+> &
+  Pick<
+    OmniExternalRefEntity,
+    'provider' | 'externalId' | 'internalType' | 'internalId'
+  >;
 
 export class OmniExternalRefService extends GenericService<OmniExternalRefEntity> {
   async findByExternalIdentity({
@@ -49,11 +58,19 @@ export class OmniExternalRefService extends GenericService<OmniExternalRefEntity
   }
 
   async upsertExternalRef(
-    input: DeepPartial<OmniExternalRefEntity>,
+    input: OmniExternalRefUpsertInput,
   ): Promise<OmniExternalRefEntity> {
+    if (input.provider.trim().length === 0) {
+      throw new Error('OmniExternalRef.provider is required');
+    }
+
+    if (input.externalId.trim().length === 0) {
+      throw new Error('OmniExternalRef.externalId is required');
+    }
+
     const existing = await this.findByExternalIdentity({
-      provider: input.provider ?? '',
-      externalId: input.externalId ?? '',
+      provider: input.provider,
+      externalId: input.externalId,
       account: input.account ?? null,
       container: input.container ?? null,
     });

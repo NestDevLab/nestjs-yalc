@@ -47,4 +47,6 @@ export const isAllowedOmniRelation = ({
     case OmniRelationKind.RelatedTo:
       return true;
   }
+
+  return false;
 };

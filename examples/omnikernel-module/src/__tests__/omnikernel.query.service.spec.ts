@@ -80,6 +80,41 @@ describe('OmniKernelQueryService', () => {
     ]);
   });
 
+  it('filters out inverse contains sources that are not collections', async () => {
+    const relationRepository = {
+      find: jest.fn(async () => [
+        {
+          sourceRecord: {
+            guid: 'collection-1',
+            kind: OmniCollectionKind.Collection,
+          },
+        },
+        {
+          sourceRecord: {
+            guid: 'doc-2',
+            kind: OmniDocumentKind.Document,
+          },
+        },
+      ]),
+    };
+    const externalRefRepository = {
+      find: jest.fn(),
+    };
+    const service = new OmniKernelQueryService(
+      relationRepository as never,
+      externalRefRepository as never,
+    );
+
+    const result = await service.getDocumentCollections('doc-1');
+
+    expect(result).toEqual([
+      {
+        guid: 'collection-1',
+        kind: OmniCollectionKind.Collection,
+      },
+    ]);
+  });
+
   it('returns document external refs through the query layer', async () => {
     const relationRepository = {
       find: jest.fn(),

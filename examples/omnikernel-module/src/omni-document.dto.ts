@@ -8,7 +8,6 @@ import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import {
   IsDate,
   IsEnum,
-  IsIn,
   IsObject,
   IsOptional,
   IsString,
@@ -61,10 +60,9 @@ export class OmniDocumentType extends OmniDocumentEntity {
   @MaxLength(255)
   slug?: string | null;
 
-  @ModelField({ gqlType: returnValue(String) })
-  @IsString()
-  @IsIn([OmniDocumentKind.Document])
-  kind!: string;
+  @ModelField({ gqlType: returnValue(OmniDocumentKind) })
+  @IsEnum(OmniDocumentKind)
+  kind!: OmniDocumentKind;
 
   @ModelField({ gqlType: returnValue(OmniRecordStatus) })
   @IsEnum(OmniRecordStatus)

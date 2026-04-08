@@ -1,5 +1,5 @@
-import type { CrudGenFindManyOptions } from '../../../crud-gen/src/api-graphql/crud-gen-gql.interface.js';
-import { GenericService } from '../../../crud-gen/src/typeorm/generic.service.js';
+import type { CrudGenFindManyOptions } from '@nestjs-yalc/crud-gen/api-graphql/crud-gen-gql.interface.js';
+import { GenericService } from '@nestjs-yalc/crud-gen/typeorm/generic.service.js';
 import type { DeepPartial, FindOptionsWhere } from 'typeorm';
 import { OmniCollectionKind } from './omni-collection-kind.enum.js';
 import { OmniCollectionEntity } from './omni-collection.entity.js';

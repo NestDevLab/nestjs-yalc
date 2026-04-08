@@ -58,10 +58,9 @@ export class OmniCollectionType extends OmniCollectionEntity {
   @MaxLength(255)
   slug?: string | null;
 
-  @ModelField({ gqlType: returnValue(String) })
-  @IsString()
-  @MaxLength(64)
-  kind!: string;
+  @ModelField({ gqlType: returnValue(OmniCollectionKind) })
+  @IsEnum(OmniCollectionKind)
+  kind!: OmniCollectionKind;
 
   @ModelField({ gqlType: returnValue(OmniRecordStatus) })
   @IsEnum(OmniRecordStatus)

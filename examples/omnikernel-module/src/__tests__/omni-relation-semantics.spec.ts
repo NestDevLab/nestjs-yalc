@@ -89,4 +89,14 @@ describe('Omni relation semantics', () => {
       }),
     ).toBe(true);
   });
+
+  it('returns false for unexpected relation values at runtime', () => {
+    expect(
+      isAllowedOmniRelation({
+        sourceKind: OmniCollectionKind.Collection,
+        targetKind: OmniDocumentKind.Document,
+        relationKind: 'unexpected' as OmniRelationKind,
+      }),
+    ).toBe(false);
+  });
 });

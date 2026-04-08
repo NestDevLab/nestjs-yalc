@@ -136,6 +136,32 @@ describe('OmniExternalRefService', () => {
     expect(result.guid).toBe('existing-guid');
   });
 
+  it('rejects blank provider or external identity during upsert', async () => {
+    const { readRepository, writeRepository } = createRepositoryPair();
+    const service = new OmniExternalRefService(
+      readRepository as never,
+      writeRepository as never,
+    );
+
+    await expect(
+      service.upsertExternalRef({
+        internalType: OmniExternalRefInternalType.Document,
+        internalId: 'doc-1',
+        provider: '',
+        externalId: '123',
+      }),
+    ).rejects.toThrow('OmniExternalRef.provider is required');
+
+    await expect(
+      service.upsertExternalRef({
+        internalType: OmniExternalRefInternalType.Document,
+        internalId: 'doc-1',
+        provider: 'github',
+        externalId: '   ',
+      }),
+    ).rejects.toThrow('OmniExternalRef.externalId is required');
+  });
+
   it('syncs document references with the document internal type', async () => {
     const { readRepository, writeRepository } = createRepositoryPair();
     const service = new OmniExternalRefService(
