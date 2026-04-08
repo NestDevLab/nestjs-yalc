@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { ExecutionContext } from '@nestjs/common';
+import { BadRequestException, ExecutionContext } from '@nestjs/common';
 import {
   mapCrudGenRestParams,
   CGQueryArgs,
@@ -9,9 +9,14 @@ import {
 } from '../api-rest/crud-gen-args-rest.decorator.js';
 import { RowDefaultValues } from '../crud-gen.enum.js';
 
-const buildCtx = (args: any): ExecutionContext =>
+const buildCtx = (query: any): ExecutionContext =>
   ({
-    getArgs: () => args,
+    switchToHttp: () => ({
+      getRequest: () => ({
+        query,
+      }),
+    }),
+    getArgs: () => query,
   }) as unknown as ExecutionContext;
 
 class DummyDto {
@@ -21,14 +26,37 @@ class DummyDto {
 describe('crud-gen args rest decorator', () => {
   it('should map params into CrudGenFindManyOptions', () => {
     const ctx = buildCtx({
-      startRow: 5,
-      endRow: 8,
-      sorting: [{ colId: 'id', sort: 'DESC' }],
+      startRow: '5',
+      endRow: '8',
+      sorting: JSON.stringify([{ colId: 'id', sort: 'DESC' }]),
+      filters: JSON.stringify({
+        expressions: {
+          name: {
+            text: {
+              field: 'name',
+              type: 'contains',
+              filter: 'john',
+              filterType: 'text',
+            },
+          },
+        },
+      }),
     });
 
     const result = mapCrudGenRestParams(undefined, ctx);
     expect(result.take).toBe(3);
     expect(result.order?.id).toBe('DESC');
+    expect(result.where.childExpressions?.[0]?.filters.name).toBeDefined();
+  });
+
+  it('should reject malformed structured REST query params', () => {
+    const ctx = buildCtx({
+      sorting: '[not-json',
+    });
+
+    expect(() => mapCrudGenRestParams(undefined, ctx)).toThrow(
+      BadRequestException,
+    );
   });
 
   it('should build decorators without throwing', () => {

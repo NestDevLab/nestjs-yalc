@@ -34,6 +34,9 @@ It follows the same `CrudGenDependencyFactory` pattern used across the example
 modules in this repository, so each entity exposes the usual auto-wired
 service, dataloader, and GraphQL resolver providers.
 
+For a runnable application that mounts this module through both GraphQL and
+generated REST controllers, see `examples/omnikernel-app`.
+
 The module now also includes workflow/query helpers for:
 
 - syncing document and collection external references through a typed

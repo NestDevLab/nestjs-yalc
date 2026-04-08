@@ -16,14 +16,12 @@
     ]
   },
   "moduleNameMapper": {
-    "^p-map$": "<rootDir>/p-map.mock.ts",
-    "^@nestjs-yalc/skeleton-module$": "<rootDir>/../../../../skeleton-module/src",
-    "^@nestjs-yalc/skeleton-module/src/(.*)$": "<rootDir>/../../../../skeleton-module/src/$1",
+    "^@nestjs-yalc/omnikernel-module$": "<rootDir>/../../../../omnikernel-module/src",
+    "^@nestjs-yalc/omnikernel-module/src/(.*)$": "<rootDir>/../../../../omnikernel-module/src/$1",
+    "^lodash-es$": "lodash",
     "^@nestjs-yalc/([^/]+)/(.+?)\\.js$": "<rootDir>/../../../../../$1/src/$2",
     "^@nestjs-yalc/([^/]+)/(.*)$": "<rootDir>/../../../../../$1/src/$2",
     "^@nestjs-yalc/([^/]+)$": "<rootDir>/../../../../../$1/src",
-    "^@skeleton-app/skeleton-base-app(|/.*)$": "<rootDir>/../../../libs/skeleton-base-app/src/$1",
-    "^lodash-es$": "lodash",
     "^(\\.{1,2}/.*)\\.js$": "$1"
   }
 }

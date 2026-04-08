@@ -6,6 +6,7 @@ import {
   SortDirection,
 } from '../crud-gen.enum.js';
 import {
+  FilterInput,
   ICrudGenBaseParams,
   ICrudGenSimpleParams,
   ISortModel,
@@ -65,7 +66,7 @@ export function crudGenRestParamsFactory(
     startRow: number = defaultValues?.startRow ?? RowDefaultValues.START_ROW;
     endRow: number = defaultValues?.endRow ?? RowDefaultValues.END_ROW;
     sorting?: typeof SortType;
-    // filters?: typeof FilterType;
+    filters?: FilterInput;
   }
 
   typeMap.set(CrudGenParams, CrudGenParams);
@@ -88,7 +89,7 @@ export function crudGenRestParamsNoPaginationFactory(
 
   class CrudGenParams implements ICrudGenBaseParams {
     sorting?: typeof SortType = defaultValues?.sorting;
-    // filters?: typeof FilterType = defaultValues?.filters;
+    filters?: FilterInput = defaultValues?.filters;
   }
 
   typeMap.set(CrudGenParams, CrudGenParams);
@@ -123,10 +124,13 @@ export class PaginatedResultDto<T> {
 
 export class CGRestQueryArgs<T = any>
   extends PaginationDTOMixin()
-  implements ICrudGenSimpleParams<T> {
-  /**
-   * @todo implements other properties (where, select, sort, etc.)
-   */
+  implements ICrudGenSimpleParams<T>
+{
+  @IsOptional()
+  sorting?: ISortModel<T>[] | string;
+
+  @IsOptional()
+  filters?: FilterInput | string;
 }
 
 export function PaginationDTOMixin(base: ClassType = class {}) {

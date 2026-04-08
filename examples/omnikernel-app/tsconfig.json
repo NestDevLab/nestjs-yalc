@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "paths": {
+      "@nestjs/*": ["../../node_modules/@nestjs/*"],
+      "typeorm": ["../../node_modules/typeorm"],
+      "@nestjs-yalc/crud-gen": ["../../crud-gen/src/index.ts"],
+      "@nestjs-yalc/crud-gen/*": ["../../crud-gen/src/*"],
+      "@nestjs-yalc/graphql": ["../../graphql/src/index.ts"],
+      "@nestjs-yalc/graphql/*": ["../../graphql/src/*"],
+      "@nestjs-yalc/types": ["../../types/src/index.d.ts"],
+      "@nestjs-yalc/types/*": ["../../types/src/*"],
+      "@nestjs-yalc/utils": ["../../utils/src/index.ts"],
+      "@nestjs-yalc/utils/*": ["../../utils/src/*"],
+      "@nestjs-yalc/omnikernel-module": ["../omnikernel-module/src/index.ts"],
+      "@nestjs-yalc/omnikernel-module/*": ["../omnikernel-module/src/*"],
+      "nestjs-yalc": ["../../types/src/index.d.ts"],
+      "nestjs-yalc/*": ["../../types/src/*"]
+    }
+  },
+  "include": ["apps/**/src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "test", "apps/**/*.spec.ts", "apps/**/*.test.ts"]
+}

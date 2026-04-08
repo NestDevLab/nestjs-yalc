@@ -90,6 +90,59 @@ describe('Skeleton App (e2e)', () => {
     expect(res.data?.list).toEqual([]);
   });
 
+  it('filters and sorts users via REST query params', async () => {
+    await request(app.getHttpServer())
+      .post('/users')
+      .send({
+        guid: '44444444-4444-4444-4444-444444444444',
+        firstName: 'Alice',
+        lastName: 'Zephyr',
+        email: 'alice@rest-filter.test',
+        password: 'secret',
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/users')
+      .send({
+        guid: '55555555-5555-5555-5555-555555555555',
+        firstName: 'Bob',
+        lastName: 'Yellow',
+        email: 'bob@rest-filter.test',
+        password: 'secret',
+      })
+      .expect(201);
+
+    const filters = {
+      expressions: {
+        email: {
+          text: {
+            field: 'email',
+            type: 'contains',
+            filter: '@rest-filter.test',
+            filterType: 'text',
+          },
+        },
+      },
+    };
+
+    const sorting = [{ colId: 'lastName', sort: 'ASC' }];
+
+    const res = await request(app.getHttpServer())
+      .get('/users')
+      .query({
+        filters: JSON.stringify(filters),
+        sorting: JSON.stringify(sorting),
+      })
+      .expect(200);
+
+    expect(res.body.list).toHaveLength(2);
+    expect(res.body.list.map((item: any) => item.lastName)).toEqual([
+      'Yellow',
+      'Zephyr',
+    ]);
+  });
+
   it('creates and reads phones via HTTP strategy', async () => {
     const strategy = new NestHttpCallStrategy(httpService, { get: () => ({}) } as any, baseUrl, {});
 

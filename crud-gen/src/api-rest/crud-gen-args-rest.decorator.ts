@@ -1,6 +1,7 @@
 import { returnValue } from '@nestjs-yalc/utils/index.js';
 import {
   applyDecorators,
+  BadRequestException,
   createParamDecorator,
   ExecutionContext,
   Query,
@@ -17,7 +18,6 @@ import {
   ICrudGenGqlArgsOptions,
   ICrudGenBaseParams,
 } from '../api-graphql/crud-gen-gql.interface.js';
-import { Args } from '@nestjs/graphql';
 import {
   ApiResponseOptions,
   ApiProperty,
@@ -28,11 +28,76 @@ import {
 import { ClassType } from 'nestjs-yalc';
 import { IConnection } from '../crud-gen.interface.js';
 
+function getRestQueryFromContext(ctx: ExecutionContext): Record<string, any> {
+  const request = ctx.switchToHttp?.().getRequest?.();
+  if (request?.query && typeof request.query === 'object') {
+    return request.query as Record<string, any>;
+  }
+
+  // Fallback kept for lightweight unit tests that stub only `getArgs()`.
+  const args = ctx.getArgs() as Record<string, any>;
+  if (args && !Array.isArray(args)) {
+    return args;
+  }
+
+  return {};
+}
+
+function parseStructuredRestParam<T>(
+  value: unknown,
+  name: 'sorting' | 'filters',
+): T | undefined {
+  if (typeof value === 'undefined' || value === null || value === '') {
+    return undefined;
+  }
+
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value) as T;
+    } catch {
+      throw new BadRequestException(
+        `Invalid REST query parameter "${name}": expected valid JSON`,
+      );
+    }
+  }
+
+  return value as T;
+}
+
+function normalizeRestCrudGenArgs(
+  rawQuery: Record<string, any>,
+): ICrudGenBaseParams {
+  const normalized: ICrudGenBaseParams = { ...rawQuery };
+
+  if (typeof rawQuery.startRow !== 'undefined') {
+    normalized.startRow = Number(rawQuery.startRow);
+    if (Number.isNaN(normalized.startRow)) {
+      throw new BadRequestException(
+        'Invalid REST query parameter "startRow": expected a number',
+      );
+    }
+  }
+
+  if (typeof rawQuery.endRow !== 'undefined') {
+    normalized.endRow = Number(rawQuery.endRow);
+    if (Number.isNaN(normalized.endRow)) {
+      throw new BadRequestException(
+        'Invalid REST query parameter "endRow": expected a number',
+      );
+    }
+  }
+
+  normalized.sorting = parseStructuredRestParam(rawQuery.sorting, 'sorting');
+  normalized.filters = parseStructuredRestParam(rawQuery.filters, 'filters');
+
+  return normalized;
+}
+
 export function mapCrudGenRestParams<Entity extends ObjectLiteral>(
   params: ICrudGenGqlArgsOptions | undefined,
   ctx: ExecutionContext,
 ): CrudGenFindManyOptions {
-  const args: ICrudGenBaseParams = ctx.getArgs() as any;
+  const args = normalizeRestCrudGenArgs(getRestQueryFromContext(ctx));
 
   const findParams = mapCrudGenParam<Entity>(
     params,
@@ -64,9 +129,7 @@ export const CrudGenCombineDecorators = (params: ICrudGenGqlArgsOptions) => {
     for (const argName of Object.keys(params.extraArgs)) {
       if (params.extraArgs[argName].hidden) continue;
 
-      argDecorators.push(
-        Args(argName, params.extraArgs[argName].options ?? {}),
-      );
+      argDecorators.push(Query(argName));
     }
   }
 

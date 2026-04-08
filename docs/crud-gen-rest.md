@@ -6,6 +6,7 @@ GraphQL is the primary focus, but CRUD-Gen includes REST helpers for pagination/
 - Use `crudGenRestParamsFactory(entityModel?, defaultValue?)` to get a query DTO with `startRow`/`endRow` and sort model (`sortModelRestFactory` auto-enums entity fields).
 - `crudGenRestParamsNoPaginationFactory` builds a DTO without pagination when you only need sorting.
 - `CGRestQueryArgs` / `CGQueryArgsNoPagination` combine Nest `@Query` params, optional extra args, and mapping into `CrudGenFindManyOptions`.
+- Structured `sorting` and `filters` can be sent as JSON-encoded query params and are mapped with the same `mapCrudGenParam` pipeline used by GraphQL.
 - `PageData` and `PaginatedResultDto` shape paginated responses; `ApiOkResponsePaginated(dto)` decorates Swagger responses with `nodes` + `pageData`.
 
 ## Mapping requests to find options
@@ -30,6 +31,6 @@ GraphQL is the primary focus, but CRUD-Gen includes REST helpers for pagination/
   - See `examples/skeleton-app` for a minimal REST module (`UsersModule`) that wires `SkeletonModule.register('default')`, the REST factory, EventManager, ApiStrategy, and validation into a clean starting point.
 
 ## Notes
-- Filters via REST are not fully implemented yet (placeholders exist in the DTO factories); prefer GraphQL for advanced filters.
+- REST now supports the same structured `sorting` / `filters` payload shape used by GraphQL when passed as JSON in query params.
 - Sorting uses entity field names; ensure your DTO exposes the same names you expect in the controller.
 - Alternative: you can expose REST via GraphQL Sofa (see `docs/api-creation.md` note). Use Sofa if you want a fully automatic REST layer from GraphQL; use the controller factory if you need explicit paths, guards, or bespoke DTOs.

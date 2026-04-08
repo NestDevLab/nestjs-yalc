@@ -1,0 +1,21 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/omnikernel-app/src",
+  "monorepo": true,
+  "root": "apps/omnikernel-app",
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/omnikernel-app/tsconfig.app.json"
+  },
+  "projects": {
+    "omnikernel-app": {
+      "type": "application",
+      "root": "apps/omnikernel-app",
+      "entryFile": "main",
+      "sourceRoot": "apps/omnikernel-app/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/omnikernel-app/tsconfig.app.json"
+      }
+    }
+  }
+}

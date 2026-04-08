@@ -22,6 +22,7 @@ Nest-yalc stands for Nestjs - Yet Another Library Collection
 
 - [SQLite skeleton app (REST + GraphQL + EventManager + Logger + ApiStrategy)](../examples/skeleton-app/README.md) — a minimal, copyable example app that wires together most features of this library and can be used as a starting point for your own projects.
 - [Task System App](../examples/task-system-app/README.md) — the planned real-world example app used both as a complete backend demo and as a stronger CI/e2e validation target for `nestjs-yalc`.
+- [OmniKernel App](../examples/omnikernel-app/README.md) — a focused example showing how the OmniKernel module can be exposed through both GraphQL and generated REST controllers on the same service layer.
 
 - [How to use the Api-Strategy library](./api-strategy.md)
 
