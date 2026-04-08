@@ -1,0 +1,16 @@
+{
+  "name": "@nestjs-yalc/omnikernel-module",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Foundational OmniKernel example module for nestjs-yalc",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*.js": "./src/*.ts",
+    "./*": "./src/*"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}

@@ -121,6 +121,14 @@ const options: IOptions = {
         lines: 75,
       },
     },
+    '@nestjs-yalc/omnikernel-module': {
+      coverageThreshold: {
+        statements: 80,
+        branches: 70,
+        functions: 40,
+        lines: 75,
+      },
+    },
   },
 };
 
