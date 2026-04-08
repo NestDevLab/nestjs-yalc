@@ -57,6 +57,10 @@ reuse OmniKernel concepts such as:
 That integration is intentionally deferred until the OmniKernel model is stable
 enough to avoid reworking the task app on every intermediate schema change.
 
+The current document write path also enforces the base record `kind` at the
+service layer, so direct service usage cannot persist a non-document document
+record by accident.
+
 ## Document Slice Additions
 
 - typed record and relation enums for status and relation semantics

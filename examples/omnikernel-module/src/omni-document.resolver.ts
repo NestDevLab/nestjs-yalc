@@ -6,6 +6,7 @@ import {
   OmniDocumentUpdateInput,
 } from './omni-document.dto.js';
 import { OmniDocumentEntity } from './omni-document.entity.js';
+import { OmniDocumentService } from './omni-document.service.js';
 
 export const omniDocumentProvidersFactory = (dbConnection: string) =>
   CrudGenDependencyFactory<OmniDocumentEntity>({
@@ -22,6 +23,7 @@ export const omniDocumentProvidersFactory = (dbConnection: string) =>
     service: {
       dbConnection,
       entityModel: OmniDocumentEntity,
+      providerClass: OmniDocumentService,
     },
     dataloader: { databaseKey: 'guid' },
   });

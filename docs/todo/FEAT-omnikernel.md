@@ -94,7 +94,7 @@ Use this checklist every time a concrete OmniKernel task is completed:
 
 ## Workstream 1 — Foundations Hardening
 
-- Enforce `OmniDocumentEntity.kind` at the service/write layer, not only through
+- [x] Enforce `OmniDocumentEntity.kind` at the service/write layer, not only through
   DTO shape or class defaults.
 - Decide whether base `OmniRecordEntity` writes need explicit STI discriminator
   tests.

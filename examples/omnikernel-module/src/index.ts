@@ -13,6 +13,7 @@ export * from './omni-record.resolver.js';
 export * from './omni-document-kind.enum.js';
 export * from './omni-document.entity.js';
 export * from './omni-document.dto.js';
+export * from './omni-document.service.js';
 export * from './omni-document.resolver.js';
 export * from './omni-relation.dto.js';
 export * from './omni-relation.resolver.js';
