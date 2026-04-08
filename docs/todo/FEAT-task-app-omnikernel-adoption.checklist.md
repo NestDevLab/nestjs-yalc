@@ -92,6 +92,11 @@ Source of truth:
 - [x] Full GraphQL switchover
 - [x] Remove dual write / legacy persistence
 - [x] Full pipeline green
+- [ ] Re-align the implementation to CRUD-Gen-native wiring
+  - [ ] replace manual REST controllers with `crudRestControllerFactory` where possible
+  - [ ] replace manual GraphQL CRUD resolvers with `resolverFactory` / `CrudGenDependencyFactory` where possible
+  - [ ] keep custom code only in Omni-backed service overrides and relation-specific extensions
+  - [ ] preserve Omni-only persistence while restoring CRUD-Gen as the standard API surface
 
 ## Notes
 
