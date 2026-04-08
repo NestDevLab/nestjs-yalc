@@ -234,6 +234,9 @@ export function defineFieldResolver<Entity extends Record<string, any> = any>(
       resolverInfo.relation.relationType === 'one-to-many' ||
       resolverInfo.relation.relationType === 'many-to-many'
     ) {
+      const agGraphType = resolverInfo.agField?.gqlType?.();
+      const isArrayGraphType = Array.isArray(agGraphType);
+
       Object.defineProperty(
         resolver.prototype,
         resolverInfo.relation.propertyName,
@@ -244,7 +247,7 @@ export function defineFieldResolver<Entity extends Record<string, any> = any>(
           value: async function (
             parent: Entity,
             findOptions: CrudGenFindManyOptions,
-          ): Promise<[Array<Entity | null>, number]> {
+          ): Promise<[Array<Entity | null>, number] | Array<Entity | null>> {
             const parentRes = parent[resolverInfo.relation.propertyName];
 
             if (parentRes !== undefined) {
@@ -253,7 +256,7 @@ export function defineFieldResolver<Entity extends Record<string, any> = any>(
                   'Cannot specify join arguments and resolver arguments at the same time',
                 );
 
-              return [parentRes, -1];
+              return isArrayGraphType ? parentRes : [parentRes, -1];
             }
 
             const dataLoader: GQLDataLoader<Entity> =
@@ -263,17 +266,22 @@ export function defineFieldResolver<Entity extends Record<string, any> = any>(
               );
 
             const joinCol =
+              resolverInfo.agField?.relation?.targetKey.alias ??
               resolverInfo.join?.referencedColumnName ??
               dataLoader.getSearchKey();
 
             const parentCol =
-              resolverInfo.join?.name ?? dataLoader.getSearchKey();
+              resolverInfo.agField?.relation?.sourceKey.alias ??
+              resolverInfo.join?.name ??
+              dataLoader.getSearchKey();
 
-            return dataLoader.loadOneToMany(
+            const result = await dataLoader.loadOneToMany(
               [joinCol, parent[parentCol]],
               findOptions,
               true,
             );
+
+            return isArrayGraphType ? result[0] : result;
           },
         },
       );
@@ -288,14 +296,22 @@ export function defineFieldResolver<Entity extends Record<string, any> = any>(
           `GenericResolver.${resolverInfo.relation.propertyName} must have a descriptor`,
         );
 
-      ResolveField(returnValue(CrudGenGqlType<Entity>(relType)), {
-        nullable: resolverInfo.agField?.gqlOptions?.nullable,
-      })(resolver.prototype, resolverInfo.relation.propertyName, descriptor);
-      UseInterceptors(new CrudGenGqlInterceptor())(
-        resolver.prototype,
-        resolverInfo.relation.propertyName,
-        descriptor,
-      );
+      ResolveField(
+        returnValue(
+          isArrayGraphType ? agGraphType : CrudGenGqlType<Entity>(relType),
+        ),
+        {
+          nullable: resolverInfo.agField?.gqlOptions?.nullable,
+        },
+      )(resolver.prototype, resolverInfo.relation.propertyName, descriptor);
+
+      if (!isArrayGraphType) {
+        UseInterceptors(new CrudGenGqlInterceptor())(
+          resolver.prototype,
+          resolverInfo.relation.propertyName,
+          descriptor,
+        );
+      }
 
       Parent()(resolver.prototype, resolverInfo.relation.propertyName, 0);
 
@@ -347,11 +363,14 @@ export function defineFieldResolver<Entity extends Record<string, any> = any>(
 
             /* istanbul ignore next */
             const joinCol =
+              resolverInfo.agField?.relation?.targetKey.alias ??
               resolverInfo.join?.referencedColumnName ??
               dataLoader.getSearchKey();
 
             const parentCol =
-              resolverInfo.join?.name ?? dataLoader.getSearchKey();
+              resolverInfo.agField?.relation?.sourceKey.alias ??
+              resolverInfo.join?.name ??
+              dataLoader.getSearchKey();
             return dataLoader.loadOne(
               [joinCol, parent[parentCol]],
               findOptions,
@@ -494,10 +513,29 @@ export function defineGetGridResource<Entity>(
     value: async function (
       findOptions: CrudGenFindManyOptions,
     ): Promise<[Entity[], number]> {
-      return (<GenericService<Entity>>this.service).getEntityListExtended(
-        findOptions,
-        true,
-      );
+      const service = <GenericService<Entity>>this.service;
+      const where = findOptions?.where as any;
+      const hasStructuredFilters =
+        !!where &&
+        typeof where === 'object' &&
+        ((typeof where.filters === 'object' &&
+          Object.keys(where.filters ?? {}).length > 0) ||
+          'operator' in where ||
+          'expressions' in where ||
+          'childExpressions' in where);
+
+      const supportsStructuredGraphqlFilters =
+        typeof (service as any).supportsStructuredGraphqlFilters === 'function'
+          ? !!(service as any).supportsStructuredGraphqlFilters()
+          : !!service.supportsExtendedRepository();
+
+      if (hasStructuredFilters && !supportsStructuredGraphqlFilters) {
+        throw new CrudGenError(
+          'Structured GraphQL filters require an extended repository; plain TypeORM fallback only supports basic grid queries.',
+        );
+      }
+
+      return service.getEntityListExtended(findOptions, true);
     },
   });
 

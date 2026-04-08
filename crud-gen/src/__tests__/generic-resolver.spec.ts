@@ -246,6 +246,143 @@ let undefinedExtraResolverOptions: IGenericResolverOptions<TestEntityRelation> =
 
 const mockedResponse = {};
 
+describe('defineGetGridResource', () => {
+  const queryName = 'gridQuery';
+
+  const makeResolverClass = () =>
+    class GridResolverClass {
+      service: any;
+    };
+
+  it('throws on structured filters when extended repository support is missing', async () => {
+    const GridResolverClass = makeResolverClass();
+    defineGetGridResource(
+      queryName,
+      TestEntityRelation,
+      GridResolverClass as any,
+      {},
+    );
+
+    const resolver = new (GridResolverClass as any)();
+    resolver.service = {
+      supportsExtendedRepository: jest.fn().mockReturnValue(false),
+      getEntityListExtended: jest.fn(),
+    };
+
+    await expect(
+      resolver[queryName]({
+        where: {
+          operator: 'AND',
+          expressions: [],
+        },
+      }),
+    ).rejects.toThrow(
+      'Structured GraphQL filters require an extended repository',
+    );
+  });
+
+  it('delegates to service for basic grid queries', async () => {
+    const GridResolverClass = makeResolverClass();
+    defineGetGridResource(
+      queryName,
+      TestEntityRelation,
+      GridResolverClass as any,
+      {},
+    );
+
+    const expected = [[new TestEntityRelation()], 1];
+    const resolver = new (GridResolverClass as any)();
+    resolver.service = {
+      supportsExtendedRepository: jest.fn().mockReturnValue(false),
+      getEntityListExtended: jest.fn().mockResolvedValue(expected),
+    };
+
+    await expect(resolver[queryName]({ where: { id: 1 } })).resolves.toEqual(
+      expected,
+    );
+    expect(resolver.service.getEntityListExtended).toHaveBeenCalledWith(
+      { where: { id: 1 } },
+      true,
+    );
+  });
+
+  it('allows structured filters when extended repository support exists', async () => {
+    const GridResolverClass = makeResolverClass();
+    defineGetGridResource(
+      queryName,
+      TestEntityRelation,
+      GridResolverClass as any,
+      {},
+    );
+
+    const expected = [[new TestEntityRelation()], 1];
+    const resolver = new (GridResolverClass as any)();
+    resolver.service = {
+      supportsStructuredGraphqlFilters: jest.fn().mockReturnValue(true),
+      getEntityListExtended: jest.fn().mockResolvedValue(expected),
+    };
+
+    await expect(
+      resolver[queryName]({
+        where: {
+          operator: 'AND',
+          expressions: [],
+        },
+      }),
+    ).resolves.toEqual(expected);
+  });
+
+  it('allows where.filters objects when extended repository support exists', async () => {
+    const GridResolverClass = makeResolverClass();
+    defineGetGridResource(
+      queryName,
+      TestEntityRelation,
+      GridResolverClass as any,
+      {},
+    );
+
+    const expected = [[new TestEntityRelation()], 1];
+    const resolver = new (GridResolverClass as any)();
+    resolver.service = {
+      supportsStructuredGraphqlFilters: jest.fn().mockReturnValue(true),
+      getEntityListExtended: jest.fn().mockResolvedValue(expected),
+    };
+
+    await expect(
+      resolver[queryName]({
+        where: {
+          filters: {
+            foo: { eq: 'bar' },
+          },
+        },
+      }),
+    ).resolves.toEqual(expected);
+  });
+
+  it('delegates to service when query options expose any extra args metadata', async () => {
+    const GridResolverClass = makeResolverClass();
+    defineGetGridResource(
+      queryName,
+      TestEntityRelation,
+      GridResolverClass as any,
+      {
+        extraArgs: {},
+      } as any,
+    );
+
+    const expected = [[new TestEntityRelation()], 1];
+    const resolver = new (GridResolverClass as any)();
+    resolver.service = {
+      supportsStructuredGraphqlFilters: jest.fn().mockReturnValue(true),
+      getEntityListExtended: jest.fn().mockResolvedValue(expected),
+    };
+
+    await expect(resolver[queryName]({ where: { foo: 'bar' } })).resolves.toEqual(
+      expected,
+    );
+  });
+});
+
 describe.skip('Generic Resolver', () => {
   const mockedGenericService = createMock<GenericService<TestEntityRelation>>();
   const mockedTestEntityRelationDL =
@@ -281,6 +418,9 @@ describe.skip('Generic Resolver', () => {
     };
   };
   beforeEach(() => {
+    (mockedGenericService as any).supportsExtendedRepository = jest
+      .fn()
+      .mockReturnValue(true);
     mockedModuleRef.resolve.mockResolvedValue(mockedTestEntityRelation2DL);
     mockedTestEntityRelation2DL.getSearchKey.mockReturnValue('id');
     mockedTestEntityRelation2DL.loadOneToMany.mockResolvedValue([
@@ -358,6 +498,26 @@ describe.skip('Generic Resolver', () => {
       baseResolverOptionNoPrefix,
     );
     expect(resolver).toBeDefined();
+  });
+
+  it('Should reject structured filters on grid queries when extended repository support is missing', async () => {
+    GqlExecutionContext.create = jest.fn().mockImplementation(() => ({
+      getContext: jest.fn().mockReturnValue({ response: mockedResponse }),
+    }));
+
+    (mockedGenericService as any).supportsExtendedRepository.mockReturnValue(false);
+    const resolver = generateResolver(fixedMetadataList, baseResolverOption);
+
+    await expect(
+      resolver[queriesName.getGridResource]({
+        where: {
+          operator: 'AND',
+          expressions: [],
+        },
+      } as any),
+    ).rejects.toThrow(
+      'Structured GraphQL filters require an extended repository',
+    );
   });
 
   it('Should create a resolver with the default options', async () => {
@@ -454,6 +614,33 @@ describe.skip('Generic Resolver', () => {
 
       // Need to restore the original not-mocked implementation
       spiedGetPropertyDescriptor.mockRestore();
+    });
+
+    it('Should return a plain array when gqlType declares an array relation field', async () => {
+      const resolveInfo: IRelationInfo = {
+        ...oneToManyResolverInfo,
+        relation: {
+          ...oneToManyResolverInfo.relation,
+          relationType: 'one-to-many',
+        },
+        agField: {
+          ...customMetadatList[propertyRelationName],
+          gqlType: () => [TestEntityDto],
+          gqlOptions: { nullable: true },
+        },
+        join: undefined,
+      };
+
+      getEntityRelations.mockReturnValue([resolveInfo]);
+      const resolver = generateResolver(customMetadatList, baseResolverOption);
+
+      const result = await resolver[propertyRelationName](
+        TestEntityRelation2,
+        {},
+      );
+
+      expect(Array.isArray(result)).toBe(true);
+      expect(result[0]).toBeInstanceOf(TestEntityRelation2);
     });
   });
 

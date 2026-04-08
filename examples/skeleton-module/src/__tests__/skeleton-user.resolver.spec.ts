@@ -18,6 +18,7 @@ import { GQLDataLoader } from '@nestjs-yalc/data-loader/dataloader.helper.js';
 import { ModuleRef } from '@nestjs/core';
 import 'reflect-metadata';
 import { type SkeletonUser } from '../skeleton-user.entity.js';
+import { type SkeletonUserType } from '../skeleton-user.dto.js';
 import { type SkeletonUserService } from '../skeleton-user.service.js';
 
 const { skeletonUserServiceFactory } = await import(
@@ -69,5 +70,36 @@ describe('Test skeleton user resolver', () => {
     lowerCaseEmailMiddleware({} as any, input, true);
 
     expect(input).toEqual({ email: 'test@test.com' });
+  });
+
+  it('should resolve fullName from the parent object when present', () => {
+    const resolver = new SkeletonUserResolver(
+      userService,
+      mockedDataloader,
+      mockedModuleRef,
+    );
+
+    const result = resolver.fullName({
+      fullName: 'Stored Name',
+      firstName: 'Alice',
+      lastName: 'Doe',
+    } as SkeletonUserType);
+
+    expect(result).toBe('Stored Name');
+  });
+
+  it('should fallback to firstName + lastName when parent.fullName is missing', () => {
+    const resolver = new SkeletonUserResolver(
+      userService,
+      mockedDataloader,
+      mockedModuleRef,
+    );
+
+    const result = resolver.fullName({
+      firstName: 'Alice',
+      lastName: 'Doe',
+    } as SkeletonUserType);
+
+    expect(result).toBe('Alice Doe');
   });
 });

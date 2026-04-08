@@ -1,4 +1,5 @@
 import { DynamicModule, Module } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { skeletonUserProvidersFactory } from './skeleton-user.resolver.js';
 import { skeletonPhoneProvidersFactory } from './skeleton-phone.resolver.js';
@@ -17,10 +18,15 @@ export class SkeletonModule {
         TypeOrmModule.forFeature([SkeletonPhone, SkeletonUser], dbConnection),
       ],
       providers: [
+        {
+          provide: EventEmitter2,
+          useValue: new EventEmitter2(),
+        },
         ...skeletonPhoneProviders.providers,
         ...skeletonUserProviders.providers,
       ],
       exports: [
+        EventEmitter2,
         ...skeletonPhoneProviders.providers,
         ...skeletonUserProviders.providers,
       ],

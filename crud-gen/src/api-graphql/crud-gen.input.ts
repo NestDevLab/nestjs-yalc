@@ -2,7 +2,6 @@ import { ClassType } from '@nestjs-yalc/types/globals.d.js';
 import { AnyFunction } from '@nestjs-yalc/types/globals.d.js';
 import {
   Field,
-  HideField,
   InputType,
   IntersectionType,
   registerEnumType,
@@ -35,6 +34,10 @@ export { JoinTypes } from './crud-gen-gql.interface.js';
  */
 @InputType()
 export class SortModel<T = any> implements ISortModel<T> {
+  @Field(
+    /* istanbul ignore next */
+    () => String,
+  )
   colId!: string;
   @Field(
     /* istanbul ignore next */
@@ -72,7 +75,17 @@ export function sortModelFactory<Entity>(entityModel: ClassType<Entity>) {
 
 @InputType()
 export class RowGroup {
+  @Field(
+    /* istanbul ignore next */
+    () => String,
+  )
   colId!: string;
+
+  @Field(
+    /* istanbul ignore next */
+    () => String,
+    { nullable: true },
+  )
   aggFunc!: string;
 }
 
@@ -83,57 +96,131 @@ export function filterExpressionInputFactory<Entity>(
   let cached;
   if ((cached = filterExpressionInputCache.get(entityModel))) return cached;
 
-  const FieldEnum = entityFieldsEnumGqlFactory(entityModel);
+  const fieldsEnum = entityFieldsEnumGqlFactory(entityModel);
 
   @InputType(`${entityModel.name}FilterTextInput`)
   class FilterText implements ITextFilterModel {
-    @HideField()
-    filterType!: FilterType.TEXT;
-    type!: GeneralFilters;
     @Field(
       /* istanbul ignore next */
-      () => FieldEnum,
+      () => FilterType,
+      { nullable: true, defaultValue: FilterType.TEXT },
+    )
+    filterType!: FilterType.TEXT;
+
+    @Field(
+      /* istanbul ignore next */
+      () => GeneralFilters,
+      { nullable: true },
+    )
+    type!: GeneralFilters;
+
+    @Field(
+      /* istanbul ignore next */
+      () => fieldsEnum,
     )
     field!: string;
+
+    @Field(
+      /* istanbul ignore next */
+      () => String,
+      { nullable: true },
+    )
     filter!: string;
   }
 
   @InputType(`${entityModel.name}FilterNumberInput`)
   class FilterNumber implements INumberFilterModel {
-    @HideField()
-    filterType!: FilterType.NUMBER;
-    type!: GeneralFilters;
     @Field(
       /* istanbul ignore next */
-      () => FieldEnum,
+      () => FilterType,
+      { nullable: true, defaultValue: FilterType.NUMBER },
+    )
+    filterType!: FilterType.NUMBER;
+
+    @Field(
+      /* istanbul ignore next */
+      () => GeneralFilters,
+      { nullable: true },
+    )
+    type!: GeneralFilters;
+
+    @Field(
+      /* istanbul ignore next */
+      () => fieldsEnum,
     )
     field!: string;
+
+    @Field(
+      /* istanbul ignore next */
+      () => Number,
+      { nullable: true },
+    )
     filter!: number;
+
+    @Field(
+      /* istanbul ignore next */
+      () => Number,
+      { nullable: true },
+    )
     filterTo?: number;
   }
 
   @InputType(`${entityModel.name}FilterDateInput`)
   class FilterDate implements DateFilterModel {
-    @HideField()
-    filterType!: FilterType.DATE;
-    type!: GeneralFilters;
     @Field(
       /* istanbul ignore next */
-      () => FieldEnum,
+      () => FilterType,
+      { nullable: true, defaultValue: FilterType.DATE },
+    )
+    filterType!: FilterType.DATE;
+
+    @Field(
+      /* istanbul ignore next */
+      () => GeneralFilters,
+      { nullable: true },
+    )
+    type!: GeneralFilters;
+
+    @Field(
+      /* istanbul ignore next */
+      () => fieldsEnum,
     )
     field!: string;
+
+    @Field(
+      /* istanbul ignore next */
+      () => String,
+      { nullable: true },
+    )
     dateFrom!: string;
+
+    @Field(
+      /* istanbul ignore next */
+      () => String,
+      { nullable: true },
+    )
     dateTo?: string;
   }
 
   @InputType(`${entityModel.name}FilterSetInput`)
   class FilterSet implements ISetFilterModel {
-    @HideField()
-    filterType!: FilterType.SET;
-    values!: string[];
     @Field(
       /* istanbul ignore next */
-      () => FieldEnum,
+      () => FilterType,
+      { nullable: true, defaultValue: FilterType.SET },
+    )
+    filterType!: FilterType.SET;
+
+    @Field(
+      /* istanbul ignore next */
+      () => [String],
+      { nullable: true },
+    )
+    values!: string[];
+
+    @Field(
+      /* istanbul ignore next */
+      () => fieldsEnum,
     )
     field!: string;
   }
@@ -181,11 +268,13 @@ export function filterExpressionInputFactory<Entity>(
     @Field(
       /* istanbul ignore next */
       () => [FilterExpressionProperty],
+      { nullable: true },
     )
     expressions?: FilterExpressionProperty[];
     @Field(
       /* istanbul ignore next */
       () => [FilterExpression],
+      { nullable: true },
     )
     childExpressions?: FilterInput[];
   }

@@ -4,7 +4,13 @@ import { GQLDataLoader } from '@nestjs-yalc/data-loader/dataloader.helper.js';
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import { UseGuards } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { GqlExecutionContext, Mutation, Resolver } from '@nestjs/graphql';
+import {
+  GqlExecutionContext,
+  Mutation,
+  Parent,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import {
   SkeletonUserType,
   SkeletonUserCreateInput,
@@ -133,6 +139,16 @@ export class SkeletonUserResolver extends resolverFactory({
     ID: string,
   ): Promise<string> {
     return this.service.resetPassword(ID);
+  }
+
+  @ResolveField(returnValue(String), {
+    description: "It's the combination of firstName and lastName",
+  })
+  fullName(@Parent() parent: SkeletonUserType): string {
+    return (
+      parent.fullName ??
+      [parent.firstName, parent.lastName].filter(Boolean).join(' ')
+    );
   }
 }
 

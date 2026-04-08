@@ -12,7 +12,16 @@ export function crudGenGqlInterceptorWorker<T>(
   startRow: number,
   endRow: number,
 ) {
-  return ([page, count]: [T, number]) => {
+  return (value: [T, number] | T) => {
+    if (
+      !Array.isArray(value) ||
+      value.length !== 2 ||
+      typeof value[1] !== 'number'
+    ) {
+      return value;
+    }
+
+    const [page, count] = value;
     return {
       nodes: page,
       pageData: { count, startRow: startRow ?? 0, endRow: endRow ?? count },

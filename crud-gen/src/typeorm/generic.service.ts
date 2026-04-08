@@ -19,7 +19,11 @@ import {
   QueryFailedError,
 } from 'typeorm';
 import { FindManyOptions, FindOptionsWhere as FindConditions } from 'typeorm';
-import { type GenericTypeORMRepository } from '@nestjs-yalc/crud-gen/typeorm/generic.repository.js';
+import {
+  type CrudGenRepositoryCapabilities,
+  type GenericTypeORMRepository,
+  PLAIN_CRUD_GEN_REPOSITORY_CAPABILITIES,
+} from '@nestjs-yalc/crud-gen/typeorm/generic.repository.js';
 import {
   CrudGenFindManyOptions,
   ICrudGenSimpleParams,
@@ -552,37 +556,82 @@ export class GenericService<
     if (relations) findOptions.relations = relations;
 
     const repo: any = this.repository as any;
+    const capabilities = this.getCrudGenRepositoryCapabilities();
 
-    // Prefer extended repository methods when available.
-    if (
-      typeof repo.getManyAndCountExtended === 'function' &&
-      typeof repo.getManyExtended === 'function'
-    ) {
+    if (capabilities.extendedQueries) {
+      if (
+        typeof repo.getManyAndCountExtended !== 'function' ||
+        typeof repo.getManyExtended !== 'function'
+      ) {
+        throw new ReferenceError(
+          'Repository declares extended query support but does not implement the required extended query methods.',
+        );
+      }
+
       return withCount
         ? repo.getManyAndCountExtended(findOptions)
         : repo.getManyExtended(findOptions);
     }
 
     // Fallback for plain TypeORM repositories (no extended helpers):
-    // approximate using standard find/findAndCount and ignore advanced
-    // CrudGen options (filters/join) when we cannot map them safely.
+    // keep support minimal, but sanitize internal helper artifacts such as
+    // empty `where.filters` before delegating to TypeORM.
     const { where, info, extra, subQueryFilters, ...typeormOptions } =
       findOptions;
 
-    const hasExtendedWhere =
-      !!where && typeof (where as any).filters === 'object';
+    const sanitizedWhere =
+      where && typeof where === 'object' && !Array.isArray(where)
+        ? (() => {
+            const clone = { ...(where as any) };
+            if ('filters' in clone) {
+              delete clone.filters;
+            }
+            return Object.keys(clone).length ? clone : undefined;
+          })()
+        : (where as any);
 
     const mappedFindOptions: FindManyOptions<EntityRead> = {
       ...(typeormOptions as FindManyOptions<EntityRead>),
-      // Only apply where when it looks like a plain TypeORM where;
-      // CrudGen structured filters (with `.filters`) require the
-      // extended repository and are ignored here.
-      where: hasExtendedWhere ? undefined : (where as any),
+      where: sanitizedWhere as any,
     };
 
     return withCount
       ? this.repository.findAndCount(mappedFindOptions)
       : this.repository.find(mappedFindOptions);
+  }
+
+  getCrudGenRepositoryCapabilities(): CrudGenRepositoryCapabilities {
+    const repo: any = this.repository as any;
+
+    if (typeof repo.getCrudGenCapabilities === 'function') {
+      const explicitCapabilities = repo.getCrudGenCapabilities();
+
+      if (explicitCapabilities && typeof explicitCapabilities === 'object') {
+        return {
+          ...PLAIN_CRUD_GEN_REPOSITORY_CAPABILITIES,
+          ...explicitCapabilities,
+        };
+      }
+    }
+
+    const legacyExtendedSupport =
+      typeof repo.supportsExtendedRepository === 'function'
+        ? !!repo.supportsExtendedRepository()
+        : typeof repo.getManyAndCountExtended === 'function' &&
+          typeof repo.getManyExtended === 'function';
+
+    return {
+      extendedQueries: legacyExtendedSupport,
+      structuredGraphqlFilters: legacyExtendedSupport,
+    };
+  }
+
+  supportsExtendedRepository(): boolean {
+    return this.getCrudGenRepositoryCapabilities().extendedQueries;
+  }
+
+  supportsStructuredGraphqlFilters(): boolean {
+    return this.getCrudGenRepositoryCapabilities().structuredGraphqlFilters;
   }
 
   protected mapEntityR2W(

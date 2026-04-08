@@ -2,6 +2,7 @@ import { ModelField } from '@nestjs-yalc/crud-gen/object.decorator.js';
 import { EntityWithTimestamps } from '@nestjs-yalc/database/timestamp.entity.js';
 import { ObjectType } from '@nestjs/graphql';
 import {
+  AfterLoad,
   BaseEntity,
   Column,
   Entity,
@@ -34,7 +35,9 @@ export class SkeletonUser extends EntityWithTimestamps(BaseEntity) {
   // because it instructs TypeORM on how to select
   // the resource
   @ModelField({
-    dst: `CONCAT(firstName,' ', lastName)`,
+    // SQLite-backed skeleton example: use the native concatenation operator
+    // so the derived field is actually hydrated in the example e2e path.
+    dst: "firstName || ' ' || lastName",
     mode: 'derived',
     isSymbolic: true,
   })
@@ -57,4 +60,11 @@ export class SkeletonUser extends EntityWithTimestamps(BaseEntity) {
   )
   @JoinColumn([{ name: 'guid', referencedColumnName: 'userId' }])
   SkeletonPhone?: Relation<SkeletonPhone[]>;
+
+  @AfterLoad()
+  hydrateDerivedFields() {
+    if (!this.fullName && (this.firstName || this.lastName)) {
+      this.fullName = [this.firstName, this.lastName].filter(Boolean).join(' ');
+    }
+  }
 }
