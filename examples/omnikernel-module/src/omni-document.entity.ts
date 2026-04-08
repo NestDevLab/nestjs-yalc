@@ -28,8 +28,6 @@ export class OmniDocumentEntity extends OmniRecordEntity {
   @BeforeInsert()
   @BeforeUpdate()
   ensureDocumentRecordKind() {
-    if (!this.kind) {
-      this.kind = OmniDocumentKind.Document;
-    }
+    this.kind = OmniDocumentKind.Document;
   }
 }

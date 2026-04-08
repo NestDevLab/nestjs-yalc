@@ -1,5 +1,4 @@
-import { DynamicModule, Global, Module } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { DynamicModule, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
 import { OmniNamedEntity } from './base/omni-named.entity.js';
@@ -12,7 +11,6 @@ import { omniNamedProvidersFactory } from './omni-named.resolver.js';
 import { omniRecordProvidersFactory } from './omni-record.resolver.js';
 import { omniRelationProvidersFactory } from './omni-relation.resolver.js';
 
-@Global()
 @Module({})
 export class OmniKernelModule {
   static register(dbConnection: string): DynamicModule {
@@ -38,10 +36,6 @@ export class OmniKernelModule {
         ),
       ],
       providers: [
-        {
-          provide: EventEmitter2,
-          useValue: new EventEmitter2(),
-        },
         ...omniNamedProviders.providers,
         ...omniRecordProviders.providers,
         ...omniRelationProviders.providers,
@@ -49,7 +43,6 @@ export class OmniKernelModule {
         ...omniExternalRefProviders.providers,
       ],
       exports: [
-        EventEmitter2,
         ...omniNamedProviders.providers,
         ...omniRecordProviders.providers,
         ...omniRelationProviders.providers,

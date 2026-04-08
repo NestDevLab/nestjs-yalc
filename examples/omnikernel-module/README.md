@@ -8,11 +8,11 @@ generic knowledge kernel with:
 - relations between records,
 - external references for third-party synchronization.
 
-It follows the same `CrudGenDependencyFactory` pattern used by
-`examples/task-system-module`, so each entity exposes the usual auto-wired
+It follows the same `CrudGenDependencyFactory` pattern used across the example
+modules in this repository, so each entity exposes the usual auto-wired
 service, dataloader, and GraphQL resolver providers.
 
-## PR 2 additions
+## Document Slice Additions
 
 - typed record and relation enums for status and relation semantics
 - `OmniDocumentEntity` as the first concrete record family built on

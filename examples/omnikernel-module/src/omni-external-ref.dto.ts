@@ -1,10 +1,4 @@
-import {
-  Field,
-  InputType,
-  ObjectType,
-  OmitType,
-  PartialType,
-} from '@nestjs/graphql';
+import { InputType, ObjectType, OmitType, PartialType } from '@nestjs/graphql';
 import {
   ModelField,
   ModelObject,
@@ -32,43 +26,36 @@ export class OmniExternalRefType extends OmniExternalRefEntity {
   }
 
   @ModelField({ gqlType: returnValue(UUIDScalar), isRequired: true })
-  @Field(() => UUIDScalar)
   @IsUUID()
   guid!: string;
 
   @ModelField({})
-  @Field()
   @IsString()
   @MaxLength(64)
   internalType!: string;
 
   @ModelField({ gqlType: returnValue(UUIDScalar), isRequired: true })
-  @Field(() => UUIDScalar)
   @IsUUID()
   internalId!: string;
 
   @ModelField({})
-  @Field()
   @IsString()
   @MaxLength(128)
   provider!: string;
 
   @ModelField({ gqlOptions: { nullable: true } })
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(128)
   account?: string | null;
 
   @ModelField({ gqlOptions: { nullable: true } })
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(128)
   container?: string | null;
 
   @ModelField({})
-  @Field()
   @IsString()
   @MaxLength(255)
   externalId!: string;
@@ -77,7 +64,6 @@ export class OmniExternalRefType extends OmniExternalRefEntity {
     gqlType: returnValue(GraphQLJSONObject),
     gqlOptions: { nullable: true },
   })
-  @Field(() => GraphQLJSONObject, { nullable: true })
   @IsOptional()
   @IsObject()
   payload?: Record<string, unknown> | null;

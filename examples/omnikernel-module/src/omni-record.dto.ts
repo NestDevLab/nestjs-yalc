@@ -1,10 +1,4 @@
-import {
-  Field,
-  InputType,
-  ObjectType,
-  OmitType,
-  PartialType,
-} from '@nestjs/graphql';
+import { InputType, ObjectType, OmitType, PartialType } from '@nestjs/graphql';
 import {
   ModelField,
   ModelObject,
@@ -37,38 +31,32 @@ export class OmniRecordType extends OmniRecordEntity {
   }
 
   @ModelField({ gqlType: returnValue(UUIDScalar), isRequired: true })
-  @Field(() => UUIDScalar)
   @IsUUID()
   guid!: string;
 
   @ModelField({ gqlOptions: { nullable: true } })
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(128)
   externalId?: string | null;
 
   @ModelField({})
-  @Field()
   @IsString()
   @MaxLength(255)
   title!: string;
 
   @ModelField({ gqlOptions: { nullable: true } })
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(255)
   slug?: string | null;
 
   @ModelField({})
-  @Field()
   @IsString()
   @MaxLength(64)
   kind!: string;
 
-  @ModelField({})
-  @Field()
+  @ModelField({ gqlType: returnValue(OmniRecordStatus) })
   @IsEnum(OmniRecordStatus)
   status!: OmniRecordStatus;
 
@@ -76,7 +64,6 @@ export class OmniRecordType extends OmniRecordEntity {
     gqlType: returnValue(GraphQLJSONObject),
     gqlOptions: { nullable: true },
   })
-  @Field(() => GraphQLJSONObject, { nullable: true })
   @IsOptional()
   @IsObject()
   payload?: Record<string, unknown> | null;
@@ -91,7 +78,6 @@ export class OmniRecordType extends OmniRecordEntity {
       type: () => OmniRelationEntity,
     },
   })
-  @Field(() => [OmniRelationType], { nullable: true })
   outgoingRelations?: Relation<OmniRelationType[]>;
 
   @ModelField({
@@ -104,7 +90,6 @@ export class OmniRecordType extends OmniRecordEntity {
       type: () => OmniRelationEntity,
     },
   })
-  @Field(() => [OmniRelationType], { nullable: true })
   incomingRelations?: Relation<OmniRelationType[]>;
 }
 

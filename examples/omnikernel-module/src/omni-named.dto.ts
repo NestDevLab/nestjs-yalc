@@ -1,10 +1,4 @@
-import {
-  Field,
-  InputType,
-  ObjectType,
-  OmitType,
-  PartialType,
-} from '@nestjs/graphql';
+import { InputType, ObjectType, OmitType, PartialType } from '@nestjs/graphql';
 import {
   ModelField,
   ModelObject,
@@ -25,25 +19,21 @@ export class OmniNamedType extends OmniNamedEntity {
   }
 
   @ModelField({ gqlType: returnValue(UUIDScalar), isRequired: true })
-  @Field(() => UUIDScalar)
   @IsUUID()
   guid!: string;
 
   @ModelField({ gqlOptions: { nullable: true } })
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(128)
   externalId?: string | null;
 
   @ModelField({})
-  @Field()
   @IsString()
   @MaxLength(255)
   title!: string;
 
   @ModelField({ gqlOptions: { nullable: true } })
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(255)

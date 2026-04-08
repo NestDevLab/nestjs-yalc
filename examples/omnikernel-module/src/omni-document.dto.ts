@@ -1,10 +1,4 @@
-import {
-  Field,
-  InputType,
-  ObjectType,
-  OmitType,
-  PartialType,
-} from '@nestjs/graphql';
+import { InputType, ObjectType, OmitType, PartialType } from '@nestjs/graphql';
 import {
   ModelField,
   ModelObject,
@@ -41,38 +35,32 @@ export class OmniDocumentType extends OmniDocumentEntity {
   }
 
   @ModelField({ gqlType: returnValue(UUIDScalar), isRequired: true })
-  @Field(() => UUIDScalar)
   @IsUUID()
   guid!: string;
 
   @ModelField({ gqlOptions: { nullable: true } })
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(128)
   externalId?: string | null;
 
   @ModelField({})
-  @Field()
   @IsString()
   @MaxLength(255)
   title!: string;
 
   @ModelField({ gqlOptions: { nullable: true } })
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(255)
   slug?: string | null;
 
   @ModelField({})
-  @Field()
   @IsString()
   @IsIn([OmniDocumentKind.Document])
   kind!: string;
 
-  @ModelField({})
-  @Field()
+  @ModelField({ gqlType: returnValue(OmniRecordStatus) })
   @IsEnum(OmniRecordStatus)
   status!: OmniRecordStatus;
 
@@ -80,7 +68,6 @@ export class OmniDocumentType extends OmniDocumentEntity {
     gqlType: returnValue(GraphQLJSONObject),
     gqlOptions: { nullable: true },
   })
-  @Field(() => GraphQLJSONObject, { nullable: true })
   @IsOptional()
   @IsObject()
   payload?: Record<string, unknown> | null;
@@ -95,7 +82,6 @@ export class OmniDocumentType extends OmniDocumentEntity {
       type: () => OmniRelationEntity,
     },
   })
-  @Field(() => [OmniRelationType], { nullable: true })
   outgoingRelations?: Relation<OmniRelationType[]>;
 
   @ModelField({
@@ -108,36 +94,30 @@ export class OmniDocumentType extends OmniDocumentEntity {
       type: () => OmniRelationEntity,
     },
   })
-  @Field(() => [OmniRelationType], { nullable: true })
   incomingRelations?: Relation<OmniRelationType[]>;
 
-  @ModelField({})
-  @Field()
+  @ModelField({ gqlType: returnValue(OmniDocumentKind) })
   @IsEnum(OmniDocumentKind)
   documentKind!: OmniDocumentKind;
 
   @ModelField({ gqlOptions: { nullable: true } })
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   content?: string | null;
 
   @ModelField({ gqlOptions: { nullable: true } })
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(128)
   contentMimeType?: string | null;
 
   @ModelField({ gqlOptions: { nullable: true } })
-  @Field({ nullable: true })
   @IsOptional()
   @IsUrl()
   @MaxLength(2048)
   sourceUrl?: string | null;
 
   @ModelField({ gqlOptions: { nullable: true } })
-  @Field({ nullable: true })
   @IsOptional()
   @IsDate()
   publishedAt?: Date | null;

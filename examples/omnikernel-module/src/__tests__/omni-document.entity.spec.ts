@@ -39,9 +39,9 @@ describe('OmniDocumentEntity', () => {
     expect(entity.kind).toBe(OmniDocumentKind.Document);
   });
 
-  it('preserves an explicit base record kind when already set', () => {
+  it('normalizes a non-document base record kind back to document', () => {
     const entity = new OmniDocumentEntity();
-    entity.kind = OmniDocumentKind.Document;
+    entity.kind = OmniDocumentKind.Note;
 
     entity.ensureDocumentRecordKind();
 
