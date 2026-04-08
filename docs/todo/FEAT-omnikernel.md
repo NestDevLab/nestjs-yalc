@@ -51,6 +51,20 @@ Still open before the full OmniKernel PR is done:
 - CI integration for OmniKernel tests
 - final documentation and review cleanup
 
+## Task Completion Checklist
+
+Use this checklist every time a concrete OmniKernel task is completed:
+
+- [ ] Update this plan file to reflect the new status or checked item.
+- [ ] Confirm the change still matches the OmniKernel final objective.
+- [ ] Add or update tests for the behavior introduced or changed.
+- [ ] Update README or docs if the behavior, model, or workflow became clearer
+      or changed.
+- [ ] Run the targeted OmniKernel validation needed for that task.
+- [ ] Decide whether the task also needs repo-wide validation.
+- [ ] Commit and push the change to the active OmniKernel PR branch.
+- [ ] Reply to or resolve any review comments affected by the change.
+
 ## Principles
 
 - Keep the data model generic where possible and specialize only where the
