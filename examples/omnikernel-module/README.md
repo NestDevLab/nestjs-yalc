@@ -26,6 +26,7 @@ Today, the module already models:
 
 - named entities for reusable lookup records,
 - records for structured domain objects,
+- collections for organizing documents and other records,
 - relations between records,
 - external references for third-party synchronization.
 
@@ -69,6 +70,13 @@ record by accident.
 - single-table record storage so documents participate in the same record graph
   as generic Omni records
 
+## Collection Slice Additions
+
+- `OmniCollectionEntity` as the first organization/container record family
+- shared `omni-record` storage for collections and documents in the same graph
+- collection membership expressed through standard Omni relations, with
+  collection-to-document `contains` links as the first concrete example
+
 ## Entities
 
 - `OmniNamedEntity`: basic named records with `externalId`, `title`, and `slug`.
@@ -76,6 +84,8 @@ record by accident.
 - `OmniDocumentEntity`: concrete document-like records with document subtype,
   content, source URL, and publication timestamp, stored in the shared
   `omni-record` table.
+- `OmniCollectionEntity`: concrete container-like records with collection
+  subtype and summary fields, stored in the shared `omni-record` table.
 - `OmniRelationEntity`: directional links between two Omni records.
 - `OmniExternalRefEntity`: provider-specific mappings between internal records
   and external systems.

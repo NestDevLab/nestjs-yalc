@@ -4,6 +4,8 @@ import { DataSource } from 'typeorm';
 const { OmniNamedEntity } = await import('../base/omni-named.entity.js');
 const { OmniRecordEntity } = await import('../base/omni-record.entity.js');
 const { OmniRelationEntity } = await import('../base/omni-relation.entity.js');
+const { OmniCollectionEntity } = await import('../omni-collection.entity.js');
+const { OmniCollectionKind } = await import('../omni-collection-kind.enum.js');
 const { OmniDocumentEntity } = await import('../omni-document.entity.js');
 const { OmniDocumentKind } = await import('../omni-document-kind.enum.js');
 const { OmniRecordStatus } = await import('../omni-record-status.enum.js');
@@ -22,6 +24,7 @@ describe('OmniKernel persistence', () => {
       entities: [
         OmniNamedEntity,
         OmniRecordEntity,
+        OmniCollectionEntity,
         OmniDocumentEntity,
         OmniRelationEntity,
       ],
@@ -36,8 +39,9 @@ describe('OmniKernel persistence', () => {
     }
   });
 
-  it('stores documents in omni-record and resolves relation targets back through the shared graph', async () => {
+  it('stores collections and documents in omni-record and resolves graph links back through the shared record hierarchy', async () => {
     const recordRepo = dataSource.getRepository(OmniRecordEntity);
+    const collectionRepo = dataSource.getRepository(OmniCollectionEntity);
     const documentRepo = dataSource.getRepository(OmniDocumentEntity);
     const relationRepo = dataSource.getRepository(OmniRelationEntity);
 
@@ -57,6 +61,15 @@ describe('OmniKernel persistence', () => {
         documentKind: OmniDocumentKind.Note,
       }),
     );
+    await collectionRepo.insert(
+      collectionRepo.create({
+        guid: '44444444-4444-4444-4444-444444444444',
+        title: 'Knowledge base',
+        status: OmniRecordStatus.Active,
+        collectionKind: OmniCollectionKind.Folder,
+        summary: 'Primary document container',
+      }),
+    );
     await relationRepo.insert(
       relationRepo.create({
         guid: '33333333-3333-3333-3333-333333333333',
@@ -66,9 +79,18 @@ describe('OmniKernel persistence', () => {
         status: OmniRelationStatus.Active,
       }),
     );
+    await relationRepo.insert(
+      relationRepo.create({
+        guid: '55555555-5555-5555-5555-555555555555',
+        sourceRecordId: '44444444-4444-4444-4444-444444444444',
+        targetRecordId: '22222222-2222-2222-2222-222222222222',
+        kind: OmniRelationKind.Contains,
+        status: OmniRelationStatus.Active,
+      }),
+    );
 
     const rows = await dataSource.query(
-      'select guid, kind, recordType, documentKind from "omni-record" order by guid',
+      'select guid, kind, recordType, collectionKind, documentKind from "omni-record" order by guid',
     );
 
     expect(rows).toEqual(
@@ -82,6 +104,12 @@ describe('OmniKernel persistence', () => {
           kind: OmniDocumentKind.Document,
           recordType: OmniDocumentKind.Document,
           documentKind: OmniDocumentKind.Note,
+        }),
+        expect.objectContaining({
+          guid: '44444444-4444-4444-4444-444444444444',
+          kind: OmniCollectionKind.Collection,
+          recordType: OmniCollectionKind.Collection,
+          collectionKind: OmniCollectionKind.Folder,
         }),
       ]),
     );
@@ -104,5 +132,23 @@ describe('OmniKernel persistence', () => {
     expect((relation.targetRecord as OmniDocumentEntity).kind).toBe(
       OmniDocumentKind.Document,
     );
+
+    const membershipRelation = await relationRepo.findOneOrFail({
+      where: { guid: '55555555-5555-5555-5555-555555555555' },
+      relations: {
+        sourceRecord: true,
+        targetRecord: true,
+      },
+    });
+
+    expect(membershipRelation.sourceRecord).toBeInstanceOf(OmniCollectionEntity);
+    expect(membershipRelation.sourceRecord.guid).toBe(
+      '44444444-4444-4444-4444-444444444444',
+    );
+    expect((membershipRelation.sourceRecord as OmniCollectionEntity).kind).toBe(
+      OmniCollectionKind.Collection,
+    );
+    expect(membershipRelation.targetRecord).toBeInstanceOf(OmniDocumentEntity);
+    expect(membershipRelation.kind).toBe(OmniRelationKind.Contains);
   });
 });

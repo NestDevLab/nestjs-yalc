@@ -56,11 +56,11 @@ Already completed in PR `#123`:
 - module registration
 - foundational tests
 - first concrete document slice
+- first organization and collection slice
 - review-driven fixes already applied
 
 Still open before the full OmniKernel PR is done:
 
-- collection and organization layer
 - richer relation semantics
 - concrete external reference workflows
 - higher-level service/query helpers
@@ -104,15 +104,15 @@ Use this checklist every time a concrete OmniKernel task is completed:
 
 ## Workstream 2 — Organization Layer
 
-- Add `OmniCollectionEntity`.
-- Define collection fields and inheritance strategy.
-- Add collection DTOs with validation decorators.
-- Add collection resolver factory.
-- Register collection entity/providers in `OmniKernelModule`.
-- Export collection pieces from `src/index.ts`.
-- Add collection entity tests.
-- Add relation tests for document-to-collection graph links.
-- Update README and this plan with collection examples.
+- [x] Add `OmniCollectionEntity`.
+- [x] Define collection fields and inheritance strategy.
+- [x] Add collection DTOs with validation decorators.
+- [x] Add collection resolver factory.
+- [x] Register collection entity/providers in `OmniKernelModule`.
+- [x] Export collection pieces from `src/index.ts`.
+- [x] Add collection entity tests.
+- [x] Add relation tests for document-to-collection graph links.
+- [x] Update README and this plan with collection examples.
 
 ## Workstream 3 — Relation Semantics
 

@@ -6,6 +6,9 @@ const omniRecordProvidersFactory = jest.fn(() => ({ providers: ['record'] }));
 const omniRelationProvidersFactory = jest.fn(() => ({
   providers: ['relation'],
 }));
+const omniCollectionProvidersFactory = jest.fn(() => ({
+  providers: ['collection'],
+}));
 const omniDocumentProvidersFactory = jest.fn(() => ({
   providers: ['document'],
 }));
@@ -21,6 +24,9 @@ jest.unstable_mockModule('../omni-record.resolver.js', () => ({
 }));
 jest.unstable_mockModule('../omni-relation.resolver.js', () => ({
   omniRelationProvidersFactory,
+}));
+jest.unstable_mockModule('../omni-collection.resolver.js', () => ({
+  omniCollectionProvidersFactory,
 }));
 jest.unstable_mockModule('../omni-document.resolver.js', () => ({
   omniDocumentProvidersFactory,
@@ -39,6 +45,7 @@ describe('OmniKernelModule', () => {
     expect(omniNamedProvidersFactory).toHaveBeenCalledWith('test');
     expect(omniRecordProvidersFactory).toHaveBeenCalledWith('test');
     expect(omniRelationProvidersFactory).toHaveBeenCalledWith('test');
+    expect(omniCollectionProvidersFactory).toHaveBeenCalledWith('test');
     expect(omniDocumentProvidersFactory).toHaveBeenCalledWith('test');
     expect(omniExternalRefProvidersFactory).toHaveBeenCalledWith('test');
     expect(module.providers).toEqual(
@@ -46,6 +53,7 @@ describe('OmniKernelModule', () => {
         'named',
         'record',
         'relation',
+        'collection',
         'document',
         'external-ref',
       ]),
