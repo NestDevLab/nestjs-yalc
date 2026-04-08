@@ -45,6 +45,18 @@ The final OmniKernel module should demonstrate a coherent end state where:
 - and higher-level services show how to query and traverse the model in a real
   application.
 
+One of the intended downstream consumers is the task application. The long-term
+goal is for the task app to stop inventing its own parallel model and instead
+reuse OmniKernel concepts such as:
+
+- records/documents for task-like entities,
+- collections for project or board-like grouping,
+- relations for dependencies and hierarchy,
+- external refs for third-party tracker synchronization.
+
+That integration is intentionally deferred until the OmniKernel model is stable
+enough to avoid reworking the task app on every intermediate schema change.
+
 ## Document Slice Additions
 
 - typed record and relation enums for status and relation semantics

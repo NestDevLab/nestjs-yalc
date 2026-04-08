@@ -31,6 +31,22 @@ The final OmniKernel example should make it obvious how to build a module that:
 The end state should be reviewable as one coherent module, not as a pile of
 unrelated entities.
 
+## Planned Downstream Adoption
+
+OmniKernel is also meant to become the substrate for the task application once
+the model is stable enough.
+
+The intended mapping is:
+
+- tasks and similar domain items -> Omni records or document-like records
+- projects, boards, or higher-level groupings -> Omni collections
+- dependencies, hierarchy, and cross-links -> Omni relations
+- external trackers or provider sync state -> Omni external refs
+
+This adoption should happen after the OmniKernel model is coherent, not before,
+so the task application does not need to be rewritten on every intermediate
+schema change.
+
 ## Current Status
 
 Already completed in PR `#123`:
@@ -48,6 +64,7 @@ Still open before the full OmniKernel PR is done:
 - richer relation semantics
 - concrete external reference workflows
 - higher-level service/query helpers
+- task-application adoption once the kernel is stable
 - CI integration for OmniKernel tests
 - final documentation and review cleanup
 
@@ -57,6 +74,8 @@ Use this checklist every time a concrete OmniKernel task is completed:
 
 - [ ] Update this plan file to reflect the new status or checked item.
 - [ ] Confirm the change still matches the OmniKernel final objective.
+- [ ] Confirm whether the change moves OmniKernel closer to task-application
+      adoption or changes that future mapping.
 - [ ] Add or update tests for the behavior introduced or changed.
 - [ ] Update README or docs if the behavior, model, or workflow became clearer
       or changed.
@@ -121,7 +140,17 @@ Use this checklist every time a concrete OmniKernel task is completed:
 - Decide whether dedicated read/query services belong in the example.
 - Add tests for non-trivial query flows.
 
-## Workstream 6 — Documentation & Developer Experience
+## Workstream 6 — Task Application Adoption
+
+- Define the first task-application concepts that should map onto OmniKernel.
+- Decide which task entities should be modeled as records versus documents.
+- Map project or board-like structures onto collections.
+- Map dependencies and hierarchy onto relation kinds.
+- Map external tracker synchronization onto external refs.
+- Add documentation showing the intended migration path from task-specific model
+  to OmniKernel-backed model.
+
+## Workstream 7 — Documentation & Developer Experience
 
 - Expand the OmniKernel README with architecture overview and usage examples.
 - Document the difference between base records, documents, collections,
@@ -129,7 +158,7 @@ Use this checklist every time a concrete OmniKernel task is completed:
 - Document the single-table record strategy.
 - Document known tradeoffs and intentional limitations of the example.
 
-## Workstream 7 — Final Validation & Review
+## Workstream 8 — Final Validation & Review
 
 - Run targeted OmniKernel lint.
 - Run targeted OmniKernel Jest suite.
@@ -146,7 +175,8 @@ Use this checklist every time a concrete OmniKernel task is completed:
 3. Finalize relation semantics for documents and collections.
 4. Expand external references for concrete workflows.
 5. Add higher-level service/query helpers.
-6. Finish docs, CI coverage, and final review.
+6. Define the task-application adoption path.
+7. Finish docs, CI coverage, and final review.
 
 ## Definition of Done
 
@@ -159,4 +189,6 @@ OmniKernel is ready when all of the following are true:
 - tests cover both metadata shape and the key behavioral flows
 - the README explains what OmniKernel is, what problem it solves, and how the
   model fits together
+- the task application adoption path is clear, even if the full migration is
+  implemented later
 - the PR reads like a complete reference module rather than a partial scaffold
