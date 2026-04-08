@@ -41,3 +41,55 @@ The generated stack can run in two modes:
 - **Plain TypeORM fallback**: basic `find` / `findAndCount` semantics only.
 
 Do not assume every GraphQL capability is available just because the generated args exist in the schema. Some capabilities, especially structured filtering, require the extended repository path.
+
+## CrudGen-first decision guide
+
+When designing a new module/app, prefer this order of decisions:
+
+1. **Can the generated surface already express the use case?**
+   - If yes, use `CrudGenDependencyFactory` directly.
+2. **Do I only need custom business logic or persistence behavior?**
+   - If yes, override the **service** and/or **repository** first.
+3. **Do I only need a few extra API knobs?**
+   - Prefer `extraArgs`, `extraInputs`, decorators, `readonly`, or `customQueries` before replacing the whole CRUD surface.
+4. **Do I need a bespoke resolver/controller because the API contract itself is fundamentally non-generic?**
+   - Only then introduce handwritten GraphQL/REST surface code.
+
+In other words: for normal CRUD resources, custom code should usually live **below** the API surface (service/repository/mapping layers), not replace the generated resolver/controller stack.
+
+## Recommended layering
+
+### Basic app / happy path
+Use:
+- `CrudGenDependencyFactory`
+- generated resolver from `resolverFactory`
+- generated REST controller from `crudRestControllerFactory`
+- default `GenericService`
+
+This is the intended baseline (see `examples/skeleton-app`).
+
+### Advanced app with custom persistence/domain logic
+Keep:
+- generated resolver/controller surface where possible
+
+Customize:
+- **service provider** for domain behavior
+- **repository provider** for advanced query semantics
+- DTO metadata (`ModelObject` / `ModelField`) for joins, derived fields, aliases, and visibility
+
+This is the preferred pattern for advanced integrations like OmniKernel-backed apps.
+
+### Last resort: manual API surface
+Use handwritten resolvers/controllers only when:
+- the contract is not CRUD-shaped anymore, or
+- CrudGen extension points are genuinely insufficient
+
+Avoid replacing generated CRUD surfaces just because the persistence substrate is custom. A different backend is usually a reason to override the service/repository, not to abandon CrudGen.
+
+## Implication for Omni-like backends
+
+A reusable backend/substrate (for example OmniKernel) should aim to be:
+- **CrudGen-compatible at the service/repository/model-metadata level**
+- **not** a reason to duplicate CRUD GraphQL/REST layers manually
+
+The more the backend supports relation metadata, derived fields, JSON-backed properties, and predictable repository behavior, the more consumers can stay CrudGen-first.

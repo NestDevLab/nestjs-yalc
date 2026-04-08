@@ -138,7 +138,8 @@ Checklist:
   - [ ] derived fields
   - [ ] relation metadata
   - [ ] source/destination field mapping
-- [ ] Produce a capability matrix: “already supported / partially supported / missing / undocumented”
+- [x] Produce a capability matrix: “already supported / partially supported / missing / undocumented”
+  - Initial draft created in `docs/todo/FEAT-crudgen-capability-matrix.md`
 - [ ] Identify which current task-app custom paths are unnecessary once CrudGen is used properly
 
 Deliverable:
@@ -152,11 +153,12 @@ Goal:
 - make hidden framework capabilities explicit and teachable
 
 Checklist:
-- [ ] Review existing docs for overlaps/gaps:
-  - [ ] `docs/crud-gen-factory.md`
-  - [ ] `docs/api-creation.md`
-  - [ ] any rest/crud-gen docs already present
+- [x] Review existing docs for overlaps/gaps:
+  - [x] `docs/crud-gen-factory.md`
+  - [x] `docs/api-creation.md`
+  - [x] existing REST/modeling docs reviewed at initial level
 - [ ] Add/expand docs for CrudGen composition fundamentals
+  - [x] initial CrudGen-first decision guide added to `docs/crud-gen-factory.md`
   - [ ] service override patterns
   - [ ] repository override patterns
   - [ ] dataloader usage
@@ -174,7 +176,9 @@ Checklist:
   - [ ] JSON/simple-json handling
   - [ ] grid/filter/sort patterns
 - [ ] Add docs for API strategy integration patterns
+  - [x] initial draft note created in `docs/todo/FEAT-crudgen-infra-patterns.md`
 - [ ] Add docs for event-manager integration patterns
+  - [x] initial draft note created in `docs/todo/FEAT-crudgen-infra-patterns.md`
 - [ ] Add docs that explain the intended layering:
   - [ ] skeleton-app = basic
   - [ ] omnikernel = reusable advanced substrate
@@ -300,8 +304,9 @@ This effort is done when all of the following are true:
 
 - [x] master plan/checklist created
 - [x] initial CrudGen capability inventory started
+- [x] initial capability matrix drafted
 - [ ] deep source audit still in progress
-- [ ] docs overhaul not started yet
+- [ ] docs overhaul in progress (initial matrix + decision-guide pass started)
 - [ ] OmniKernel hardening not started yet
 - [ ] task-app CrudGen-first refactor not started yet
 - [ ] API strategy/event-manager integration pass not started yet

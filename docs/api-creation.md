@@ -160,6 +160,20 @@ Please refer to the documentation on how to use NestJS-Yalc CrudGen library to l
 However, this is a very basic and non real-world example just to show you that the system is able to generate everything on his
 own with just a TypeORM entity.
 
+### CrudGen-first rule of thumb
+
+Before writing a custom resolver/controller, ask these questions in order:
+
+1. Can the generated CRUD surface already express the contract I need?
+2. If not, can I solve it by overriding the service or repository instead?
+3. If not, can I solve it with `extraArgs`, `extraInputs`, decorators, readonly mode, or `customQueries`?
+4. Only if the answer is still no, should I write a bespoke API surface.
+
+This keeps custom behavior in the correct layer:
+- generated API surface stays standard
+- persistence/domain behavior lives in services/repositories/DTO metadata
+- apps remain easier to test, document, and compose
+
 ### A more advanced approach
 
 To make the endpoints complete, we want to define more configurations to:
