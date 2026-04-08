@@ -1,11 +1,13 @@
 import { ObjectType } from '@nestjs/graphql';
-import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
+import { ChildEntity, Column } from 'typeorm';
 import { OmniRecordEntity } from './base/omni-record.entity.js';
 import { OmniDocumentKind } from './omni-document-kind.enum.js';
 
-@Entity('omni-document')
+@ChildEntity(OmniDocumentKind.Document)
 @ObjectType({ isAbstract: true })
 export class OmniDocumentEntity extends OmniRecordEntity {
+  kind: OmniDocumentKind = OmniDocumentKind.Document;
+
   @Column('varchar', {
     default: OmniDocumentKind.Document,
     enum: Object.values(OmniDocumentKind),
@@ -24,10 +26,4 @@ export class OmniDocumentEntity extends OmniRecordEntity {
 
   @Column('datetime', { nullable: true })
   publishedAt?: Date | null;
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  ensureDocumentRecordKind() {
-    this.kind = OmniDocumentKind.Document;
-  }
 }

@@ -17,13 +17,16 @@ service, dataloader, and GraphQL resolver providers.
 - typed record and relation enums for status and relation semantics
 - `OmniDocumentEntity` as the first concrete record family built on
   `OmniRecordEntity`
+- single-table record storage so documents participate in the same record graph
+  as generic Omni records
 
 ## Entities
 
 - `OmniNamedEntity`: basic named records with `externalId`, `title`, and `slug`.
 - `OmniRecordEntity`: richer records with `kind`, `status`, and `payload`.
 - `OmniDocumentEntity`: concrete document-like records with document subtype,
-  content, source URL, and publication timestamp.
+  content, source URL, and publication timestamp, stored in the shared
+  `omni-record` table.
 - `OmniRelationEntity`: directional links between two Omni records.
 - `OmniExternalRefEntity`: provider-specific mappings between internal records
   and external systems.

@@ -10,16 +10,24 @@ describe('OmniDocumentEntity', () => {
     expect(new OmniDocumentEntity()).toBeInstanceOf(OmniRecordEntity);
   });
 
-  it('registers document-specific columns', () => {
+  it('stores documents as child records in the omni-record table', () => {
     const metadata = getMetadataArgsStorage();
-    const table = metadata.tables.find(
+    const recordTable = metadata.tables.find(
+      (item) => item.target === OmniRecordEntity,
+    );
+    const documentTable = metadata.tables.find(
       (item) => item.target === OmniDocumentEntity,
+    );
+    const inheritance = metadata.inheritances.find(
+      (item) => item.target === OmniRecordEntity,
     );
     const entityColumns = metadata.columns
       .filter((item) => item.target === OmniDocumentEntity)
       .map((item) => item.propertyName);
 
-    expect(table?.name).toBe('omni-document');
+    expect(recordTable?.name).toBe('omni-record');
+    expect(documentTable?.type).toBe('entity-child');
+    expect(inheritance?.column).toMatchObject({ name: 'recordType' });
     expect(entityColumns).toEqual(
       expect.arrayContaining([
         'documentKind',
@@ -31,20 +39,17 @@ describe('OmniDocumentEntity', () => {
     );
   });
 
-  it('defaults the base record kind to document when missing', () => {
+  it('defaults the base record kind to document in the class instance', () => {
     const entity = new OmniDocumentEntity();
-
-    entity.ensureDocumentRecordKind();
 
     expect(entity.kind).toBe(OmniDocumentKind.Document);
   });
 
-  it('normalizes a non-document base record kind back to document', () => {
+  it('allows explicit document subtypes while keeping the base record kind stable', () => {
     const entity = new OmniDocumentEntity();
-    entity.kind = OmniDocumentKind.Note;
-
-    entity.ensureDocumentRecordKind();
+    entity.documentKind = OmniDocumentKind.Note;
 
     expect(entity.kind).toBe(OmniDocumentKind.Document);
+    expect(entity.documentKind).toBe(OmniDocumentKind.Note);
   });
 });

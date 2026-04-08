@@ -5,14 +5,7 @@ import {
 } from '@nestjs-yalc/crud-gen/object.decorator.js';
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
-import {
-  IsEnum,
-  IsObject,
-  IsOptional,
-  IsString,
-  IsUUID,
-  MaxLength,
-} from 'class-validator';
+import { IsEnum, IsObject, IsOptional, IsUUID } from 'class-validator';
 import { GraphQLJSONObject } from 'graphql-type-json';
 import type { Relation } from 'typeorm';
 import { OmniRecordEntity } from './base/omni-record.entity.js';
