@@ -8,6 +8,7 @@ export * from './omni-named.resolver.js';
 export * from './omni-record-status.enum.js';
 export * from './omni-relation-status.enum.js';
 export * from './omni-relation-kind.enum.js';
+export * from './omni-relation-semantics.js';
 export * from './omni-record.dto.js';
 export * from './omni-record.resolver.js';
 export * from './omni-collection-kind.enum.js';

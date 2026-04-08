@@ -16,6 +16,7 @@ const { OmniCollectionEntity } = await import('../omni-collection.entity.js');
 const { OmniCollectionService } = await import('../omni-collection.service.js');
 const { OmniDocumentEntity } = await import('../omni-document.entity.js');
 const { OmniDocumentService } = await import('../omni-document.service.js');
+const relationSemantics = await import('../omni-relation-semantics.js');
 const { omniCollectionProvidersFactory } = await import(
   '../omni-collection.resolver.js'
 );
@@ -205,6 +206,9 @@ describe('OmniKernel public API', () => {
     );
     expect(omnikernelPublicApi.omniCollectionProvidersFactory).toBe(
       omniCollectionProvidersFactory,
+    );
+    expect(omnikernelPublicApi.isAllowedOmniRelation).toBe(
+      relationSemantics.isAllowedOmniRelation,
     );
   });
 });

@@ -57,11 +57,11 @@ Already completed in PR `#123`:
 - foundational tests
 - first concrete document slice
 - first organization and collection slice
+- first explicit relation semantics slice
 - review-driven fixes already applied
 
 Still open before the full OmniKernel PR is done:
 
-- richer relation semantics
 - concrete external reference workflows
 - higher-level service/query helpers
 - task-application adoption once the kernel is stable
@@ -116,13 +116,13 @@ Use this checklist every time a concrete OmniKernel task is completed:
 
 ## Workstream 3 — Relation Semantics
 
-- Revisit `OmniRelationKind` for the next concrete use cases.
-- Add collection-oriented kinds such as `contains`, `belongs_to`, or the final
-  chosen names.
-- Decide whether relation direction alone is sufficient or whether helper
-  semantics are needed.
-- Add tests for allowed and expected relation combinations.
-- Document the intended graph semantics in the README.
+- [x] Revisit `OmniRelationKind` for the next concrete use cases.
+- [x] Keep `contains` as the canonical collection organization edge and avoid a
+  redundant `belongs_to` inverse for now.
+- [x] Decide that relation direction is sufficient for the inverse meaning at
+  this stage and export helper semantics for the canonical edges.
+- [x] Add tests for allowed and expected relation combinations.
+- [x] Document the intended graph semantics in the README.
 
 ## Workstream 4 — External Reference Workflows
 

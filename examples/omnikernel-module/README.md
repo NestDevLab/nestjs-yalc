@@ -77,6 +77,15 @@ record by accident.
 - collection membership expressed through standard Omni relations, with
   collection-to-document `contains` links as the first concrete example
 
+## Relation Semantics
+
+- `contains` is the canonical organization edge, flowing from collection to the
+  contained record
+- there is intentionally no separate `belongs_to` inverse edge yet, because the
+  reverse meaning is already carried by relation direction
+- `derived_from` is currently reserved for document-to-document lineage
+- `references` and `related_to` remain the flexible cross-record graph links
+
 ## Entities
 
 - `OmniNamedEntity`: basic named records with `externalId`, `title`, and `slug`.
