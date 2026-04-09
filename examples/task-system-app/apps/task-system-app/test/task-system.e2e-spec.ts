@@ -104,9 +104,10 @@ describe('Task System App e2e', () => {
     expect(res.body.list.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('lists project tasks via Omni collection membership', async () => {
+  it('lists project tasks through the standard task collection endpoint', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/projects/${createdProjectGuid}/tasks`)
+      .get('/tasks')
+      .query({ projectId: createdProjectGuid })
       .expect(200);
 
     expect(res.body.list).toEqual(

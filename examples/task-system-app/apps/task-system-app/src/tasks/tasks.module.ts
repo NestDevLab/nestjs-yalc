@@ -8,6 +8,7 @@ import { TasksEventsController } from './tasks.events.controller';
 import { TasksLoggingController } from './tasks.logging.controller';
 import { TasksProxyController } from './tasks.proxy.controller';
 import { TasksProxyService } from './tasks.proxy.service';
+import { taskItemProviders } from './task-item.resolver';
 import { TasksController } from './tasks.rest.controller';
 
 @Module({
@@ -20,6 +21,7 @@ import { TasksController } from './tasks.rest.controller';
     TasksEventsController,
   ],
   providers: [
+    ...taskItemProviders.providers,
     TasksProxyService,
     TasksDomainEventsService,
     {

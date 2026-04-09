@@ -16,7 +16,6 @@ import {
   TaskEventRelationsResolver,
   TaskItemRelationsResolver,
   TaskProjectRelationsResolver,
-  TaskSystemGraphqlResolver,
 } from './graphql-relations.resolver';
 import { OmniTaskAppModule } from './omni-task-app/omni-task-app.module';
 import { ProjectsModule } from './projects/projects.module';
@@ -54,7 +53,6 @@ import { TaskAppEventModule } from './task-app-event.module';
   ],
   providers: [
     UUIDScalar,
-    TaskSystemGraphqlResolver,
     TaskItemRelationsResolver,
     TaskEventRelationsResolver,
     TaskProjectRelationsResolver,

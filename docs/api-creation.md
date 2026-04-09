@@ -150,7 +150,7 @@ At the GraphQL schema level, generated grid queries are the place where paginati
 
 Please refer to the documentation on how to use NestJS-Yalc CrudGen library to learn how to configure the query and mutation parameters properly.
 
-**NOTE:** You can use our library based on **graphq-sofa** in order to expose RestAPI endpoints based on the queries and mutations generated above, or you can combine GraphQL and REST the way the SQLite **skeleton app** does (see `examples/skeleton-app`), using:
+**NOTE:** You can use our library based on **graphq-sofa** in order to expose RestAPI endpoints based on the queries and mutations generated above, or you can combine GraphQL and REST the way the in-memory SQL.js **skeleton app** does (see `examples/skeleton-app`), using:
 
 - `CrudGenDependencyFactory` for resolvers/services/dataloaders,
 - `crudRestControllerFactory` for REST controllers on top of the same `GenericService`,
@@ -417,7 +417,7 @@ In the example above we've achieved the following:
 There are many other features available NestJS-Yalc/crud-gen, including JSON field handling, middlewares, default values and many other. Please, refer
 to the documentation of the `@ModelField` and `@ModelObject` decorator to know more.
 
-As last step, we have to define our DTO and the entity within the `CrudGenDependencyFactory`, hence the `skeleton-user.resolver.ts` will look like this (see also `examples/skeleton-module` and the SQLite skeleton app in `examples/skeleton-app` for a complete, runnable version):
+As last step, we have to define our DTO and the entity within the `CrudGenDependencyFactory`, hence the `skeleton-user.resolver.ts` will look like this (see also `examples/skeleton-module` and the in-memory SQL.js skeleton app in `examples/skeleton-app` for a complete, runnable version):
 
 ```typescript
 export const skeletonUserProvidersFactory = (dbConnection: string) =>

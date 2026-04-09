@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CrudGenFindManyOptions } from '@nestjs-yalc/crud-gen/api-graphql/crud-gen-gql.interface';
 import { YalcEventService } from '@nestjs-yalc/event-manager';
 import {
   OmniRecordEntity,
@@ -7,13 +8,14 @@ import {
   OmniRelationKind,
   OmniRelationStatus,
 } from '@nestjs-yalc/omnikernel-module';
+import { TaskEvent } from '@nestjs-yalc/task-system-module/src/task-event.entity';
 import { randomUUID } from 'node:crypto';
-import { In, Repository } from 'typeorm';
+import { DeepPartial, FindOperator, In, Repository } from 'typeorm';
 import {
   TaskAppOmniMapper,
   type TaskOmniPageQuery,
 } from './task-app-omni.mapper';
-import { TaskEventCreateInput, TaskEventType } from './task-app.types';
+import { TaskEventCreateInput, TaskEventType } from '../events/task-event.dto';
 import { TaskAppOmniProjectService } from './task-app-omni-project.service';
 
 @Injectable()
@@ -27,6 +29,10 @@ export class TaskAppOmniEventService {
     private readonly mapper: TaskAppOmniMapper,
     private readonly projectService: TaskAppOmniProjectService,
   ) {}
+
+  supportsStructuredGraphqlFilters() {
+    return false;
+  }
 
   async list(query: TaskOmniPageQuery = {}) {
     const pagination = this.mapper.parsePageQuery(query);
@@ -71,12 +77,107 @@ export class TaskAppOmniEventService {
   }
 
   async getById(guid: string): Promise<TaskEventType> {
-    const record = await this.getEventRecordOrFail(guid);
-    const projectId = await this.getProjectIdForEvent(guid);
-    return this.mapper.mapOmniRecordToEvent(record, projectId);
+    return this.getTaskEventOrFail(guid);
   }
 
   async create(input: Partial<TaskEventCreateInput>): Promise<TaskEventType> {
+    return this.createEntity(input) as Promise<TaskEventType>;
+  }
+
+  async update(
+    guid: string,
+    input: Partial<TaskEventCreateInput>,
+  ): Promise<TaskEventType> {
+    return this.updateEntity({ guid }, input) as Promise<TaskEventType>;
+  }
+
+  async delete(guid: string) {
+    await this.deleteEntity({ guid });
+    return { deleted: true };
+  }
+
+  async getEntity(
+    where: Partial<TaskEvent> | Partial<TaskEvent>[] | string,
+    _fields?: (keyof TaskEvent)[],
+    _relations?: string[],
+    _databaseName?: string,
+    options?: {
+      failOnNull?: boolean;
+    },
+  ): Promise<TaskEventType | null | undefined> {
+    const record = await this.recordRepository.findOne({
+      where: this.mapCrudGenWhereToOmniWhere(where),
+    });
+
+    if (!record) {
+      if (options?.failOnNull) {
+        throw this.events.errorNotFound('events.omni.not-found', {
+          data: { conditions: where },
+          response: { message: 'Event not found' },
+        });
+      }
+
+      return null;
+    }
+
+    const projectId = await this.getProjectIdForEvent(record.guid);
+    return this.mapper.mapOmniRecordToEvent(record, projectId);
+  }
+
+  async getEntityListExtended(
+    findOptions: CrudGenFindManyOptions<TaskEvent>,
+    withCount?: false,
+  ): Promise<TaskEventType[]>;
+  async getEntityListExtended(
+    findOptions: CrudGenFindManyOptions<TaskEvent>,
+    withCount: true,
+  ): Promise<[TaskEventType[], number]>;
+  async getEntityListExtended(
+    findOptions: CrudGenFindManyOptions<TaskEvent>,
+    withCount = false,
+  ): Promise<[TaskEventType[], number] | TaskEventType[]> {
+    const skip = findOptions.skip ?? 0;
+    const take = findOptions.take;
+    const where = this.mapCrudGenWhereToOmniWhere(
+      findOptions.where as Partial<TaskEvent> | undefined,
+    );
+    const records = await this.recordRepository.find({
+      order: (findOptions.order as any) ?? { createdAt: 'ASC' },
+      skip,
+      take,
+      where,
+    });
+    const projectIds = await this.getProjectIds(
+      records.map((record) => record.guid),
+    );
+
+    if (!withCount) {
+      return records.map((record) =>
+        this.mapper.mapOmniRecordToEvent(
+          record,
+          projectIds.get(record.guid) ?? null,
+        ),
+      );
+    }
+
+    const count = await this.recordRepository.count({ where });
+
+    return [
+      records.map((record) =>
+        this.mapper.mapOmniRecordToEvent(
+          record,
+          projectIds.get(record.guid) ?? null,
+        ),
+      ),
+      count,
+    ];
+  }
+
+  async createEntity(
+    input: DeepPartial<TaskEvent>,
+    _findOptions?: CrudGenFindManyOptions<TaskEvent>,
+    returnEntity = true,
+  ): Promise<TaskEventType | boolean> {
     if (!input.guid || !input.title || !input.startAt) {
       throw this.events.errorBadRequest('events.omni.create.invalid', {
         response: { message: 'Event guid, title, and startAt are required' },
@@ -87,19 +188,39 @@ export class TaskAppOmniEventService {
       await this.projectService.ensureProjectExists(input.projectId);
     }
 
+    const createInput: Partial<TaskEventCreateInput> = {
+      allDay: input.allDay,
+      description: input.description,
+      endAt: input.endAt as Date | null | undefined,
+      guid: input.guid,
+      location: input.location,
+      projectId: input.projectId,
+      startAt: input.startAt as Date,
+      status: input.status,
+      title: input.title,
+    };
+
     const record = this.recordRepository.create(
-      this.mapper.mapEventToOmniRecord(input),
+      this.mapper.mapEventToOmniRecord(createInput),
     );
     await this.recordRepository.save(record);
     await this.syncContainsRelation(record.guid, input.projectId ?? null);
-    return this.getById(record.guid);
+
+    if (!returnEntity) {
+      return true;
+    }
+
+    return this.getTaskEventOrFail(record.guid);
   }
 
-  async update(
-    guid: string,
-    input: Partial<TaskEventCreateInput>,
-  ): Promise<TaskEventType> {
-    const current = await this.getById(guid);
+  async updateEntity(
+    conditions: Partial<TaskEvent>,
+    input: DeepPartial<TaskEvent>,
+    _findOptions?: CrudGenFindManyOptions<TaskEvent>,
+    returnEntity = true,
+  ): Promise<TaskEventType | boolean> {
+    const guid = this.requireGuid(conditions);
+    const current = await this.getTaskEventOrFail(guid);
     const merged: Partial<TaskEventCreateInput> = {
       guid,
       title: input.title ?? current.title,
@@ -108,8 +229,11 @@ export class TaskAppOmniEventService {
           ? input.description
           : current.description ?? null,
       status: input.status ?? current.status,
-      startAt: input.startAt ?? current.startAt,
-      endAt: input.endAt !== undefined ? input.endAt : current.endAt ?? null,
+      startAt: (input.startAt as Date | undefined) ?? current.startAt,
+      endAt:
+        input.endAt !== undefined
+          ? (input.endAt as Date | null)
+          : current.endAt ?? null,
       allDay: input.allDay ?? current.allDay,
       location:
         input.location !== undefined
@@ -129,15 +253,26 @@ export class TaskAppOmniEventService {
       await this.syncContainsRelation(guid, input.projectId ?? null);
     }
 
-    return this.getById(guid);
+    if (!returnEntity) {
+      return true;
+    }
+
+    return this.getTaskEventOrFail(guid);
   }
 
-  async delete(guid: string) {
+  async deleteEntity(conditions: Partial<TaskEvent>): Promise<boolean> {
+    const guid = this.requireGuid(conditions);
     await this.getEventRecordOrFail(guid);
     await this.relationRepository.delete({ sourceRecordId: guid });
     await this.relationRepository.delete({ targetRecordId: guid });
     await this.recordRepository.delete({ guid, kind: this.mapper.eventKind });
-    return { deleted: true };
+    return true;
+  }
+
+  private async getTaskEventOrFail(guid: string) {
+    const record = await this.getEventRecordOrFail(guid);
+    const projectId = await this.getProjectIdForEvent(guid);
+    return this.mapper.mapOmniRecordToEvent(record, projectId);
   }
 
   private async getEventRecordOrFail(guid: string) {
@@ -242,5 +377,58 @@ export class TaskAppOmniEventService {
         targetRecordId: eventId,
       }),
     );
+  }
+
+  private requireGuid(conditions: Partial<TaskEvent>) {
+    if (!conditions.guid) {
+      throw this.events.errorBadRequest('events.omni.conditions.invalid', {
+        response: { message: 'Event guid is required' },
+      });
+    }
+
+    return conditions.guid;
+  }
+
+  private mapCrudGenWhereToOmniWhere(
+    where?: Partial<TaskEvent> | Partial<TaskEvent>[] | string,
+  ) {
+    const baseWhere = { kind: this.mapper.eventKind };
+
+    if (!where) {
+      return baseWhere;
+    }
+
+    if (typeof where === 'string') {
+      return {
+        ...baseWhere,
+        guid: where,
+      };
+    }
+
+    if (Array.isArray(where)) {
+      return where.map((item) => this.mapCrudGenWhereToOmniWhere(item));
+    }
+
+    const guid = where.guid as string | FindOperator<string> | undefined;
+
+    return {
+      ...baseWhere,
+      ...(guid instanceof FindOperator
+        ? this.mapGuidFindOperator(guid)
+        : guid
+        ? { guid }
+        : {}),
+      ...(where.status ? { status: where.status } : {}),
+    };
+  }
+
+  private mapGuidFindOperator(guid: FindOperator<string>) {
+    if (guid.type === 'in' && Array.isArray(guid.value)) {
+      return {
+        guid: In(guid.value as string[]),
+      };
+    }
+
+    return { guid };
   }
 }

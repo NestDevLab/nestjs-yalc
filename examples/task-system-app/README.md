@@ -200,3 +200,45 @@ and GraphQL flows.
 The Omni-specific mapping and orchestration logic lives under
 `apps/task-system-app/src/omni-task-app/` to keep the domain translation
 explicit instead of scattering Omni-specific behavior across the app surface.
+
+## CrudGen-first composition
+
+The app is now intentionally structured as a **CrudGen-first** example instead
+of a manual CRUD showcase.
+
+Generated CRUD surfaces are used for:
+
+- `projects`
+- `tasks`
+- `events`
+- `external-refs`
+- `sync-states`
+
+That means:
+
+- GraphQL CRUD and grid queries are generated via `CrudGenDependencyFactory`
+- REST CRUD controllers are generated via `crudRestControllerFactory`
+- DTOs are modeled with `ModelObject` / `ModelField` so the framework owns the
+  public CRUD contract
+
+Custom code is kept in lower layers on purpose:
+
+- **Omni-backed services** implement the persistence semantics
+  - collection vs record mapping
+  - `contains`, `references`, and `related_to` synchronization
+  - validation and `YalcEventService` errors/logs
+- **relation resolvers** are kept narrow and explicit where the example wants
+  to show composition without forcing eager relation materialization into the
+  base mapper
+- **non-CRUD controllers** remain manual only for integration examples such as
+  API strategy, event emission, and logging/error patterns
+
+In practice, the app demonstrates the preferred layering for advanced backends:
+
+1. DTO metadata defines the CRUD contract
+2. generated GraphQL/REST surfaces expose the contract
+3. service overrides implement domain and persistence semantics
+4. manual surface code is reserved for truly non-CRUD behavior
+
+This is the pattern that OmniKernel-backed apps should follow in this
+repository.

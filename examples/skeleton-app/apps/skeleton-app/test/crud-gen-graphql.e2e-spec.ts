@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 
-describe('Crud-gen GraphQL (SQLite) e2e', () => {
+describe('Crud-gen GraphQL (SQL.js) e2e', () => {
   let app: INestApplication;
   let guid: string;
 

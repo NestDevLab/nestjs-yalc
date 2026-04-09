@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CrudGenFindManyOptions } from '@nestjs-yalc/crud-gen/api-graphql/crud-gen-gql.interface';
 import { YalcEventService } from '@nestjs-yalc/event-manager';
 import {
   OmniCollectionEntity,
@@ -7,12 +8,16 @@ import {
   OmniExternalRefInternalType,
   OmniRecordEntity,
 } from '@nestjs-yalc/omnikernel-module';
-import { Repository } from 'typeorm';
+import { TaskExternalRef } from '@nestjs-yalc/task-system-module/src/task-external-ref.entity';
+import { DeepPartial, FindOperator, In, Repository } from 'typeorm';
 import {
   TaskAppOmniMapper,
   type TaskOmniPageQuery,
 } from './task-app-omni.mapper';
-import { TaskExternalRefCreateInput } from './task-app.types';
+import {
+  TaskExternalRefCreateInput,
+  TaskExternalRefType,
+} from '../sync/task-external-ref.dto';
 
 @Injectable()
 export class TaskAppOmniExternalRefService {
@@ -26,6 +31,10 @@ export class TaskAppOmniExternalRefService {
     private readonly events: YalcEventService,
     private readonly mapper: TaskAppOmniMapper,
   ) {}
+
+  supportsStructuredGraphqlFilters() {
+    return false;
+  }
 
   async list(
     query: TaskOmniPageQuery & { internalId?: string; internalType?: string },
@@ -76,11 +85,97 @@ export class TaskAppOmniExternalRefService {
   }
 
   async getById(guid: string) {
-    const ref = await this.getExternalRefOrFail(guid);
-    return this.mapper.mapOmniExternalRefToTask(ref);
+    return this.getTaskExternalRefOrFail(guid);
   }
 
   async create(input: Partial<TaskExternalRefCreateInput>) {
+    return this.createEntity(input);
+  }
+
+  async update(guid: string, input: Partial<TaskExternalRefCreateInput>) {
+    return this.updateEntity({ guid }, input);
+  }
+
+  async delete(guid: string) {
+    await this.deleteEntity({ guid });
+    return { deleted: true };
+  }
+
+  async getEntity(
+    where: Partial<TaskExternalRef> | Partial<TaskExternalRef>[] | string,
+    _fields?: (keyof TaskExternalRef)[],
+    _relations?: string[],
+    _databaseName?: string,
+    options?: {
+      failOnNull?: boolean;
+    },
+  ): Promise<TaskExternalRefType | null | undefined> {
+    const ref = await this.externalRefRepository.findOne({
+      where: this.mapCrudGenWhereToOmniWhere(where),
+    });
+
+    if (!ref) {
+      if (options?.failOnNull) {
+        throw this.events.errorNotFound('sync.omni.external-ref.not-found', {
+          data: {
+            conditions: where,
+          },
+          response: {
+            message: 'External reference not found',
+          },
+        });
+      }
+
+      return null;
+    }
+
+    return this.mapper.mapOmniExternalRefToTask(ref);
+  }
+
+  async getEntityListExtended(
+    findOptions: CrudGenFindManyOptions<TaskExternalRef>,
+    withCount?: false,
+  ): Promise<TaskExternalRefType[]>;
+  async getEntityListExtended(
+    findOptions: CrudGenFindManyOptions<TaskExternalRef>,
+    withCount: true,
+  ): Promise<[TaskExternalRefType[], number]>;
+  async getEntityListExtended(
+    findOptions: CrudGenFindManyOptions<TaskExternalRef>,
+    withCount = false,
+  ): Promise<[TaskExternalRefType[], number] | TaskExternalRefType[]> {
+    const skip = findOptions.skip ?? 0;
+    const take = findOptions.take;
+    const refs = await this.externalRefRepository.find({
+      order: (findOptions.order as any) ?? { createdAt: 'ASC' },
+      skip,
+      take,
+      where: this.mapCrudGenWhereToOmniWhere(
+        findOptions.where as Partial<TaskExternalRef> | undefined,
+      ),
+    });
+
+    if (!withCount) {
+      return refs.map((ref) => this.mapper.mapOmniExternalRefToTask(ref));
+    }
+
+    const count = await this.externalRefRepository.count({
+      where: this.mapCrudGenWhereToOmniWhere(
+        findOptions.where as Partial<TaskExternalRef> | undefined,
+      ),
+    });
+
+    return [
+      refs.map((ref) => this.mapper.mapOmniExternalRefToTask(ref)),
+      count,
+    ];
+  }
+
+  async createEntity(
+    input: DeepPartial<TaskExternalRef>,
+    _findOptions?: CrudGenFindManyOptions<TaskExternalRef>,
+    returnEntity = true,
+  ): Promise<TaskExternalRefType | boolean> {
     this.validateExternalRefInput(input);
     await this.ensureInternalTargetExists(
       this.mapper.mapTaskExternalRefInternalType(input.internalType),
@@ -102,11 +197,21 @@ export class TaskAppOmniExternalRefService {
     });
     const storedRef = await this.externalRefRepository.save(entity);
 
-    return this.getById(storedRef.guid);
+    if (!returnEntity) {
+      return true;
+    }
+
+    return this.getTaskExternalRefOrFail(storedRef.guid);
   }
 
-  async update(guid: string, input: Partial<TaskExternalRefCreateInput>) {
-    const current = await this.getById(guid);
+  async updateEntity(
+    conditions: Partial<TaskExternalRef>,
+    input: DeepPartial<TaskExternalRef>,
+    _findOptions?: CrudGenFindManyOptions<TaskExternalRef>,
+    returnEntity = true,
+  ): Promise<TaskExternalRefType | boolean> {
+    const guid = this.requireGuid(conditions);
+    const current = await this.getTaskExternalRefOrFail(guid);
     const merged: Partial<TaskExternalRefCreateInput> = {
       account:
         input.account !== undefined ? input.account : current.account ?? null,
@@ -131,13 +236,18 @@ export class TaskAppOmniExternalRefService {
       this.mapper.mapExternalRefToOmniExternalRef(merged),
     );
 
-    return this.getById(guid);
+    if (!returnEntity) {
+      return true;
+    }
+
+    return this.getTaskExternalRefOrFail(guid);
   }
 
-  async delete(guid: string) {
+  async deleteEntity(conditions: Partial<TaskExternalRef>): Promise<boolean> {
+    const guid = this.requireGuid(conditions);
     await this.getExternalRefOrFail(guid);
     await this.externalRefRepository.delete({ guid });
-    return { deleted: true };
+    return true;
   }
 
   private validateExternalRefInput(input: Partial<TaskExternalRefCreateInput>) {
@@ -181,6 +291,90 @@ export class TaskAppOmniExternalRefService {
     }
 
     return ref;
+  }
+
+  private async getTaskExternalRefOrFail(guid: string) {
+    const ref = await this.getExternalRefOrFail(guid);
+    return this.mapper.mapOmniExternalRefToTask(ref);
+  }
+
+  private mapCrudGenWhereToOmniWhere(
+    where?: Partial<TaskExternalRef> | Partial<TaskExternalRef>[] | string,
+  ) {
+    if (typeof where === 'string') {
+      return {
+        guid: where,
+      };
+    }
+
+    if (Array.isArray(where)) {
+      const [firstCondition] = where;
+      return this.mapCrudGenWhereToOmniWhere(firstCondition);
+    }
+
+    const rawWhere =
+      where && typeof where === 'object' && 'filters' in where
+        ? {
+            ...(where as Record<string, unknown>),
+            ...((where as { filters?: Record<string, unknown> }).filters ?? {}),
+          }
+        : where;
+
+    if (!rawWhere) {
+      return {};
+    }
+
+    const omniWhere: Record<string, unknown> = {};
+    for (const [key, rawValue] of Object.entries(rawWhere)) {
+      if (key === 'filters' || rawValue === undefined) {
+        continue;
+      }
+
+      if (key === 'internalType') {
+        omniWhere[key] = this.mapInternalTypeFilter(rawValue);
+        continue;
+      }
+
+      omniWhere[key] = rawValue;
+    }
+
+    return omniWhere;
+  }
+
+  private mapInternalTypeFilter(value: unknown) {
+    if (value instanceof FindOperator && Array.isArray((value as any).value)) {
+      return In(
+        ((value as any).value as unknown[]).map((item) =>
+          this.mapper.mapTaskExternalRefInternalType(
+            item as string | undefined,
+          ),
+        ),
+      );
+    }
+
+    if (typeof value === 'string') {
+      return this.mapper.mapTaskExternalRefInternalType(value);
+    }
+
+    return value;
+  }
+
+  private requireGuid(conditions: Partial<TaskExternalRef>) {
+    if (!conditions.guid) {
+      throw this.events.errorBadRequest(
+        'sync.omni.external-ref.guid.required',
+        {
+          data: {
+            conditions,
+          },
+          response: {
+            message: 'TaskExternalRefCondition.guid is required',
+          },
+        },
+      );
+    }
+
+    return conditions.guid;
   }
 
   private async ensureInternalTargetExists(

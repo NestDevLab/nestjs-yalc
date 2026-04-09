@@ -229,11 +229,23 @@ Generated surfaces should sit on top of Omni-backed services/repositories.
 - [ ] remove behavior from handwritten controllers/resolvers that belongs in services
 
 ### Phase 3 — Restore generated surfaces
-- [ ] projects generated via CrudGen
-- [ ] tasks generated via CrudGen
-- [ ] events generated via CrudGen
-- [ ] external refs generated via CrudGen
-- [ ] sync states generated via CrudGen
+- [x] projects generated via CrudGen
+- [x] tasks generated via CrudGen
+- [x] events generated via CrudGen
+- [x] external refs generated via CrudGen
+- [x] sync states generated via CrudGen
+
+Current note:
+- `tasks` now uses dedicated CrudGen DTOs plus generated GraphQL/REST surfaces, while the Omni-backed service override keeps `contains`, `references`, and `related_to` semantics below the API layer.
+- The generated REST path now relies on a framework-level flat-query equality mapping, so collection filters such as `GET /tasks?projectId=...` can stay generated-first instead of forcing a handwritten list controller.
+- `projects` and `events` now use dedicated CrudGen DTOs plus generated GraphQL/REST surfaces, while Omni-specific collection/record semantics remain in the service overrides.
+- The mapper/service split is now explicit:
+  - base CRUD DTOs stay scalar-first and CrudGen-compatible
+  - relation fields such as `project.tasks`, `project.events`, and `event.project` are resolved in the GraphQL relation layer instead of being eagerly materialized in the mapper
+- `external-refs` now uses a generated GraphQL surface plus `crudRestControllerFactory`, while the Omni-specific dedupe/validation logic stays in the service override.
+- The slice also flushed out two framework composition issues that are now explicit:
+  - app-local GraphQL enum names must not collide with CrudGen enum names (`SortDirection`, `JoinTypes`)
+  - example-local dataloader wiring is safer with an explicit provider override than with an implicit event-emitter token that can vary across duplicated package installs
 
 ### Phase 4 — Custom semantic operations only where needed
 - [ ] identify remaining true custom operations

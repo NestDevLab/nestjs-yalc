@@ -14,8 +14,8 @@ import { PhonesModule } from '../src/phones/phones.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: ':memory:',
+      type: 'sqljs',
+      autoSave: false,
       dropSchema: true,
       entities: [SkeletonUser, SkeletonPhone],
       synchronize: true,

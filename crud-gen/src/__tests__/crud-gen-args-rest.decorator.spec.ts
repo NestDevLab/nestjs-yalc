@@ -9,9 +9,15 @@ import {
 } from '../api-rest/crud-gen-args-rest.decorator.js';
 import { RowDefaultValues } from '../crud-gen.enum.js';
 
-const buildCtx = (args: any): ExecutionContext =>
+const buildCtx = (
+  args: any,
+  query: Record<string, unknown> = {},
+): ExecutionContext =>
   ({
     getArgs: () => args,
+    switchToHttp: () => ({
+      getRequest: () => ({ query }),
+    }),
   }) as unknown as ExecutionContext;
 
 class DummyDto {
@@ -29,6 +35,14 @@ describe('crud-gen args rest decorator', () => {
     const result = mapCrudGenRestParams(undefined, ctx);
     expect(result.take).toBe(3);
     expect(result.order?.id).toBe('DESC');
+  });
+
+  it('should map flat query params into equality filters', () => {
+    const ctx = buildCtx({}, { projectId: 'project-1' });
+
+    const result = mapCrudGenRestParams(undefined, ctx);
+
+    expect(result.where?.filters?.projectId).toBeDefined();
   });
 
   it('should build decorators without throwing', () => {
