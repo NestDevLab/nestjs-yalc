@@ -105,9 +105,9 @@
     "@graphql-tools/wrap": "^9.3.6",
     "graphql": "^16.8.1",
     "graphql-type-json": "^0.3.2",
-    "pg": "^8.16.3",
+    "pg": "8.20.0",
     "pg-cloudflare": "^1.2.7",
-    "sqlite3": "^5.1.7",
+    "sqlite3": "5.1.7",
     "typeorm-model-generator": "^0.4.6"
   },
   "overrides": {
