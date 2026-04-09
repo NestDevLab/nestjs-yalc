@@ -105,6 +105,7 @@
     "@graphql-tools/wrap": "^9.3.6",
     "graphql": "^16.8.1",
     "graphql-type-json": "^0.3.2",
+    "mssql": "12.2.1",
     "pg": "8.20.0",
     "pg-cloudflare": "^1.2.7",
     "sqlite3": "5.1.7",
