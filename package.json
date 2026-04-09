@@ -103,6 +103,7 @@
   },
   "optionalDependencies": {
     "@graphql-tools/wrap": "^9.3.6",
+    "encoding": "0.1.13",
     "graphql": "^16.8.1",
     "graphql-type-json": "^0.3.2",
     "mssql": "12.2.1",
