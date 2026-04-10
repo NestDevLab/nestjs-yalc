@@ -1,8 +1,7 @@
 import { crudRestControllerFactory } from '@nestjs-yalc/crud-gen/api-rest/crud-gen-rest.controller.factory';
-import {
-  TaskExternalRef,
-  TaskExternalRefType,
-} from '@nestjs-yalc/task-system-module';
+import { getServiceToken } from '@nestjs-yalc/crud-gen/typeorm/generic.service';
+import { TaskExternalRef } from '@nestjs-yalc/task-system-module/src/task-external-ref.entity';
+import { TaskExternalRefType } from './task-external-ref.dto';
 
 export const ExternalRefsController =
   crudRestControllerFactory<TaskExternalRef>({
@@ -10,8 +9,5 @@ export const ExternalRefsController =
     dto: TaskExternalRefType,
     path: 'external-refs',
     idField: 'guid',
-    mutations: {
-      create: { decorators: [] },
-      update: { decorators: [] },
-    },
+    serviceToken: getServiceToken(TaskExternalRef),
   });

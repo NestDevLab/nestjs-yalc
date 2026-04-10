@@ -44,6 +44,8 @@
       "@nestjs-yalc/interfaces/*": ["../../interfaces/src/*"],
       "@nestjs-yalc/logger": ["../../logger/src/index.ts"],
       "@nestjs-yalc/logger/*": ["../../logger/src/*"],
+      "@nestjs-yalc/omnikernel-module": ["../omnikernel-module/src/index.ts"],
+      "@nestjs-yalc/omnikernel-module/*": ["../omnikernel-module/src/*"],
       "@nestjs-yalc/utils": ["../../utils/src/index.ts"],
       "@nestjs-yalc/utils/*": ["../../utils/src/*"],
       "@nestjs-yalc/types": ["../../types/src/index.d.ts"],

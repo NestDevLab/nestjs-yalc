@@ -45,7 +45,7 @@
     "apollo-server-core": "^3.13.0",
     "apollo-server-express": "^3.13.0",
     "graphql": "^16.12.0",
-    "sqlite3": "^5.1.7",
+    "sql.js": "^1.13.0",
     "typeorm": "^0.3.14",
     "@types/nestjs-yalc": "file:../../types",
     "reflect-metadata": "^0.1.13",

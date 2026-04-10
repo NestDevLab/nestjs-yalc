@@ -1,69 +1,47 @@
 import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import {
-  TaskEvent,
-  TaskEventType,
-  TaskItem,
-  TaskItemType,
-  TaskProject,
-  TaskProjectType,
-} from '@nestjs-yalc/task-system-module';
+import { TaskEventType } from './events/task-event.dto';
+import { TaskAppOmniEventService } from './omni-task-app/task-app-omni-event.service';
+import { TaskAppOmniProjectService } from './omni-task-app/task-app-omni-project.service';
+import { TaskAppOmniTaskService } from './omni-task-app/task-app-omni-task.service';
+import { TaskProjectType } from './projects/task-project.dto';
+import { TaskItemType } from './tasks/task-item.dto';
 
 @Resolver(() => TaskItemType)
 export class TaskItemRelationsResolver {
-  constructor(
-    @InjectRepository(TaskProject)
-    private readonly projectRepository: Repository<TaskProject>,
-  ) {}
+  constructor(private readonly projectService: TaskAppOmniProjectService) {}
 
   @ResolveField(() => TaskProjectType, { nullable: true })
-  async project(@Parent() task: TaskItem) {
+  async project(@Parent() task: TaskItemType) {
     if (!task.projectId) return null;
-    const project = await this.projectRepository.findOneBy({
-      guid: task.projectId,
-    });
-    return project ? new TaskProjectType(project) : null;
+    return this.projectService.getById(task.projectId);
   }
 }
 
 @Resolver(() => TaskEventType)
 export class TaskEventRelationsResolver {
-  constructor(
-    @InjectRepository(TaskProject)
-    private readonly projectRepository: Repository<TaskProject>,
-  ) {}
+  constructor(private readonly projectService: TaskAppOmniProjectService) {}
 
   @ResolveField(() => TaskProjectType, { nullable: true })
-  async project(@Parent() event: TaskEvent) {
+  async project(@Parent() event: TaskEventType) {
     if (!event.projectId) return null;
-    const project = await this.projectRepository.findOneBy({
-      guid: event.projectId,
-    });
-    return project ? new TaskProjectType(project) : null;
+    return this.projectService.getById(event.projectId);
   }
 }
 
 @Resolver(() => TaskProjectType)
 export class TaskProjectRelationsResolver {
   constructor(
-    @InjectRepository(TaskItem)
-    private readonly taskRepository: Repository<TaskItem>,
-    @InjectRepository(TaskEvent)
-    private readonly eventRepository: Repository<TaskEvent>,
+    private readonly taskService: TaskAppOmniTaskService,
+    private readonly eventService: TaskAppOmniEventService,
   ) {}
 
   @ResolveField(() => [TaskItemType], { nullable: true })
-  async tasks(@Parent() project: TaskProject) {
-    const tasks = await this.taskRepository.findBy({ projectId: project.guid });
-    return tasks.map((task) => new TaskItemType(task));
+  async tasks(@Parent() project: TaskProjectType) {
+    return (await this.taskService.list({ projectId: project.guid })).nodes;
   }
 
   @ResolveField(() => [TaskEventType], { nullable: true })
-  async events(@Parent() project: TaskProject) {
-    const events = await this.eventRepository.findBy({
-      projectId: project.guid,
-    });
-    return events.map((event) => new TaskEventType(event));
+  async events(@Parent() project: TaskProjectType) {
+    return (await this.eventService.list({ projectId: project.guid })).nodes;
   }
 }

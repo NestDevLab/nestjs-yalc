@@ -1,12 +1,12 @@
-import { CrudGenDependencyFactory } from '@nestjs-yalc/crud-gen/crud-gen.helpers.js';
+import { CrudGenDependencyFactory } from '@nestjs-yalc/crud-gen/crud-gen.helpers';
 import {
   OmniCollectionCondition,
   OmniCollectionCreateInput,
   OmniCollectionType,
   OmniCollectionUpdateInput,
-} from './omni-collection.dto.js';
-import { OmniCollectionEntity } from './omni-collection.entity.js';
-import { OmniCollectionService } from './omni-collection.service.js';
+} from './omni-collection.dto';
+import { OmniCollectionEntity } from './omni-collection.entity';
+import { OmniCollectionService } from './omni-collection.service';
 
 export const omniCollectionProvidersFactory = (dbConnection: string) =>
   CrudGenDependencyFactory<OmniCollectionEntity>({

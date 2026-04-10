@@ -1,12 +1,12 @@
-import { CrudGenDependencyFactory } from '@nestjs-yalc/crud-gen/crud-gen.helpers.js';
+import { CrudGenDependencyFactory } from '@nestjs-yalc/crud-gen/crud-gen.helpers';
 import {
   OmniDocumentCondition,
   OmniDocumentCreateInput,
   OmniDocumentType,
   OmniDocumentUpdateInput,
-} from './omni-document.dto.js';
-import { OmniDocumentEntity } from './omni-document.entity.js';
-import { OmniDocumentService } from './omni-document.service.js';
+} from './omni-document.dto';
+import { OmniDocumentEntity } from './omni-document.entity';
+import { OmniDocumentService } from './omni-document.service';
 
 export const omniDocumentProvidersFactory = (dbConnection: string) =>
   CrudGenDependencyFactory<OmniDocumentEntity>({

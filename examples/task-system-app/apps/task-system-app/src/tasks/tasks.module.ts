@@ -1,27 +1,18 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NestHttpCallStrategyProvider } from '@nestjs-yalc/api-strategy';
 import { YalcGlobalClsService } from '@nestjs-yalc/app/cls.module.js';
-import { EventModule } from '@nestjs-yalc/event-manager';
 import { TasksDomainEventsService } from './tasks.domain-events.service';
 import { TasksErrorsController } from './tasks.errors.controller';
 import { TasksEventsController } from './tasks.events.controller';
 import { TasksLoggingController } from './tasks.logging.controller';
 import { TasksProxyController } from './tasks.proxy.controller';
 import { TasksProxyService } from './tasks.proxy.service';
+import { taskItemProviders } from './task-item.resolver';
 import { TasksController } from './tasks.rest.controller';
 
 @Module({
-  imports: [
-    HttpModule,
-    EventModule.forRootAsync({
-      eventEmitter: {
-        provide: EventEmitter2,
-        useValue: new EventEmitter2(),
-      },
-    }),
-  ],
+  imports: [HttpModule],
   controllers: [
     TasksController,
     TasksErrorsController,
@@ -30,6 +21,7 @@ import { TasksController } from './tasks.rest.controller';
     TasksEventsController,
   ],
   providers: [
+    ...taskItemProviders.providers,
     TasksProxyService,
     TasksDomainEventsService,
     {

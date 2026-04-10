@@ -1,7 +1,7 @@
-import { GenericService } from '@nestjs-yalc/crud-gen/typeorm/generic.service.js';
+import { GenericService } from '@nestjs-yalc/crud-gen/typeorm/generic.service';
 import type { DeepPartial } from 'typeorm';
-import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
-import { OmniExternalRefInternalType } from './omni-external-ref-internal-type.enum.js';
+import { OmniExternalRefEntity } from './base/omni-external-ref.entity';
+import { OmniExternalRefInternalType } from './omni-external-ref-internal-type.enum';
 
 export interface OmniExternalRefLookup {
   provider: string;

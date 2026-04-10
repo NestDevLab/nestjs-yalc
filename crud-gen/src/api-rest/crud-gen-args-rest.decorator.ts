@@ -27,6 +27,7 @@ import {
 } from '@nestjs/swagger';
 import { ClassType } from 'nestjs-yalc';
 import { IConnection } from '../crud-gen.interface.js';
+import { columnConversion, forceFilterWorker } from '../crud-gen.helpers.js';
 
 export function mapCrudGenRestParams<Entity extends ObjectLiteral>(
   params: ICrudGenGqlArgsOptions | undefined,
@@ -40,6 +41,32 @@ export function mapCrudGenRestParams<Entity extends ObjectLiteral>(
     args,
     { isCount: true },
   );
+
+  const rawArgs = (ctx.switchToHttp().getRequest()?.query ?? {}) as Record<
+    string,
+    unknown
+  >;
+  const fieldMapper = (findParams.extra as any)?._fieldMapper;
+  const reservedKeys = new Set(['startRow', 'endRow', 'sorting', 'filters']);
+
+  for (const [key, value] of Object.entries(rawArgs)) {
+    if (
+      reservedKeys.has(key) ||
+      key.startsWith('$') ||
+      value === undefined ||
+      value === null ||
+      Array.isArray(value) ||
+      typeof value === 'object'
+    ) {
+      continue;
+    }
+
+    forceFilterWorker(
+      (findParams.where ??= { filters: {} }),
+      columnConversion(key, fieldMapper),
+      value as string | number,
+    );
+  }
 
   return findParams;
 }

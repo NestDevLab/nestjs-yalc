@@ -6,7 +6,7 @@ import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { HttpService } from '@nestjs/axios';
 
-describe('Crud-gen REST (SQLite) e2e', () => {
+describe('Crud-gen REST (SQL.js) e2e', () => {
   let app: INestApplication;
   let createdGuid: string;
 

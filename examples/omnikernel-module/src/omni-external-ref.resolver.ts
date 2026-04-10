@@ -1,12 +1,12 @@
-import { CrudGenDependencyFactory } from '@nestjs-yalc/crud-gen/crud-gen.helpers.js';
+import { CrudGenDependencyFactory } from '@nestjs-yalc/crud-gen/crud-gen.helpers';
 import {
   OmniExternalRefCondition,
   OmniExternalRefCreateInput,
   OmniExternalRefType,
   OmniExternalRefUpdateInput,
-} from './omni-external-ref.dto.js';
-import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
-import { OmniExternalRefService } from './omni-external-ref.service.js';
+} from './omni-external-ref.dto';
+import { OmniExternalRefEntity } from './base/omni-external-ref.entity';
+import { OmniExternalRefService } from './omni-external-ref.service';
 
 export const omniExternalRefProvidersFactory = (dbConnection: string) =>
   CrudGenDependencyFactory<OmniExternalRefEntity>({

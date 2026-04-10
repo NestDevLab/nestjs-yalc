@@ -1,20 +1,11 @@
 import { Module } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { EventModule } from '@nestjs-yalc/event-manager';
 import { ProjectsController } from './projects.rest.controller';
 import { ProjectsDomainEventsService } from './projects.domain-events.service';
 import { ProjectsLoggingController } from './projects.logging.controller';
+import { taskProjectProviders } from './task-project.resolver';
 
 @Module({
-  imports: [
-    EventModule.forRootAsync({
-      eventEmitter: {
-        provide: EventEmitter2,
-        useValue: new EventEmitter2(),
-      },
-    }),
-  ],
   controllers: [ProjectsController, ProjectsLoggingController],
-  providers: [ProjectsDomainEventsService],
+  providers: [ProjectsDomainEventsService, ...taskProjectProviders.providers],
 })
 export class ProjectsModule {}

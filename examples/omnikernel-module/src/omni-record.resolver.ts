@@ -1,11 +1,11 @@
-import { CrudGenDependencyFactory } from '@nestjs-yalc/crud-gen/crud-gen.helpers.js';
+import { CrudGenDependencyFactory } from '@nestjs-yalc/crud-gen/crud-gen.helpers';
 import {
   OmniRecordCondition,
   OmniRecordCreateInput,
   OmniRecordType,
   OmniRecordUpdateInput,
-} from './omni-record.dto.js';
-import { OmniRecordEntity } from './base/omni-record.entity.js';
+} from './omni-record.dto';
+import { OmniRecordEntity } from './base/omni-record.entity';
 
 export const omniRecordProvidersFactory = (dbConnection: string) =>
   CrudGenDependencyFactory<OmniRecordEntity>({

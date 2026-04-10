@@ -1,6 +1,6 @@
-# Skeleton App (SQLite + NestJS-YALC)
+# Skeleton App (SQL.js + NestJS-YALC)
 
-This example app shows how to wire **NestJS-YALC** building blocks into a small SQLite-backed service. It is designed to be a clean starting point that you can copy or extend to bootstrap your own app.
+This example app shows how to wire **NestJS-YALC** building blocks into a small SQL.js-backed service. It is designed to be a clean starting point that you can copy or extend to bootstrap your own app.
 
 ## Features
 
@@ -47,7 +47,7 @@ This example app shows how to wire **NestJS-YALC** building blocks into a small 
 
 - `apps/skeleton-app/src/app.module.ts`
   - GraphQLModule (Apollo) with `autoSchemaFile`.
-  - TypeORM SQLite in-memory DB (`SkeletonUser`, `SkeletonPhone`).
+  - TypeORM SQL.js in-memory DB (`SkeletonUser`, `SkeletonPhone`).
   - Skeleton GraphQL module: `SkeletonModule.register('default')`.
   - `UsersModule` with REST controllers and strategy wiring.
 

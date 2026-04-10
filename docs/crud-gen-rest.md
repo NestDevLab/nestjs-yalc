@@ -11,6 +11,7 @@ GraphQL is the primary focus, but CRUD-Gen includes REST helpers for pagination/
 ## Mapping requests to find options
 - `mapCrudGenRestParams`/`CrudGenRestArgsFactory` reuse the same mapping as GraphQL (`mapCrudGenParam`) to turn query params into TypeORM-friendly `CrudGenFindManyOptions`.
 - Extra args behave like GraphQL: declare them in `extraArgs` and they are exposed as query params unless `hidden`.
+- For generated REST controllers, flat query params such as `?projectId=...` or `?guid=...` are now mapped as simple equality filters on top of the normal pagination/sorting mapping. This keeps common CRUD list endpoints usable without inventing bespoke controller methods for every resource.
 
 ## Controllers
 - Apply `CGQueryArgs` to controller methods to receive mapped `CrudGenFindManyOptions`.
@@ -30,6 +31,9 @@ GraphQL is the primary focus, but CRUD-Gen includes REST helpers for pagination/
   - See `examples/skeleton-app` for a minimal REST module (`UsersModule`) that wires `SkeletonModule.register('default')`, the REST factory, EventManager, ApiStrategy, and validation into a clean starting point.
 
 ## Notes
-- Filters via REST are not fully implemented yet (placeholders exist in the DTO factories); prefer GraphQL for advanced filters.
+- REST now supports **simple equality filters** via flat query params on generated controllers.
+  - Example: `GET /tasks?projectId=<uuid>`
+  - Example: `GET /projects?guid=<uuid>`
+- Advanced structured filters are still a GraphQL-first capability. If you need compound filters, nested expressions, or repository-driven query semantics, prefer GraphQL or a dedicated repository/service override.
 - Sorting uses entity field names; ensure your DTO exposes the same names you expect in the controller.
 - Alternative: you can expose REST via GraphQL Sofa (see `docs/api-creation.md` note). Use Sofa if you want a fully automatic REST layer from GraphQL; use the controller factory if you need explicit paths, guards, or bespoke DTOs.

@@ -104,6 +104,22 @@ describe('Task System App e2e', () => {
     expect(res.body.list.length).toBeGreaterThanOrEqual(1);
   });
 
+  it('lists project tasks through the standard task collection endpoint', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/tasks')
+      .query({ projectId: createdProjectGuid })
+      .expect(200);
+
+    expect(res.body.list).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          guid: createdTaskGuid,
+          projectId: createdProjectGuid,
+        }),
+      ]),
+    );
+  });
+
   it('creates an event linked to the project', async () => {
     const guid = randomUUID();
     const res = await request(app.getHttpServer())

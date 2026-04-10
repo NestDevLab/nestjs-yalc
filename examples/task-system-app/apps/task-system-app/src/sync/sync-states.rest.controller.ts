@@ -1,16 +1,12 @@
 import { crudRestControllerFactory } from '@nestjs-yalc/crud-gen/api-rest/crud-gen-rest.controller.factory';
-import {
-  TaskSyncState,
-  TaskSyncStateType,
-} from '@nestjs-yalc/task-system-module';
+import { getServiceToken } from '@nestjs-yalc/crud-gen/typeorm/generic.service';
+import { TaskSyncState } from '@nestjs-yalc/task-system-module/src/task-sync-state.entity';
+import { TaskSyncStateType } from './task-sync-state.dto';
 
 export const SyncStatesController = crudRestControllerFactory<TaskSyncState>({
   entityModel: TaskSyncState,
   dto: TaskSyncStateType,
   path: 'sync-states',
   idField: 'guid',
-  mutations: {
-    create: { decorators: [] },
-    update: { decorators: [] },
-  },
+  serviceToken: getServiceToken(TaskSyncState),
 });

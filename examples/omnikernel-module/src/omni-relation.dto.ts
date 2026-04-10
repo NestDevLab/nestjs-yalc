@@ -2,17 +2,17 @@ import { InputType, ObjectType, OmitType, PartialType } from '@nestjs/graphql';
 import {
   ModelField,
   ModelObject,
-} from '@nestjs-yalc/crud-gen/object.decorator.js';
-import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
-import returnValue from '@nestjs-yalc/utils/returnValue.js';
+} from '@nestjs-yalc/crud-gen/object.decorator';
+import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar';
+import returnValue from '@nestjs-yalc/utils/returnValue';
 import { IsEnum, IsObject, IsOptional, IsUUID } from 'class-validator';
 import { GraphQLJSONObject } from 'graphql-type-json';
 import type { Relation } from 'typeorm';
-import { OmniRecordEntity } from './base/omni-record.entity.js';
-import { OmniRelationEntity } from './base/omni-relation.entity.js';
-import { OmniRecordType } from './omni-record.dto.js';
-import { OmniRelationKind } from './omni-relation-kind.enum.js';
-import { OmniRelationStatus } from './omni-relation-status.enum.js';
+import { OmniRecordEntity } from './base/omni-record.entity';
+import { OmniRelationEntity } from './base/omni-relation.entity';
+import { OmniRecordType } from './omni-record.dto';
+import { OmniRelationKind } from './omni-relation-kind.enum';
+import { OmniRelationStatus } from './omni-relation-status.enum';
 
 @ObjectType()
 @ModelObject()
