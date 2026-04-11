@@ -137,10 +137,10 @@
         "./kafka/src/*"
       ],
       "@nestjs-yalc/skeleton-module": [
-        "./examples/skeleton-module/src/index.ts"
+        "./examples/skeleton/module/src/index.ts"
       ],
       "@nestjs-yalc/skeleton-module/*": [
-        "./examples/skeleton-module/src/*"
+        "./examples/skeleton/module/src/*"
       ],
       "nestjs-yalc": [
         "./types/src/index.d.ts"
@@ -149,10 +149,10 @@
         "./types/src/*"
       ],
       "@nestjs-yalc/omnikernel-module": [
-        "./examples/omnikernel-module/src/index.ts"
+        "./examples/omnikernel/module/src/index.ts"
       ],
       "@nestjs-yalc/omnikernel-module/*": [
-        "./examples/omnikernel-module/src/*"
+        "./examples/omnikernel/module/src/*"
       ]
     },
     "types": [

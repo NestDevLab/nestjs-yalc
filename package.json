@@ -19,7 +19,7 @@
     "test:cov:serve": "npx http-server -c-1 ./var/coverage/",
     "test:cov:clear": "npm run test:clear && rimraf ./var/coverage/",
     "test:clear": "node node_modules/.bin/jest --clearCache",
-    "test:e2e": "npm run test:e2e --prefix examples/skeleton-app",
+    "test:e2e": "npm run test:e2e --prefix examples/skeleton/app",
     "test:vscode": "node test.js ",
     "npm:update:onlylock": "npm update --package-lock-only",
     "npm:outdated": "npm outdated",

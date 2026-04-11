@@ -122,7 +122,7 @@ Use:
 - generated REST controller from `crudRestControllerFactory`
 - default `GenericService`
 
-This is the intended baseline (see `examples/skeleton-app`).
+This is the intended baseline (see `examples/skeleton/app`).
 
 ### Advanced app with custom persistence/domain logic
 Keep:

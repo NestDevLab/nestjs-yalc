@@ -43,8 +43,8 @@ object.
     - `DELETE /path/:id` → `deleteEntity` (returns `{ deleted: boolean }`)
   - Set `readonly: true` to expose only the read endpoints (`GET` list + `GET :id`).
   - Use `mutations?: { create?: { disabled?: boolean; decorators?: IDecoratorType[] }; update?: { ... }; delete?: { ... } }` to disable individual write endpoints or attach guards/interceptors specifically to them.
-  - See `examples/skeleton-app` for a minimal REST module (`UsersModule`) that wires `SkeletonModule.register('default')`, the REST factory, EventManager, ApiStrategy, and validation into a clean starting point.
-  - See `examples/omnikernel-app` for generated REST controllers over a reusable OmniKernel backend.
+  - See `examples/skeleton/app` for the minimal `CrudGenResourceFactory` path that composes REST, GraphQL, service, repository, and dataloader providers from one app-owned resource definition.
+  - See `examples/omnikernel/app` for generated REST controllers over a reusable OmniKernel backend.
 
 ## Notes
 - REST supports **simple equality filters** via flat query params on generated controllers.

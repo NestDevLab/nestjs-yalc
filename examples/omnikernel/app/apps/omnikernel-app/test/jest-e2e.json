@@ -1,0 +1,30 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        "tsconfig": "<rootDir>/../../../tsconfig.e2e.json",
+        "diagnostics": false,
+        "astTransformers": {
+          "before": ["<rootDir>/graphql-plugin.wrapper.cjs"]
+        }
+      }
+    ]
+  },
+  "moduleNameMapper": {
+    "^@nestjs-yalc/omnikernel-module$": "<rootDir>/../../../../module/src",
+    "^@nestjs-yalc/omnikernel-module/src/(.*)$": "<rootDir>/../../../../module/src/$1",
+    "^@nestjs/(.*)$": "<rootDir>/../../../../../../node_modules/@nestjs/$1",
+    "^typeorm$": "<rootDir>/../../../../../../node_modules/typeorm",
+    "^p-map$": "<rootDir>/p-map.mock.ts",
+    "^lodash-es$": "lodash",
+    "^@nestjs-yalc/([^/]+)/(.+?)\\.js$": "<rootDir>/../../../../../../$1/src/$2",
+    "^@nestjs-yalc/([^/]+)/(.*)$": "<rootDir>/../../../../../../$1/src/$2",
+    "^@nestjs-yalc/([^/]+)$": "<rootDir>/../../../../../../$1/src",
+    "^(\\.{1,2}/.*)\\.js$": "$1"
+  }
+}

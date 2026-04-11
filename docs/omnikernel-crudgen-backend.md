@@ -131,17 +131,17 @@ If it no longer looks like CRUD:
 
 The reusable substrate example is the OmniKernel app:
 
-- [examples/omnikernel-app/README.md](../examples/omnikernel-app/README.md)
+- [examples/omnikernel/app/README.md](../examples/omnikernel/app/README.md)
 
 It exposes the raw OmniKernel resource set through generated REST controllers
 and generated GraphQL resolvers over the same in-memory persistence surface. The
-app imports OmniKernel with GraphQL disabled and then composes REST and GraphQL
+app imports the backend-only OmniKernel module and composes REST and GraphQL
 with `CrudGenResourceFactory`, so the API surface is owned by the app while the
 backend providers stay reusable.
 
 The strongest current real composition example is the task-system app:
 
-- [examples/task-system-app/README.md](../examples/task-system-app/README.md)
+- [examples/task/app/README.md](../examples/task/app/README.md)
 
 It demonstrates how projects, tasks, events, sync states, and external refs can
 all stay CrudGen-first while using OmniKernel as the runtime persistence model.

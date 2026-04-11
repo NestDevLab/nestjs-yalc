@@ -33,8 +33,9 @@ Canonical semantic relations:
 
 Standard CRUD resources should use:
 
-- generated GraphQL via `CrudGenDependencyFactory`
-- generated REST via `crudRestControllerFactory`
+- generated GraphQL via `CrudGenResourceFactory`
+- generated REST via `CrudGenResourceFactory`
+- service/dataloader overrides for Omni-backed persistence semantics
 - app-specific DTOs modeled with `ModelObject` / `ModelField`
 
 Current generated resources:

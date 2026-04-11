@@ -23,8 +23,9 @@ This guide shows how to structure a Nest monorepo that uses `nestjs-yalc` to shi
 - `utils/` — CI/build/test helpers (scripts, tsconfig references).
 - Root configs — `nest-cli.json` (project map), `tsconfig*.json`, `webpack.config.cjs`, `jest.config.ts`.
 - `examples/` — optional reference apps/modules. In this repo:
-  - `examples/skeleton-module` is a GraphQL-only module showing CRUD-Gen patterns in isolation.
-  - `examples/skeleton-app` is a small, in-memory SQL.js app that wires `SkeletonModule` into REST + GraphQL, EventManager, Logger, ApiStrategy and validation; you can copy/extend it as a clean starting point for your own services.
+  - `examples/skeleton` is the minimal CrudGen-first app and model package.
+  - `examples/omnikernel` separates a reusable backend-only substrate from app-owned REST/GraphQL APIs.
+  - `examples/task` is the advanced OmniKernel-backed composition with targeted service/dataloader overrides.
 
 ## Dependency wiring
 - `package.json`: reference `@nestjs-yalc/*` with `file:deps/nestjs-yalc/...` to lock the toolchain.

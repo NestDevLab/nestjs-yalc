@@ -149,9 +149,9 @@ usable as a substrate for other API shapes.
 
 ## Reference examples
 
-- Minimal baseline: [examples/skeleton-app/README.md](../examples/skeleton-app/README.md)
-- Reusable substrate example: [examples/omnikernel-app/README.md](../examples/omnikernel-app/README.md)
-- Real composition example: [examples/task-system-app/README.md](../examples/task-system-app/README.md)
+- Minimal baseline: [examples/skeleton/app/README.md](../examples/skeleton/app/README.md)
+- Reusable substrate example: [examples/omnikernel/app/README.md](../examples/omnikernel/app/README.md)
+- Real composition example: [examples/task/app/README.md](../examples/task/app/README.md)
 - Factory details: [crud-gen-factory.md](./crud-gen-factory.md)
 - Modeling details: [crud-gen-modeling.md](./crud-gen-modeling.md)
 - REST details: [crud-gen-rest.md](./crud-gen-rest.md)
