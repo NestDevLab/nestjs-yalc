@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import { importMockedEsm } from '@nestjs-yalc/jest/esm.helper.js';
 import * as GenericServiceModule from '../typeorm/generic.service.js';
 import { GenericService, GenericServiceFactory } from '../typeorm/generic.service.js';
+import { BadRequestException } from '@nestjs/common';
 import {
   BaseEntity,
   Connection,
@@ -735,9 +736,7 @@ describe('GenericService', () => {
         } as any,
         false,
       ),
-    ).rejects.toThrow(
-      'Plain TypeORM repositories cannot represent nested OR filters inside an AND expression.',
-    );
+    ).rejects.toThrow(BadRequestException);
     expect(plainRepo.find).not.toHaveBeenCalled();
   });
 

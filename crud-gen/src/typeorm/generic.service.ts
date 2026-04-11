@@ -9,7 +9,11 @@ import {
   UpdateEntityError,
 } from '../entity.error.js';
 import { getConnectionName } from '@nestjs-yalc/database/conn.helper.js';
-import { FactoryProvider, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  FactoryProvider,
+  Injectable,
+} from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type.js';
 import {
@@ -117,7 +121,7 @@ function normalizeCrudGenWhereConditionForPlainTypeorm(where: {
 
   for (const childWhere of childWheres) {
     if (Array.isArray(childWhere)) {
-      throw new ReferenceError(
+      throw new BadRequestException(
         'Plain TypeORM repositories cannot represent nested OR filters inside an AND expression. Use an extended CrudGen repository for this query shape.',
       );
     }

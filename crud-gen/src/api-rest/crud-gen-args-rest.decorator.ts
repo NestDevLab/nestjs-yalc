@@ -51,6 +51,12 @@ function parseStructuredRestParam<T>(
 ): T | undefined {
   if (value === undefined || value === null || value === '') return undefined;
 
+  if (Array.isArray(value)) {
+    throw new BadRequestException(
+      `Query parameter "${name}" must be provided only once`,
+    );
+  }
+
   if (typeof value !== 'string') return value as T;
 
   try {

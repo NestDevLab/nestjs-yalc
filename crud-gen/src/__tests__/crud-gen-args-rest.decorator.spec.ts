@@ -98,6 +98,14 @@ describe('crud-gen args rest decorator', () => {
     );
   });
 
+  it('should reject repeated structured JSON query params', () => {
+    const ctx = buildCtx({}, { filters: ['{}', '{}'] });
+
+    expect(() => mapCrudGenRestParams(undefined, ctx)).toThrow(
+      BadRequestException,
+    );
+  });
+
   it('should reject invalid numeric pagination query params', () => {
     const ctx = buildCtx({}, { startRow: 'not-a-number' });
 
