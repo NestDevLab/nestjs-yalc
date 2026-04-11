@@ -154,6 +154,7 @@ Please refer to the documentation on how to use NestJS-Yalc CrudGen library to l
 
 - `CrudGenDependencyFactory` for resolvers/services/dataloaders,
 - `crudRestControllerFactory` for REST controllers on top of the same `GenericService`,
+- structured REST `sorting` and `filters` query parameters on generated list endpoints,
 - EventManager + DefaultError for consistent error handling,
 - ApiStrategy for HTTP/local calls between services.
 

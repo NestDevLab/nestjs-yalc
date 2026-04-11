@@ -86,6 +86,36 @@ describe('Task System App e2e', () => {
     });
   });
 
+  it('lists Omni-backed tasks with structured REST sorting and filters', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/tasks')
+      .query({
+        sorting: JSON.stringify([{ colId: 'title', sort: 'ASC' }]),
+        filters: JSON.stringify({
+          expressions: [
+            {
+              text: {
+                field: 'title',
+                type: 'contains',
+                filter: 'boundaries',
+                filterType: 'text',
+              },
+            },
+          ],
+        }),
+      })
+      .expect(200);
+
+    expect(res.body.list).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          guid: createdTaskGuid,
+          title: 'Define task system boundaries',
+        }),
+      ]),
+    );
+  });
+
   it('updates task status', async () => {
     await request(app.getHttpServer())
       .put(`/tasks/${createdTaskGuid}`)
@@ -185,6 +215,35 @@ describe('Task System App e2e', () => {
   it('lists external references', async () => {
     const res = await request(app.getHttpServer()).get('/external-refs').expect(200);
     expect(res.body.list.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('lists Omni-backed external references with structured REST filters', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/external-refs')
+      .query({
+        filters: JSON.stringify({
+          expressions: [
+            {
+              text: {
+                field: 'provider',
+                type: 'equals',
+                filter: 'google-tasks',
+                filterType: 'text',
+              },
+            },
+          ],
+        }),
+      })
+      .expect(200);
+
+    expect(res.body.list).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          guid: createdExternalRefGuid,
+          provider: 'google-tasks',
+        }),
+      ]),
+    );
   });
 
   it('creates a sync state for the external reference', async () => {

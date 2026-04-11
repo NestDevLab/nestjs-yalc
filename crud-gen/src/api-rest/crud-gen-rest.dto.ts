@@ -5,9 +5,10 @@ import {
   RowDefaultValues,
   SortDirection,
 } from '../crud-gen.enum.js';
-import {
+import type {
   ICrudGenBaseParams,
   ICrudGenSimpleParams,
+  FilterInput,
   ISortModel,
   ISortModelStrict,
 } from '../api-graphql/crud-gen-gql.interface.js';
@@ -55,17 +56,11 @@ export function crudGenRestParamsFactory(
     ? [sortModelRestFactory(entityModel)]
     : [SortModelRest];
 
-  /** @todo implement filters */
-
-  // const FilterType = entityModel
-  //   ? filterExpressionInputFactory(entityModel)
-  //   : FilterScalar;
-
   class CrudGenParams implements ICrudGenBaseParams {
     startRow: number = defaultValues?.startRow ?? RowDefaultValues.START_ROW;
     endRow: number = defaultValues?.endRow ?? RowDefaultValues.END_ROW;
     sorting?: typeof SortType;
-    // filters?: typeof FilterType;
+    filters?: FilterInput;
   }
 
   typeMap.set(CrudGenParams, CrudGenParams);
@@ -80,15 +75,9 @@ export function crudGenRestParamsNoPaginationFactory(
     ? [sortModelRestFactory(entityModel)]
     : [SortModelRest];
 
-  /** @todo implement filters */
-
-  // const FilterType = entityModel
-  //   ? filterExpressionInputFactory(entityModel)
-  //   : FilterScalar;
-
   class CrudGenParams implements ICrudGenBaseParams {
     sorting?: typeof SortType = defaultValues?.sorting;
-    // filters?: typeof FilterType = defaultValues?.filters;
+    filters?: FilterInput = defaultValues?.filters;
   }
 
   typeMap.set(CrudGenParams, CrudGenParams);
@@ -123,10 +112,13 @@ export class PaginatedResultDto<T> {
 
 export class CGRestQueryArgs<T = any>
   extends PaginationDTOMixin()
-  implements ICrudGenSimpleParams<T> {
-  /**
-   * @todo implements other properties (where, select, sort, etc.)
-   */
+  implements ICrudGenSimpleParams<T>
+{
+  @IsOptional()
+  sorting?: ISortModelStrict<T>[];
+
+  @IsOptional()
+  filters?: FilterInput;
 }
 
 export function PaginationDTOMixin(base: ClassType = class {}) {

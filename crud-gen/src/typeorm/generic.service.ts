@@ -40,6 +40,95 @@ import {
   mapPaginationParamsToTypeORM,
   mapSortingParamsToTypeORM,
 } from './crud-gen-args.helpers.js';
+import { Operators } from '../crud-gen.enum.js';
+
+function hasObjectKeys(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && Object.keys(value).length > 0;
+}
+
+function normalizeCrudGenWhereForPlainTypeorm(where: unknown): unknown {
+  if (!where || typeof where !== 'object') {
+    return where;
+  }
+
+  if (Array.isArray(where)) {
+    const normalized = where
+      .map((entry) => normalizeCrudGenWhereForPlainTypeorm(entry))
+      .filter(Boolean);
+
+    return normalized.length ? normalized : undefined;
+  }
+
+  const candidate = where as {
+    operator?: Operators;
+    filters?: Record<string, unknown>;
+    childExpressions?: unknown[];
+  };
+
+  if (
+    'filters' in candidate ||
+    'childExpressions' in candidate ||
+    'operator' in candidate
+  ) {
+    return normalizeCrudGenWhereConditionForPlainTypeorm(candidate);
+  }
+
+  return where;
+}
+
+function normalizeCrudGenWhereConditionForPlainTypeorm(where: {
+  operator?: Operators;
+  filters?: Record<string, unknown>;
+  childExpressions?: unknown[];
+}): unknown {
+  const directFilters = Object.fromEntries(
+    Object.entries(where).filter(
+      ([key, value]) =>
+        !['filters', 'operator', 'childExpressions'].includes(key) &&
+        value !== undefined,
+    ),
+  );
+  const filters = {
+    ...directFilters,
+    ...(hasObjectKeys(where.filters) ? where.filters : {}),
+  };
+  const childWheres = (where.childExpressions ?? [])
+    .map((entry) => normalizeCrudGenWhereForPlainTypeorm(entry))
+    .filter(Boolean);
+
+  const operator = (where.operator ?? Operators.AND).toUpperCase();
+
+  if (operator === Operators.OR) {
+    const orWheres: unknown[] = [];
+    if (hasObjectKeys(filters)) orWheres.push(filters);
+
+    for (const childWhere of childWheres) {
+      if (Array.isArray(childWhere)) {
+        orWheres.push(...childWhere);
+      } else {
+        orWheres.push(childWhere);
+      }
+    }
+
+    return orWheres.length ? orWheres : undefined;
+  }
+
+  let mergedWhere: Record<string, unknown> = filters;
+
+  for (const childWhere of childWheres) {
+    if (Array.isArray(childWhere)) {
+      throw new ReferenceError(
+        'Plain TypeORM repositories cannot represent nested OR filters inside an AND expression. Use an extended CrudGen repository for this query shape.',
+      );
+    }
+
+    if (hasObjectKeys(childWhere)) {
+      mergedWhere = { ...mergedWhere, ...childWhere };
+    }
+  }
+
+  return hasObjectKeys(mergedWhere) ? mergedWhere : undefined;
+}
 
 /**
  *
@@ -579,16 +668,7 @@ export class GenericService<
     const { where, info, extra, subQueryFilters, ...typeormOptions } =
       findOptions;
 
-    const sanitizedWhere =
-      where && typeof where === 'object' && !Array.isArray(where)
-        ? (() => {
-            const clone = { ...(where as any) };
-            if ('filters' in clone) {
-              delete clone.filters;
-            }
-            return Object.keys(clone).length ? clone : undefined;
-          })()
-        : (where as any);
+    const sanitizedWhere = normalizeCrudGenWhereForPlainTypeorm(where);
 
     const mappedFindOptions: FindManyOptions<EntityRead> = {
       ...(typeormOptions as FindManyOptions<EntityRead>),

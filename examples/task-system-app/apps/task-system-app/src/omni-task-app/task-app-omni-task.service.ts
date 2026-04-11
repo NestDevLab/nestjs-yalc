@@ -446,10 +446,7 @@ export class TaskAppOmniTaskService {
       return this.normalizeCrudGenWhere(where[0]);
     }
 
-    const filters =
-      'filters' in where && typeof where.filters === 'object'
-        ? (where.filters as Record<string, unknown>)
-        : where;
+    const filters = this.mapper.extractCrudGenFilterMap(where);
 
     const guid = filters.guid as string | FindOperator<string> | undefined;
     const projectId = filters.projectId as

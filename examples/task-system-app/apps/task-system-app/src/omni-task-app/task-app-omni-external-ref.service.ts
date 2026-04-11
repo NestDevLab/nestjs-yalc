@@ -313,11 +313,8 @@ export class TaskAppOmniExternalRefService {
     }
 
     const rawWhere =
-      where && typeof where === 'object' && 'filters' in where
-        ? {
-            ...(where as Record<string, unknown>),
-            ...((where as { filters?: Record<string, unknown> }).filters ?? {}),
-          }
+      where && typeof where === 'object'
+        ? this.mapper.extractCrudGenFilterMap(where)
         : where;
 
     if (!rawWhere) {

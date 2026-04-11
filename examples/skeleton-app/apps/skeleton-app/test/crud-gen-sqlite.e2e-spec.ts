@@ -18,23 +18,23 @@ describe('Crud-gen REST (SQL.js) e2e', () => {
     app = moduleRef.createNestApplication();
     await app.init();
 
-     const httpService = app.get(HttpService);
-     jest.spyOn(httpService.axiosRef, 'request').mockImplementation(
-       async (config: any) => {
-         // Proxy the call to the in-app /users endpoint to avoid real HTTP
-         const res = await request(app.getHttpServer())
-           .get(config.url as string)
-           .set(config.headers ?? {});
+    const httpService = app.get(HttpService);
+    jest.spyOn(httpService.axiosRef, 'request').mockImplementation(
+      async (config: any) => {
+        // Proxy the call to the in-app /users endpoint to avoid real HTTP
+        const res = await request(app.getHttpServer())
+          .get(config.url as string)
+          .set(config.headers ?? {});
 
-         return {
-           data: res.body,
-           status: res.status,
-           statusText: res.statusText,
-           headers: res.headers,
-           request: {},
-         };
-       },
-     );
+        return {
+          data: res.body,
+          status: res.status,
+          statusText: res.statusText,
+          headers: res.headers,
+          request: {},
+        };
+      },
+    );
   });
 
   afterAll(async () => {
@@ -62,7 +62,47 @@ describe('Crud-gen REST (SQL.js) e2e', () => {
   it('lists users with pagination metadata', async () => {
     const res = await request(app.getHttpServer()).get('/users').expect(200);
     expect(res.body.list.length).toBeGreaterThanOrEqual(1);
-    expect(res.body.pageData).toMatchObject({ startRow: 0, count: expect.any(Number) });
+    expect(res.body.pageData).toMatchObject({
+      startRow: 0,
+      count: expect.any(Number),
+    });
+  });
+
+  it('lists users with structured REST sorting and filters', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/users')
+      .query({
+        sorting: JSON.stringify([{ colId: 'firstName', sort: 'ASC' }]),
+        filters: JSON.stringify({
+          expressions: [
+            {
+              text: {
+                field: 'firstName',
+                type: 'contains',
+                filter: 'Alice',
+                filterType: 'text',
+              },
+            },
+          ],
+        }),
+      })
+      .expect(200);
+
+    expect(res.body.list).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          guid: createdGuid,
+          firstName: 'Alice',
+        }),
+      ]),
+    );
+  });
+
+  it('rejects malformed structured REST filters', async () => {
+    await request(app.getHttpServer())
+      .get('/users')
+      .query({ filters: '{bad-json' })
+      .expect(400);
   });
 
   it('updates a user', async () => {
@@ -88,7 +128,9 @@ describe('Crud-gen REST (SQL.js) e2e', () => {
   });
 
   it('deletes a user', async () => {
-    await request(app.getHttpServer()).delete(`/users/${createdGuid}`).expect(200);
+    await request(app.getHttpServer())
+      .delete(`/users/${createdGuid}`)
+      .expect(200);
   });
 
   it('returns a 400 error via YalcEventService', async () => {

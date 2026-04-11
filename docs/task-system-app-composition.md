@@ -45,6 +45,11 @@ Current generated resources:
 - `external-refs`
 - `sync-states`
 
+The REST e2e suite intentionally covers structured `sorting` and `filters` on
+generated controllers backed by Omni services. This is a regression target: if a
+resource needs standard list/grid behavior, prefer fixing the framework or the
+service override instead of reintroducing manual list controllers.
+
 ## Where custom logic lives
 
 ### DTO layer

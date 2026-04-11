@@ -40,6 +40,28 @@ export class TaskAppOmniMapper {
   readonly eventKind = 'event';
   readonly syncStateKind = 'sync-state';
 
+  extractCrudGenFilterMap(where: unknown): Record<string, unknown> {
+    if (!where || typeof where !== 'object' || Array.isArray(where)) {
+      return {};
+    }
+
+    const source = where as {
+      filters?: Record<string, unknown>;
+      childExpressions?: unknown[];
+    } & Record<string, unknown>;
+
+    const filters = source.filters ? { ...source.filters } : { ...source };
+    delete filters.filters;
+    delete filters.operator;
+    delete filters.childExpressions;
+
+    for (const childExpression of source.childExpressions ?? []) {
+      Object.assign(filters, this.extractCrudGenFilterMap(childExpression));
+    }
+
+    return filters;
+  }
+
   mapProjectToOmniCollection(
     input: Partial<TaskProjectCreateInput>,
   ): Partial<OmniCollectionEntity> {

@@ -124,7 +124,14 @@ If it no longer looks like CRUD:
 
 ## Reference example
 
-The strongest current example is the task-system app:
+The reusable substrate example is the OmniKernel app:
+
+- [examples/omnikernel-app/README.md](../examples/omnikernel-app/README.md)
+
+It exposes the raw OmniKernel resource set through generated REST controllers
+and generated GraphQL resolvers over the same in-memory persistence surface.
+
+The strongest current real composition example is the task-system app:
 
 - [examples/task-system-app/README.md](../examples/task-system-app/README.md)
 
