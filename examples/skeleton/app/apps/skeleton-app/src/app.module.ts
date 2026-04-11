@@ -16,8 +16,8 @@ import { UsersModule } from './users/users.module';
       path: '/graphql',
     }),
     TypeOrmModule.forRoot({
-      type: 'sqljs',
-      autoSave: false,
+      type: 'sqlite',
+      database: ':memory:',
       dropSchema: true,
       entities: [SkeletonUser, SkeletonPhone],
       synchronize: true,

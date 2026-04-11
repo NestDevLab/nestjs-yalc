@@ -23,8 +23,8 @@ import { OmniApiModule } from './omni/omni-api.module';
     }),
     EventEmitterModule.forRoot(),
     TypeOrmModule.forRoot({
-      type: 'sqljs',
-      autoSave: false,
+      type: 'sqlite',
+      database: ':memory:',
       dropSchema: true,
       entities: [
         OmniNamedEntity,

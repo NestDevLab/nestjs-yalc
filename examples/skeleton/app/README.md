@@ -1,7 +1,7 @@
 # Skeleton App
 
 This is the minimal runnable CrudGen example. It shows the standard path for a
-small SQL.js-backed Nest app:
+small SQLite in-memory Nest app:
 
 - model entities and DTOs in `examples/skeleton/module`
 - compose REST, GraphQL, service, repository, and dataloader providers in the

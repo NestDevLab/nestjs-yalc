@@ -13,8 +13,8 @@ import { PhonesModule } from '../src/phones/phones.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'sqljs',
-      autoSave: false,
+      type: 'sqlite',
+      database: ':memory:',
       dropSchema: true,
       entities: [SkeletonUser, SkeletonPhone],
       synchronize: true,

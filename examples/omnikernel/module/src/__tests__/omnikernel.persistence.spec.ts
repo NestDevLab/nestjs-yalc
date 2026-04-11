@@ -17,8 +17,8 @@ describe('OmniKernel persistence', () => {
 
   beforeEach(async () => {
     dataSource = new DataSource({
-      type: 'sqljs',
-      autoSave: false,
+      type: 'sqlite',
+      database: ':memory:',
       dropSchema: true,
       synchronize: true,
       entities: [

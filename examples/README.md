@@ -1,6 +1,8 @@
 # Examples
 
-The examples are organized by architectural role.
+The examples are organized as three progressively richer applications. They are
+not three competing starters; each one exists to demonstrate a different layer
+of the framework.
 
 ## Skeleton
 
@@ -10,7 +12,10 @@ The examples are organized by architectural role.
 - `app`: generated REST + GraphQL + backend composition with
   `CrudGenResourceFactory`.
 
-Use it as the baseline for a new app.
+Use it as the baseline for a new app. It shows the standard CrudGen path plus
+small, separate examples for validation, `YalcEventService`, and `ApiStrategy`.
+See [`examples/skeleton/README.md`](./skeleton/README.md) and
+[`examples/skeleton/app/README.md`](./skeleton/app/README.md) for details.
 
 ## OmniKernel
 
@@ -20,6 +25,10 @@ Use it as the baseline for a new app.
 - `app`: generated REST + GraphQL APIs composed over that substrate.
 
 Use it as the reference for reusable CrudGen-compatible persistence backends.
+Its focus is backend/API separation, not custom service-to-service flows. See
+[`examples/omnikernel/README.md`](./omnikernel/README.md),
+[`examples/omnikernel/module/README.md`](./omnikernel/module/README.md), and
+[`examples/omnikernel/app/README.md`](./omnikernel/app/README.md) for details.
 
 ## Task
 
@@ -30,4 +39,7 @@ Use it as the reference for reusable CrudGen-compatible persistence backends.
   service/dataloader overrides.
 
 Use it to study customization patterns without falling back to manual CRUD
-controllers or resolvers.
+controllers or resolvers. It is also the main example for using
+`YalcEventService` and `ApiStrategy` beside generated CRUD surfaces. See
+[`examples/task/README.md`](./task/README.md) and
+[`examples/task/app/README.md`](./task/app/README.md) for details.

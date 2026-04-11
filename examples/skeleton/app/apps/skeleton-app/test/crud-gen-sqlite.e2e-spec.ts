@@ -6,7 +6,7 @@ import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { HttpService } from '@nestjs/axios';
 
-describe('Crud-gen REST (SQL.js) e2e', () => {
+describe('Crud-gen REST (SQLite in-memory) e2e', () => {
   let app: INestApplication;
   let createdGuid: string;
 
@@ -183,7 +183,7 @@ describe('Crud-gen REST (SQL.js) e2e', () => {
       .expect(400);
   });
 
-  it('uses the improved logger via users-logging controller', async () => {
+  it('uses YalcEventService via users-logging controller', async () => {
     const res = await request(app.getHttpServer())
       .get('/users-logging')
       .expect(200);

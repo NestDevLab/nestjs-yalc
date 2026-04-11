@@ -6,6 +6,14 @@ Advanced CrudGen-first application composition.
 - `app` persists through OmniKernel and exposes generated REST/GraphQL with
   service and dataloader overrides.
 
+Use this example after the skeleton and OmniKernel examples. It demonstrates
+how a real app composes generated CRUD APIs, an OmniKernel-backed persistence
+layer, targeted service overrides, domain events, HTTP-aware errors, logging,
+and `ApiStrategy` proxy calls without returning to handwritten CRUD
+controllers/resolvers.
+
+See [`app/README.md`](./app/README.md) for the runnable app details.
+
 Run:
 
 ```bash

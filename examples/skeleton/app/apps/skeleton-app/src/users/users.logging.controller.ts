@@ -1,18 +1,16 @@
-import { Controller, Get, Inject } from '@nestjs/common';
-import { ImprovedLoggerService } from '@nestjs-yalc/logger';
-import { EVENT_LOGGER } from '@nestjs-yalc/event-manager';
+import { Controller, Get } from '@nestjs/common';
+import { YalcEventService } from '@nestjs-yalc/event-manager';
 
 @Controller('users-logging')
 export class UsersLoggingController {
-  constructor(
-    @Inject(EVENT_LOGGER)
-    private readonly logger: ImprovedLoggerService,
-  ) {}
+  constructor(private readonly events: YalcEventService) {}
 
   @Get()
-  logExample() {
-    this.logger.log('Users logging endpoint called', {
+  async logExample() {
+    await this.events.log(['skeleton', 'users', 'logging-demo'], {
+      message: 'Users logging endpoint called',
       data: { feature: 'skeleton-app', endpoint: 'users-logging' },
+      event: { await: true },
     });
 
     return { ok: true };

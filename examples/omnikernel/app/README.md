@@ -15,7 +15,7 @@ backend substrate, while this app composes protocol-specific APIs in
 - App-local composition of all public API resources.
 - Structured REST `sorting` and `filters` query parameters on generated
   controllers.
-- A single in-memory `sqljs` persistence surface shared by REST and GraphQL.
+- A single SQLite in-memory persistence surface shared by REST and GraphQL.
 
 ## Exposed REST Resources
 
