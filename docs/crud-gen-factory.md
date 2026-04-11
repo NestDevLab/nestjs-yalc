@@ -84,6 +84,9 @@ const userResource = CrudGenResourceFactory({
 Spread `userResource.providers` into module providers and
 `userResource.controllers` into module controllers. Set any layer to `false` to
 disable it, or omit `rest`/`graphql` when the app should not expose that surface.
+When `backend: false`, the resource factory does not create backend providers,
+repository references, service tokens, or dataloader tokens; REST/GraphQL must
+therefore point at providers registered elsewhere when they are enabled.
 
 For reusable substrates, prefer registering backend providers in the substrate
 module and composing GraphQL/REST in the app. This keeps storage reusable and

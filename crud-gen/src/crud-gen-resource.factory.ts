@@ -23,7 +23,7 @@ export interface ICrudGenResourceFactoryOptions<Entity extends ObjectLiteral> {
 export interface ICrudGenResourceFactoryResult<Entity extends ObjectLiteral> {
   providers: Provider[];
   controllers: ClassType<any>[];
-  repository: ClassType<GenericTypeORMRepository<Entity>>;
+  repository?: ClassType<GenericTypeORMRepository<Entity>>;
   serviceToken?: string;
   dataLoaderToken?: string;
 }
@@ -34,10 +34,18 @@ export function CrudGenResourceFactory<Entity extends Record<string, any>>({
   graphql,
   rest,
 }: ICrudGenResourceFactoryOptions<Entity>): ICrudGenResourceFactoryResult<Entity> {
-  const backendProviders = CrudGenBackendFactory<Entity>({
-    entityModel,
-    ...(backend === false ? {} : backend),
-  });
+  const backendProviders =
+    backend === false
+      ? {
+          providers: [],
+          repository: undefined,
+          serviceToken: undefined,
+          dataLoaderToken: undefined,
+        }
+      : CrudGenBackendFactory<Entity>({
+          entityModel,
+          ...backend,
+        });
 
   const graphqlProviders =
     graphql === false || graphql === undefined

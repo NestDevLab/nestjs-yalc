@@ -679,6 +679,23 @@ describe('Crud-gen helpers', () => {
       expect(resource.controllers.length).toBe(1);
       expect(resource.serviceToken).toBe('GenericService');
     });
+
+    it('Should skip backend artifacts when resource backend is disabled', () => {
+      const resource = CrudGenResourceFactory<TestEntity>({
+        entityModel: TestEntity,
+        backend: false,
+        rest: {
+          path: 'test-entities',
+          serviceToken: 'ExistingService',
+        },
+      });
+
+      expect(resource.providers).toEqual([]);
+      expect(resource.controllers.length).toBe(1);
+      expect(resource.repository).toBeUndefined();
+      expect(resource.serviceToken).toBeUndefined();
+      expect(resource.dataLoaderToken).toBeUndefined();
+    });
   });
 
   const testTypeFiler: [FilterType, any][] = [
