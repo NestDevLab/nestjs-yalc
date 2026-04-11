@@ -112,7 +112,7 @@ Avoid these patterns in new code:
 - `docs/crud-gen-rest.md`
 - `docs/event-manager-service.md`
 - `docs/error-handling.md`
-- `examples/skeleton-app/README.md`
+- `examples/skeleton/app/README.md`
 
 ## Practical rule of thumb
 

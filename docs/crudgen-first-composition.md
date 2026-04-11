@@ -48,8 +48,10 @@ If the CRUD contract can be expressed here, keep going with generated surfaces.
 
 For standard CRUD resources, prefer:
 
-- `CrudGenDependencyFactory` for GraphQL provider packs
-- `resolverFactory` through the dependency factory
+- `CrudGenResourceFactory` when the app owns REST and GraphQL for the resource
+- `CrudGenBackendFactory` when a reusable module should expose only the backend
+- `CrudGenGraphqlFactory` when an app wants generated GraphQL over an existing backend
+- `CrudGenDependencyFactory` for compatibility with older backend + GraphQL packs
 - `crudRestControllerFactory` for REST controllers
 
 This should be the default for:
@@ -129,10 +131,27 @@ The intended split is:
 
 This separation keeps the framework examples coherent and reusable.
 
+## Reusable backend modules
+
+Reusable modules should avoid owning public API surface by default. Prefer this
+shape:
+
+- the reusable module registers `CrudGenBackendFactory` providers
+- the reusable module optionally keeps `CrudGenDependencyFactory` compatibility
+  for existing consumers
+- the application imports the backend module and uses `CrudGenResourceFactory`
+  or the protocol-specific factories to decide which REST and GraphQL surfaces
+  it wants to expose
+
+This keeps GraphQL resolver classes and REST controller classes inside the app
+when they are application composition artifacts, while the backend module remains
+usable as a substrate for other API shapes.
+
 ## Reference examples
 
-- Minimal baseline: [examples/skeleton-app/README.md](../examples/skeleton-app/README.md)
-- Real composition example: [examples/task-system-app/README.md](../examples/task-system-app/README.md)
+- Minimal baseline: [examples/skeleton/app/README.md](../examples/skeleton/app/README.md)
+- Reusable substrate example: [examples/omnikernel/app/README.md](../examples/omnikernel/app/README.md)
+- Real composition example: [examples/task/app/README.md](../examples/task/app/README.md)
 - Factory details: [crud-gen-factory.md](./crud-gen-factory.md)
 - Modeling details: [crud-gen-modeling.md](./crud-gen-modeling.md)
 - REST details: [crud-gen-rest.md](./crud-gen-rest.md)

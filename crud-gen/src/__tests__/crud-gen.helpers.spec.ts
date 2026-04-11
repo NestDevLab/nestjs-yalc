@@ -14,6 +14,7 @@ import { isAskingForCount } from '../api-graphql/crud-gen-gql.helpers.js';
 import { JoinArgOptions, JoinTypes } from '../api-graphql/crud-gen.input.js';
 import type { IWhereCondition } from '../api-graphql/crud-gen-gql.type.js';
 import type { ICrudGenDependencyFactoryOptions } from '../crud-gen.helpers.js';
+import { CrudGenResourceFactory } from '../crud-gen-resource.factory.js';
 import type {
   FilterOption,
   FilterOptionType,
@@ -48,6 +49,8 @@ const {
   isIFieldAndFilterMapper,
   objectToFieldMapper,
   CrudGenDependencyFactory,
+  CrudGenBackendFactory,
+  CrudGenGraphqlFactory,
   filterTypeToNativeType,
   traverseFiltersAndApplyFunction,
   isFilterExpressionInput,
@@ -615,6 +618,83 @@ describe('Crud-gen helpers', () => {
         CrudGenDependencyFactory<TestEntity>(customOptions);
 
       expect(dependecyObject).toBeDefined();
+    });
+
+    it('Should create backend-only providers and tokens', () => {
+      const backend = CrudGenBackendFactory<TestEntity>({
+        entityModel: TestEntity,
+        service: {
+          dbConnection: 'id',
+          providerClass: GenericService,
+        },
+        dataloader: {
+          databaseKey: 'id',
+        },
+      });
+
+      expect(backend.providers.length).toBeGreaterThan(0);
+      expect(backend.serviceToken).toBe('GenericService');
+      expect(backend.dataLoaderToken).toBeDefined();
+      expect(backend.repository).toBeDefined();
+    });
+
+    it('Should create GraphQL-only providers against existing tokens', () => {
+      const graphql = CrudGenGraphqlFactory<TestEntity>({
+        entityModel: TestEntity,
+        resolver: {
+          dto: TestEntityDto,
+          prefix: 'Test_',
+        },
+        serviceToken: 'ExistingService',
+        dataLoaderToken: 'ExistingDataLoader',
+      });
+
+      expect(graphql.providers.length).toBe(1);
+    });
+
+    it('Should create combined resource providers and controllers', () => {
+      const resource = CrudGenResourceFactory<TestEntity>({
+        entityModel: TestEntity,
+        backend: {
+          service: {
+            dbConnection: 'id',
+            providerClass: GenericService,
+          },
+          dataloader: {
+            databaseKey: 'id',
+          },
+        },
+        graphql: {
+          resolver: {
+            dto: TestEntityDto,
+            prefix: 'Test_',
+          },
+        },
+        rest: {
+          path: 'test-entities',
+        },
+      });
+
+      expect(resource.providers.length).toBeGreaterThan(1);
+      expect(resource.controllers.length).toBe(1);
+      expect(resource.serviceToken).toBe('GenericService');
+    });
+
+    it('Should skip backend artifacts when resource backend is disabled', () => {
+      const resource = CrudGenResourceFactory<TestEntity>({
+        entityModel: TestEntity,
+        backend: false,
+        rest: {
+          path: 'test-entities',
+          serviceToken: 'ExistingService',
+        },
+      });
+
+      expect(resource.providers).toEqual([]);
+      expect(resource.controllers.length).toBe(1);
+      expect(resource.repository).toBeUndefined();
+      expect(resource.serviceToken).toBeUndefined();
+      expect(resource.dataLoaderToken).toBeUndefined();
     });
   });
 

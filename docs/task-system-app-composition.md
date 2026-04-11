@@ -33,8 +33,9 @@ Canonical semantic relations:
 
 Standard CRUD resources should use:
 
-- generated GraphQL via `CrudGenDependencyFactory`
-- generated REST via `crudRestControllerFactory`
+- generated GraphQL via `CrudGenResourceFactory`
+- generated REST via `CrudGenResourceFactory`
+- service/dataloader overrides for Omni-backed persistence semantics
 - app-specific DTOs modeled with `ModelObject` / `ModelField`
 
 Current generated resources:
@@ -44,6 +45,11 @@ Current generated resources:
 - `events`
 - `external-refs`
 - `sync-states`
+
+The REST e2e suite intentionally covers structured `sorting` and `filters` on
+generated controllers backed by Omni services. This is a regression target: if a
+resource needs standard list/grid behavior, prefer fixing the framework or the
+service override instead of reintroducing manual list controllers.
 
 ## Where custom logic lives
 

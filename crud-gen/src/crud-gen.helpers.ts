@@ -355,6 +355,12 @@ export interface IDependencyObject<Entity extends ObjectLiteral> {
   repository: ClassType<GenericTypeORMRepository<Entity>>;
 }
 
+export interface ICrudGenBackendFactoryResult<Entity extends ObjectLiteral>
+  extends IDependencyObject<Entity> {
+  serviceToken?: string;
+  dataLoaderToken?: string;
+}
+
 export interface IProviderOverride<T = any> {
   provider:
     | ClassProvider<T>
@@ -394,6 +400,22 @@ export interface ICrudGenDependencyFactoryOptions<
   repository?: ClassType<GenericTypeORMRepository<Entity>>;
 }
 
+export interface ICrudGenBackendFactoryOptions<Entity extends ObjectLiteral> {
+  entityModel: ClassType<Entity>;
+  service?: IGenericServiceOptions<Entity> | IProviderOverride;
+  dataloader?: IDataLoaderOptions<Entity> | IProviderOverride;
+  repository?: ClassType<GenericTypeORMRepository<Entity>>;
+}
+
+export interface ICrudGenGraphqlFactoryOptions<Entity extends ObjectLiteral> {
+  entityModel: ClassType<Entity>;
+  resolver:
+    | Omit<IGenericResolverOptions<Entity>, 'entityModel'>
+    | IResolverOverride;
+  serviceToken?: string;
+  dataLoaderToken?: string;
+}
+
 export function isProviderOverride(
   resolver: any,
 ): resolver is IProviderOverride {
@@ -408,14 +430,38 @@ export function CrudGenDependencyFactory<Entity extends Record<string, any>>({
   service,
   repository,
 }: ICrudGenDependencyFactoryOptions<Entity>): IDependencyObject<Entity> {
+  const backend = CrudGenBackendFactory<Entity>({
+    entityModel,
+    service,
+    dataloader,
+    repository,
+  });
+  const graphql =
+    resolver !== false
+      ? CrudGenGraphqlFactory<Entity>({
+          entityModel,
+          resolver: resolver ?? {},
+          serviceToken: backend.serviceToken,
+          dataLoaderToken: backend.dataLoaderToken,
+        })
+      : { providers: [] };
+
+  return {
+    providers: [...backend.providers, ...graphql.providers],
+    repository: backend.repository,
+  };
+}
+
+export function CrudGenBackendFactory<Entity extends Record<string, any>>({
+  entityModel,
+  dataloader,
+  service,
+  repository,
+}: ICrudGenBackendFactoryOptions<Entity>): ICrudGenBackendFactoryResult<Entity> {
   const providers: Provider[] = [];
 
-  const resolverOptions: IGenericResolverOptions<Entity> = {
-    ...(resolver ?? {}),
-    entityModel,
-  };
-
-  let dataLoaderToken, serviceToken;
+  let dataLoaderToken: string | undefined;
+  let serviceToken: string | undefined;
 
   if (service) {
     if (isProviderOverride(service)) {
@@ -460,23 +506,40 @@ export function CrudGenDependencyFactory<Entity extends Record<string, any>>({
     }
   }
 
-  if (resolver !== false) {
-    resolverOptions.service = {
-      serviceToken,
-      dataLoaderToken,
-    };
-
-    providers.push(
-      resolver && isProviderOverride(resolver)
-        ? resolver.provider
-        : resolverFactory<Entity>(resolverOptions),
-    );
-  }
-
   return {
     providers,
     repository: repository ?? CGExtendedRepositoryFactory<Entity>(entityModel),
+    serviceToken,
+    dataLoaderToken,
   };
+}
+
+export function CrudGenGraphqlFactory<Entity extends Record<string, any>>({
+  entityModel,
+  resolver,
+  serviceToken,
+  dataLoaderToken,
+}: ICrudGenGraphqlFactoryOptions<Entity>): { providers: Provider[] } {
+  if (isProviderOverride(resolver)) {
+    return { providers: [resolver.provider] };
+  }
+
+  const resolverConfig = resolver as Omit<
+    IGenericResolverOptions<Entity>,
+    'entityModel'
+  >;
+  const resolverOptions: IGenericResolverOptions<Entity> = {
+    ...resolverConfig,
+    entityModel,
+    service: {
+      ...resolverConfig.service,
+      serviceToken: resolverConfig.service?.serviceToken ?? serviceToken,
+      dataLoaderToken:
+        resolverConfig.service?.dataLoaderToken ?? dataLoaderToken,
+    },
+  };
+
+  return { providers: [resolverFactory<Entity>(resolverOptions)] };
 }
 
 export function getProviderToken(

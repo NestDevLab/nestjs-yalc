@@ -8,6 +8,40 @@ Factory-driven CRUD generator for NestJS with TypeORM and GraphQL/REST helpers (
 - Tests/coverage: `npm run test:cov` (uses Jest projects; set `JEST_WORKERS` to limit parallelism)
 
 ## Quick start
+When the app owns the whole resource surface, use the resource combinator:
+
+```ts
+export const userResource = CrudGenResourceFactory<User>({
+  entityModel: User,
+  backend: {
+    service: { dbConnection: 'default' },
+    dataloader: { databaseKey: 'id' },
+  },
+  graphql: {
+    resolver: {
+      dto: UserType,
+      input: {
+        create: UserCreateInput,
+        update: UserUpdateInput,
+        conditions: UserCondition,
+      },
+    },
+  },
+  rest: {
+    dto: UserType,
+    path: 'users',
+    idField: 'id',
+  },
+});
+```
+
+Spread `userResource.providers` into module providers,
+`userResource.controllers` into module controllers, and pass
+`userResource.repository` to `TypeOrmModule.forFeature`.
+
+For existing GraphQL-only modules, the compatibility helper still creates the
+backend and resolver providers together:
+
 ```ts
 export const userProviders = CrudGenDependencyFactory<User>({
   entityModel: User,
@@ -27,9 +61,11 @@ Spread `userProviders.providers` into your module providers and pass `userProvid
 
 ## Key pieces
 - Decorators: `ModelObject`, `ModelField` (mapping, relations, filters, derived fields)
-- Factories: `CrudGenDependencyFactory`, `GenericServiceFactory` (service), `DataLoaderFactory` (dataloader), `CGExtendedRepositoryFactory` (repository)
+- Resource composition: `CrudGenResourceFactory` combines backend, GraphQL, and REST generation with per-surface enable/disable options.
+- Layer factories: `CrudGenBackendFactory` for service/repository/dataloader providers, `CrudGenGraphqlFactory` for resolver providers against existing backend tokens, and `CrudGenDependencyFactory` for the legacy backend + GraphQL pack.
+- Lower-level factories: `GenericServiceFactory` (service), `DataLoaderFactory` (dataloader), `CGExtendedRepositoryFactory` (repository)
 - GraphQL helpers: argument/condition builders, extra args/inputs, generated resolvers
-- REST helpers: `CGQueryArgs`, pagination DTOs, Swagger response helper, `crudRestControllerFactory` to generate full CRUD controllers (list/getById/create/update/delete) wired to your `GenericService`, with optional `readonly` and per-mutation toggles
+- REST helpers: `CGQueryArgs`, pagination/filter/sorting DTOs, Swagger response helper, `crudRestControllerFactory` to generate full CRUD controllers (list/getById/create/update/delete) wired to your `GenericService`, with optional `readonly`, structured JSON `sorting`/`filters`, flat equality query filters, custom `serviceToken`, and per-mutation toggles
 - Errors: entity CRUD errors, missing arguments/conditions
 
 > Note: some helpers are imported from subpaths (e.g., `@nestjs-yalc/crud-gen/object.decorator`, `.../crud-gen.helpers`) while the top-level `src/index.ts` export surface is being finalized.

@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import { importMockedEsm } from '@nestjs-yalc/jest/esm.helper.js';
 import * as GenericServiceModule from '../typeorm/generic.service.js';
 import { GenericService, GenericServiceFactory } from '../typeorm/generic.service.js';
+import { BadRequestException } from '@nestjs/common';
 import {
   BaseEntity,
   Connection,
@@ -32,6 +33,7 @@ import {
   NoResultsFoundError,
   ConditionsTooBroadError,
 } from '../conditions.error.js';
+import { Operators } from '../crud-gen.enum.js';
 const ClassHelper = await importMockedEsm(
   '@nestjs-yalc/utils/class.helper.js',
   import.meta,
@@ -649,6 +651,93 @@ describe('GenericService', () => {
     expect(callArgs.where).toEqual({ foo: 'bar' });
     expect(callArgs.skip).toBe(5);
     expect(callArgs.take).toBe(5);
+  });
+
+  it('should map fallback structured AND filters before delegating to TypeORM', async () => {
+    const plainRepo: any = {
+      target: {},
+      find: jest.fn(),
+    };
+
+    plainRepo.find.mockResolvedValueOnce([{ id: '1' }]);
+
+    const plainService = new GenericService<any>(plainRepo);
+
+    await plainService.getEntityListExtended(
+      {
+        where: {
+          filters: { projectId: 'project-a' },
+          childExpressions: [{ filters: { status: 'open' } }],
+        },
+      } as any,
+      false,
+    );
+
+    const callArgs = plainRepo.find.mock.calls[0][0];
+    expect(callArgs.where).toEqual({
+      projectId: 'project-a',
+      status: 'open',
+    });
+  });
+
+  it('should map fallback top-level OR filters before delegating to TypeORM', async () => {
+    const plainRepo: any = {
+      target: {},
+      find: jest.fn(),
+    };
+
+    plainRepo.find.mockResolvedValueOnce([{ id: '1' }]);
+
+    const plainService = new GenericService<any>(plainRepo);
+
+    await plainService.getEntityListExtended(
+      {
+        where: {
+          operator: Operators.OR,
+          childExpressions: [
+            { filters: { status: 'open' } },
+            { filters: { status: 'blocked' } },
+          ],
+        },
+      } as any,
+      false,
+    );
+
+    const callArgs = plainRepo.find.mock.calls[0][0];
+    expect(callArgs.where).toEqual([
+      { status: 'open' },
+      { status: 'blocked' },
+    ]);
+  });
+
+  it('should reject fallback nested OR filters inside AND expressions', async () => {
+    const plainRepo: any = {
+      target: {},
+      find: jest.fn(),
+    };
+
+    const plainService = new GenericService<any>(plainRepo);
+
+    await expect(
+      plainService.getEntityListExtended(
+        {
+          where: {
+            filters: { projectId: 'project-a' },
+            childExpressions: [
+              {
+                operator: Operators.OR,
+                childExpressions: [
+                  { filters: { status: 'open' } },
+                  { filters: { status: 'blocked' } },
+                ],
+              },
+            ],
+          },
+        } as any,
+        false,
+      ),
+    ).rejects.toThrow(BadRequestException);
+    expect(plainRepo.find).not.toHaveBeenCalled();
   });
 
   it('should report supportsExtendedRepository false for plain repositories', () => {

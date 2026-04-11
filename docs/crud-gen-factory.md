@@ -1,6 +1,22 @@
 # CRUD-Gen Dependency Factory Reference
 
-`CrudGenDependencyFactory` wires a CRUD stack (resolver/controller, service, dataloader, repository) around a TypeORM entity and optional DTOs.
+CrudGen exposes small factories for each layer plus a compatibility combinator
+for the common "generate everything" case. REST and GraphQL are API surfaces;
+they should normally share the same service, dataloader, and repository
+providers.
+
+## Layered factories
+
+- `CrudGenBackendFactory`: generates the backend provider layer only
+  (service, dataloader, repository reference/tokens).
+- `CrudGenGraphqlFactory`: generates GraphQL resolver providers only and points
+  them at existing service/dataloader tokens.
+- `crudRestControllerFactory`: generates REST controllers only and points them
+  at an existing service token.
+- `CrudGenResourceFactory`: combines backend, GraphQL, and REST generation with
+  per-layer enable/disable flags.
+- `CrudGenDependencyFactory`: compatibility helper for the original backend +
+  GraphQL provider pack.
 
 ## Options (`ICrudGenDependencyFactoryOptions`)
 - `entityModel` (required): TypeORM entity class.
@@ -34,6 +50,48 @@ In the common module setup shown by the live examples, `TypeOrmModule.forFeature
 - Extra args/inputs: use `extraArgs` for required filters; `extraInputs` to extend mutations (e.g., flags/middleware to adjust input).
 - Disable pieces: set `resolver: false` if you only need the service/dataloader/repository (e.g., headless usage).
 
+## Resource factory
+
+Use `CrudGenResourceFactory` when an app owns the whole public API surface and
+wants one declaration that composes the smaller factories:
+
+```ts
+const userResource = CrudGenResourceFactory({
+  entityModel: UserEntity,
+  backend: {
+    service: { dbConnection: 'default' },
+    dataloader: { databaseKey: 'id' },
+  },
+  graphql: {
+    resolver: {
+      dto: UserType,
+      input: {
+        create: UserCreateInput,
+        update: UserUpdateInput,
+        conditions: UserCondition,
+      },
+      prefix: 'Users_',
+    },
+  },
+  rest: {
+    dto: UserType,
+    path: 'users',
+    idField: 'id',
+  },
+});
+```
+
+Spread `userResource.providers` into module providers and
+`userResource.controllers` into module controllers. Set any layer to `false` to
+disable it, or omit `rest`/`graphql` when the app should not expose that surface.
+When `backend: false`, the resource factory does not create backend providers,
+repository references, service tokens, or dataloader tokens; REST/GraphQL must
+therefore point at providers registered elsewhere when they are enabled.
+
+For reusable substrates, prefer registering backend providers in the substrate
+module and composing GraphQL/REST in the app. This keeps storage reusable and
+makes the public API ownership explicit.
+
 ## Extended repository vs plain fallback
 The generated stack can run in two modes:
 
@@ -61,12 +119,13 @@ In other words: for normal CRUD resources, custom code should usually live **bel
 
 ### Basic app / happy path
 Use:
-- `CrudGenDependencyFactory`
+- `CrudGenResourceFactory` when the app owns both REST and GraphQL
+- `CrudGenDependencyFactory` for legacy backend + GraphQL provider packs
 - generated resolver from `resolverFactory`
 - generated REST controller from `crudRestControllerFactory`
 - default `GenericService`
 
-This is the intended baseline (see `examples/skeleton-app`).
+This is the intended baseline (see `examples/skeleton/app`).
 
 ### Advanced app with custom persistence/domain logic
 Keep:

@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { ExecutionContext } from '@nestjs/common';
+import { BadRequestException, ExecutionContext } from '@nestjs/common';
 import {
   mapCrudGenRestParams,
   CGQueryArgs,
@@ -7,7 +7,12 @@ import {
   ApiOkResponsePaginated,
   CrudGenCombineDecorators,
 } from '../api-rest/crud-gen-args-rest.decorator.js';
-import { RowDefaultValues } from '../crud-gen.enum.js';
+import {
+  FilterType,
+  GeneralFilters,
+  Operators,
+  SortDirection,
+} from '../crud-gen.enum.js';
 
 const buildCtx = (
   args: any,
@@ -26,15 +31,40 @@ class DummyDto {
 
 describe('crud-gen args rest decorator', () => {
   it('should map params into CrudGenFindManyOptions', () => {
-    const ctx = buildCtx({
-      startRow: 5,
-      endRow: 8,
-      sorting: [{ colId: 'id', sort: 'DESC' }],
+    const ctx = buildCtx({}, {
+      startRow: '5',
+      endRow: '8',
+      sorting: JSON.stringify([{ colId: 'id', sort: SortDirection.DESC }]),
     });
 
     const result = mapCrudGenRestParams(undefined, ctx);
     expect(result.take).toBe(3);
     expect(result.order?.id).toBe('DESC');
+  });
+
+  it('should parse structured REST filters from JSON query params', () => {
+    const ctx = buildCtx(
+      {},
+      {
+        filters: JSON.stringify({
+          operator: Operators.AND,
+          expressions: [
+            {
+              text: {
+                field: 'name',
+                filterType: FilterType.TEXT,
+                type: GeneralFilters.CONTAINS,
+                filter: 'alice',
+              },
+            },
+          ],
+        }),
+      },
+    );
+
+    const result = mapCrudGenRestParams(undefined, ctx);
+
+    expect(result.where?.childExpressions?.[0]?.filters?.name).toBeDefined();
   });
 
   it('should map flat query params into equality filters', () => {
@@ -43,6 +73,45 @@ describe('crud-gen args rest decorator', () => {
     const result = mapCrudGenRestParams(undefined, ctx);
 
     expect(result.where?.filters?.projectId).toBeDefined();
+  });
+
+  it('should keep flat equality filters alongside structured REST params', () => {
+    const ctx = buildCtx(
+      {},
+      {
+        sorting: JSON.stringify([{ colId: 'id', sort: SortDirection.ASC }]),
+        projectId: 'project-1',
+      },
+    );
+
+    const result = mapCrudGenRestParams(undefined, ctx);
+
+    expect(result.order?.id).toBe('ASC');
+    expect(result.where?.filters?.projectId).toBeDefined();
+  });
+
+  it('should reject malformed structured JSON query params', () => {
+    const ctx = buildCtx({}, { filters: '{bad-json' });
+
+    expect(() => mapCrudGenRestParams(undefined, ctx)).toThrow(
+      BadRequestException,
+    );
+  });
+
+  it('should reject repeated structured JSON query params', () => {
+    const ctx = buildCtx({}, { filters: ['{}', '{}'] });
+
+    expect(() => mapCrudGenRestParams(undefined, ctx)).toThrow(
+      BadRequestException,
+    );
+  });
+
+  it('should reject invalid numeric pagination query params', () => {
+    const ctx = buildCtx({}, { startRow: 'not-a-number' });
+
+    expect(() => mapCrudGenRestParams(undefined, ctx)).toThrow(
+      BadRequestException,
+    );
   });
 
   it('should build decorators without throwing', () => {

@@ -27,11 +27,11 @@ For this project, use only patterns and building blocks already aligned with `ne
 
 Create a standalone app composed of:
 
-- `examples/task-system-module`
+- `examples/task/module`
   - reusable module package
   - entities / DTOs / generated CRUD providers
   - reusable domain module wiring
-- `examples/task-system-app`
+- `examples/task/app`
   - runnable Nest app
   - REST surfaces
   - strategy-based internal communication examples
@@ -87,8 +87,8 @@ Keep this checklist updated while implementing. Mark items as `[x]` when complet
 
 - [x] Define architecture and constraints for a standalone `task-system-app`
 - [x] Add planning/documentation files to the repo
-- [x] Create initial scaffold for `examples/task-system-module`
-- [x] Create initial scaffold for `examples/task-system-app`
+- [x] Create initial scaffold for `examples/task/module`
+- [x] Create initial scaffold for `examples/task/app`
 - [x] Open branch/PR for the scaffold work
 - [x] Make `task-system-app` boot successfully
 - [x] Fix `CrudGenDependencyFactory` + `TypeORM` + DI wiring in the YALC-correct way
@@ -142,7 +142,7 @@ Already started:
 - inspect framework conventions
 - add documentation:
   - `docs/backend-blueprint.md`
-  - `examples/task-system-app/README.md`
+  - `examples/task/app/README.md`
   - this plan file
 
 ### Phase 1 — first runnable vertical slice
@@ -282,7 +282,7 @@ Suggested PR scope:
 
 The project is successful when:
 
-- `examples/task-system-app` is runnable standalone;
+- `examples/task/app` is runnable standalone;
 - it demonstrates correct `nestjs-yalc` patterns;
 - it has meaningful e2e coverage;
 - it is valuable even without OpenClaw;

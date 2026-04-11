@@ -24,8 +24,10 @@ Nest-yalc stands for Nestjs - Yet Another Library Collection
 - [Task-system app composition guide](./task-system-app-composition.md)
 - [API Strategy + EventManager integration patterns](./api-strategy-event-manager-patterns.md)
 
-- [In-memory SQL.js skeleton app (REST + GraphQL + EventManager + Logger + ApiStrategy)](../examples/skeleton-app/README.md) — a minimal, copyable example app that wires together most features of this library and can be used as a starting point for your own projects.
-- [Task System App](../examples/task-system-app/README.md) — the planned real-world example app used both as a complete backend demo and as a stronger CI/e2e validation target for `nestjs-yalc`.
+- [Examples overview](../examples/README.md) — the architectural map for the skeleton, OmniKernel, and task examples.
+- [Skeleton App](../examples/skeleton/app/README.md) — the minimal all-in-one `CrudGenResourceFactory` path.
+- [OmniKernel App](../examples/omnikernel/app/README.md) — generated REST and GraphQL over a backend-only OmniKernel substrate.
+- [Task App](../examples/task/app/README.md) — the advanced OmniKernel-backed composition and CI/e2e validation target.
 
 - [How to use the Api-Strategy library](./api-strategy.md)
 

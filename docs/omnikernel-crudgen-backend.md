@@ -10,7 +10,8 @@ and the applications built on top of it.
 
 OmniKernel already provides:
 
-- CrudGen-native registration through `CrudGenDependencyFactory`
+- CrudGen-native backend registration for services and dataloaders
+- optional generated GraphQL registration for compatibility
 - DTOs modeled with `ModelObject` / `ModelField`
 - relation-aware entities
 - payload-oriented records/documents/collections
@@ -47,6 +48,10 @@ Reusable OmniKernel concerns include:
   - relation metadata
   - JSON-backed fields
   - derived fields
+
+OmniKernel can expose generated GraphQL providers for compatibility, but new
+apps should prefer importing it as a substrate and composing their public API
+surface explicitly.
 
 ## What should stay in apps
 
@@ -124,9 +129,19 @@ If it no longer looks like CRUD:
 
 ## Reference example
 
-The strongest current example is the task-system app:
+The reusable substrate example is the OmniKernel app:
 
-- [examples/task-system-app/README.md](../examples/task-system-app/README.md)
+- [examples/omnikernel/app/README.md](../examples/omnikernel/app/README.md)
+
+It exposes the raw OmniKernel resource set through generated REST controllers
+and generated GraphQL resolvers over the same in-memory persistence surface. The
+app imports the backend-only OmniKernel module and composes REST and GraphQL
+with `CrudGenResourceFactory`, so the API surface is owned by the app while the
+backend providers stay reusable.
+
+The strongest current real composition example is the task-system app:
+
+- [examples/task/app/README.md](../examples/task/app/README.md)
 
 It demonstrates how projects, tasks, events, sync states, and external refs can
 all stay CrudGen-first while using OmniKernel as the runtime persistence model.

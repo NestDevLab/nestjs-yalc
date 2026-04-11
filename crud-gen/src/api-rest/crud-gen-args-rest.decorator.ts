@@ -1,6 +1,7 @@
 import { returnValue } from '@nestjs-yalc/utils/index.js';
 import {
   applyDecorators,
+  BadRequestException,
   createParamDecorator,
   ExecutionContext,
   Query,
@@ -17,7 +18,6 @@ import {
   ICrudGenGqlArgsOptions,
   ICrudGenBaseParams,
 } from '../api-graphql/crud-gen-gql.interface.js';
-import { Args } from '@nestjs/graphql';
 import {
   ApiResponseOptions,
   ApiProperty,
@@ -29,11 +29,88 @@ import { ClassType } from 'nestjs-yalc';
 import { IConnection } from '../crud-gen.interface.js';
 import { columnConversion, forceFilterWorker } from '../crud-gen.helpers.js';
 
+function getRestQueryFromContext(
+  ctx: ExecutionContext,
+): Record<string, unknown> {
+  const requestQuery = ctx.switchToHttp?.().getRequest?.()?.query;
+  if (requestQuery && typeof requestQuery === 'object') {
+    return requestQuery as Record<string, unknown>;
+  }
+
+  const args = ctx.getArgs?.() as unknown;
+  if (args && typeof args === 'object' && !Array.isArray(args)) {
+    return args as Record<string, unknown>;
+  }
+
+  return {};
+}
+
+function parseStructuredRestParam<T>(
+  value: unknown,
+  name: string,
+): T | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+
+  if (Array.isArray(value)) {
+    throw new BadRequestException(
+      `Query parameter "${name}" must be provided only once`,
+    );
+  }
+
+  if (typeof value !== 'string') return value as T;
+
+  try {
+    return JSON.parse(value) as T;
+  } catch (error) {
+    throw new BadRequestException(`Invalid JSON query parameter "${name}"`);
+  }
+}
+
+function parseRestNumberParam(
+  value: unknown,
+  name: string,
+): number | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+
+  const parsed = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(parsed)) {
+    throw new BadRequestException(`Invalid numeric query parameter "${name}"`);
+  }
+
+  return parsed;
+}
+
+function normalizeRestCrudGenArgs(
+  rawQuery: Record<string, unknown>,
+): ICrudGenBaseParams {
+  const args: ICrudGenBaseParams = { ...rawQuery };
+  const startRow = parseRestNumberParam(rawQuery.startRow, 'startRow');
+  const endRow = parseRestNumberParam(rawQuery.endRow, 'endRow');
+
+  if (startRow !== undefined) args.startRow = startRow;
+  if (endRow !== undefined) args.endRow = endRow;
+
+  const sorting = parseStructuredRestParam<ICrudGenBaseParams['sorting']>(
+    rawQuery.sorting,
+    'sorting',
+  );
+  const filters = parseStructuredRestParam<ICrudGenBaseParams['filters']>(
+    rawQuery.filters,
+    'filters',
+  );
+
+  if (sorting !== undefined) args.sorting = sorting;
+  if (filters !== undefined) args.filters = filters;
+
+  return args;
+}
+
 export function mapCrudGenRestParams<Entity extends ObjectLiteral>(
   params: ICrudGenGqlArgsOptions | undefined,
   ctx: ExecutionContext,
 ): CrudGenFindManyOptions {
-  const args: ICrudGenBaseParams = ctx.getArgs() as any;
+  const rawArgs = getRestQueryFromContext(ctx);
+  const args = normalizeRestCrudGenArgs(rawArgs);
 
   const findParams = mapCrudGenParam<Entity>(
     params,
@@ -42,10 +119,6 @@ export function mapCrudGenRestParams<Entity extends ObjectLiteral>(
     { isCount: true },
   );
 
-  const rawArgs = (ctx.switchToHttp().getRequest()?.query ?? {}) as Record<
-    string,
-    unknown
-  >;
   const fieldMapper = (findParams.extra as any)?._fieldMapper;
   const reservedKeys = new Set(['startRow', 'endRow', 'sorting', 'filters']);
 
@@ -91,9 +164,7 @@ export const CrudGenCombineDecorators = (params: ICrudGenGqlArgsOptions) => {
     for (const argName of Object.keys(params.extraArgs)) {
       if (params.extraArgs[argName].hidden) continue;
 
-      argDecorators.push(
-        Args(argName, params.extraArgs[argName].options ?? {}),
-      );
+      argDecorators.push(Query(argName));
     }
   }
 

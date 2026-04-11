@@ -127,7 +127,7 @@ Notes:
 - `startRow` and `endRow` are real GraphQL args on paginated grid queries and drive the `pageData.startRow/endRow` response metadata.
 - If these pagination args are missing from the schema, treat that as a framework regression rather than an application-level limitation.
 - Count behavior is selection-sensitive: selecting `pageData.count` can trigger a different repository path than queries that only ask for `nodes`.
-- Advanced structured filtering (`filters` with `expressions` / `childExpressions`) requires the extended repository path. When CRUD-Gen falls back to a plain TypeORM repository, these extended query features now fail explicitly instead of being ignored silently.
+- Advanced structured GraphQL filtering (`filters` with `expressions` / `childExpressions`) requires the extended repository path. Generated REST controllers can use straightforward structured filters through the plain TypeORM fallback, but nested expression trees still belong in an extended repository/query override.
 
 ## Plain fallback vs extended repository
 CRUD-Gen has two execution modes at runtime:
@@ -139,11 +139,13 @@ Supported reliably:
 - simple `where`
 - sorting
 - pagination
+- generated REST structured filters for straightforward expression trees
 - basic GraphQL grid queries
 - linkage fields such as `projectId`
 
 Not supported as full CRUD-Gen semantics:
-- structured GraphQL filters
+- full structured GraphQL filters
+- nested `OR` filters inside `AND` expressions
 - advanced join/subquery behavior
 - dataloader/relation-loading flows that depend on extended repository semantics
 - richer helper metadata encoded in `where.filters`
