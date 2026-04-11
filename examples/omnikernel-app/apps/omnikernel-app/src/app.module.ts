@@ -12,7 +12,7 @@ import {
   OmniRecordEntity,
   OmniRelationEntity,
 } from '@nestjs-yalc/omnikernel-module';
-import { OmniRestModule } from './omni/omni-rest.module';
+import { OmniApiModule } from './omni/omni-api.module';
 
 @Module({
   imports: [
@@ -36,7 +36,7 @@ import { OmniRestModule } from './omni/omni-rest.module';
       ],
       synchronize: true,
     }),
-    OmniRestModule,
+    OmniApiModule,
   ],
   providers: [UUIDScalar],
 })

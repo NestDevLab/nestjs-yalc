@@ -5,31 +5,73 @@ import { OmniNamedEntity } from './base/omni-named.entity';
 import { OmniRecordEntity } from './base/omni-record.entity';
 import { OmniRelationEntity } from './base/omni-relation.entity';
 import { OmniCollectionEntity } from './omni-collection.entity';
-import { omniCollectionProvidersFactory } from './omni-collection.resolver';
+import {
+  omniCollectionBackendProvidersFactory,
+  omniCollectionGraphqlProvidersFactory,
+} from './omni-collection.resolver';
 import { OmniDocumentEntity } from './omni-document.entity';
-import { omniDocumentProvidersFactory } from './omni-document.resolver';
-import { omniExternalRefProvidersFactory } from './omni-external-ref.resolver';
-import { omniNamedProvidersFactory } from './omni-named.resolver';
-import { omniRecordProvidersFactory } from './omni-record.resolver';
-import { omniRelationProvidersFactory } from './omni-relation.resolver';
+import {
+  omniDocumentBackendProvidersFactory,
+  omniDocumentGraphqlProvidersFactory,
+} from './omni-document.resolver';
+import {
+  omniExternalRefBackendProvidersFactory,
+  omniExternalRefGraphqlProvidersFactory,
+} from './omni-external-ref.resolver';
+import {
+  omniNamedBackendProvidersFactory,
+  omniNamedGraphqlProvidersFactory,
+} from './omni-named.resolver';
+import {
+  omniRecordBackendProvidersFactory,
+  omniRecordGraphqlProvidersFactory,
+} from './omni-record.resolver';
+import {
+  omniRelationBackendProvidersFactory,
+  omniRelationGraphqlProvidersFactory,
+} from './omni-relation.resolver';
 import {
   OmniKernelQueryService,
   omniKernelQueryServiceProviderFactory,
 } from './omnikernel.query.service';
 
+export interface OmniKernelModuleOptions {
+  graphql?: boolean;
+}
+
 @Module({})
 export class OmniKernelModule {
-  static register(dbConnection: string): DynamicModule {
-    const omniNamedProviders = omniNamedProvidersFactory(dbConnection);
-    const omniRecordProviders = omniRecordProvidersFactory(dbConnection);
-    const omniRelationProviders = omniRelationProvidersFactory(dbConnection);
+  static register(
+    dbConnection: string,
+    options: OmniKernelModuleOptions = {},
+  ): DynamicModule {
+    const includeGraphql = options.graphql ?? true;
+    const omniNamedProviders = omniNamedBackendProvidersFactory(dbConnection);
+    const omniRecordProviders = omniRecordBackendProvidersFactory(dbConnection);
+    const omniRelationProviders =
+      omniRelationBackendProvidersFactory(dbConnection);
     const omniCollectionProviders =
-      omniCollectionProvidersFactory(dbConnection);
-    const omniDocumentProviders = omniDocumentProvidersFactory(dbConnection);
+      omniCollectionBackendProvidersFactory(dbConnection);
+    const omniDocumentProviders =
+      omniDocumentBackendProvidersFactory(dbConnection);
     const omniExternalRefProviders =
-      omniExternalRefProvidersFactory(dbConnection);
+      omniExternalRefBackendProvidersFactory(dbConnection);
     const omniKernelQueryServiceProvider =
       omniKernelQueryServiceProviderFactory(dbConnection);
+    const graphqlProviders = includeGraphql
+      ? [
+          ...omniNamedGraphqlProvidersFactory(omniNamedProviders).providers,
+          ...omniRecordGraphqlProvidersFactory(omniRecordProviders).providers,
+          ...omniRelationGraphqlProvidersFactory(omniRelationProviders)
+            .providers,
+          ...omniCollectionGraphqlProvidersFactory(omniCollectionProviders)
+            .providers,
+          ...omniDocumentGraphqlProvidersFactory(omniDocumentProviders)
+            .providers,
+          ...omniExternalRefGraphqlProvidersFactory(omniExternalRefProviders)
+            .providers,
+        ]
+      : [];
 
     return {
       module: OmniKernelModule,
@@ -53,6 +95,7 @@ export class OmniKernelModule {
         ...omniCollectionProviders.providers,
         ...omniDocumentProviders.providers,
         ...omniExternalRefProviders.providers,
+        ...graphqlProviders,
         omniKernelQueryServiceProvider,
       ],
       exports: [
@@ -62,6 +105,7 @@ export class OmniKernelModule {
         ...omniCollectionProviders.providers,
         ...omniDocumentProviders.providers,
         ...omniExternalRefProviders.providers,
+        ...graphqlProviders,
         omniKernelQueryServiceProvider,
         OmniKernelQueryService,
       ],

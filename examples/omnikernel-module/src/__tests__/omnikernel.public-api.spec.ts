@@ -24,18 +24,36 @@ const { OmniExternalRefService } = await import(
 );
 const relationSemantics = await import('../omni-relation-semantics.js');
 const { OmniKernelQueryService } = await import('../omnikernel.query.service.js');
-const { omniCollectionProvidersFactory } = await import(
-  '../omni-collection.resolver.js'
-);
-const { omniNamedProvidersFactory } = await import('../omni-named.resolver.js');
-const { omniRecordProvidersFactory } = await import('../omni-record.resolver.js');
-const { omniRelationProvidersFactory } = await import('../omni-relation.resolver.js');
-const { omniExternalRefProvidersFactory } = await import(
-  '../omni-external-ref.resolver.js'
-);
-const { omniDocumentProvidersFactory } = await import(
-  '../omni-document.resolver.js'
-);
+const {
+  omniCollectionBackendProvidersFactory,
+  omniCollectionGraphqlProvidersFactory,
+  omniCollectionProvidersFactory,
+} = await import('../omni-collection.resolver.js');
+const {
+  omniNamedBackendProvidersFactory,
+  omniNamedGraphqlProvidersFactory,
+  omniNamedProvidersFactory,
+} = await import('../omni-named.resolver.js');
+const {
+  omniRecordBackendProvidersFactory,
+  omniRecordGraphqlProvidersFactory,
+  omniRecordProvidersFactory,
+} = await import('../omni-record.resolver.js');
+const {
+  omniRelationBackendProvidersFactory,
+  omniRelationGraphqlProvidersFactory,
+  omniRelationProvidersFactory,
+} = await import('../omni-relation.resolver.js');
+const {
+  omniExternalRefBackendProvidersFactory,
+  omniExternalRefGraphqlProvidersFactory,
+  omniExternalRefProvidersFactory,
+} = await import('../omni-external-ref.resolver.js');
+const {
+  omniDocumentBackendProvidersFactory,
+  omniDocumentGraphqlProvidersFactory,
+  omniDocumentProvidersFactory,
+} = await import('../omni-document.resolver.js');
 const omnikernelPublicApi = await import('../index.js');
 
 describe('OmniKernel public API', () => {
@@ -220,8 +238,56 @@ describe('OmniKernel public API', () => {
     expect(omnikernelPublicApi.omniDocumentProvidersFactory).toBe(
       omniDocumentProvidersFactory,
     );
+    expect(omnikernelPublicApi.omniDocumentBackendProvidersFactory).toBe(
+      omniDocumentBackendProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniDocumentGraphqlProvidersFactory).toBe(
+      omniDocumentGraphqlProvidersFactory,
+    );
     expect(omnikernelPublicApi.omniCollectionProvidersFactory).toBe(
       omniCollectionProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniCollectionBackendProvidersFactory).toBe(
+      omniCollectionBackendProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniCollectionGraphqlProvidersFactory).toBe(
+      omniCollectionGraphqlProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniNamedProvidersFactory).toBe(
+      omniNamedProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniNamedBackendProvidersFactory).toBe(
+      omniNamedBackendProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniNamedGraphqlProvidersFactory).toBe(
+      omniNamedGraphqlProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniRecordProvidersFactory).toBe(
+      omniRecordProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniRecordBackendProvidersFactory).toBe(
+      omniRecordBackendProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniRecordGraphqlProvidersFactory).toBe(
+      omniRecordGraphqlProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniRelationProvidersFactory).toBe(
+      omniRelationProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniRelationBackendProvidersFactory).toBe(
+      omniRelationBackendProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniRelationGraphqlProvidersFactory).toBe(
+      omniRelationGraphqlProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniExternalRefProvidersFactory).toBe(
+      omniExternalRefProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniExternalRefBackendProvidersFactory).toBe(
+      omniExternalRefBackendProvidersFactory,
+    );
+    expect(omnikernelPublicApi.omniExternalRefGraphqlProvidersFactory).toBe(
+      omniExternalRefGraphqlProvidersFactory,
     );
     expect(omnikernelPublicApi.isAllowedOmniRelation).toBe(
       relationSemantics.isAllowedOmniRelation,

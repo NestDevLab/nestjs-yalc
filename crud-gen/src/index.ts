@@ -1,4 +1,5 @@
 export * from './crud-gen.helpers.js';
+export * from './crud-gen-resource.factory.js';
 export * from './crud-gen.enum.js';
 export * from './crud-gen.interface.js';
 export * from './crud-gen.error.js';

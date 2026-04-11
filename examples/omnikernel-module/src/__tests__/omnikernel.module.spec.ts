@@ -2,63 +2,113 @@ import { describe, expect, it, jest } from '@jest/globals';
 import 'reflect-metadata';
 const { OmniKernelQueryService } = await import('../omnikernel.query.service.js');
 
-const omniNamedProvidersFactory = jest.fn(() => ({ providers: ['named'] }));
-const omniRecordProvidersFactory = jest.fn(() => ({ providers: ['record'] }));
-const omniRelationProvidersFactory = jest.fn(() => ({
-  providers: ['relation'],
+const omniNamedBackendProvidersFactory = jest.fn(() => ({
+  providers: ['named-backend'],
 }));
-const omniCollectionProvidersFactory = jest.fn(() => ({
-  providers: ['collection'],
+const omniNamedGraphqlProvidersFactory = jest.fn(() => ({
+  providers: ['named-graphql'],
 }));
-const omniDocumentProvidersFactory = jest.fn(() => ({
-  providers: ['document'],
+const omniRecordBackendProvidersFactory = jest.fn(() => ({
+  providers: ['record-backend'],
 }));
-const omniExternalRefProvidersFactory = jest.fn(() => ({
-  providers: ['external-ref'],
+const omniRecordGraphqlProvidersFactory = jest.fn(() => ({
+  providers: ['record-graphql'],
+}));
+const omniRelationBackendProvidersFactory = jest.fn(() => ({
+  providers: ['relation-backend'],
+}));
+const omniRelationGraphqlProvidersFactory = jest.fn(() => ({
+  providers: ['relation-graphql'],
+}));
+const omniCollectionBackendProvidersFactory = jest.fn(() => ({
+  providers: ['collection-backend'],
+}));
+const omniCollectionGraphqlProvidersFactory = jest.fn(() => ({
+  providers: ['collection-graphql'],
+}));
+const omniDocumentBackendProvidersFactory = jest.fn(() => ({
+  providers: ['document-backend'],
+}));
+const omniDocumentGraphqlProvidersFactory = jest.fn(() => ({
+  providers: ['document-graphql'],
+}));
+const omniExternalRefBackendProvidersFactory = jest.fn(() => ({
+  providers: ['external-ref-backend'],
+}));
+const omniExternalRefGraphqlProvidersFactory = jest.fn(() => ({
+  providers: ['external-ref-graphql'],
 }));
 
 jest.unstable_mockModule('../omni-named.resolver.js', () => ({
-  omniNamedProvidersFactory,
+  omniNamedBackendProvidersFactory,
+  omniNamedGraphqlProvidersFactory,
 }));
 jest.unstable_mockModule('../omni-record.resolver.js', () => ({
-  omniRecordProvidersFactory,
+  omniRecordBackendProvidersFactory,
+  omniRecordGraphqlProvidersFactory,
 }));
 jest.unstable_mockModule('../omni-relation.resolver.js', () => ({
-  omniRelationProvidersFactory,
+  omniRelationBackendProvidersFactory,
+  omniRelationGraphqlProvidersFactory,
 }));
 jest.unstable_mockModule('../omni-collection.resolver.js', () => ({
-  omniCollectionProvidersFactory,
+  omniCollectionBackendProvidersFactory,
+  omniCollectionGraphqlProvidersFactory,
 }));
 jest.unstable_mockModule('../omni-document.resolver.js', () => ({
-  omniDocumentProvidersFactory,
+  omniDocumentBackendProvidersFactory,
+  omniDocumentGraphqlProvidersFactory,
 }));
 jest.unstable_mockModule('../omni-external-ref.resolver.js', () => ({
-  omniExternalRefProvidersFactory,
+  omniExternalRefBackendProvidersFactory,
+  omniExternalRefGraphqlProvidersFactory,
 }));
 
 const { OmniKernelModule } = await import('../omnikernel.module.js');
 
 describe('OmniKernelModule', () => {
-  it('registers the module and invokes all provider factories', () => {
+  it('registers backend and GraphQL providers by default', () => {
     const module = OmniKernelModule.register('test');
 
     expect(module).toBeDefined();
-    expect(omniNamedProvidersFactory).toHaveBeenCalledWith('test');
-    expect(omniRecordProvidersFactory).toHaveBeenCalledWith('test');
-    expect(omniRelationProvidersFactory).toHaveBeenCalledWith('test');
-    expect(omniCollectionProvidersFactory).toHaveBeenCalledWith('test');
-    expect(omniDocumentProvidersFactory).toHaveBeenCalledWith('test');
-    expect(omniExternalRefProvidersFactory).toHaveBeenCalledWith('test');
+    expect(omniNamedBackendProvidersFactory).toHaveBeenCalledWith('test');
+    expect(omniNamedGraphqlProvidersFactory).toHaveBeenCalledWith({
+      providers: ['named-backend'],
+    });
     expect(module.providers).toEqual(
       expect.arrayContaining([
-        'named',
-        'record',
-        'relation',
-        'collection',
-        'document',
-        'external-ref',
+        'named-backend',
+        'record-backend',
+        'relation-backend',
+        'collection-backend',
+        'document-backend',
+        'external-ref-backend',
+        'named-graphql',
+        'record-graphql',
+        'relation-graphql',
+        'collection-graphql',
+        'document-graphql',
+        'external-ref-graphql',
         expect.objectContaining({ provide: OmniKernelQueryService }),
       ]),
+    );
+  });
+
+  it('can register the reusable substrate without GraphQL providers', () => {
+    const module = OmniKernelModule.register('test', { graphql: false });
+
+    expect(module.providers).toEqual(
+      expect.arrayContaining([
+        'named-backend',
+        'record-backend',
+        'relation-backend',
+        'collection-backend',
+        'document-backend',
+        'external-ref-backend',
+      ]),
+    );
+    expect(module.providers).not.toEqual(
+      expect.arrayContaining(['named-graphql']),
     );
   });
 });
