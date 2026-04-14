@@ -25,7 +25,7 @@ import {
   ApiOkResponse,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { ClassType } from 'nestjs-yalc';
+import type { ClassType } from '@nestjs-yalc/types/globals.d.js';
 import { IConnection } from '../crud-gen.interface.js';
 import { columnConversion, forceFilterWorker } from '../crud-gen.helpers.js';
 

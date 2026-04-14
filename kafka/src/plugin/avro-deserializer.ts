@@ -1,10 +1,10 @@
 /* istanbul ignore file */
 import { Deserializer, ReadPacket } from '@nestjs/microservices';
 import { SchemaRegistry } from '@kafkajs/confluent-schema-registry';
-import { SchemaRegistryAPIClientArgs } from '@kafkajs/confluent-schema-registry/dist/api';
-import { SchemaRegistryAPIClientOptions } from '@kafkajs/confluent-schema-registry/dist/@types.js';
-import { KafkaMessage } from '@nestjs/microservices/external/kafka.interface.js';
-import { DeserializedData } from '../interface/debezium.interface.js';
+import type { SchemaRegistryAPIClientArgs } from '@kafkajs/confluent-schema-registry/dist/api/index.js';
+import type { SchemaRegistryAPIClientOptions } from '@kafkajs/confluent-schema-registry/dist/@types.js';
+import type { KafkaMessage } from '@nestjs/microservices/external/kafka.interface.js';
+import type { DeserializedData } from '../interface/debezium.interface.js';
 
 /**
  * Deserializer for Kafka data by using Avro Schema

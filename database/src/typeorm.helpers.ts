@@ -3,7 +3,7 @@ import { PostgresConnectionCredentialsOptions } from 'typeorm/driver/postgres/Po
 import { TypeORMLogger } from '@nestjs-yalc/logger';
 import { IYalcBaseAppOptions } from '@nestjs-yalc/app/base-app.interface.js';
 import { MigrationInterface } from 'typeorm';
-import { ClassType } from 'nestjs-yalc';
+import type { ClassType } from '@nestjs-yalc/types/globals.d.js';
 import { YalcEventService } from '@nestjs-yalc/event-manager/event.service.js';
 
 export const setGlobalPreDeployMigrationClasses = (
