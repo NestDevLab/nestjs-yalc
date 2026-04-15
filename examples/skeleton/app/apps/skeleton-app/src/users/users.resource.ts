@@ -18,6 +18,7 @@ import {
   SkeletonUserType,
   SkeletonUserUpdateInput,
 } from '@nestjs-yalc/skeleton-module';
+import { bindGeneratedDataloaderEventEmitter } from '../crudgen-provider-compat.js';
 
 const skeletonUserServiceToken = 'SkeletonUserGenericService';
 
@@ -133,4 +134,6 @@ export const usersResource = CrudGenResourceFactory<SkeletonUser>({
 });
 
 export const UsersController = usersResource.controllers[0];
-export const usersResourceProviders = usersResource.providers;
+export const usersResourceProviders = bindGeneratedDataloaderEventEmitter(
+  usersResource.providers,
+);

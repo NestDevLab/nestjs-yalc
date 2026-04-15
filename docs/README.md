@@ -42,6 +42,7 @@ Nest-yalc stands for Nestjs - Yet Another Library Collection
 - [Backend blueprint: the opinionated way to use nestjs-yalc for new backends](./backend-blueprint.md)
 - [Framework hardening follow-ups after PR #121](./framework-hardening-followups.md)
 - [Public npm publication](./npm-publication.md)
+- [Public example mirrors](./public-example-mirrors.md)
 
 ## NPM package.json and Workspace
 

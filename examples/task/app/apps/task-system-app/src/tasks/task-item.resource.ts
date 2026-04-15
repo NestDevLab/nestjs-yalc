@@ -6,6 +6,7 @@ import {
   getFn,
 } from '@nestjs-yalc/data-loader';
 import { TaskItem } from '@nestjs-yalc/task-system-module/src/task-item.entity';
+import { bindGeneratedDataloaderEventEmitter } from '../crudgen-provider-compat.js';
 import { TaskAppOmniTaskService } from '../omni-task-app/task-app-omni-task.service';
 import {
   TaskItemCondition,
@@ -51,4 +52,6 @@ export const taskItemResource = CrudGenResourceFactory<TaskItem>({
 });
 
 export const TasksController = taskItemResource.controllers[0];
-export const taskItemProviders = taskItemResource.providers;
+export const taskItemProviders = bindGeneratedDataloaderEventEmitter(
+  taskItemResource.providers,
+);

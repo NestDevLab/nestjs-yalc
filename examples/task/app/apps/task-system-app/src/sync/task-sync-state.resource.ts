@@ -6,6 +6,7 @@ import {
   getFn,
 } from '@nestjs-yalc/data-loader';
 import { TaskSyncState } from '@nestjs-yalc/task-system-module/src/task-sync-state.entity';
+import { bindGeneratedDataloaderEventEmitter } from '../crudgen-provider-compat.js';
 import { TaskAppOmniSyncStateService } from '../omni-task-app/task-app-omni-sync-state.service';
 import {
   TaskSyncStateCondition,
@@ -51,4 +52,6 @@ export const taskSyncStateResource = CrudGenResourceFactory<TaskSyncState>({
 });
 
 export const SyncStatesController = taskSyncStateResource.controllers[0];
-export const taskSyncStateProviders = taskSyncStateResource.providers;
+export const taskSyncStateProviders = bindGeneratedDataloaderEventEmitter(
+  taskSyncStateResource.providers,
+);

@@ -242,13 +242,18 @@ The export command writes standalone example sources under `var/example-exports`
 - `var/example-exports/task`
 
 During export, framework dependencies such as `@nestjs-yalc/crud-gen` and
-`@nestjs-yalc/framework` are rewritten to the current public version range.
-Example-local packages stay as local `file:` dependencies inside the exported
-tree, for example `@nestjs-yalc/skeleton-module` or
+`@nestjs-yalc/framework` are rewritten to their package-specific current public
+version ranges. Example-local packages stay as local `file:` dependencies
+inside the exported tree, for example `@nestjs-yalc/skeleton-module` or
 `@nestjs-yalc/task-system-module`.
 
 The exported directories are the intended source for future read-only mirrors
 such as `nestjs-yalc-example-skeleton`, `nestjs-yalc-example-omnikernel`, and
-`nestjs-yalc-example-task-system`. Those mirrors should demonstrate how a
-consumer installs Yalc from npm, while the monorepo examples remain optimized
-for framework development and CI coverage.
+`nestjs-yalc-example-task`. Those mirrors should demonstrate how a consumer
+installs Yalc from npm, while the monorepo examples remain optimized for
+framework development and CI coverage.
+
+Each export also includes a standalone GitHub Actions workflow that installs the
+example app, builds it, and runs its e2e tests. See
+[Public example mirrors](./public-example-mirrors.md) for the repository sync
+workflow, required GitHub token, and read-only mirror operating model.

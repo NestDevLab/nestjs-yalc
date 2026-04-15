@@ -1,0 +1,76 @@
+name: public example mirrors
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Sync without pushing mirror commits
+        required: false
+        default: false
+        type: boolean
+  push:
+    branches:
+      - dev
+    paths:
+      - examples/skeleton/**
+      - examples/omnikernel/**
+      - examples/task/**
+      - scripts/export-public-examples.mjs
+      - scripts/sync-public-example-mirrors.mjs
+      - .github/workflows/example-mirrors.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: example-mirrors-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: 24
+
+jobs:
+  sync:
+    name: Sync generated example mirrors
+    runs-on: ubuntu-latest
+    if: github.repository == 'NestDevLab/nestjs-yalc'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Configure Git author
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Check mirror token
+        env:
+          EXAMPLE_MIRROR_TOKEN: ${{ secrets.EXAMPLE_MIRROR_TOKEN }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+        run: |
+          if [ "$DRY_RUN" != "true" ] && [ -z "$EXAMPLE_MIRROR_TOKEN" ]; then
+            echo "EXAMPLE_MIRROR_TOKEN is required to push external mirror repositories."
+            exit 1
+          fi
+
+      - name: Sync mirrors
+        env:
+          EXAMPLE_MIRROR_TOKEN: ${{ secrets.EXAMPLE_MIRROR_TOKEN }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then
+            npm run examples:mirror:dry-run
+          else
+            npm run examples:mirror
+          fi

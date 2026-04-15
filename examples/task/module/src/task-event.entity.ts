@@ -8,6 +8,7 @@ import {
   ManyToOne,
   PrimaryColumn,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { TaskProject } from './task-project.entity.js';
 
 @Entity('task-event')
@@ -39,7 +40,7 @@ export class TaskEvent extends EntityWithTimestamps(BaseEntity) {
 
   @ManyToOne(() => TaskProject, (project) => project.events, { nullable: true })
   @JoinColumn({ name: 'projectId', referencedColumnName: 'guid' })
-  project?: TaskProject | null;
+  project?: Relation<TaskProject> | null;
 
   @Column('varchar', { nullable: true })
   location?: string | null;
