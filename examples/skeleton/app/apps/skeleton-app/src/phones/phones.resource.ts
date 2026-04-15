@@ -6,6 +6,7 @@ import {
   SkeletonPhoneType,
   SkeletonPhoneUpdateInput,
 } from '@nestjs-yalc/skeleton-module';
+import { bindGeneratedDataloaderEventEmitter } from '../crudgen-provider-compat.js';
 
 export const phonesResource = CrudGenResourceFactory<SkeletonPhone>({
   entityModel: SkeletonPhone,
@@ -36,4 +37,6 @@ export const phonesResource = CrudGenResourceFactory<SkeletonPhone>({
 });
 
 export const PhonesController = phonesResource.controllers[0];
-export const phonesResourceProviders = phonesResource.providers;
+export const phonesResourceProviders = bindGeneratedDataloaderEventEmitter(
+  phonesResource.providers,
+);

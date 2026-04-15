@@ -13,11 +13,15 @@ The monorepo remains the source of truth for:
 
 ## Mirror repositories
 
-The intended mirror repositories are:
+The public mirror repositories are:
 
-- `NestDevLab/nestjs-yalc-example-skeleton`
-- `NestDevLab/nestjs-yalc-example-omnikernel`
-- `NestDevLab/nestjs-yalc-example-task`
+- [NestDevLab/nestjs-yalc-example-skeleton](https://github.com/NestDevLab/nestjs-yalc-example-skeleton)
+- [NestDevLab/nestjs-yalc-example-omnikernel](https://github.com/NestDevLab/nestjs-yalc-example-omnikernel)
+- [NestDevLab/nestjs-yalc-example-task](https://github.com/NestDevLab/nestjs-yalc-example-task)
+
+They are configured as public template repositories so consumers can start a new
+application from the generated example layout without cloning the full
+framework monorepo.
 
 The mirrors should be configured so normal users cannot push directly. Keep the
 default branch protected and allow writes only from maintainers or the sync
@@ -106,10 +110,15 @@ external pushes.
 Each generated mirror contains its own CI workflow. The workflow runs:
 
 ```bash
-npm install --prefer-offline --no-audit --prefix app
-npm run build --prefix app
-npm run test:e2e --prefix app
+npm install --prefer-offline --no-audit
+npm run build
+npm run test:e2e
 ```
+
+Each export has a generated root `package.json` with npm workspaces for `app`,
+`module`, and any additional local example modules. CI installs from the export
+root so sibling modules can resolve both the public framework packages and the
+example-local packages through the shared workspace dependency tree.
 
 The workflow uses `npm install` rather than `npm ci` because the exported
 template does not reuse monorepo lockfiles. If a mirror should become fully

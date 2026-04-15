@@ -1,4 +1,5 @@
 import { CrudGenResourceFactory } from '@nestjs-yalc/crud-gen';
+import { bindGeneratedDataloaderEventEmitter } from '../crudgen-provider-compat.js';
 import {
   OmniCollectionCondition,
   OmniCollectionCreateInput,
@@ -178,8 +179,8 @@ const omniResources = [
   omniExternalRefResource,
 ];
 
-export const omniApiProviders = omniResources.flatMap(
-  (resource) => resource.providers,
+export const omniApiProviders = omniResources.flatMap((resource) =>
+  bindGeneratedDataloaderEventEmitter(resource.providers),
 );
 export const omniApiControllers = omniResources.flatMap(
   (resource) => resource.controllers,

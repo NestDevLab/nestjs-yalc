@@ -6,6 +6,7 @@ import {
   getFn,
 } from '@nestjs-yalc/data-loader';
 import { TaskExternalRef } from '@nestjs-yalc/task-system-module/src/task-external-ref.entity';
+import { bindGeneratedDataloaderEventEmitter } from '../crudgen-provider-compat.js';
 import { TaskAppOmniExternalRefService } from '../omni-task-app/task-app-omni-external-ref.service';
 import {
   TaskExternalRefCondition,
@@ -51,4 +52,6 @@ export const taskExternalRefResource = CrudGenResourceFactory<TaskExternalRef>({
 });
 
 export const ExternalRefsController = taskExternalRefResource.controllers[0];
-export const taskExternalRefProviders = taskExternalRefResource.providers;
+export const taskExternalRefProviders = bindGeneratedDataloaderEventEmitter(
+  taskExternalRefResource.providers,
+);

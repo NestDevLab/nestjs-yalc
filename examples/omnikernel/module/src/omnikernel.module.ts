@@ -1,4 +1,5 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule, Module, Provider } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OmniExternalRefEntity } from './base/omni-external-ref.entity';
 import { OmniNamedEntity } from './base/omni-named.entity';
@@ -17,21 +18,47 @@ import {
   omniKernelQueryServiceProviderFactory,
 } from './omnikernel.query.service';
 
+type ProviderWithInject = Provider & { inject?: unknown[] };
+
+const bindGeneratedDataloaderEventEmitter = (
+  providers: Provider[],
+): Provider[] =>
+  providers.map((provider) => {
+    if (typeof provider !== 'object' || provider === null) return provider;
+
+    const providerWithInject = provider as ProviderWithInject;
+    if (!Array.isArray(providerWithInject.inject)) return provider;
+
+    return {
+      ...providerWithInject,
+      inject: providerWithInject.inject.map((token) => token ?? EventEmitter2),
+    } as Provider;
+  });
+
 @Module({})
 export class OmniKernelModule {
   static register(dbConnection: string): DynamicModule {
-    const omniNamedProviders = omniNamedBackendProvidersFactory(dbConnection);
-    const omniRecordProviders = omniRecordBackendProvidersFactory(dbConnection);
-    const omniRelationProviders =
-      omniRelationBackendProvidersFactory(dbConnection);
-    const omniCollectionProviders =
-      omniCollectionBackendProvidersFactory(dbConnection);
-    const omniDocumentProviders =
-      omniDocumentBackendProvidersFactory(dbConnection);
-    const omniExternalRefProviders =
-      omniExternalRefBackendProvidersFactory(dbConnection);
+    const omniNamedProviders = bindGeneratedDataloaderEventEmitter(
+      omniNamedBackendProvidersFactory(dbConnection).providers,
+    );
+    const omniRecordProviders = bindGeneratedDataloaderEventEmitter(
+      omniRecordBackendProvidersFactory(dbConnection).providers,
+    );
+    const omniRelationProviders = bindGeneratedDataloaderEventEmitter(
+      omniRelationBackendProvidersFactory(dbConnection).providers,
+    );
+    const omniCollectionProviders = bindGeneratedDataloaderEventEmitter(
+      omniCollectionBackendProvidersFactory(dbConnection).providers,
+    );
+    const omniDocumentProviders = bindGeneratedDataloaderEventEmitter(
+      omniDocumentBackendProvidersFactory(dbConnection).providers,
+    );
+    const omniExternalRefProviders = bindGeneratedDataloaderEventEmitter(
+      omniExternalRefBackendProvidersFactory(dbConnection).providers,
+    );
     const omniKernelQueryServiceProvider =
       omniKernelQueryServiceProviderFactory(dbConnection);
+    const eventEmitter = new EventEmitter2();
 
     return {
       module: OmniKernelModule,
@@ -49,21 +76,26 @@ export class OmniKernelModule {
         ),
       ],
       providers: [
-        ...omniNamedProviders.providers,
-        ...omniRecordProviders.providers,
-        ...omniRelationProviders.providers,
-        ...omniCollectionProviders.providers,
-        ...omniDocumentProviders.providers,
-        ...omniExternalRefProviders.providers,
+        {
+          provide: EventEmitter2,
+          useValue: eventEmitter,
+        },
+        ...omniNamedProviders,
+        ...omniRecordProviders,
+        ...omniRelationProviders,
+        ...omniCollectionProviders,
+        ...omniDocumentProviders,
+        ...omniExternalRefProviders,
         omniKernelQueryServiceProvider,
       ],
       exports: [
-        ...omniNamedProviders.providers,
-        ...omniRecordProviders.providers,
-        ...omniRelationProviders.providers,
-        ...omniCollectionProviders.providers,
-        ...omniDocumentProviders.providers,
-        ...omniExternalRefProviders.providers,
+        EventEmitter2,
+        ...omniNamedProviders,
+        ...omniRecordProviders,
+        ...omniRelationProviders,
+        ...omniCollectionProviders,
+        ...omniDocumentProviders,
+        ...omniExternalRefProviders,
         omniKernelQueryServiceProvider,
         OmniKernelQueryService,
       ],

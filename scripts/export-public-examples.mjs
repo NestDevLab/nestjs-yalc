@@ -60,6 +60,10 @@ for (const example of examples) {
   }
 
   rewritePackageManifests(target, example.localPackages);
+  rewriteTsConfigPaths(target, example.localPackages);
+  rewriteE2eTsConfigs(target);
+  rewriteJestConfigs(target, example.localPackages);
+  writeRootPackageManifest(target, example);
   writeExportNotice(target, example.name);
   writeMirrorCi(target, example.name);
   writeMirrorGitignore(target);
@@ -99,6 +103,129 @@ function rewritePackageManifests(rootDir, localPackages) {
   }
 }
 
+function rewriteE2eTsConfigs(rootDir) {
+  for (const tsconfigPath of findFiles(rootDir, 'tsconfig.e2e.json')) {
+    const tsconfig = readJson(tsconfigPath);
+
+    tsconfig.compilerOptions = {
+      ...(tsconfig.compilerOptions ?? {}),
+      module: 'ESNext',
+      moduleResolution: 'node',
+    };
+
+    fs.writeFileSync(tsconfigPath, `${JSON.stringify(tsconfig, null, 2)}\n`);
+  }
+}
+
+function rewriteJestConfigs(rootDir, localPackages) {
+  for (const jestConfigPath of findFiles(rootDir, 'jest-e2e.json')) {
+    const config = readJson(jestConfigPath);
+
+    if (!config.moduleNameMapper) {
+      continue;
+    }
+
+    config.extensionsToTreatAsEsm = ['.ts'];
+
+    const tsTransform = config.transform?.['^.+\\.ts$'];
+    if (Array.isArray(tsTransform) && typeof tsTransform[1] === 'object') {
+      tsTransform[1].useESM = true;
+    }
+
+    const mapper = {};
+
+    if (config.moduleNameMapper['^p-map$']) {
+      mapper['^p-map$'] = config.moduleNameMapper['^p-map$'];
+    }
+
+    for (const [packageName, dependencyPath] of localPackages.entries()) {
+      const localPath = dependencyPath.replace(/^file:\.\.\//, '');
+      mapper[`^${escapeRegExp(packageName)}$`] =
+        `<rootDir>/../../../../${localPath}/src`;
+      mapper[`^${escapeRegExp(packageName)}/src/(.*)$`] =
+        `<rootDir>/../../../../${localPath}/src/$1`;
+    }
+
+    for (const [pattern, replacement] of Object.entries(
+      config.moduleNameMapper,
+    )) {
+      if (
+        pattern.startsWith('^@nestjs-yalc/') ||
+        pattern === '^@nestjs/(.*)$' ||
+        pattern === '^typeorm$' ||
+        pattern === '^p-map$' ||
+        pattern === '^lodash-es$' ||
+        pattern === '^(\\.{1,2}/.*)\\.js$'
+      ) {
+        continue;
+      }
+
+      mapper[pattern] = replacement;
+    }
+
+    mapper['^@nestjs/(.*)$'] = '<rootDir>/../../../../node_modules/@nestjs/$1';
+    mapper['^typeorm$'] = '<rootDir>/../../../../node_modules/typeorm';
+    mapper['^@nestjs-yalc/([^/]+)/(.+?)\\.js$'] =
+      '<rootDir>/../../../../node_modules/@nestjs-yalc/$1/src/$2';
+    mapper['^@nestjs-yalc/([^/]+)/(.*)$'] =
+      '<rootDir>/../../../../node_modules/@nestjs-yalc/$1/src/$2';
+    mapper['^@nestjs-yalc/([^/]+)$'] =
+      '<rootDir>/../../../../node_modules/@nestjs-yalc/$1/src';
+
+    if (config.moduleNameMapper['^(\\.{1,2}/.*)\\.js$']) {
+      mapper['^(\\.{1,2}/.*)\\.js$'] =
+        config.moduleNameMapper['^(\\.{1,2}/.*)\\.js$'];
+    }
+
+    config.moduleNameMapper = mapper;
+    fs.writeFileSync(jestConfigPath, `${JSON.stringify(config, null, 2)}\n`);
+  }
+}
+
+function rewriteTsConfigPaths(rootDir, localPackages) {
+  const publicPackageNames = new Set(publicPackageVersions.keys());
+
+  for (const tsconfigPath of findFiles(rootDir, 'tsconfig.json')) {
+    const tsconfig = readJson(tsconfigPath);
+    const paths = tsconfig.compilerOptions?.paths;
+
+    if (!paths) {
+      continue;
+    }
+
+    // The public export installs dependencies from its generated workspace root,
+    // so monorepo-relative dependency aliases must be rewritten to the exported
+    // repository layout rather than removed.
+    paths['@nestjs/*'] = ['../node_modules/@nestjs/*'];
+    paths.typeorm = ['../node_modules/typeorm'];
+    delete paths['nestjs-yalc'];
+    delete paths['nestjs-yalc/*'];
+
+    for (const packageName of publicPackageNames) {
+      paths[packageName] = [
+        `../node_modules/${packageName}/src/index.js`,
+        `../node_modules/${packageName}/src/index.d.ts`,
+      ];
+      paths[`${packageName}/*`] = [
+        `../node_modules/${packageName}/*`,
+        `../node_modules/${packageName}/src/*`,
+      ];
+    }
+
+    for (const [packageName, dependencyPath] of localPackages.entries()) {
+      const localPath = dependencyPath.replace(/^file:/, '');
+      paths[packageName] = [`${localPath}/src/index.ts`];
+      paths[`${packageName}/*`] = [`${localPath}/*`, `${localPath}/src/*`];
+    }
+
+    fs.writeFileSync(tsconfigPath, `${JSON.stringify(tsconfig, null, 2)}\n`);
+  }
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function versionRangeForPublicPackage(packageName) {
   return `^${publicPackageVersions.get(packageName)}`;
 }
@@ -125,6 +252,31 @@ function writeExportNotice(target, exampleName) {
   ].join('\n');
 
   fs.writeFileSync(path.join(target, 'PUBLIC_EXPORT.md'), notice);
+}
+
+function writeRootPackageManifest(target, example) {
+  const workspaceNames = ['app', 'module'];
+
+  for (const extraCopy of example.extraCopies ?? []) {
+    workspaceNames.push(extraCopy.to);
+  }
+
+  const manifest = {
+    name: `nestjs-yalc-example-${example.name}`,
+    private: true,
+    version: '0.0.0',
+    description: `Generated public ${example.name} example for nestjs-yalc`,
+    scripts: {
+      build: 'npm run build --prefix app',
+      'test:e2e': 'npm run test:e2e --prefix app',
+    },
+    workspaces: workspaceNames,
+  };
+
+  fs.writeFileSync(
+    path.join(target, 'package.json'),
+    `${JSON.stringify(manifest, null, 2)}\n`,
+  );
 }
 
 function writeMirrorCi(target, exampleName) {
@@ -162,13 +314,13 @@ function writeMirrorCi(target, exampleName) {
     '          node-version: ${{ env.NODE_VERSION }}',
     '',
     '      - name: Install example dependencies',
-    '        run: npm install --prefer-offline --no-audit --prefix app',
+    '        run: npm install --prefer-offline --no-audit',
     '',
     '      - name: Build example app',
-    '        run: npm run build --prefix app',
+    '        run: npm run build',
     '',
     '      - name: Run example e2e tests',
-    '        run: npm run test:e2e --prefix app',
+    '        run: npm run test:e2e',
     '',
   ].join('\n');
 

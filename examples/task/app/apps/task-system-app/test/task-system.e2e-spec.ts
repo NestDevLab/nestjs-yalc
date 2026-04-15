@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import { expect } from '@jest/globals';
+import { expect, jest } from '@jest/globals';
 import { HttpService } from '@nestjs/axios';
 import { Test } from '@nestjs/testing';
 import { randomUUID } from 'node:crypto';

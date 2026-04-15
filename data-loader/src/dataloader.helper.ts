@@ -6,6 +6,7 @@ import { IWhereCondition } from '@nestjs-yalc/crud-gen/api-graphql/crud-gen-gql.
 import { Operators } from '@nestjs-yalc/crud-gen/crud-gen.enum.js';
 import {
   FactoryProvider,
+  InjectionToken,
   NotAcceptableException,
   NotFoundException,
   Optional,
@@ -18,7 +19,7 @@ import {
 import { ClassType } from '@nestjs-yalc/types/globals.d.js';
 import { getProviderToken } from '@nestjs-yalc/crud-gen/crud-gen.helpers.js';
 import { EventCrudGen } from '@nestjs-yalc/crud-gen/event.enum.js';
-import * as eventemitter2 from 'eventemitter2';
+import EventEmitter2Class from 'eventemitter2';
 import { type EventEmitter2 } from 'eventemitter2';
 
 export type SearchKeyType<E, T = string> = [keyof E, T] | T | undefined;
@@ -295,7 +296,7 @@ export function DataLoaderFactory<Entity extends Record<string, any>>(
     },
     inject: [
       serviceToken ?? getServiceToken(entity),
-      eventemitter2.EventEmitter2,
+      EventEmitter2Class as unknown as InjectionToken,
     ],
     scope: Scope.REQUEST,
   };

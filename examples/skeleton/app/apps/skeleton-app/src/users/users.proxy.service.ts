@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   HttpAbstractStrategy,
   IHttpCallStrategyResponse,
-} from '@nestjs-yalc/api-strategy';
+} from '@nestjs-yalc/api-strategy/strategies/http-abstract-call.strategy.js';
 
 export const USERS_HTTP_STRATEGY = 'USERS_HTTP_STRATEGY';
 

@@ -6,6 +6,7 @@ import {
   getFn,
 } from '@nestjs-yalc/data-loader';
 import { TaskProject } from '@nestjs-yalc/task-system-module/src/task-project.entity';
+import { bindGeneratedDataloaderEventEmitter } from '../crudgen-provider-compat.js';
 import { TaskAppOmniProjectService } from '../omni-task-app/task-app-omni-project.service';
 import {
   TaskProjectCondition,
@@ -51,4 +52,6 @@ export const taskProjectResource = CrudGenResourceFactory<TaskProject>({
 });
 
 export const ProjectsController = taskProjectResource.controllers[0];
-export const taskProjectProviders = taskProjectResource.providers;
+export const taskProjectProviders = bindGeneratedDataloaderEventEmitter(
+  taskProjectResource.providers,
+);
