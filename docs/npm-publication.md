@@ -55,6 +55,12 @@ Run an npm publish dry-run for every generated package:
 npm run publish:dry-run
 ```
 
+Run the public-package smoke test against local tarballs:
+
+```bash
+npm run smoke:public:tarball
+```
+
 Publish every generated package publicly:
 
 ```bash
@@ -63,6 +69,17 @@ npm run publish:public
 
 The publish script runs from each `var/dist/*` package directory and uses
 `npm publish --access public`.
+
+After publishing, run the same smoke test against the npm registry:
+
+```bash
+npm run smoke:public:registry
+```
+
+The smoke test creates a temporary consumer project outside the monorepo,
+installs the packages, type-checks public imports, and executes runtime imports
+from the public package roots. Use the tarball smoke before publication and the
+registry smoke immediately after publication.
 
 ## Versioning model
 
@@ -83,10 +100,11 @@ depend on local `file:` paths.
 
 ## Publishing order
 
-The helper scripts publish packages in deterministic directory order. This is
-safe for dry-runs. For the first real public release, publish from a clean git
-state and verify that the npm user has publish rights for the `@nestjs-yalc`
-scope before running `npm run publish:public`.
+The helper scripts publish packages in dependency-first order. This prevents the
+aggregate `@nestjs-yalc/framework` package from being published before the
+individual `@nestjs-yalc/*` packages it depends on. For the first real public
+release, publish from a clean git state and verify that the npm user has publish
+rights for the `@nestjs-yalc` scope before running `npm run publish:public`.
 
 If npm rejects a package because the version already exists, bump the root
 version first and rebuild. npm package versions are immutable.
