@@ -1,4 +1,4 @@
-import { CrudGenResourceFactory } from "@nestjs-yalc/crud-gen";
+import { CrudGenResourceFactory } from '@nestjs-yalc/crud-gen';
 import {
   OmniCollectionCondition,
   OmniCollectionCreateInput,
@@ -33,7 +33,7 @@ import {
   OmniRelationEntity,
   OmniRelationType,
   OmniRelationUpdateInput,
-} from "@nestjs-yalc/omnikernel-module";
+} from '@nestjs-yalc/omnikernel-module';
 
 export const omniNamedResource = CrudGenResourceFactory<OmniNamedEntity>({
   entityModel: OmniNamedEntity,
@@ -46,13 +46,13 @@ export const omniNamedResource = CrudGenResourceFactory<OmniNamedEntity>({
         update: OmniNamedUpdateInput,
         conditions: OmniNamedCondition,
       },
-      prefix: "OmniKernel_",
+      prefix: 'OmniKernel_',
     },
   },
   rest: {
     dto: OmniNamedType,
-    path: "omni/named",
-    idField: "guid",
+    path: 'omni/named',
+    idField: 'guid',
   },
 });
 
@@ -67,13 +67,13 @@ export const omniRecordResource = CrudGenResourceFactory<OmniRecordEntity>({
         update: OmniRecordUpdateInput,
         conditions: OmniRecordCondition,
       },
-      prefix: "OmniKernel_",
+      prefix: 'OmniKernel_',
     },
   },
   rest: {
     dto: OmniRecordType,
-    path: "omni/records",
-    idField: "guid",
+    path: 'omni/records',
+    idField: 'guid',
   },
 });
 
@@ -88,14 +88,14 @@ export const omniDocumentResource = CrudGenResourceFactory<OmniDocumentEntity>({
         update: OmniDocumentUpdateInput,
         conditions: OmniDocumentCondition,
       },
-      prefix: "OmniKernel_",
+      prefix: 'OmniKernel_',
     },
     serviceToken: OmniDocumentService.name,
   },
   rest: {
     dto: OmniDocumentType,
-    path: "omni/documents",
-    idField: "guid",
+    path: 'omni/documents',
+    idField: 'guid',
     serviceToken: OmniDocumentService.name,
   },
 });
@@ -112,14 +112,14 @@ export const omniCollectionResource =
           update: OmniCollectionUpdateInput,
           conditions: OmniCollectionCondition,
         },
-        prefix: "OmniKernel_",
+        prefix: 'OmniKernel_',
       },
       serviceToken: OmniCollectionService.name,
     },
     rest: {
       dto: OmniCollectionType,
-      path: "omni/collections",
-      idField: "guid",
+      path: 'omni/collections',
+      idField: 'guid',
       serviceToken: OmniCollectionService.name,
     },
   });
@@ -135,13 +135,13 @@ export const omniRelationResource = CrudGenResourceFactory<OmniRelationEntity>({
         update: OmniRelationUpdateInput,
         conditions: OmniRelationCondition,
       },
-      prefix: "OmniKernel_",
+      prefix: 'OmniKernel_',
     },
   },
   rest: {
     dto: OmniRelationType,
-    path: "omni/relations",
-    idField: "guid",
+    path: 'omni/relations',
+    idField: 'guid',
   },
 });
 
@@ -157,14 +157,14 @@ export const omniExternalRefResource =
           update: OmniExternalRefUpdateInput,
           conditions: OmniExternalRefCondition,
         },
-        prefix: "OmniKernel_",
+        prefix: 'OmniKernel_',
       },
       serviceToken: OmniExternalRefService.name,
     },
     rest: {
       dto: OmniExternalRefType,
-      path: "omni/external-refs",
-      idField: "guid",
+      path: 'omni/external-refs',
+      idField: 'guid',
       serviceToken: OmniExternalRefService.name,
     },
   });
@@ -179,8 +179,8 @@ const omniResources = [
 ];
 
 export const omniApiProviders = omniResources.flatMap(
-  (resource) => resource.providers
+  (resource) => resource.providers,
 );
 export const omniApiControllers = omniResources.flatMap(
-  (resource) => resource.controllers
+  (resource) => resource.controllers,
 );
