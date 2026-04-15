@@ -81,6 +81,47 @@ installs the packages, type-checks public imports, and executes runtime imports
 from the public package roots. Use the tarball smoke before publication and the
 registry smoke immediately after publication.
 
+## GitHub Actions publication
+
+Public npm releases are automated by
+`.github/workflows/npm-publish.yml`. The workflow runs the same release gates as
+the manual process:
+
+- `npm run ci:checks`
+- `npm run pack:dry-run`
+- `npm run publish:dry-run`
+- `npm run smoke:public:tarball`
+- `npm publish --access public --provenance`
+- `npm run smoke:public:registry`
+
+The workflow has two entrypoints:
+
+- `release.published`: validates, publishes, and runs the registry smoke test.
+- `workflow_dispatch`: validates by default. Set `publish = true` to publish
+  manually.
+
+The workflow uses `--skip-existing` for release runs and for manual runs by
+default. This makes the job safe to retry after npm propagation delays or a
+partially completed publish: package versions that already exist are skipped,
+and missing package versions are still published.
+
+Preferred authentication is npm Trusted Publishing with GitHub OIDC. Configure
+each published package under the `@nestjs-yalc` scope with this trusted
+publisher:
+
+```text
+Repository: NestDevLab/nestjs-yalc
+Workflow: .github/workflows/npm-publish.yml
+Environment: npm
+```
+
+The workflow requests `id-token: write` and publishes with `--provenance`, so no
+long-lived npm token is required once Trusted Publishing is configured. If a new
+package must be published before npm allows Trusted Publishing to be configured,
+use a short-lived granular npm token with read/write access to `@nestjs-yalc`,
+enable bypass 2FA, store it as the `NPM_TOKEN` repository secret, publish once,
+then remove the secret after the package is converted to Trusted Publishing.
+
 ## Versioning model
 
 The repository currently uses a fixed-version release model. The root
