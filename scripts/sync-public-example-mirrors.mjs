@@ -10,6 +10,10 @@ const owner = getOption('owner') ?? process.env.EXAMPLE_MIRROR_OWNER ?? 'NestDev
 const branch = getOption('branch') ?? process.env.EXAMPLE_MIRROR_BRANCH ?? 'main';
 const cloneRoot = path.join(repoRoot, 'var', 'example-mirrors');
 const exportRoot = path.join(repoRoot, 'var', 'example-exports');
+const mirrorToken = process.env.EXAMPLE_MIRROR_TOKEN ?? process.env.GH_TOKEN;
+const gitAuthHeader = mirrorToken
+  ? `Authorization: Basic ${Buffer.from(`x-access-token:${mirrorToken}`).toString('base64')}`
+  : undefined;
 
 const mirrors = [
   {
@@ -31,6 +35,12 @@ const mirrors = [
       'nestjs-yalc-example-task',
   },
 ];
+
+if (!dryRun && !mirrorToken) {
+  throw new Error(
+    'EXAMPLE_MIRROR_TOKEN or GH_TOKEN is required when pushing public example mirrors.',
+  );
+}
 
 run('npm', ['run', 'examples:export'], repoRoot);
 fs.mkdirSync(cloneRoot, { recursive: true });
@@ -55,6 +65,7 @@ for (const mirror of mirrors) {
       targetDir,
     ],
     repoRoot,
+    { auth: Boolean(gitAuthHeader) },
   );
 
   replaceRepositoryContents(sourceDir, targetDir);
@@ -78,7 +89,7 @@ for (const mirror of mirrors) {
     ['commit', '-m', 'chore: sync generated example from nestjs-yalc'],
     targetDir,
   );
-  run('git', ['push', 'origin', branch], targetDir);
+  run('git', ['push', 'origin', branch], targetDir, { auth: true });
 }
 
 function getOption(name) {
@@ -87,12 +98,6 @@ function getOption(name) {
 }
 
 function mirrorUrl(repository) {
-  const token = process.env.EXAMPLE_MIRROR_TOKEN ?? process.env.GH_TOKEN;
-
-  if (token) {
-    return `https://x-access-token:${token}@github.com/${owner}/${repository}.git`;
-  }
-
   return `https://github.com/${owner}/${repository}.git`;
 }
 
@@ -134,17 +139,41 @@ function getOutput(command, commandArgs, cwd) {
     cwd,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
+    env: gitEnv(),
   });
 }
 
-function run(command, commandArgs, cwd) {
-  console.log(`$ ${command} ${commandArgs.map(sanitizeArg).join(' ')}`);
-  execFileSync(command, commandArgs, {
+function run(command, commandArgs, cwd, options = {}) {
+  const finalArgs = withGitAuth(command, commandArgs, options.auth);
+  console.log(`$ ${command} ${finalArgs.map(sanitizeArg).join(' ')}`);
+  execFileSync(command, finalArgs, {
     cwd,
     stdio: 'inherit',
+    env: gitEnv(),
   });
 }
 
 function sanitizeArg(arg) {
-  return arg.replace(/x-access-token:[^@]+@github\.com/g, 'x-access-token:***@github.com');
+  return arg
+    .replace(/x-access-token:[^@]+@github\.com/g, 'x-access-token:***@github.com')
+    .replace(/Authorization: Basic \S+/g, 'Authorization: Basic ***');
+}
+
+function withGitAuth(command, commandArgs, auth) {
+  if (command !== 'git' || !auth || !gitAuthHeader) {
+    return commandArgs;
+  }
+
+  return [
+    '-c',
+    `http.https://github.com/.extraheader=${gitAuthHeader}`,
+    ...commandArgs,
+  ];
+}
+
+function gitEnv() {
+  return {
+    ...process.env,
+    GIT_TERMINAL_PROMPT: '0',
+  };
 }

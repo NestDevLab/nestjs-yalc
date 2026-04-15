@@ -22,6 +22,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: example-mirrors-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   NODE_VERSION: 24
 
