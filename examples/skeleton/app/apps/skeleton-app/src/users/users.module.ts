@@ -11,7 +11,7 @@ import { YalcClsModule } from '@nestjs-yalc/app/cls.module.js';
 import { NestHttpCallStrategyProvider } from '@nestjs-yalc/api-strategy';
 import { UsersProxyService } from './users.proxy.service';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { EventModule } from '@nestjs-yalc/event-manager/event.module';
+import { EventModule } from '@nestjs-yalc/event-manager';
 
 @Module({
   imports: [

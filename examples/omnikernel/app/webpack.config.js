@@ -4,9 +4,9 @@ module.exports = (options) => ({
     ...options.resolve,
     extensionAlias: {
       ...(options.resolve?.extensionAlias ?? {}),
-      ".js": [".ts", ".js"],
-      ".mjs": [".mts", ".mjs"],
-      ".cjs": [".cts", ".cjs"],
+      '.js': ['.ts', '.js'],
+      '.mjs': ['.mts', '.mjs'],
+      '.cjs': ['.cts', '.cjs'],
     },
   },
 });

@@ -83,7 +83,7 @@ jobs:
       - name: Publish packages
         if: github.event_name == 'release' || inputs.publish
         env:
-          SKIP_EXISTING: ${{ github.event_name == 'release' || inputs.skip-existing }}
+          SKIP_EXISTING: ${{ github.event_name == 'release' || inputs['skip-existing'] }}
         run: |
           args=(--provenance)
           if [[ "$SKIP_EXISTING" == "true" ]]; then
@@ -93,7 +93,7 @@ jobs:
           node ./scripts/publish-public-packages.mjs "${args[@]}"
 
       - name: Run registry consumer smoke test
-        if: (github.event_name == 'release' || inputs.publish) && inputs.registry-smoke != false
+        if: (github.event_name == 'release' || inputs.publish) && inputs['registry-smoke'] != false
         run: |
           for attempt in {1..6}; do
             if npm run smoke:public:registry; then
