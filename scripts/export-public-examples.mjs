@@ -5,16 +5,21 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const rootPackage = readJson(path.join(repoRoot, 'package.json'));
 const outputRoot = path.join(repoRoot, 'var', 'example-exports');
-const publicVersionRange = `^${rootPackage.version}`;
-const publicPackageNames = new Set(
-  [
-    rootPackage.name,
-    ...(rootPackage.workspaces ?? []).map((workspacePath) => {
-      const packagePath = path.join(repoRoot, workspacePath, 'package.json');
-      return fs.existsSync(packagePath) ? readJson(packagePath).name : undefined;
-    }),
-  ].filter(Boolean),
-);
+const publicPackageVersions = new Map([[rootPackage.name, rootPackage.version]]);
+
+for (const workspacePath of rootPackage.workspaces ?? []) {
+  const packagePath = path.join(repoRoot, workspacePath, 'package.json');
+
+  if (!fs.existsSync(packagePath)) {
+    continue;
+  }
+
+  const manifest = readJson(packagePath);
+
+  if (manifest.name && manifest.version) {
+    publicPackageVersions.set(manifest.name, manifest.version);
+  }
+}
 
 const examples = [
   {
@@ -56,6 +61,8 @@ for (const example of examples) {
 
   rewritePackageManifests(target, example.localPackages);
   writeExportNotice(target, example.name);
+  writeMirrorCi(target, example.name);
+  writeMirrorGitignore(target);
   console.log(`exported ${example.name} -> ${path.relative(repoRoot, target)}`);
 }
 
@@ -81,14 +88,19 @@ function rewritePackageManifests(rootDir, localPackages) {
           continue;
         }
 
-        if (publicPackageNames.has(dependencyName)) {
-          manifest[section][dependencyName] = publicVersionRange;
+        if (publicPackageVersions.has(dependencyName)) {
+          manifest[section][dependencyName] =
+            versionRangeForPublicPackage(dependencyName);
         }
       }
     }
 
     fs.writeFileSync(packagePath, `${JSON.stringify(manifest, null, 2)}\n`);
   }
+}
+
+function versionRangeForPublicPackage(packageName) {
+  return `^${publicPackageVersions.get(packageName)}`;
 }
 
 function writeExportNotice(target, exampleName) {
@@ -98,8 +110,11 @@ function writeExportNotice(target, exampleName) {
     `This directory is a generated export of the \`${exampleName}\` example.`,
     '',
     'It is intended to be mirrored into a read-only example repository. Framework',
-    'dependencies are rewritten to public `@nestjs-yalc/*` npm versions, while',
+    'dependencies are rewritten to package-specific public npm versions, while',
     'example-local modules stay as local `file:` dependencies.',
+    '',
+    'Do not edit the mirror repository directly. Change the source example in',
+    '`NestDevLab/nestjs-yalc`, regenerate the export, and sync the mirror.',
     '',
     'Regenerate it from the framework monorepo with:',
     '',
@@ -110,6 +125,68 @@ function writeExportNotice(target, exampleName) {
   ].join('\n');
 
   fs.writeFileSync(path.join(target, 'PUBLIC_EXPORT.md'), notice);
+}
+
+function writeMirrorCi(target, exampleName) {
+  const workflowDir = path.join(target, '.github', 'workflows');
+  fs.mkdirSync(workflowDir, { recursive: true });
+
+  const workflow = [
+    'name: example ci',
+    '',
+    'on:',
+    '  workflow_dispatch:',
+    '  push:',
+    '    branches:',
+    '      - main',
+    '  pull_request:',
+    '',
+    'env:',
+    '  NODE_VERSION: 24',
+    '  NODE_ENV: pipeline',
+    '  JWT_SECRET_PVT: dummydummy',
+    '  JWT_SECRET_PUB: dummydummy',
+    '',
+    'jobs:',
+    '  e2e:',
+    `    name: ${exampleName} example e2e`,
+    '    runs-on: ubuntu-latest',
+    '',
+    '    steps:',
+    '      - name: Checkout',
+    '        uses: actions/checkout@v4',
+    '',
+    '      - name: Setup Node',
+    '        uses: actions/setup-node@v4',
+    '        with:',
+    '          node-version: ${{ env.NODE_VERSION }}',
+    '',
+    '      - name: Install example dependencies',
+    '        run: npm install --prefer-offline --no-audit --prefix app',
+    '',
+    '      - name: Build example app',
+    '        run: npm run build --prefix app',
+    '',
+    '      - name: Run example e2e tests',
+    '        run: npm run test:e2e --prefix app',
+    '',
+  ].join('\n');
+
+  fs.writeFileSync(path.join(workflowDir, 'ci.yml'), workflow);
+}
+
+function writeMirrorGitignore(target) {
+  const gitignore = [
+    'node_modules/',
+    'dist/',
+    'coverage/',
+    '.env',
+    '.env.*',
+    '!.env.example',
+    '',
+  ].join('\n');
+
+  fs.writeFileSync(path.join(target, '.gitignore'), gitignore);
 }
 
 function copyDir(from, to) {

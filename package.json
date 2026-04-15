@@ -43,6 +43,8 @@
     "changeset:status": "changeset status",
     "version:packages": "changeset version && npm install --package-lock-only --ignore-scripts",
     "examples:export": "node ./scripts/export-public-examples.mjs",
+    "examples:mirror": "node ./scripts/sync-public-example-mirrors.mjs",
+    "examples:mirror:dry-run": "node ./scripts/sync-public-example-mirrors.mjs --dry-run",
     "test:vscode": "node test.js ",
     "npm:update:onlylock": "npm update --package-lock-only",
     "npm:outdated": "npm outdated",
