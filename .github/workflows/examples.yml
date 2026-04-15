@@ -41,7 +41,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: ${{ matrix.path }}/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            ${{ matrix.path }}/package-lock.json
+
+      - name: Install framework dependencies
+        run: npm ci --prefer-offline --no-audit
 
       - name: Install example dependencies
         run: npm ci --prefer-offline --no-audit --prefix "${{ matrix.path }}"
