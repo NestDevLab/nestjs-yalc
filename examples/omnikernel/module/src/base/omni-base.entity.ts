@@ -6,4 +6,8 @@ import { BaseEntity, PrimaryColumn } from 'typeorm';
 export abstract class OmniBaseEntity extends EntityWithTimestamps(BaseEntity) {
   @PrimaryColumn('varchar', { name: 'guid', length: 36 })
   guid!: string;
+
+  declare createdAt: Date;
+
+  declare updatedAt: Date;
 }

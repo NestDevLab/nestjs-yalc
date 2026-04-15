@@ -3,6 +3,14 @@
   "type": "module",
   "version": "1.3.2",
   "description": "NestJS - Yet Another Library Collection",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NestDevLab/nestjs-yalc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/NestDevLab/nestjs-yalc/issues"
+  },
+  "homepage": "https://github.com/NestDevLab/nestjs-yalc#readme",
   "scripts": {
     "ci:checks": "npm run lint && npm run build && npm run test:cov && npm run test:e2e",
     "prebuild": "node ./scripts/clean-dist.mjs",
@@ -20,10 +28,15 @@
     "test:cov:serve": "npx http-server -c-1 ./var/coverage/",
     "test:cov:clear": "npm run test:clear && rimraf ./var/coverage/",
     "test:clear": "node node_modules/.bin/jest --clearCache",
-    "test:e2e": "npm run test:e2e --prefix examples/skeleton/app",
+    "test:e2e": "npm run test:e2e:examples",
+    "test:e2e:examples": "npm run test:e2e:skeleton && npm run test:e2e:omnikernel && npm run test:e2e:task",
+    "test:e2e:skeleton": "npm run test:e2e --prefix examples/skeleton/app",
+    "test:e2e:omnikernel": "npm run test:e2e --prefix examples/omnikernel/app",
+    "test:e2e:task": "npm run test:e2e --prefix examples/task/app",
     "pack:dry-run": "npm run build && node ./scripts/pack-public-packages.mjs",
     "publish:dry-run": "npm run build && node ./scripts/publish-public-packages.mjs --dry-run",
     "publish:public": "npm run build && node ./scripts/publish-public-packages.mjs",
+    "publish:public:ci": "npm run build && node ./scripts/publish-public-packages.mjs --skip-existing --provenance",
     "smoke:public:tarball": "npm run build && node ./scripts/smoke-public-packages.mjs --source=tarball",
     "smoke:public:registry": "node ./scripts/smoke-public-packages.mjs --source=registry",
     "examples:export": "node ./scripts/export-public-examples.mjs",

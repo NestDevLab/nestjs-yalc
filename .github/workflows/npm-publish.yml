@@ -1,0 +1,112 @@
+name: Publish public npm packages
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish packages to npm after validation"
+        required: true
+        type: boolean
+        default: false
+      skip-existing:
+        description: "Skip package versions that already exist on npm"
+        required: true
+        type: boolean
+        default: true
+      registry-smoke:
+        description: "Run the public registry smoke test after publishing"
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: 24
+  NODE_ENV: pipeline
+  JWT_SECRET_PVT: dummydummy
+  JWT_SECRET_PUB: dummydummy
+
+jobs:
+  publish:
+    name: Validate and publish npm packages
+    runs-on: ubuntu-latest
+    environment: npm
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Run framework checks
+        run: npm run ci:checks
+
+      - name: Validate public package tarballs
+        run: npm run pack:dry-run
+
+      - name: Validate npm publish metadata
+        run: npm run publish:dry-run
+
+      - name: Run tarball consumer smoke test
+        run: npm run smoke:public:tarball
+
+      - name: Configure npm token fallback
+        if: github.event_name == 'release' || inputs.publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [[ -n "$NPM_TOKEN" ]]; then
+            npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
+          fi
+
+      - name: Publish packages
+        if: github.event_name == 'release' || inputs.publish
+        env:
+          SKIP_EXISTING: ${{ github.event_name == 'release' || inputs['skip-existing'] }}
+        run: |
+          args=(--provenance)
+          if [[ "$SKIP_EXISTING" == "true" ]]; then
+            args+=(--skip-existing)
+          fi
+
+          node ./scripts/publish-public-packages.mjs "${args[@]}"
+
+      - name: Run registry consumer smoke test
+        if: (github.event_name == 'release' || inputs.publish) && inputs['registry-smoke'] != false
+        run: |
+          for attempt in {1..6}; do
+            if npm run smoke:public:registry; then
+              exit 0
+            fi
+
+            echo "Registry smoke failed on attempt ${attempt}; retrying after npm propagation delay."
+            sleep 30
+          done
+
+          npm run smoke:public:registry
+
+      - name: Dry-run summary
+        if: github.event_name == 'workflow_dispatch' && !inputs.publish
+        run: |
+          echo "Publish input is false; validation completed without publishing."

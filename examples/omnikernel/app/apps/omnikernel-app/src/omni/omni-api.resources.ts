@@ -96,7 +96,7 @@ export const omniDocumentResource = CrudGenResourceFactory<OmniDocumentEntity>({
     dto: OmniDocumentType,
     path: 'omni/documents',
     idField: 'guid',
-    serviceToken: OmniDocumentService,
+    serviceToken: OmniDocumentService.name,
   },
 });
 
@@ -120,7 +120,7 @@ export const omniCollectionResource =
       dto: OmniCollectionType,
       path: 'omni/collections',
       idField: 'guid',
-      serviceToken: OmniCollectionService,
+      serviceToken: OmniCollectionService.name,
     },
   });
 
@@ -165,7 +165,7 @@ export const omniExternalRefResource =
       dto: OmniExternalRefType,
       path: 'omni/external-refs',
       idField: 'guid',
-      serviceToken: OmniExternalRefService,
+      serviceToken: OmniExternalRefService.name,
     },
   });
 

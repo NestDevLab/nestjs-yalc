@@ -5,6 +5,7 @@
   "root": "apps/omnikernel-app",
   "compilerOptions": {
     "webpack": true,
+    "webpackConfigPath": "webpack.config.js",
     "tsConfigPath": "apps/omnikernel-app/tsconfig.app.json"
   },
   "projects": {
@@ -14,6 +15,7 @@
       "entryFile": "main",
       "sourceRoot": "apps/omnikernel-app/src",
       "compilerOptions": {
+        "webpackConfigPath": "webpack.config.js",
         "tsConfigPath": "apps/omnikernel-app/tsconfig.app.json"
       }
     }

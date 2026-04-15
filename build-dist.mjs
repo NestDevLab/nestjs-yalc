@@ -6,6 +6,15 @@ const cwd = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 const rootPkgPath = path.join(cwd, 'package.json');
 
 const rootPkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf8'));
+const publicRepository = rootPkg.repository ?? {
+  type: 'git',
+  url: 'git+https://github.com/NestDevLab/nestjs-yalc.git',
+};
+const publicBugs = rootPkg.bugs ?? {
+  url: 'https://github.com/NestDevLab/nestjs-yalc/issues',
+};
+const publicHomepage =
+  rootPkg.homepage ?? 'https://github.com/NestDevLab/nestjs-yalc#readme';
 
 const distRoot = path.join(cwd, 'var', 'dist');
 
@@ -223,6 +232,9 @@ for (const workspace of packages) {
     typings: undefined,
     exports: exportsField,
     files: Array.from(new Set([...(pkg.files ?? []), 'src'])),
+    repository: pkg.repository ?? publicRepository,
+    bugs: pkg.bugs ?? publicBugs,
+    homepage: pkg.homepage ?? publicHomepage,
     publishConfig: {
       ...(pkg.publishConfig ?? {}),
       access: 'public',
