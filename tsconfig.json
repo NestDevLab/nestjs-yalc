@@ -165,7 +165,6 @@
   ],
   "exclude": [
     "**/node_modules",
-    "kafka",
     "examples",
     "test",
     "**/__mocks__",

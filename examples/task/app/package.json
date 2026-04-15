@@ -50,7 +50,7 @@
     "graphql": "^16.12.0",
     "sqlite3": "^5.1.7",
     "typeorm": "^0.3.14",
-    "@types/nestjs-yalc": "file:../../../types",
+    "@nestjs-yalc/types": "file:../../../types",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^4.1.2",
     "rxjs": "^7.8.0"

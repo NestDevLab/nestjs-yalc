@@ -26,7 +26,7 @@
     "@nestjs/graphql": "^10.2.1",
     "@nestjs/platform-express": "^9.4.3",
     "@nestjs/typeorm": "^9.0.1",
-    "@types/nestjs-yalc": "file:../../../types",
+    "@nestjs-yalc/types": "file:../../../types",
     "apollo-server-core": "^3.13.0",
     "apollo-server-express": "^3.13.0",
     "graphql": "^16.12.0",

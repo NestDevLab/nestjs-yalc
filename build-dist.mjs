@@ -10,6 +10,57 @@ const rootPkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf8'));
 const distRoot = path.join(cwd, 'var', 'dist');
 
 const workspaces = Array.isArray(rootPkg.workspaces) ? rootPkg.workspaces : [];
+const rootVersion = rootPkg.version ?? '0.0.0';
+
+const readPackageJson = (pkgDir) => {
+  const pkgJsonPath = path.join(pkgDir, 'package.json');
+  if (!fs.existsSync(pkgJsonPath)) return undefined;
+  return JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+};
+
+const workspacePackages = workspaces
+  .map((workspace) => {
+    const pkgDir = path.resolve(cwd, workspace);
+    const pkg = readPackageJson(pkgDir);
+    return pkg?.name ? { workspace, pkg, pkgDir } : undefined;
+  })
+  .filter(Boolean);
+
+const internalPackageNames = new Set([
+  rootPkg.name,
+  ...workspacePackages.map(({ pkg }) => pkg.name),
+]);
+
+const frameworkExcludedPackageNames = new Set([
+  '@nestjs-yalc/jest',
+  '@nestjs-yalc/jest-config',
+]);
+
+const frameworkRuntimeExports = workspacePackages.filter(({ pkg }) => {
+  return (
+    pkg.name.startsWith('@nestjs-yalc/') &&
+    !pkg.name.includes('/types') &&
+    !frameworkExcludedPackageNames.has(pkg.name)
+  );
+});
+
+const frameworkTypeExports = workspacePackages.filter(({ pkg }) => {
+  return (
+    pkg.name.startsWith('@nestjs-yalc/') &&
+    !frameworkExcludedPackageNames.has(pkg.name)
+  );
+});
+
+const rewriteInternalDependencies = (dependencies) => {
+  if (!dependencies) return dependencies;
+
+  return Object.fromEntries(
+    Object.entries(dependencies).map(([name, version]) => {
+      if (!internalPackageNames.has(name)) return [name, version];
+      return [name, `^${rootVersion}`];
+    }),
+  );
+};
 
 const normalizeRelPath = (value) => {
   const normalized = value.replace(/\\/g, '/');
@@ -66,11 +117,47 @@ for (const workspace of packages) {
   if (!pkgName) continue;
 
   const pkgFolder = pkgName.split('/').pop();
-  const relativeDir =
-    workspace === '.' ? pkgFolder : path.relative(cwd, pkgDir);
+  const relativeDir = pkgFolder;
   const distDir = path.join(distRoot, relativeDir);
   if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
   const srcDir = path.join(pkgDir, 'src');
+  const hasSrcDir = fs.existsSync(srcDir);
+  const sourceOutputDir = hasSrcDir
+    ? path.join(distRoot, path.relative(cwd, pkgDir), 'src')
+    : path.join(distRoot, path.relative(cwd, pkgDir));
+
+  if (workspace === '.') {
+    const frameworkSrcDir = path.join(distDir, 'src');
+    fs.mkdirSync(frameworkSrcDir, { recursive: true });
+
+    const jsExports = frameworkRuntimeExports
+      .map(({ pkg: workspacePkg }) => `export * from '${workspacePkg.name}';`)
+      .join('\n');
+    const dtsExports = frameworkTypeExports
+      .map(({ pkg: workspacePkg }) => `export * from '${workspacePkg.name}';`)
+      .join('\n');
+
+    fs.writeFileSync(
+      path.join(frameworkSrcDir, 'index.js'),
+      `${jsExports}\n`,
+      'utf8',
+    );
+    fs.writeFileSync(
+      path.join(frameworkSrcDir, 'index.d.ts'),
+      `${dtsExports}\n`,
+      'utf8',
+    );
+  }
+
+  if (
+    workspace !== '.' &&
+    sourceOutputDir !== path.join(distDir, 'src') &&
+    fs.existsSync(sourceOutputDir)
+  ) {
+    fs.cpSync(sourceOutputDir, path.join(distDir, 'src'), {
+      recursive: true,
+    });
+  }
 
   const compiledIndex = path.join(distDir, 'src', 'index.js');
   const compiledDts = path.join(distDir, 'src', 'index.d.ts');
@@ -97,13 +184,28 @@ for (const workspace of packages) {
     : undefined;
 
   const exportsField =
-    pkg.exports !== undefined
+    workspace === '.'
+      ? {
+          '.': {
+            types: './src/index.d.ts',
+            import: './src/index.js',
+            default: './src/index.js',
+          },
+        }
+      : pkg.exports !== undefined
       ? normalizeExportTargets(pkg.exports, (value) => {
           if (!compiledIndexExists && !compiledDtsExists) return value;
           if (value.startsWith('./dist/src/'))
             return value.replace('./dist/src/', './src/');
           if (value.startsWith('./dist/'))
             return value.replace('./dist/', './src/');
+          if (
+            !hasSrcDir &&
+            value.startsWith('./') &&
+            !value.startsWith('./src/')
+          ) {
+            return value.replace('./', './src/');
+          }
           return value;
         })
       : {
@@ -114,13 +216,17 @@ for (const workspace of packages) {
   const distPkg = {
     ...pkg,
     name: pkgName,
-    version: pkg.version ?? rootPkg.version ?? '0.0.0',
+    version: rootVersion,
     main,
     module: undefined,
     types,
     typings: undefined,
     exports: exportsField,
     files: Array.from(new Set([...(pkg.files ?? []), 'src'])),
+    publishConfig: {
+      ...(pkg.publishConfig ?? {}),
+      access: 'public',
+    },
   };
 
   const tslibVersion =
@@ -128,13 +234,40 @@ for (const workspace of packages) {
     (rootPkg.dependencies && rootPkg.dependencies.tslib) ||
     '^2.6.3';
 
+  const frameworkDependencies =
+    workspace === '.'
+      ? Object.fromEntries(
+          frameworkTypeExports.map(({ pkg: workspacePkg }) => [
+            workspacePkg.name,
+            `^${rootVersion}`,
+          ]),
+        )
+      : {};
+
   distPkg.dependencies = {
-    ...(pkg.dependencies ?? {}),
+    ...rewriteInternalDependencies(pkg.dependencies ?? {}),
+    ...frameworkDependencies,
     tslib: tslibVersion,
   };
 
+  if (pkg.peerDependencies) {
+    distPkg.peerDependencies = rewriteInternalDependencies(
+      pkg.peerDependencies,
+    );
+  }
+
+  if (pkg.optionalDependencies) {
+    distPkg.optionalDependencies = rewriteInternalDependencies(
+      pkg.optionalDependencies,
+    );
+  }
+
   // Avoid shipping dev-time scripts (postinstall, etc.) in built artefacts.
   delete distPkg.scripts;
+  delete distPkg.devDependencies;
+  delete distPkg.workspaces;
+  delete distPkg.overrides;
+  delete distPkg.private;
 
   const distPkgPath = path.join(distDir, 'package.json');
   fs.writeFileSync(
@@ -142,4 +275,16 @@ for (const workspace of packages) {
     `${JSON.stringify(distPkg, null, 2)}\n`,
     'utf8',
   );
+
+  const licensePath = path.join(cwd, 'LICENSE');
+  if (fs.existsSync(licensePath)) {
+    fs.copyFileSync(licensePath, path.join(distDir, 'LICENSE'));
+  }
+
+  const readmePath = fs.existsSync(path.join(pkgDir, 'README.md'))
+    ? path.join(pkgDir, 'README.md')
+    : path.join(cwd, 'docs', 'README.md');
+  if (fs.existsSync(readmePath)) {
+    fs.copyFileSync(readmePath, path.join(distDir, 'README.md'));
+  }
 }
