@@ -55,6 +55,10 @@ Run an npm publish dry-run for every generated package:
 npm run publish:dry-run
 ```
 
+The dry-run uses `--skip-existing`, matching the publish workflow retry
+behavior. If the current version is already published, the command skips that
+package instead of failing on npm's immutable-version guard.
+
 Run the public-package smoke test against local tarballs:
 
 ```bash
@@ -124,7 +128,7 @@ then remove the secret after the package is converted to Trusted Publishing.
 
 ## Versioning model
 
-The repository currently uses a fixed-version release model. The root
+The repository uses Changesets with a fixed-version release group. The root
 `package.json` version is the release version, and every generated npm package
 uses that same version.
 
@@ -136,8 +140,51 @@ Internal package dependencies are rewritten to the same public range:
 }
 ```
 
-This keeps the first public release simple and avoids publishing packages that
-depend on local `file:` paths.
+This keeps publication simple and avoids publishing packages that depend on
+local `file:` paths. It also matches `build-dist.mjs`, which generates every
+public package from the root release version.
+
+Changesets versions the workspace packages in one fixed release group. The
+generated aggregate package `@nestjs-yalc/framework` is the repository root
+package, not a workspace package, so `npm run version:packages` runs
+`scripts/sync-root-version.mjs` after `changeset version`. That synchronization
+sets the root/framework version to the same fixed workspace release version and
+updates `package-lock.json`.
+
+Add a changeset in every PR that changes public behavior:
+
+```bash
+npm run changeset
+```
+
+Select the workspace package or packages changed by the PR. Do not select
+`@nestjs-yalc/framework`; it follows the fixed release version automatically.
+
+Choose the highest required release type for the overall public release:
+
+- `patch`: bug fixes, documentation corrections that affect package consumers,
+  and compatible internal improvements.
+- `minor`: new public APIs, new supported package entrypoints, or new framework
+  capabilities.
+- `major`: breaking public API or runtime behavior changes.
+
+For changes that only affect CI, tests, or repository maintenance, do not add a
+changeset.
+
+Check pending release impact locally:
+
+```bash
+npm run changeset:status
+```
+
+After changes are merged into `dev`, `.github/workflows/changesets.yml` creates
+or updates a release PR titled `chore(release): version packages`. That PR runs
+`npm run version:packages`, updates package versions, updates changelogs, and
+removes consumed changeset files.
+
+The version PR does not publish by itself. Once the version PR is merged, use
+the npm publication workflow described above to publish the new immutable npm
+versions.
 
 ## Publishing order
 
@@ -147,8 +194,8 @@ individual `@nestjs-yalc/*` packages it depends on. For the first real public
 release, publish from a clean git state and verify that the npm user has publish
 rights for the `@nestjs-yalc` scope before running `npm run publish:public`.
 
-If npm rejects a package because the version already exists, bump the root
-version first and rebuild. npm package versions are immutable.
+If npm rejects a package because the version already exists, create or merge the
+next Changesets version PR and rebuild. npm package versions are immutable.
 
 ## Consumer installation
 

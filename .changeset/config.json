@@ -1,0 +1,32 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.1.3/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [
+    [
+      "@nestjs-yalc/api-strategy",
+      "@nestjs-yalc/app",
+      "@nestjs-yalc/aws-helpers",
+      "@nestjs-yalc/crud-gen",
+      "@nestjs-yalc/data-loader",
+      "@nestjs-yalc/database",
+      "@nestjs-yalc/errors",
+      "@nestjs-yalc/event-manager",
+      "@nestjs-yalc/field-middleware",
+      "@nestjs-yalc/graphql",
+      "@nestjs-yalc/interfaces",
+      "@nestjs-yalc/jest",
+      "@nestjs-yalc/jest-config",
+      "@nestjs-yalc/kafka",
+      "@nestjs-yalc/logger",
+      "@nestjs-yalc/types",
+      "@nestjs-yalc/types-extends",
+      "@nestjs-yalc/utils"
+    ]
+  ],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "dev",
+  "updateInternalDependencies": "patch",
+  "ignore": []
+}
