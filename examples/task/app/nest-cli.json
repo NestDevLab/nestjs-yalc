@@ -5,6 +5,7 @@
   "root": "apps/task-system-app",
   "compilerOptions": {
     "webpack": true,
+    "webpackConfigPath": "webpack.config.js",
     "tsConfigPath": "apps/task-system-app/tsconfig.app.json"
   },
   "projects": {
@@ -14,6 +15,7 @@
       "entryFile": "main",
       "sourceRoot": "apps/task-system-app/src",
       "compilerOptions": {
+        "webpackConfigPath": "webpack.config.js",
         "tsConfigPath": "apps/task-system-app/tsconfig.app.json"
       }
     }

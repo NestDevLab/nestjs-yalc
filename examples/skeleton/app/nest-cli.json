@@ -5,6 +5,7 @@
   "root": "apps/skeleton-app",
   "compilerOptions": {
     "webpack": true,
+    "webpackConfigPath": "webpack.config.js",
     "tsConfigPath": "apps/skeleton-app/tsconfig.app.json"
   },
   "projects": {
@@ -14,6 +15,7 @@
       "entryFile": "main",
       "sourceRoot": "apps/skeleton-app/src",
       "compilerOptions": {
+        "webpackConfigPath": "webpack.config.js",
         "tsConfigPath": "apps/skeleton-app/tsconfig.app.json"
       }
     },
@@ -23,6 +25,7 @@
       "entryFile": "main",
       "sourceRoot": "apps/skeleton-cron/src",
       "compilerOptions": {
+        "webpackConfigPath": "webpack.config.js",
         "tsConfigPath": "apps/skeleton-cron/tsconfig.app.json"
       }
     },
@@ -32,6 +35,7 @@
       "entryFile": "index",
       "sourceRoot": "libs/skeleton-base-app/src",
       "compilerOptions": {
+        "webpackConfigPath": "webpack.config.js",
         "tsConfigPath": "libs/skeleton-base-app/tsconfig.lib.json"
       }
     }
