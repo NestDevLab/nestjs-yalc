@@ -1,0 +1,53 @@
+name: examples pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+      - master
+  pull_request:
+
+env:
+  NODE_VERSION: 24
+  NODE_ENV: pipeline
+  JWT_SECRET_PVT: dummydummy
+  JWT_SECRET_PUB: dummydummy
+
+jobs:
+  e2e:
+    name: ${{ matrix.name }} example e2e
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Skeleton
+            path: examples/skeleton/app
+          - name: OmniKernel
+            path: examples/omnikernel/app
+          - name: Task
+            path: examples/task/app
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          submodules: recursive
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ${{ matrix.path }}/package-lock.json
+
+      - name: Install example dependencies
+        run: npm ci --prefer-offline --no-audit --prefix "${{ matrix.path }}"
+
+      - name: Build example app
+        run: npm run build --prefix "${{ matrix.path }}"
+
+      - name: Run example e2e tests
+        run: npm run test:e2e --prefix "${{ matrix.path }}"
