@@ -54,20 +54,23 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Check mirror token
+      - name: Inspect mirror token
+        id: mirror-token
         env:
           EXAMPLE_MIRROR_TOKEN: ${{ secrets.EXAMPLE_MIRROR_TOKEN }}
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
         run: |
           if [ "$DRY_RUN" != "true" ] && [ -z "$EXAMPLE_MIRROR_TOKEN" ]; then
-            echo "EXAMPLE_MIRROR_TOKEN is required to push external mirror repositories."
-            exit 1
+            echo "::warning::EXAMPLE_MIRROR_TOKEN is not configured. Running mirror sync in dry-run mode."
+            echo "dry_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "dry_run=$DRY_RUN" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Sync mirrors
         env:
           EXAMPLE_MIRROR_TOKEN: ${{ secrets.EXAMPLE_MIRROR_TOKEN }}
-          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+          DRY_RUN: ${{ steps.mirror-token.outputs.dry_run }}
         run: |
           if [ "$DRY_RUN" = "true" ]; then
             npm run examples:mirror:dry-run
