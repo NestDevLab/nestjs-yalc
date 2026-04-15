@@ -41,7 +41,7 @@
     "smoke:public:registry": "node ./scripts/smoke-public-packages.mjs --source=registry",
     "changeset": "changeset",
     "changeset:status": "changeset status",
-    "version:packages": "changeset version && node ./scripts/sync-root-version.mjs && npm install --package-lock-only --ignore-scripts",
+    "version:packages": "changeset version && npm install --package-lock-only --ignore-scripts",
     "examples:export": "node ./scripts/export-public-examples.mjs",
     "test:vscode": "node test.js ",
     "npm:update:onlylock": "npm update --package-lock-only",

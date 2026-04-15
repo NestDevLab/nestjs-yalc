@@ -35,6 +35,10 @@ const workspacePackages = workspaces
   })
   .filter(Boolean);
 
+const workspacePackageVersions = new Map(
+  workspacePackages.map(({ pkg }) => [pkg.name, pkg.version ?? rootVersion]),
+);
+
 const internalPackageNames = new Set([
   rootPkg.name,
   ...workspacePackages.map(({ pkg }) => pkg.name),
@@ -66,7 +70,7 @@ const rewriteInternalDependencies = (dependencies) => {
   return Object.fromEntries(
     Object.entries(dependencies).map(([name, version]) => {
       if (!internalPackageNames.has(name)) return [name, version];
-      return [name, `^${rootVersion}`];
+      return [name, `^${workspacePackageVersions.get(name) ?? rootVersion}`];
     }),
   );
 };
@@ -225,7 +229,7 @@ for (const workspace of packages) {
   const distPkg = {
     ...pkg,
     name: pkgName,
-    version: rootVersion,
+    version: workspace === '.' ? rootVersion : pkg.version ?? rootVersion,
     main,
     module: undefined,
     types,
@@ -251,7 +255,7 @@ for (const workspace of packages) {
       ? Object.fromEntries(
           frameworkTypeExports.map(({ pkg: workspacePkg }) => [
             workspacePkg.name,
-            `^${rootVersion}`,
+            `^${workspacePkg.version ?? rootVersion}`,
           ]),
         )
       : {};

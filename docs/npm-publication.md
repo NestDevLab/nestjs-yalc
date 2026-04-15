@@ -128,28 +128,31 @@ then remove the secret after the package is converted to Trusted Publishing.
 
 ## Versioning model
 
-The repository uses Changesets with a fixed-version release group. The root
-`package.json` version is the release version, and every generated npm package
-uses that same version.
+The repository uses Changesets with independent workspace package versions. A
+changeset explicitly declares which public package or packages changed and
+whether each change is `patch`, `minor`, or `major`. There is no automatic file
+analysis: the PR author records the intended public release impact in the
+changeset.
 
-Internal package dependencies are rewritten to the same public range:
+Internal package dependencies are rewritten to the current public version of the
+target package:
 
 ```json
 {
-  "@nestjs-yalc/database": "^1.3.2"
+  "@nestjs-yalc/database": "^1.3.3"
 }
 ```
 
-This keeps publication simple and avoids publishing packages that depend on
-local `file:` paths. It also matches `build-dist.mjs`, which generates every
-public package from the root release version.
+This keeps version PRs focused: changing one leaf package usually updates that
+package, its changelog, and any dependent packages that Changesets determines
+must receive an internal dependency range update.
 
-Changesets versions the workspace packages in one fixed release group. The
-generated aggregate package `@nestjs-yalc/framework` is the repository root
-package, not a workspace package, so `npm run version:packages` runs
-`scripts/sync-root-version.mjs` after `changeset version`. That synchronization
-sets the root/framework version to the same fixed workspace release version and
-updates `package-lock.json`.
+`@nestjs-yalc/framework` is the generated aggregate package published from the
+repository root. It depends on the individual workspace packages using caret
+ranges. For normal patch and minor workspace releases, existing framework
+versions can resolve the newer compatible packages through npm's semver rules.
+Only bump the root framework package when the aggregate package itself changes
+or when a workspace package needs a new incompatible major range.
 
 Add a changeset in every PR that changes public behavior:
 
@@ -158,7 +161,9 @@ npm run changeset
 ```
 
 Select the workspace package or packages changed by the PR. Do not select
-`@nestjs-yalc/framework`; it follows the fixed release version automatically.
+`@nestjs-yalc/framework` for ordinary library changes; it is the repository root
+package and should only be bumped when the aggregate package itself needs a new
+release.
 
 Choose the highest required release type for the overall public release:
 
@@ -179,7 +184,8 @@ npm run changeset:status
 
 After changes are merged into `dev`, `.github/workflows/changesets.yml` creates
 or updates a release PR titled `chore(release): version packages`. That PR runs
-`npm run version:packages`, updates package versions, updates changelogs, and
+`npm run version:packages`, updates the selected package versions, updates
+internal dependency ranges, updates changelogs, updates `package-lock.json`, and
 removes consumed changeset files.
 
 The version PR does not publish by itself. Once the version PR is merged, use

@@ -8,13 +8,13 @@ Add a changeset when a PR changes public package behavior:
 npm run changeset
 ```
 
-The repository currently uses a fixed-version release model. A `patch`, `minor`,
-or `major` changeset bumps the whole `@nestjs-yalc/*` release group together so
-the generated npm distribution keeps one coherent public version.
+The repository uses independent package versioning. A `patch`, `minor`, or
+`major` changeset bumps only the selected package and any dependent packages
+that need their internal dependency ranges updated.
 
 Select the workspace package or packages that changed. Do not select
 `@nestjs-yalc/framework`: it is the generated aggregate package, and
-`npm run version:packages` synchronizes its root package version automatically.
+it is published from the repository root.
 
 After changes land on `dev`, `.github/workflows/changesets.yml` creates or
 updates the `chore(release): version packages` PR. Merging that PR applies the
