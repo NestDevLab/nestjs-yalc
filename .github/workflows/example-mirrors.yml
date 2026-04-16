@@ -54,6 +54,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+      # External mirror repositories require an explicit cross-repository token.
       - name: Check mirror token
         env:
           EXAMPLE_MIRROR_TOKEN: ${{ secrets.EXAMPLE_MIRROR_TOKEN }}
