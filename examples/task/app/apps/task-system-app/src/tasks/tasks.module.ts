@@ -66,11 +66,15 @@ import { taskItemProviders, TasksController } from './task-item.resource';
         httpService: HttpService,
         clsService: YalcGlobalClsService,
       ) => {
-        return new NestHttpCallStrategy(
-          httpService,
-          clsService,
-          process.env.TASKS_HTTP_BASE_URL ?? '',
-        );
+        const baseUrl = process.env.TASKS_HTTP_BASE_URL?.trim();
+
+        if (!baseUrl && process.env.TASKS_API_STRATEGY === 'http') {
+          throw new Error(
+            'TASKS_HTTP_BASE_URL must be set to an absolute base URL when TASKS_API_STRATEGY is "http".',
+          );
+        }
+
+        return new NestHttpCallStrategy(httpService, clsService, baseUrl ?? '');
       },
       inject: [HttpService, YalcGlobalClsService],
     },

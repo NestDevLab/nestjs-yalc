@@ -69,13 +69,12 @@ import { EventModule } from '@nestjs-yalc/event-manager';
         httpService: HttpService,
         clsService: YalcGlobalClsService,
       ) => {
-        return new NestHttpCallStrategy(
-          httpService,
-          clsService,
-          process.env.USERS_HTTP_BASE_URL ??
-            process.env.SKELETON_BASE_URL ??
-            '',
-        );
+        const baseUrl =
+          process.env.USERS_HTTP_BASE_URL?.trim() ||
+          process.env.SKELETON_BASE_URL?.trim() ||
+          'http://127.0.0.1:3000';
+
+        return new NestHttpCallStrategy(httpService, clsService, baseUrl);
       },
       inject: [HttpService, YalcGlobalClsService],
     },

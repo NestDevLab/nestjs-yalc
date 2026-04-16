@@ -22,8 +22,9 @@ describe('Crud-gen REST (SQLite in-memory) e2e', () => {
     jest.spyOn(httpService.axiosRef, 'request').mockImplementation(
       async (config: any) => {
         // Route the client endpoint's internal HTTP call back into the app.
+        const url = new URL(config.url as string, 'http://internal.local');
         const res = await request(app.getHttpServer())
-          .get(config.url as string)
+          .get(`${url.pathname}${url.search}`)
           .set(config.headers ?? {});
 
         return {

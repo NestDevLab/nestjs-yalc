@@ -1,7 +1,6 @@
 import { INestApplication, Module } from '@nestjs/common';
 import { HttpModule, HttpService } from '@nestjs/axios';
 import { Test } from '@nestjs/testing';
-import { createServer } from 'node:net';
 import request from 'supertest';
 import { NestHttpCallStrategy, NestLocalCallStrategy } from '@nestjs-yalc/api-strategy';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
@@ -26,25 +25,6 @@ import { PhonesModule } from '../src/phones/phones.module';
 })
 class TestAppModule {}
 
-async function getAvailablePort() {
-  return new Promise<number>((resolve, reject) => {
-    const server = createServer();
-    server.once('error', reject);
-    server.listen(0, () => {
-      const address = server.address();
-      const port = typeof address === 'object' && address?.port ? address.port : 0;
-      server.close((error) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-
-        resolve(port);
-      });
-    });
-  });
-}
-
 describe('Skeleton App (e2e)', () => {
   let app: INestApplication;
   let fastifyApp: INestApplication;
@@ -59,8 +39,7 @@ describe('Skeleton App (e2e)', () => {
     previousUsersApiStrategy = process.env.USERS_API_STRATEGY;
     previousUsersHttpBaseUrl = process.env.USERS_HTTP_BASE_URL;
     previousSkeletonBaseUrl = process.env.SKELETON_BASE_URL;
-    const port = await getAvailablePort();
-    baseUrl = `http://127.0.0.1:${port}`;
+    baseUrl = 'http://127.0.0.1:3000';
     process.env.USERS_API_STRATEGY = 'http';
     process.env.USERS_HTTP_BASE_URL = baseUrl;
     process.env.SKELETON_BASE_URL = baseUrl;
@@ -70,7 +49,13 @@ describe('Skeleton App (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    await app.listen(port);
+    await app.listen(0);
+    const address = app.getHttpServer().address();
+    const port = typeof address === 'object' && address?.port ? address.port : 0;
+    baseUrl = `http://127.0.0.1:${port}`;
+    process.env.USERS_HTTP_BASE_URL = baseUrl;
+    process.env.SKELETON_BASE_URL = baseUrl;
+    (app.get('USERS_CLIENT_HTTP_API_STRATEGY') as any).baseUrl = baseUrl;
     httpService = moduleFixture.get(HttpService);
 
     process.env.USERS_API_STRATEGY = 'local';

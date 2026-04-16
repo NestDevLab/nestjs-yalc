@@ -5,7 +5,6 @@ import { HttpService } from '@nestjs/axios';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { randomUUID } from 'node:crypto';
-import { createServer } from 'node:net';
 import request from 'supertest';
 import {
   NestHttpCallStrategy,
@@ -29,25 +28,6 @@ import { SyncModule } from '../src/sync/sync.module';
 import { TaskAppEventModule } from '../src/task-app-event.module';
 import { TasksModule } from '../src/tasks/tasks.module';
 import { AppModule } from '../src/app.module';
-
-async function getAvailablePort() {
-  return new Promise<number>((resolve, reject) => {
-    const server = createServer();
-    server.once('error', reject);
-    server.listen(0, () => {
-      const address = server.address();
-      const port = typeof address === 'object' && address?.port ? address.port : 0;
-      server.close((error) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-
-        resolve(port);
-      });
-    });
-  });
-}
 
 @Module({
   imports: [
@@ -91,16 +71,20 @@ describe('Task System App e2e', () => {
   beforeAll(async () => {
     previousTasksApiStrategy = process.env.TASKS_API_STRATEGY;
     previousTasksHttpBaseUrl = process.env.TASKS_HTTP_BASE_URL;
-    const port = await getAvailablePort();
     process.env.TASKS_API_STRATEGY = 'http';
-    process.env.TASKS_HTTP_BASE_URL = `http://127.0.0.1:${port}`;
+    process.env.TASKS_HTTP_BASE_URL = 'http://127.0.0.1:3000';
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleRef.createNestApplication();
-    await app.listen(port);
+    await app.listen(0);
+    const address = app.getHttpServer().address();
+    const port = typeof address === 'object' && address?.port ? address.port : 0;
+    process.env.TASKS_HTTP_BASE_URL = `http://127.0.0.1:${port}`;
+    (app.get('TASKS_CLIENT_HTTP_API_STRATEGY') as any).baseUrl =
+      process.env.TASKS_HTTP_BASE_URL;
 
     httpStrategy = new NestHttpCallStrategy(
       app.get(HttpService),
