@@ -98,7 +98,7 @@ CRUD layer.
 
 Handwritten controllers are reserved for non-CRUD integration examples:
 
-- ApiStrategy proxy flows
+- ApiStrategy module-client workflow flows
 - EventManager logging examples
 - EventManager error examples
 - domain event demo endpoints

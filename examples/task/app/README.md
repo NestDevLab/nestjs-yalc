@@ -60,6 +60,51 @@ npm run build --prefix examples/task/app
 npm run test:e2e --prefix examples/task/app
 ```
 
+The app starts on Fastify so it can use `NestLocalCallStrategy` through
+`fastify.inject()` without a network hop. The task workflow examples use a
+module-level API client selected through `ApiCallStrategySelectorProvider`.
+The local strategy is the default:
+
+```bash
+TASKS_API_STRATEGY=local npm run start --prefix examples/task/app
+```
+
+Use the remote HTTP strategy only when the app should call an HTTP endpoint:
+
+```bash
+TASKS_API_STRATEGY=http TASKS_HTTP_BASE_URL=http://127.0.0.1:3000 npm run start --prefix examples/task/app
+```
+
+## API Strategy Client Pattern
+
+The task module demonstrates the recommended real-world layering:
+
+```text
+controller -> workflow service -> module API client -> selected API strategy
+```
+
+The controller exposes application workflows under `/task-workflows`. It does
+not expose transport details. `TasksApiClient` is exported by the reusable
+task-system module package (`examples/task/module/src/client`) and is the only
+layer that knows it is calling REST endpoints through `IHttpCallStrategy`. The
+app module wires the concrete local and HTTP strategies and selects one stable
+client strategy token from configuration.
+
+Workflow endpoints:
+
+- `GET /task-workflows/backlog` lists backlog tasks through the selected
+  strategy.
+- `POST /task-workflows/project-with-task` creates a project, creates a task
+  linked to it, and emits a task-created domain event.
+- `PUT /task-workflows/tasks/:id/complete` marks a task as done and emits a
+  task-status-changed domain event.
+- `GET /task-workflows/projects/:projectId/tasks` lists tasks for a project
+  through the selected strategy.
+
+Use this pattern for application code that needs to cross a service boundary:
+keep the boundary call inside a typed module client, then keep controllers and
+workflow services focused on use cases.
+
 ## Role In The Examples
 
 Use this app when you want the full framework pattern:
@@ -68,4 +113,15 @@ Use this app when you want the full framework pattern:
 - shared service/repository backend semantics
 - OmniKernel as reusable persistence substrate
 - service/dataloader override patterns
-- API strategy and event manager integration in a real app
+- API strategy and EventManager integration in real workflows
+
+## API Strategy E2E Coverage
+
+The e2e suite covers both API strategy transports used by the example:
+
+- `NestHttpCallStrategy` configured with `TASKS_API_STRATEGY=http` and
+  `TASKS_HTTP_BASE_URL`, then executed
+  against the running Nest HTTP server through `/task-workflows`.
+- `NestLocalCallStrategy` through a Fastify-backed test app, using
+  `fastify.inject()` instead of a network hop. The same workflow endpoints are
+  exercised with the default local provider.

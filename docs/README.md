@@ -25,9 +25,9 @@ Nest-yalc stands for Nestjs - Yet Another Library Collection
 - [API Strategy + EventManager integration patterns](./api-strategy-event-manager-patterns.md)
 
 - [Examples overview](../examples/README.md) — the architectural map for the skeleton, OmniKernel, and task examples.
-- [Skeleton App](../examples/skeleton/app/README.md) — the minimal all-in-one `CrudGenResourceFactory` path.
+- [Skeleton App](../examples/skeleton/app/README.md) — the minimal all-in-one `CrudGenResourceFactory` path with a small module API-client example.
 - [OmniKernel App](../examples/omnikernel/app/README.md) — generated REST and GraphQL over a backend-only OmniKernel substrate.
-- [Task App](../examples/task/app/README.md) — the advanced OmniKernel-backed composition and CI/e2e validation target.
+- [Task App](../examples/task/app/README.md) — the advanced OmniKernel-backed composition with module API-client workflows and CI/e2e validation.
 
 - [How to use the Api-Strategy library](./api-strategy.md)
 

@@ -38,7 +38,11 @@ This preserves CrudGen-first architecture while still allowing rich real-world b
 Current evidence from `examples/skeleton-app/apps/skeleton-app/src/users/users.module.ts`:
 
 - `SkeletonModule.register('default')` provides the CRUD surface
-- `NestHttpCallStrategyProvider('USERS_HTTP_STRATEGY', { baseUrl: '' })` shows HTTP strategy client registration
+- `UsersApiClient` from `examples/skeleton/module` shows typed module-client
+  calls through a selected API strategy
+- `ApiCallStrategySelectorProvider` exposes a stable
+  `USERS_CLIENT_API_STRATEGY` token while the app wires local and HTTP
+  strategies
 - `EventModule.forRootAsync()` + event emitter setup shows event-manager wiring in an app module
 
 This proves the framework already supports placing CrudGen and infra-service patterns in the same app, but the pattern is not yet documented explicitly.

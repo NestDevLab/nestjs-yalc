@@ -22,15 +22,17 @@ Use ApiStrategy when a module or app needs to call another service boundary.
 
 Typical examples:
 
-- HTTP proxy calls
+- typed module clients that call another HTTP surface
 - local in-process calls in development
 - swappable transport per environment
 
 Recommended pattern:
 
 1. keep CRUD controllers/resolvers focused on resource behavior
-2. inject a strategy-backed service for cross-boundary calls
+2. inject a typed module client for cross-boundary calls
 3. keep the transport implementation behind a provider token
+4. when multiple transports are valid, expose one stable caller token through
+   `ApiCallStrategySelectorProvider`
 
 This allows the same application logic to move between:
 
@@ -39,6 +41,30 @@ This allows the same application logic to move between:
 - event transport
 
 without changing the caller contract.
+
+Use selector providers for app-level configuration such as local development
+versus remote deployment. Register each concrete strategy under its own token,
+then expose one final token to consumers:
+
+```ts
+ApiCallStrategySelectorProvider({
+  provide: TASKS_CLIENT_API_STRATEGY,
+  defaultStrategy: 'local',
+  strategies: {
+    local: TASKS_CLIENT_LOCAL_API_STRATEGY,
+    http: TASKS_CLIENT_HTTP_API_STRATEGY,
+  },
+  selector: {
+    useFactory: () => process.env.TASKS_API_STRATEGY,
+  },
+});
+```
+
+The same selector shape applies to `IEventStrategy` via
+`EventStrategySelectorProvider`. Today the built-in event strategy is local
+`EventEmitter2`; future broker-backed strategies such as RabbitMQ, SNS, or
+Kafka should be added as separate `IEventStrategy` providers and selected
+through the same stable event token.
 
 ## When to use YalcEventService
 
@@ -63,8 +89,8 @@ Recommended pattern:
 In a CrudGen-first app:
 
 - generated GraphQL/REST surfaces stay thin
-- services implement the business behavior
-- ApiStrategy lives beside or below services that need remote/local transport
+- workflow services implement the business behavior
+- ApiStrategy lives behind typed module clients
 - YalcEventService is used inside those services for logs/events/errors
 
 This keeps the CRUD surface generic while the operational behavior remains
@@ -72,23 +98,32 @@ explicit and testable.
 
 ## Task-system app examples
 
-The task-system app intentionally keeps several non-CRUD endpoints to show these
-patterns:
+The task-system app intentionally keeps several non-CRUD endpoints to show
+these patterns:
 
-- proxy endpoints for ApiStrategy usage
+- `/task-workflows/*` endpoints for ApiStrategy usage through `TasksApiClient`
+  exported by the task-system module package
 - logging endpoints for EventManager usage
 - error endpoints for HTTP-aware EventManager errors
 - domain event demo endpoints
 
-Those endpoints are examples of integration behavior, not examples of how CRUD
-resources should be exposed.
+The workflow endpoints combine strategy-backed calls and domain events:
+
+- `POST /task-workflows/project-with-task` creates resources through the
+  selected strategy and emits `task-system.tasks.created`.
+- `PUT /task-workflows/tasks/:id/complete` updates through the selected strategy
+  and emits `task-system.tasks.status-changed`.
+
+Those endpoints are examples of integration behavior. They are intentionally
+separate from generated CRUD resources.
 
 ## Recommended decision rule
 
 If the behavior is:
 
 - resource CRUD -> keep it in CrudGen
-- cross-service communication -> use ApiStrategy
+- cross-service communication -> use ApiStrategy, with selector providers when
+  the transport is configurable
 - log/error/event behavior -> use YalcEventService
 
 If all three are mixed into one controller/resolver method, the layering is

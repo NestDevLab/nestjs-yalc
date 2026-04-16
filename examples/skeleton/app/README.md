@@ -27,6 +27,26 @@ generated REST and generated GraphQL over the same service/repository layer.
 - Event-aware error handling, logging, DTO validation, and HTTP/local
   `ApiStrategy` calls as separate non-CRUD examples.
 
+## API Strategy Client Pattern
+
+The skeleton module exports a small typed client:
+
+```text
+controller -> module API client -> selected API strategy
+```
+
+`UsersApiClient` lives in `examples/skeleton/module/src/client` and wraps the
+generated `/users` and `/phones` REST endpoints. The app wires local and HTTP
+strategies in `UsersModule`, then exposes the selected client through:
+
+- `GET /users-client`
+- `GET /users-client/phones`
+
+This app remains intentionally minimal, so the client controller is a low-level
+framework example rather than a full workflow layer. The skeleton Express
+runtime uses the HTTP strategy by default; the e2e suite also starts a Fastify
+app and switches `USERS_API_STRATEGY=local` to verify `NestLocalCallStrategy`.
+
 ## Run
 
 ```bash
