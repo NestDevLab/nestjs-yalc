@@ -5,5 +5,6 @@ export * from './skeleton-user.dto.js';
 export * from './skeleton-phone.resolver.js';
 export * from './skeleton-user.resolver.js';
 export * from './skeleton-user.service.js';
+export * from './client/users-api.client.js';
 export * from './role.guard.js';
 export * from './skeleton.module.js';

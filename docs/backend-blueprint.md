@@ -51,7 +51,10 @@ Use:
 - `NestLocalCallStrategyProvider` when caller and callee live in the same Nest runtime
 - `NestHttpCallStrategyProvider` when the callee is remote or must be treated as remote
 
-Wrap each dependency behind a stable injection token and a small client service.
+Wrap each concrete dependency behind its own strategy token. When the transport
+can vary by environment, expose one stable caller token with
+`ApiCallStrategySelectorProvider` so client services do not change when the app
+switches between local and remote transports.
 
 ### Asynchronous flows
 
@@ -59,6 +62,8 @@ Use:
 
 - `NestLocalEventStrategyProvider` for in-process async event flows
 - `YalcEventService` to emit/log events and to create structured HTTP-aware errors
+- `EventStrategySelectorProvider` when event transport may later move from
+  local `EventEmitter2` to broker-backed strategies such as RabbitMQ or SNS
 
 Prefer events for:
 

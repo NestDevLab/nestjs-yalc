@@ -158,17 +158,50 @@ Use `@nestjs-yalc/api-strategy` to swap transport without touching domain logic.
   ```
   > Note: `BaseApiService` in this example is a project-specific helper that wraps common response/error handling; it is not provided by `nestjs-yalc`. You can either introduce a similar base class in your codebase or inline the response handling logic in each client service.
 
+- **Module client pattern**: for real application code, put the strategy behind
+  a typed client in the reusable domain module/package when one exists. The task
+  app demonstrates this with `TasksApiClient` exported by
+  `examples/task/module` and `/task-workflows`: controllers call workflow
+  services, workflow services call the module client, and the module client
+  calls the selected `IHttpCallStrategy`. The skeleton app provides the smaller
+  `UsersApiClient` variant from `examples/skeleton/module`.
+
 - **Events**: extend `NestLocalEventStrategy` if you need to enrich in-process events. Inject `APP_EVENT_SERVICE` (the YALC event bus) for async flows.
 
-- **Switching transport**: replace `NestLocalCallStrategyProvider` with `NestHttpCallStrategyProvider` (or a custom strategy) while keeping the same caller token and client code.
+- **Switching transport**: register each concrete strategy under its own token,
+  then expose one stable caller token with `ApiCallStrategySelectorProvider`.
+  This keeps client code stable while the selected transport comes from app
+  configuration.
   ```ts
+  export const MY_SERVICE_CALLER = 'MY_SERVICE_CALLER';
+  export const MY_SERVICE_LOCAL_CALLER = 'MY_SERVICE_LOCAL_CALLER';
+  export const MY_SERVICE_HTTP_CALLER = 'MY_SERVICE_HTTP_CALLER';
+
   providers: [
-    NestHttpCallStrategyProvider(MY_SERVICE_CALLER, {
+    NestLocalCallStrategyProvider(MY_SERVICE_LOCAL_CALLER, {
+      NestLocalStrategy: ProjectLocalCallStrategy,
+      baseUrl: MY_BASE_URL,
+    }),
+    NestHttpCallStrategyProvider(MY_SERVICE_HTTP_CALLER, {
       NestHttpStrategy: NestHttpCallStrategy,
       baseUrl: process.env.EXTERNAL_BASE_URL,
     }),
+    ApiCallStrategySelectorProvider({
+      provide: MY_SERVICE_CALLER,
+      defaultStrategy: 'local',
+      strategies: {
+        local: MY_SERVICE_LOCAL_CALLER,
+        http: MY_SERVICE_HTTP_CALLER,
+      },
+      selector: {
+        useFactory: () => process.env.MY_SERVICE_API_STRATEGY,
+      },
+    }),
   ];
   ```
+  Keep concrete local/http strategy tokens private to the module where possible.
+  Export only the typed client or a stable client-facing token when another
+  module needs the boundary.
 
 ## Config and tokens
 - Every app declares an alias (`APP_ALIAS_*`) and uses YALC tokens (`APP_EVENT_SERVICE`, `SYSTEM_LOGGER_SERVICE`, `getAppConfigToken(alias)`, `getAppEventToken(alias)`) to isolate config/logging when multiple modules run in the same process.

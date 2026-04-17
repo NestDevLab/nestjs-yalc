@@ -1,15 +1,29 @@
 import { Module } from '@nestjs/common';
+import { HttpModule, HttpService } from '@nestjs/axios';
+import { HttpAdapterHost } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SkeletonUser } from '@nestjs-yalc/skeleton-module';
+import {
+  SkeletonUser,
+  USERS_CLIENT_API_STRATEGY,
+  USERS_CLIENT_HTTP_API_STRATEGY,
+  USERS_CLIENT_LOCAL_API_STRATEGY,
+  UsersApiClient,
+} from '@nestjs-yalc/skeleton-module';
 import { UsersController, usersResourceProviders } from './users.resource';
 import { UsersErrorsController } from './users.errors.controller';
-import { UsersProxyController } from './users.proxy.controller';
+import { UsersClientController } from './users-client.controller';
 import { UsersLoggingController } from './users.logging.controller';
 import { UsersValidationController } from './users.validation.controller';
-import { HttpModule } from '@nestjs/axios';
-import { YalcClsModule } from '@nestjs-yalc/app/cls.module.js';
-import { NestHttpCallStrategyProvider } from '@nestjs-yalc/api-strategy';
-import { UsersProxyService } from './users.proxy.service';
+import type { AppConfigService } from '@nestjs-yalc/app/app-config.service.js';
+import {
+  YalcClsModule,
+  YalcGlobalClsService,
+} from '@nestjs-yalc/app/cls.module.js';
+import {
+  ApiCallStrategySelectorProvider,
+  NestHttpCallStrategy,
+  NestLocalCallStrategy,
+} from '@nestjs-yalc/api-strategy';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EventModule } from '@nestjs-yalc/event-manager';
 
@@ -24,15 +38,56 @@ import { EventModule } from '@nestjs-yalc/event-manager';
   controllers: [
     UsersController,
     UsersErrorsController,
-    UsersProxyController,
+    UsersClientController,
     UsersLoggingController,
     UsersValidationController,
   ],
   providers: [
     ...usersResourceProviders,
-    UsersProxyService,
-    NestHttpCallStrategyProvider('USERS_HTTP_STRATEGY', {
-      baseUrl: '',
+    UsersApiClient,
+    {
+      provide: USERS_CLIENT_LOCAL_API_STRATEGY,
+      useFactory: (
+        httpAdapterHost: HttpAdapterHost,
+        clsService: YalcGlobalClsService,
+      ) => {
+        const configService = {
+          values: {},
+        } as AppConfigService<{ internalRequestToken?: string }>;
+
+        return new NestLocalCallStrategy(
+          httpAdapterHost,
+          clsService,
+          configService,
+        );
+      },
+      inject: [HttpAdapterHost, YalcGlobalClsService],
+    },
+    {
+      provide: USERS_CLIENT_HTTP_API_STRATEGY,
+      useFactory: (
+        httpService: HttpService,
+        clsService: YalcGlobalClsService,
+      ) => {
+        const baseUrl =
+          process.env.USERS_HTTP_BASE_URL?.trim() ||
+          process.env.SKELETON_BASE_URL?.trim() ||
+          'http://127.0.0.1:3000';
+
+        return new NestHttpCallStrategy(httpService, clsService, baseUrl);
+      },
+      inject: [HttpService, YalcGlobalClsService],
+    },
+    ApiCallStrategySelectorProvider({
+      provide: USERS_CLIENT_API_STRATEGY,
+      defaultStrategy: 'http',
+      strategies: {
+        local: USERS_CLIENT_LOCAL_API_STRATEGY,
+        http: USERS_CLIENT_HTTP_API_STRATEGY,
+      },
+      selector: {
+        useFactory: () => process.env.USERS_API_STRATEGY,
+      },
     }),
   ],
   exports: [TypeOrmModule],

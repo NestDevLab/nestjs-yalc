@@ -21,9 +21,10 @@ describe('Crud-gen REST (SQLite in-memory) e2e', () => {
     const httpService = app.get(HttpService);
     jest.spyOn(httpService.axiosRef, 'request').mockImplementation(
       async (config: any) => {
-        // Proxy the call to the in-app /users endpoint to avoid real HTTP
+        // Route the client endpoint's internal HTTP call back into the app.
+        const url = new URL(config.url as string, 'http://internal.local');
         const res = await request(app.getHttpServer())
-          .get(config.url as string)
+          .get(`${url.pathname}${url.search}`)
           .set(config.headers ?? {});
 
         return {
@@ -149,9 +150,9 @@ describe('Crud-gen REST (SQLite in-memory) e2e', () => {
     expect(res.body.statusCode).toBe(404);
   });
 
-  it('calls users list via NestHttpCallStrategy proxy', async () => {
+  it('calls users list via the module API client', async () => {
     const res = await request(app.getHttpServer())
-      .get('/users-proxy')
+      .get('/users-client')
       .expect(200);
 
     expect(Array.isArray(res.body.list ?? res.body)).toBe(true);

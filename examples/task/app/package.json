@@ -21,6 +21,8 @@
     "test:e2e": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-import-meta-resolve \" jest --config ./apps/task-system-app/test/jest-e2e.json"
   },
   "dependencies": {
+    "@fastify/static": "^6.12.0",
+    "@fastify/view": "^7.4.1",
     "@nestjs-yalc/api-strategy": "file:../../../api-strategy",
     "@nestjs-yalc/app": "file:../../../app",
     "@nestjs-yalc/crud-gen": "file:../../../crud-gen",
@@ -36,6 +38,7 @@
     "@nestjs-yalc/logger": "file:../../../logger",
     "@nestjs-yalc/omnikernel-module": "file:../../omnikernel/module",
     "@nestjs-yalc/task-system-module": "file:../module",
+    "@nestjs-yalc/types": "file:../../../types",
     "@nestjs-yalc/utils": "file:../../../utils",
     "@nestjs/apollo": "^10.2.1",
     "@nestjs/axios": "^1.0.1",
@@ -44,16 +47,17 @@
     "@nestjs/event-emitter": "^1.4.1",
     "@nestjs/graphql": "^10.2.1",
     "@nestjs/platform-express": "^9.4.3",
+    "@nestjs/platform-fastify": "^9.4.3",
     "@nestjs/typeorm": "^9.0.1",
     "apollo-server-core": "^3.13.0",
     "apollo-server-express": "^3.13.0",
+    "apollo-server-fastify": "^3.13.0",
     "graphql": "^16.12.0",
-    "sqlite3": "^5.1.7",
-    "typeorm": "^0.3.14",
-    "@nestjs-yalc/types": "file:../../../types",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^4.1.2",
-    "rxjs": "^7.8.0"
+    "rxjs": "^7.8.0",
+    "sqlite3": "^5.1.7",
+    "typeorm": "^0.3.14"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.5.0",

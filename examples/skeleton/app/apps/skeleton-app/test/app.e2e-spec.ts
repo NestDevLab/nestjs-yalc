@@ -31,22 +31,34 @@ describe('Skeleton App (e2e)', () => {
   let baseUrl: string;
   let httpService: HttpService;
   let localStrategy: NestLocalCallStrategy;
+  let previousUsersApiStrategy: string | undefined;
+  let previousUsersHttpBaseUrl: string | undefined;
+  let previousSkeletonBaseUrl: string | undefined;
 
   beforeAll(async () => {
+    previousUsersApiStrategy = process.env.USERS_API_STRATEGY;
+    previousUsersHttpBaseUrl = process.env.USERS_HTTP_BASE_URL;
+    previousSkeletonBaseUrl = process.env.SKELETON_BASE_URL;
+    baseUrl = 'http://127.0.0.1:3000';
+    process.env.USERS_API_STRATEGY = 'http';
+    process.env.USERS_HTTP_BASE_URL = baseUrl;
+    process.env.SKELETON_BASE_URL = baseUrl;
+
     const moduleFixture = await Test.createTestingModule({
       imports: [TestAppModule, HttpModule],
     }).compile();
 
-    // Express app for HTTP strategy
     app = moduleFixture.createNestApplication();
     await app.listen(0);
     const address = app.getHttpServer().address();
     const port = typeof address === 'object' && address?.port ? address.port : 0;
     baseUrl = `http://127.0.0.1:${port}`;
+    process.env.USERS_HTTP_BASE_URL = baseUrl;
     process.env.SKELETON_BASE_URL = baseUrl;
+    (app.get('USERS_CLIENT_HTTP_API_STRATEGY') as any).baseUrl = baseUrl;
     httpService = moduleFixture.get(HttpService);
 
-    // Fastify app for Local strategy inject (real inject)
+    process.env.USERS_API_STRATEGY = 'local';
     const fastifyFixture = await Test.createTestingModule({
       imports: [TestAppModule],
     }).compile();
@@ -69,6 +81,24 @@ describe('Skeleton App (e2e)', () => {
   afterAll(async () => {
     await app?.close();
     await fastifyApp?.close();
+
+    if (previousUsersApiStrategy === undefined) {
+      delete process.env.USERS_API_STRATEGY;
+    } else {
+      process.env.USERS_API_STRATEGY = previousUsersApiStrategy;
+    }
+
+    if (previousUsersHttpBaseUrl === undefined) {
+      delete process.env.USERS_HTTP_BASE_URL;
+    } else {
+      process.env.USERS_HTTP_BASE_URL = previousUsersHttpBaseUrl;
+    }
+
+    if (previousSkeletonBaseUrl === undefined) {
+      delete process.env.SKELETON_BASE_URL;
+    } else {
+      process.env.SKELETON_BASE_URL = previousSkeletonBaseUrl;
+    }
   });
 
   it('returns an empty users list with pagination metadata', async () => {
@@ -111,9 +141,9 @@ describe('Skeleton App (e2e)', () => {
     });
     expect(createRes.status).toBe(201);
 
-    const proxyRes = await strategy.get('/users-proxy/phones');
-    expect(proxyRes.status).toBe(200);
-    const list = Array.isArray((proxyRes.data as any)?.list) ? (proxyRes.data as any).list : (proxyRes.data as any[]);
+    const clientRes = await strategy.get('/users-client/phones');
+    expect(clientRes.status).toBe(200);
+    const list = Array.isArray((clientRes.data as any)?.list) ? (clientRes.data as any).list : (clientRes.data as any[]);
     expect(Array.isArray(list)).toBe(true);
     expect(list.find((p: any) => p.phoneNumber === '123456789')).toBeTruthy();
   });
@@ -139,7 +169,7 @@ describe('Skeleton App (e2e)', () => {
     });
     expect(createRes.status).toBe(201);
 
-    const phonesRes = await localStrategy.get('/phones');
+    const phonesRes = await localStrategy.get('/users-client/phones');
     expect(phonesRes.status).toBe(200);
     const list = Array.isArray((phonesRes.data as any)?.list) ? (phonesRes.data as any).list : (phonesRes.data as any[]);
     expect(Array.isArray(list)).toBe(true);

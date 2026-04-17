@@ -1,45 +1,128 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, Module } from '@nestjs/common';
 import { expect, jest } from '@jest/globals';
+import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { HttpService } from '@nestjs/axios';
 import { Test } from '@nestjs/testing';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
+import {
+  NestHttpCallStrategy,
+} from '@nestjs-yalc/api-strategy/strategies/nest-http-call.strategy.js';
+import {
+  NestLocalCallStrategy,
+} from '@nestjs-yalc/api-strategy/strategies/nest-local-call.strategy.js';
+import {
+  OmniCollectionEntity,
+  OmniDocumentEntity,
+  OmniExternalRefEntity,
+  OmniNamedEntity,
+  OmniRecordEntity,
+  OmniRelationEntity,
+} from '@nestjs-yalc/omnikernel-module';
+import { YalcEventService } from '@nestjs-yalc/event-manager';
+import { EventsModule } from '../src/events/events.module';
+import { OmniTaskAppModule } from '../src/omni-task-app/omni-task-app.module';
+import { ProjectsModule } from '../src/projects/projects.module';
+import { SyncModule } from '../src/sync/sync.module';
+import { TaskAppEventModule } from '../src/task-app-event.module';
+import { TasksModule } from '../src/tasks/tasks.module';
 import { AppModule } from '../src/app.module';
+
+@Module({
+  imports: [
+    TaskAppEventModule,
+    TypeOrmModule.forRoot({
+      type: 'sqlite',
+      database: ':memory:',
+      dropSchema: true,
+      entities: [
+        OmniNamedEntity,
+        OmniRecordEntity,
+        OmniRelationEntity,
+        OmniCollectionEntity,
+        OmniDocumentEntity,
+        OmniExternalRefEntity,
+      ],
+      synchronize: true,
+    }),
+    OmniTaskAppModule,
+    TasksModule,
+    ProjectsModule,
+    EventsModule,
+    SyncModule,
+  ],
+})
+class LocalStrategyTestAppModule {}
 
 describe('Task System App e2e', () => {
   let app: INestApplication;
+  let fastifyApp: INestApplication;
+  let httpStrategy: NestHttpCallStrategy;
+  let localStrategy: NestLocalCallStrategy;
   let createdProjectGuid: string;
   let createdTaskGuid: string;
   let createdEventGuid: string;
   let createdExternalRefGuid: string;
   let createdSyncStateGuid: string;
+  let previousTasksApiStrategy: string | undefined;
+  let previousTasksHttpBaseUrl: string | undefined;
 
   beforeAll(async () => {
+    previousTasksApiStrategy = process.env.TASKS_API_STRATEGY;
+    previousTasksHttpBaseUrl = process.env.TASKS_HTTP_BASE_URL;
+    process.env.TASKS_API_STRATEGY = 'http';
+    process.env.TASKS_HTTP_BASE_URL = 'http://127.0.0.1:3000';
+
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleRef.createNestApplication();
-    await app.init();
+    await app.listen(0);
+    const address = app.getHttpServer().address();
+    const port = typeof address === 'object' && address?.port ? address.port : 0;
+    process.env.TASKS_HTTP_BASE_URL = `http://127.0.0.1:${port}`;
+    (app.get('TASKS_CLIENT_HTTP_API_STRATEGY') as any).baseUrl =
+      process.env.TASKS_HTTP_BASE_URL;
 
-    const httpService = app.get(HttpService);
-    jest.spyOn(httpService.axiosRef, 'request').mockImplementation(async (config: any) => {
-      const res = await request(app.getHttpServer())
-        .get(config.url as string)
-        .set(config.headers ?? {});
+    httpStrategy = new NestHttpCallStrategy(
+      app.get(HttpService),
+      { get: () => ({}) } as any,
+      process.env.TASKS_HTTP_BASE_URL,
+    );
 
-      return {
-        data: res.body,
-        status: res.status,
-        statusText: res.statusText,
-        headers: res.headers,
-        request: {},
-      };
-    });
+    delete process.env.TASKS_API_STRATEGY;
+
+    const fastifyModuleRef = await Test.createTestingModule({
+      imports: [LocalStrategyTestAppModule],
+    }).compile();
+
+    fastifyApp = fastifyModuleRef.createNestApplication(new FastifyAdapter());
+    await fastifyApp.init();
+
+    localStrategy = new NestLocalCallStrategy(
+      { httpAdapter: fastifyApp.getHttpAdapter() } as any,
+      { get: () => ({}) } as any,
+      { values: {} } as any,
+    );
   });
 
   afterAll(async () => {
     await app?.close();
+    await fastifyApp?.close();
+
+    if (previousTasksApiStrategy === undefined) {
+      delete process.env.TASKS_API_STRATEGY;
+    } else {
+      process.env.TASKS_API_STRATEGY = previousTasksApiStrategy;
+    }
+
+    if (previousTasksHttpBaseUrl === undefined) {
+      delete process.env.TASKS_HTTP_BASE_URL;
+    } else {
+      process.env.TASKS_HTTP_BASE_URL = previousTasksHttpBaseUrl;
+    }
   });
 
   it('creates a project', async () => {
@@ -300,12 +383,214 @@ describe('Task System App e2e', () => {
     expect(res.body.statusCode).toBe(404);
   });
 
-  it('calls tasks list via NestHttpCallStrategy proxy', async () => {
-    const res = await request(app.getHttpServer())
-      .get('/tasks-proxy')
-      .expect(200);
+  it('calls tasks list via NestHttpCallStrategy over real HTTP', async () => {
+    const httpService = app.get(HttpService);
+    const requestSpy = jest.spyOn(httpService.axiosRef, 'request');
 
-    expect(Array.isArray(res.body.list ?? res.body)).toBe(true);
+    const res = await httpStrategy.get('/tasks');
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray((res.data as any).list ?? res.data)).toBe(true);
+    expect(requestSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        url: `${process.env.TASKS_HTTP_BASE_URL}/tasks`,
+      }),
+    );
+  });
+
+  it('runs task workflows through the configured NestHttpCallStrategy', async () => {
+    const httpService = app.get(HttpService);
+    const requestSpy = jest.spyOn(httpService.axiosRef, 'request');
+    const eventSpy = jest.spyOn(app.get(YalcEventService), 'log');
+    requestSpy.mockClear();
+    eventSpy.mockClear();
+
+    const projectGuid = randomUUID();
+    const taskGuid = randomUUID();
+
+    const createRes = await request(app.getHttpServer())
+      .post('/task-workflows/project-with-task')
+      .send({
+        project: {
+          guid: projectGuid,
+          name: 'HTTP workflow project',
+          description: 'Created by the task workflow HTTP example',
+          status: 'active',
+        },
+        task: {
+          guid: taskGuid,
+          title: 'HTTP workflow task',
+          description: 'Created by the task workflow HTTP example',
+          status: 'todo',
+        },
+      })
+      .expect(201);
+
+    expect(createRes.body.project.guid).toBe(projectGuid);
+    expect(createRes.body.task.guid).toBe(taskGuid);
+    expect(createRes.body.task.projectId).toBe(projectGuid);
+    expect(requestSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'POST',
+        url: `${process.env.TASKS_HTTP_BASE_URL}/projects`,
+      }),
+    );
+    expect(requestSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'POST',
+        url: `${process.env.TASKS_HTTP_BASE_URL}/tasks`,
+      }),
+    );
+    expect(eventSpy).toHaveBeenCalledWith(
+      ['task-system', 'tasks', 'created'],
+      expect.objectContaining({
+        data: expect.objectContaining({
+          taskId: taskGuid,
+          projectId: projectGuid,
+        }),
+      }),
+    );
+
+    const backlogRes = await request(app.getHttpServer())
+      .get('/task-workflows/backlog')
+      .expect(200);
+    expect(backlogRes.body.list).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          guid: taskGuid,
+          projectId: projectGuid,
+          status: 'todo',
+        }),
+      ]),
+    );
+
+    const projectTasksRes = await request(app.getHttpServer())
+      .get(`/task-workflows/projects/${projectGuid}/tasks`)
+      .expect(200);
+    expect(projectTasksRes.body.list).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          guid: taskGuid,
+          projectId: projectGuid,
+        }),
+      ]),
+    );
+
+    const completeRes = await request(app.getHttpServer())
+      .put(`/task-workflows/tasks/${taskGuid}/complete`)
+      .expect(200);
+    expect(completeRes.body.task).toMatchObject({
+      guid: taskGuid,
+      status: 'done',
+    });
+    expect(requestSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'PUT',
+        url: `${process.env.TASKS_HTTP_BASE_URL}/tasks/${taskGuid}`,
+      }),
+    );
+    expect(requestSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        url: `${process.env.TASKS_HTTP_BASE_URL}/tasks/${taskGuid}`,
+      }),
+    );
+    expect(eventSpy).toHaveBeenCalledWith(
+      ['task-system', 'tasks', 'status-changed'],
+      expect.objectContaining({
+        data: expect.objectContaining({
+          taskId: taskGuid,
+          status: 'done',
+        }),
+      }),
+    );
+  });
+
+  it('runs task workflows via NestLocalCallStrategy through Fastify inject', async () => {
+    const eventSpy = jest.spyOn(fastifyApp.get(YalcEventService), 'log');
+    eventSpy.mockClear();
+    const localProjectGuid = randomUUID();
+    const localTaskGuid = randomUUID();
+
+    const createWorkflow = await localStrategy.post(
+      '/task-workflows/project-with-task',
+      {
+        data: {
+          project: {
+            guid: localProjectGuid,
+            name: 'Local workflow project',
+            description: 'Created through Fastify inject',
+            status: 'active',
+          },
+          task: {
+            guid: localTaskGuid,
+            title: 'Local workflow task',
+            description: 'Created through NestLocalCallStrategy',
+            status: 'todo',
+          },
+        },
+      },
+    );
+    expect(createWorkflow.status).toBe(201);
+    expect((createWorkflow.data as any).project.guid).toBe(localProjectGuid);
+    expect((createWorkflow.data as any).task.guid).toBe(localTaskGuid);
+    expect((createWorkflow.data as any).task.projectId).toBe(localProjectGuid);
+
+    const backlogTasks = await localStrategy.get('/task-workflows/backlog');
+    const projectTasks = await localStrategy.get(
+      `/task-workflows/projects/${localProjectGuid}/tasks`,
+    );
+
+    expect(backlogTasks.status).toBe(200);
+    expect((backlogTasks.data as any).list).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          guid: localTaskGuid,
+          projectId: localProjectGuid,
+          status: 'todo',
+        }),
+      ]),
+    );
+    expect(projectTasks.status).toBe(200);
+    expect((projectTasks.data as any).list).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          guid: localTaskGuid,
+          projectId: localProjectGuid,
+        }),
+      ]),
+    );
+
+    const completeTask = await localStrategy.call(
+      `/task-workflows/tasks/${localTaskGuid}/complete`,
+      {
+        method: 'PUT',
+      },
+    );
+    expect(completeTask.status).toBe(200);
+    expect((completeTask.data as any).task).toMatchObject({
+      guid: localTaskGuid,
+      status: 'done',
+    });
+    expect(eventSpy).toHaveBeenCalledWith(
+      ['task-system', 'tasks', 'created'],
+      expect.objectContaining({
+        data: expect.objectContaining({
+          taskId: localTaskGuid,
+          projectId: localProjectGuid,
+        }),
+      }),
+    );
+    expect(eventSpy).toHaveBeenCalledWith(
+      ['task-system', 'tasks', 'status-changed'],
+      expect.objectContaining({
+        data: expect.objectContaining({
+          taskId: localTaskGuid,
+          status: 'done',
+        }),
+      }),
+    );
   });
 
   it('uses YalcEventService for logging', async () => {
