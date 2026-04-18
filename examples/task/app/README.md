@@ -75,6 +75,47 @@ Use the remote HTTP strategy only when the app should call an HTTP endpoint:
 TASKS_API_STRATEGY=http TASKS_HTTP_BASE_URL=http://127.0.0.1:3000 npm run start --prefix examples/task/app
 ```
 
+## RabbitMQ Event Strategy
+
+The task app also includes an optional RabbitMQ-backed domain event transport.
+Local development and the standard e2e suite use the local `EventEmitter2`
+strategy unless `TASK_EVENTS_STRATEGY=rabbitmq` is set.
+
+The RabbitMQ strategy is `NestRabbitMqEventStrategy` from `api-strategy`. It
+keeps the in-process `EventEmitter2` emission active for same-runtime handlers
+and also publishes the same domain event to RabbitMQ for external consumers.
+
+Start the local broker:
+
+```bash
+npm run rabbitmq:up --prefix examples/task/app
+```
+
+Run the RabbitMQ e2e suite:
+
+```bash
+npm run test:e2e:rabbitmq --prefix examples/task/app
+```
+
+Stop the broker:
+
+```bash
+npm run rabbitmq:down --prefix examples/task/app
+```
+
+Runtime configuration:
+
+- `TASK_EVENTS_STRATEGY=local|rabbitmq` selects the event transport. The
+  default is `local`.
+- `TASK_RABBITMQ_URL` defaults to `amqp://127.0.0.1:5672`.
+- `TASK_RABBITMQ_EXCHANGE` defaults to `task-system.events`.
+- `TASK_RABBITMQ_QUEUE` defaults to `task-system.audit` for the demo consumer.
+
+The RabbitMQ e2e starts the app with `TASK_EVENTS_STRATEGY=rabbitmq`, executes
+the same workflow endpoints, verifies local `EventEmitter2` handlers still run,
+publishes `task-system.tasks.created` and `task-system.tasks.status-changed`
+through RabbitMQ, then consumes them back through a real queue-backed handler.
+
 ## API Strategy Client Pattern
 
 The task module demonstrates the recommended real-world layering:
@@ -105,6 +146,16 @@ Use this pattern for application code that needs to cross a service boundary:
 keep the boundary call inside a typed module client, then keep controllers and
 workflow services focused on use cases.
 
+Domain events follow the same idea:
+
+```text
+workflow service -> domain events service -> task events client -> selected event strategy
+```
+
+`TasksEventsClient` is exported by the reusable task-system module. The app
+wires the local `EventEmitter2` strategy and the optional local-plus-RabbitMQ
+strategy behind one stable `TASK_EVENTS_STRATEGY` token.
+
 ## Role In The Examples
 
 Use this app when you want the full framework pattern:
@@ -125,3 +176,7 @@ The e2e suite covers both API strategy transports used by the example:
 - `NestLocalCallStrategy` through a Fastify-backed test app, using
   `fastify.inject()` instead of a network hop. The same workflow endpoints are
   exercised with the default local provider.
+
+The RabbitMQ e2e suite is separate because it requires a local broker. It
+verifies the event strategy path with a real exchange, queue binding, publisher,
+and consumer handler.

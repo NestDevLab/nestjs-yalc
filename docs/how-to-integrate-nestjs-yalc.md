@@ -166,7 +166,11 @@ Use `@nestjs-yalc/api-strategy` to swap transport without touching domain logic.
   calls the selected `IHttpCallStrategy`. The skeleton app provides the smaller
   `UsersApiClient` variant from `examples/skeleton/module`.
 
-- **Events**: extend `NestLocalEventStrategy` if you need to enrich in-process events. Inject `APP_EVENT_SERVICE` (the YALC event bus) for async flows.
+- **Events**: use `NestLocalEventStrategy` when the event should stay inside
+  the current Nest runtime. Use `NestRabbitMqEventStrategy` when the same
+  domain event should reach local `EventEmitter2` handlers and also be
+  published to RabbitMQ for external consumers. Inject `APP_EVENT_SERVICE` (the
+  YALC event bus) for async flows.
 
 - **Switching transport**: register each concrete strategy under its own token,
   then expose one stable caller token with `ApiCallStrategySelectorProvider`.

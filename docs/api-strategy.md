@@ -9,11 +9,12 @@ This library implements the strategy pattern and factory pattern so you can swit
 - **`NestHttpCallStrategy`** — uses Nest `HttpService.axiosRef` for real HTTP calls. It merges CLS-propagated headers (via `YalcGlobalClsService`), applies an optional whitelist, maps `HttpOptions` to Axios config, and supports query parameters via `URLSearchParams`.
 - **`NestLocalCallStrategy`** — uses Fastify `inject` to perform in-process HTTP-like calls against your app. Useful for local/dev or “mono” deployments where both caller and callee live in the same Nest runtime. Can optionally skip JSON parsing with `shouldSkipJsonParse`.
 - **`NestLocalEventStrategy`** — emits events through `EventEmitter2` (sync or async).
+- **`NestRabbitMqEventStrategy`** — emits the event locally through `EventEmitter2` and also publishes it to a RabbitMQ exchange. Use it when same-runtime handlers and external broker consumers must both receive the domain event.
 - **Abstracts/interfaces** — `HttpAbstractStrategy` adds `get`/`post` helpers; `IHttpCallStrategy`, `HttpOptions`, `IHttpCallStrategyResponse`, `IHttpCallStrategyOptions` define the HTTP contract; `IApiCallStrategy`/`IEventStrategy` define the core contracts for calls and events.
 - **Strategy selector providers** — `StrategySelectorProvider`, `ApiCallStrategySelectorProvider`, and `EventStrategySelectorProvider` expose one stable provider token while selecting one concrete strategy from a registered map.
 - **Context services** — `ContextCallServiceFactory` and `ContextEventServiceFactory` build injectable services with `getStrategy`/`setStrategy` for explicit runtime mutation by application code.
 
-You can also implement your own strategies by extending `HttpAbstractStrategy` or providing custom `IApiCallStrategy`/`IEventStrategy` implementations (e.g., gRPC, Kafka, RabbitMQ).
+You can also implement your own strategies by extending `HttpAbstractStrategy` or providing custom `IApiCallStrategy`/`IEventStrategy` implementations (e.g., gRPC, Kafka, SNS).
 
 ## Providers (Nest wiring)
 
@@ -26,6 +27,7 @@ import {
   NestHttpCallStrategyProvider,
   NestLocalCallStrategyProvider,
   NestLocalEventStrategyProvider,
+  NestRabbitMqEventStrategyProvider,
   // Accept the same options, including headersWhitelist/internalRequestHeader/internalRequestToken
 } from '@nestjs-yalc/api-strategy';
 import { HttpModule } from '@nestjs/axios';
@@ -49,6 +51,12 @@ import { Module } from '@nestjs/common';
       internalRequestHeader: 'x-internal-request-token',
     }),
     NestLocalEventStrategyProvider('EVENT_STRATEGY'),
+    NestRabbitMqEventStrategyProvider('RABBITMQ_EVENT_STRATEGY', {
+      options: {
+        url: process.env.RABBITMQ_URL ?? 'amqp://127.0.0.1:5672',
+        exchange: 'app.events',
+      },
+    }),
     ApiCallStrategySelectorProvider({
       provide: 'API_STRATEGY',
       defaultStrategy: 'local',
@@ -65,6 +73,10 @@ import { Module } from '@nestjs/common';
       defaultStrategy: 'local',
       strategies: {
         local: 'EVENT_STRATEGY',
+        rabbitmq: 'RABBITMQ_EVENT_STRATEGY',
+      },
+      selector: {
+        useFactory: () => process.env.EVENT_STRATEGY,
       },
     }),
   ],
@@ -72,6 +84,7 @@ import { Module } from '@nestjs/common';
     'HTTP_STRATEGY',
     'LOCAL_STRATEGY',
     'EVENT_STRATEGY',
+    'RABBITMQ_EVENT_STRATEGY',
     'API_STRATEGY',
     'SELECTED_EVENT_STRATEGY',
   ],
@@ -91,6 +104,12 @@ Provider options:
   - `shouldSkipJsonParse` can bypass `result.json()` when the body isn’t JSON.
 - `NestLocalEventStrategyProvider({ NestLocalStrategy? })`
   - Injects `EventEmitter2`, supports `emit` and `emitAsync`.
+- `NestRabbitMqEventStrategyProvider({ NestRabbitMqStrategy?, options })`
+  - Injects `EventEmitter2`, supports local `emit`/`emitAsync`, and publishes
+    the same event to RabbitMQ.
+  - `options.url` and `options.exchange` are required.
+  - Optional `exchangeType`, `durable`, `persistent`, `contentType`,
+    `publishOptions`, and `serialize` customize broker behavior.
 
 ## Strategy selector providers
 
@@ -137,6 +156,7 @@ The same pattern works for event strategies:
 import {
   EventStrategySelectorProvider,
   NestLocalEventStrategyProvider,
+  NestRabbitMqEventStrategyProvider,
 } from '@nestjs-yalc/api-strategy';
 
 export const USER_EVENT_STRATEGY = 'USER_EVENT_STRATEGY';
@@ -145,8 +165,12 @@ export const USER_RABBITMQ_EVENT_STRATEGY = 'USER_RABBITMQ_EVENT_STRATEGY';
 
 providers: [
   NestLocalEventStrategyProvider(USER_LOCAL_EVENT_STRATEGY),
-  // Provide USER_RABBITMQ_EVENT_STRATEGY with a future RabbitMQ/SNS/etc.
-  // implementation of IEventStrategy.
+  NestRabbitMqEventStrategyProvider(USER_RABBITMQ_EVENT_STRATEGY, {
+    options: {
+      url: process.env.RABBITMQ_URL,
+      exchange: 'users.events',
+    },
+  }),
   EventStrategySelectorProvider({
     provide: USER_EVENT_STRATEGY,
     defaultStrategy: 'local',
@@ -272,6 +296,7 @@ export class UserService {
 - Start with local-call/local-event for fast dev/test in a monolith, then switch to HTTP or other transports without refactoring callers.
 - Route per-environment using selector providers, while keeping caller tokens stable.
 - Keep event transport open for future brokers by selecting between `IEventStrategy`
-  implementations such as local `EventEmitter2`, RabbitMQ, SNS, or other transports.
+  implementations such as local `EventEmitter2`, local-plus-RabbitMQ, SNS, or
+  other transports.
 - Use context services only for explicit runtime mutation by application code.
 - Prototype service-to-service communication before introducing full API gateways/brokers.

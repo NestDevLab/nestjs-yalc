@@ -9,3 +9,4 @@ export * from './strategies/http-abstract-call.strategy.js';
 export * from './strategies/nest-http-call.strategy.js';
 export * from './strategies/nest-local-call.strategy.js';
 export * from './strategies/nest-local-event.strategy.js';
+export * from './strategies/nest-rabbitmq-event.strategy.js';
