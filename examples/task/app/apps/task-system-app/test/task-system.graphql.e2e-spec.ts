@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { expect } from '@jest/globals';
+import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
@@ -19,8 +20,8 @@ describe('Task System App GraphQL e2e', () => {
       imports: [AppModule],
     }).compile();
 
-    app = moduleRef.createNestApplication();
-    await app.init();
+    app = moduleRef.createNestApplication(new FastifyAdapter());
+    await app.listen(0);
   });
 
   afterAll(async () => {

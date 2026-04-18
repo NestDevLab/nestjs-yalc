@@ -14,6 +14,11 @@ import {
 import type { AppConfigService } from '@nestjs-yalc/app/app-config.service.js';
 import { YalcGlobalClsService } from '@nestjs-yalc/app/cls.module.js';
 import { YalcEventService } from '@nestjs-yalc/event-manager';
+import {
+  TelemetryCallStrategy,
+  TelemetryEventStrategy,
+  TelemetryService,
+} from '@nestjs-yalc/observability';
 import { TasksDomainEventsService } from './tasks.domain-events.service';
 import { TaskEventsAuditStore } from './events/task-events-audit.store';
 import { TaskEventsLocalHandler } from './events/task-events-local.handler';
@@ -66,24 +71,33 @@ import { taskItemProviders, TasksController } from './task-item.resource';
       useFactory: (
         httpAdapterHost: HttpAdapterHost,
         clsService: YalcGlobalClsService,
+        telemetry: TelemetryService,
       ) => {
         const configService = {
           values: {},
         } as AppConfigService<{ internalRequestToken?: string }>;
 
-        return new NestLocalCallStrategy(
-          httpAdapterHost,
-          clsService,
-          configService,
+        return new TelemetryCallStrategy(
+          new NestLocalCallStrategy(
+            httpAdapterHost,
+            clsService,
+            configService,
+          ) as any,
+          telemetry,
+          {
+            name: 'tasks-client.local',
+            transport: 'local',
+          },
         );
       },
-      inject: [HttpAdapterHost, YalcGlobalClsService],
+      inject: [HttpAdapterHost, YalcGlobalClsService, TelemetryService],
     },
     {
       provide: TASKS_CLIENT_HTTP_API_STRATEGY,
       useFactory: (
         httpService: HttpService,
         clsService: YalcGlobalClsService,
+        telemetry: TelemetryService,
       ) => {
         const baseUrl = process.env.TASKS_HTTP_BASE_URL?.trim();
 
@@ -93,9 +107,16 @@ import { taskItemProviders, TasksController } from './task-item.resource';
           );
         }
 
-        return new NestHttpCallStrategy(httpService, clsService, baseUrl ?? '');
+        return new TelemetryCallStrategy(
+          new NestHttpCallStrategy(httpService, clsService, baseUrl ?? ''),
+          telemetry,
+          {
+            name: 'tasks-client.http',
+            transport: 'http',
+          },
+        );
       },
-      inject: [HttpService, YalcGlobalClsService],
+      inject: [HttpService, YalcGlobalClsService, TelemetryService],
     },
     ApiCallStrategySelectorProvider({
       provide: TASKS_CLIENT_API_STRATEGY,
@@ -110,25 +131,49 @@ import { taskItemProviders, TasksController } from './task-item.resource';
     }),
     {
       provide: TASK_EVENTS_LOCAL_STRATEGY,
-      useFactory: (events: YalcEventService) =>
-        new NestLocalEventStrategy(events.emitter),
-      inject: [YalcEventService],
+      useFactory: (events: YalcEventService, telemetry: TelemetryService) =>
+        new TelemetryEventStrategy(
+          new NestLocalEventStrategy(events.emitter),
+          telemetry,
+          {
+            name: 'tasks-events.local',
+            transport: 'local',
+          },
+        ),
+      inject: [YalcEventService, TelemetryService],
     },
     {
       provide: TASK_EVENTS_RABBITMQ_STRATEGY,
-      useFactory: (localStrategy: NestLocalEventStrategy) =>
-        new CompositeEventStrategy([
-          localStrategy,
-          new ConditionalEventStrategy(
-            new RabbitMqEventStrategy(createTaskEventsRabbitMqOptions()),
-            {
-              enabled: () =>
-                process.env.TASK_RABBITMQ_PUBLISH_ENABLED !== 'false',
-              disabledResult: false,
-            },
-          ),
-        ]),
-      inject: [TASK_EVENTS_LOCAL_STRATEGY],
+      useFactory: (
+        localStrategy: NestLocalEventStrategy,
+        telemetry: TelemetryService,
+      ) =>
+        new TelemetryEventStrategy(
+          new CompositeEventStrategy([
+            localStrategy,
+            new ConditionalEventStrategy(
+              new TelemetryEventStrategy(
+                new RabbitMqEventStrategy(createTaskEventsRabbitMqOptions()),
+                telemetry,
+                {
+                  name: 'tasks-events.rabbitmq',
+                  transport: 'rabbitmq',
+                },
+              ),
+              {
+                enabled: () =>
+                  process.env.TASK_RABBITMQ_PUBLISH_ENABLED !== 'false',
+                disabledResult: false,
+              },
+            ),
+          ]),
+          telemetry,
+          {
+            name: 'tasks-events.composite',
+            transport: 'composite',
+          },
+        ),
+      inject: [TASK_EVENTS_LOCAL_STRATEGY, TelemetryService],
     },
     EventStrategySelectorProvider({
       provide: TASK_EVENTS_STRATEGY,

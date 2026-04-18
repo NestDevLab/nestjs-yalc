@@ -12,6 +12,7 @@ import {
 import {
   NestLocalCallStrategy,
 } from '@nestjs-yalc/api-strategy/strategies/nest-local-call.strategy.js';
+import { ObservabilityModule } from '@nestjs-yalc/observability';
 import {
   OmniCollectionEntity,
   OmniDocumentEntity,
@@ -32,6 +33,10 @@ import { AppModule } from '../src/app.module';
 @Module({
   imports: [
     TaskAppEventModule,
+    ObservabilityModule.forRoot({
+      enabled: false,
+      serviceName: 'task-system-e2e',
+    }),
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: ':memory:',
@@ -78,7 +83,7 @@ describe('Task System App e2e', () => {
       imports: [AppModule],
     }).compile();
 
-    app = moduleRef.createNestApplication();
+    app = moduleRef.createNestApplication(new FastifyAdapter());
     await app.listen(0);
     const address = app.getHttpServer().address();
     const port = typeof address === 'object' && address?.port ? address.port : 0;

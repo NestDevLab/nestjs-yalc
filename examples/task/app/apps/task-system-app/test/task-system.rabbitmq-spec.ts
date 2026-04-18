@@ -1,4 +1,5 @@
 import { INestApplication } from "@nestjs/common";
+import { FastifyAdapter } from "@nestjs/platform-fastify";
 import { Test } from "@nestjs/testing";
 import { randomUUID } from "node:crypto";
 import amqp from "amqplib";
@@ -69,7 +70,7 @@ describe("Task System RabbitMQ events e2e", () => {
       imports: [AppModule],
     }).compile();
 
-    app = moduleRef.createNestApplication();
+    app = moduleRef.createNestApplication(new FastifyAdapter());
     await app.listen(0);
     const address = app.getHttpServer().address();
     const port =

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { TelemetryService } from '@nestjs-yalc/observability';
 import { TasksApiClient } from '@nestjs-yalc/task-system-module/src/client/tasks-api.client';
 import type { TaskProjectCreateInput } from '../projects/task-project.dto';
 import type { TaskItemCreateInput, TaskItemUpdateInput } from './task-item.dto';
@@ -16,49 +17,61 @@ export class TaskWorkflowsService {
   constructor(
     private readonly client: TasksApiClient,
     private readonly events: TasksDomainEventsService,
+    private readonly telemetry: TelemetryService,
   ) {}
 
   async getBacklog() {
-    const tasks = await this.client.listTasks();
-    const backlog = tasks.list.filter((task) => task.status === 'todo');
+    return this.telemetry.measure('task-workflows.backlog', async () => {
+      const tasks = await this.client.listTasks();
+      const backlog = tasks.list.filter((task) => task.status === 'todo');
 
-    return {
-      ...tasks,
-      list: backlog,
-      pageData: {
-        ...tasks.pageData,
-        count: backlog.length,
-      },
-    };
+      return {
+        ...tasks,
+        list: backlog,
+        pageData: {
+          ...tasks.pageData,
+          count: backlog.length,
+        },
+      };
+    });
   }
 
   async createProjectWithTask(payload: CreateProjectWithTaskPayload) {
-    const project = await this.client.createProject(payload.project);
-    const task = await this.client.createTask({
-      ...payload.task,
-      projectId: payload.task.projectId ?? project.guid,
-    });
+    return this.telemetry.measure(
+      'task-workflows.project-with-task',
+      async () => {
+        const project = await this.client.createProject(payload.project);
+        const task = await this.client.createTask({
+          ...payload.task,
+          projectId: payload.task.projectId ?? project.guid,
+        });
 
-    await this.events.emitTaskCreated(
-      task.guid,
-      task.projectId ?? project.guid,
+        await this.events.emitTaskCreated(
+          task.guid,
+          task.projectId ?? project.guid,
+        );
+
+        return { project, task };
+      },
     );
-
-    return { project, task };
   }
 
   async completeTask(taskId: string) {
-    await this.client.updateTask(taskId, {
-      status: 'done',
-    } as TaskItemUpdateInput);
+    return this.telemetry.measure('task-workflows.complete-task', async () => {
+      await this.client.updateTask(taskId, {
+        status: 'done',
+      } as TaskItemUpdateInput);
 
-    const task = await this.client.getTask(taskId);
-    await this.events.emitTaskStatusChanged(task.guid, task.status);
+      const task = await this.client.getTask(taskId);
+      await this.events.emitTaskStatusChanged(task.guid, task.status);
 
-    return { task };
+      return { task };
+    });
   }
 
   async listProjectTasks(projectId: string) {
-    return this.client.listProjectTasks(projectId);
+    return this.telemetry.measure('task-workflows.project-tasks', () =>
+      this.client.listProjectTasks(projectId),
+    );
   }
 }

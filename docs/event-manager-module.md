@@ -50,19 +50,28 @@ handlers and can also be published through a real broker when
 disabled independently with `TASK_RABBITMQ_PUBLISH_ENABLED=false` while local
 handlers stay active.
 
+## Observability plugin
+
+`EventModule` does not depend on OpenTelemetry. Applications that need external
+monitoring should install `@nestjs-yalc/observability` and register
+`ObservabilityModule` next to their EventManager wiring. The observability
+plugin listens to the same `EventEmitter2` events emitted by `YalcEventService`
+and exports them as OpenTelemetry telemetry without changing EventManager
+runtime behavior.
+
 ## Examples
 
 Default wiring with the Nest EventEmitter module:
 
 ```ts
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { EventModule } from '@nestjs-yalc/event-manager';
+import { EventEmitterModule } from "@nestjs/event-emitter";
+import { EventModule } from "@nestjs-yalc/event-manager";
 
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
     EventModule.forRootAsync({
-      loggerProvider: { context: 'AppEvents' },
+      loggerProvider: { context: "AppEvents" },
     }),
   ],
 })
@@ -72,8 +81,8 @@ export class AppModule {}
 Custom emitter provider and service token:
 
 ```ts
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { EventModule, YalcEventService } from '@nestjs-yalc/event-manager';
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { EventModule, YalcEventService } from "@nestjs-yalc/event-manager";
 
 class MyEventService extends YalcEventService {}
 
@@ -89,14 +98,14 @@ class MyEventService extends YalcEventService {}
         eventService: (logger, emitter, options) =>
           new MyEventService(logger, emitter, options),
         eventServiceToken: MyEventService,
-        loggerProvider: { context: 'CustomEvents' },
+        loggerProvider: { context: "CustomEvents" },
       },
       {
-        provide: 'EVENT_OPTIONS',
+        provide: "EVENT_OPTIONS",
         useValue: {
-          logger: { context: 'CustomEvents' },
+          logger: { context: "CustomEvents" },
         },
-      },
+      }
     ),
   ],
   providers: [MyEventService],

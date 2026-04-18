@@ -127,6 +127,60 @@ through RabbitMQ, then consumes them back through a real queue-backed handler.
 It also verifies that disabling broker publishing does not disable local
 handlers.
 
+## Observability
+
+The task app is also the real-world example for `@nestjs-yalc/observability`.
+The app registers `ObservabilityModule` as an opt-in plugin. When enabled, it
+listens to EventManager events and exports OpenTelemetry telemetry for:
+
+- task workflow durations
+- local and HTTP API strategy calls
+- local and RabbitMQ event strategy emits
+- EventManager domain events
+- HTTP-aware errors raised through `YalcEventService`
+
+Start the local Grafana LGTM stack:
+
+```bash
+npm run observability:up --prefix examples/task/app
+```
+
+If port `3000` is already used, choose another host port:
+
+```bash
+GRAFANA_PORT=3002 npm run observability:up --prefix examples/task/app
+```
+
+Run the app with telemetry enabled:
+
+```bash
+YALC_OBSERVABILITY_ENABLED=true \
+YALC_OTEL_ENDPOINT=http://127.0.0.1:4318 \
+PORT=3001 \
+TASKS_API_STRATEGY=http \
+TASKS_HTTP_BASE_URL=http://127.0.0.1:3001 \
+TASK_EVENTS_STRATEGY=rabbitmq \
+TASK_RABBITMQ_URL=amqp://127.0.0.1:5672 \
+npm run start --prefix examples/task/app
+```
+
+Grafana is available at `http://127.0.0.1:3000` by default, or at the
+configured `GRAFANA_PORT`. OTLP HTTP is exposed at `http://127.0.0.1:4318`.
+
+For CI and automated tests, use the lightweight Collector stack:
+
+```bash
+npm run observability:ci:up --prefix examples/task/app
+npm run rabbitmq:up --prefix examples/task/app
+npm run test:e2e:observability --prefix examples/task/app
+npm run rabbitmq:down --prefix examples/task/app
+npm run observability:ci:down --prefix examples/task/app
+```
+
+The CI stack writes received telemetry to `examples/task/app/var/otel`, which
+is ignored by git. Payload export is disabled by default; enable it only when
+the payload is masked and safe for your environment.
+
 ## API Strategy Client Pattern
 
 The task module demonstrates the recommended real-world layering:
@@ -192,3 +246,9 @@ The RabbitMQ e2e suite is separate because it requires a local broker. It
 verifies the event strategy path with a real exchange, queue binding, publisher,
 and consumer handler. CI runs it through the dedicated `Task RabbitMQ example
 e2e` job in the examples pipeline.
+
+The observability e2e suite is also separate because it requires Docker. It
+starts an OpenTelemetry Collector, exercises the workflow endpoints with
+RabbitMQ enabled and disabled, and verifies telemetry for workflows, strategy
+wrappers, EventManager events, and errors. CI runs it through the dedicated
+`Task observability example e2e` job.

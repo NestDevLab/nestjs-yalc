@@ -36,7 +36,9 @@
       "@nestjs-yalc/errors/*": ["../../../errors/src/*"],
       "@nestjs-yalc/event-manager": ["../../../event-manager/src/index.ts"],
       "@nestjs-yalc/event-manager/*": ["../../../event-manager/src/*"],
-      "@nestjs-yalc/field-middleware": ["../../../field-middleware/src/index.ts"],
+      "@nestjs-yalc/field-middleware": [
+        "../../../field-middleware/src/index.ts"
+      ],
       "@nestjs-yalc/field-middleware/*": ["../../../field-middleware/src/*"],
       "@nestjs-yalc/graphql": ["../../../graphql/src/index.ts"],
       "@nestjs-yalc/graphql/*": ["../../../graphql/src/*"],
@@ -44,13 +46,18 @@
       "@nestjs-yalc/interfaces/*": ["../../../interfaces/src/*"],
       "@nestjs-yalc/logger": ["../../../logger/src/index.ts"],
       "@nestjs-yalc/logger/*": ["../../../logger/src/*"],
-      "@nestjs-yalc/omnikernel-module": ["../../omnikernel/module/src/index.ts"],
+      "@nestjs-yalc/observability": ["../../../observability/src/index.ts"],
+      "@nestjs-yalc/observability/*": ["../../../observability/src/*"],
+      "@nestjs-yalc/omnikernel-module": [
+        "../../omnikernel/module/src/index.ts"
+      ],
       "@nestjs-yalc/omnikernel-module/*": ["../../omnikernel/module/src/*"],
       "@nestjs-yalc/utils": ["../../../utils/src/index.ts"],
       "@nestjs-yalc/utils/*": ["../../../utils/src/*"],
       "@nestjs-yalc/types": ["../../../types/src/index.d.ts"],
       "@nestjs-yalc/types/*": ["../../../types/src/*"],
       "@nestjs-yalc/task-system-module": ["../module/src/index.ts"],
+      "@nestjs-yalc/task-system-module/src/*": ["../module/src/*"],
       "@nestjs-yalc/task-system-module/*": ["../module/src/*"],
       "nestjs-yalc": ["../../../types/src/index.d.ts"],
       "nestjs-yalc/*": ["../../../types/src/*"]

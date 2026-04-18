@@ -49,7 +49,7 @@ then expose one final token to consumers:
 ```ts
 ApiCallStrategySelectorProvider({
   provide: TASKS_CLIENT_API_STRATEGY,
-  defaultStrategy: 'local',
+  defaultStrategy: "local",
   strategies: {
     local: TASKS_CLIENT_LOCAL_API_STRATEGY,
     http: TASKS_CLIENT_HTTP_API_STRATEGY,
@@ -105,6 +105,12 @@ Recommended pattern:
 - avoid raw `console` and avoid ad-hoc `HttpException` usage in framework
   examples
 
+When the same behavior must be externally observable, register
+`@nestjs-yalc/observability` and wrap selected call/event strategies with
+`TelemetryCallStrategy` or `TelemetryEventStrategy`. Keep OpenTelemetry as a
+monitoring plugin: it should observe EventManager and strategy activity, not
+replace domain event transports such as local `EventEmitter2` or RabbitMQ.
+
 ## How this combines with CrudGen-first apps
 
 In a CrudGen-first app:
@@ -150,6 +156,12 @@ domain events still reach local `EventEmitter2` handlers, are published to
 RabbitMQ, and are consumed back by the task app's queue-backed handler. It also
 verifies that `TASK_RABBITMQ_PUBLISH_ENABLED=false` suppresses only the broker
 publish branch.
+
+The observability e2e suite starts a lightweight OpenTelemetry Collector and
+verifies that the same workflows export telemetry for workflow spans, API
+strategy calls, event strategy emits, EventManager domain events, errors, and
+RabbitMQ publishing. Local development can use the Grafana LGTM compose stack
+for a UI, but CI only needs the Collector file/debug exporter.
 
 Those endpoints are examples of integration behavior. They are intentionally
 separate from generated CRUD resources.
