@@ -190,4 +190,5 @@ The e2e suite covers both API strategy transports used by the example:
 
 The RabbitMQ e2e suite is separate because it requires a local broker. It
 verifies the event strategy path with a real exchange, queue binding, publisher,
-and consumer handler.
+and consumer handler. CI runs it through the dedicated `Task RabbitMQ example
+e2e` job in the examples pipeline.
