@@ -9,7 +9,8 @@ This library implements the strategy pattern and factory pattern so you can swit
 - **`NestHttpCallStrategy`** — uses Nest `HttpService.axiosRef` for real HTTP calls. It merges CLS-propagated headers (via `YalcGlobalClsService`), applies an optional whitelist, maps `HttpOptions` to Axios config, and supports query parameters via `URLSearchParams`.
 - **`NestLocalCallStrategy`** — uses Fastify `inject` to perform in-process HTTP-like calls against your app. Useful for local/dev or “mono” deployments where both caller and callee live in the same Nest runtime. Can optionally skip JSON parsing with `shouldSkipJsonParse`.
 - **`NestLocalEventStrategy`** — emits events through `EventEmitter2` (sync or async).
-- **`NestRabbitMqEventStrategy`** — emits the event locally through `EventEmitter2` and also publishes it to a RabbitMQ exchange. Use it when same-runtime handlers and external broker consumers must both receive the domain event.
+- **`RabbitMqEventStrategy`** — publishes events to a RabbitMQ exchange. It is a broker transport only; compose it with `NestLocalEventStrategy` when same-runtime handlers must run too.
+- **Strategy wrappers** — `CompositeEventStrategy`, `ConditionalEventStrategy`, `ConditionalCallStrategy`, `FallbackCallStrategy`, and `ShadowCallStrategy` let you fan out, disable, filter, fallback, or shadow strategies without changing the concrete transports.
 - **Abstracts/interfaces** — `HttpAbstractStrategy` adds `get`/`post` helpers; `IHttpCallStrategy`, `HttpOptions`, `IHttpCallStrategyResponse`, `IHttpCallStrategyOptions` define the HTTP contract; `IApiCallStrategy`/`IEventStrategy` define the core contracts for calls and events.
 - **Strategy selector providers** — `StrategySelectorProvider`, `ApiCallStrategySelectorProvider`, and `EventStrategySelectorProvider` expose one stable provider token while selecting one concrete strategy from a registered map.
 - **Context services** — `ContextCallServiceFactory` and `ContextEventServiceFactory` build injectable services with `getStrategy`/`setStrategy` for explicit runtime mutation by application code.
@@ -23,11 +24,13 @@ Use the factory helpers to register strategies as providers in your modules:
 ```ts
 import {
   ApiCallStrategySelectorProvider,
+  CompositeEventStrategy,
+  ConditionalEventStrategy,
   EventStrategySelectorProvider,
   NestHttpCallStrategyProvider,
   NestLocalCallStrategyProvider,
   NestLocalEventStrategyProvider,
-  NestRabbitMqEventStrategyProvider,
+  RabbitMqEventStrategy,
   // Accept the same options, including headersWhitelist/internalRequestHeader/internalRequestToken
 } from '@nestjs-yalc/api-strategy';
 import { HttpModule } from '@nestjs/axios';
@@ -51,11 +54,23 @@ import { Module } from '@nestjs/common';
       internalRequestHeader: 'x-internal-request-token',
     }),
     NestLocalEventStrategyProvider('EVENT_STRATEGY'),
-    NestRabbitMqEventStrategyProvider('RABBITMQ_EVENT_STRATEGY', {
-      options: {
-        url: process.env.RABBITMQ_URL ?? 'amqp://127.0.0.1:5672',
-        exchange: 'app.events',
-      },
+    {
+      provide: 'RABBITMQ_EVENT_STRATEGY',
+      useFactory: (localStrategy) =>
+        new CompositeEventStrategy([
+          localStrategy,
+          new ConditionalEventStrategy(
+            new RabbitMqEventStrategy({
+              url: process.env.RABBITMQ_URL ?? 'amqp://127.0.0.1:5672',
+              exchange: 'app.events',
+            }),
+            {
+              enabled: () => process.env.RABBITMQ_PUBLISH_ENABLED !== 'false',
+              disabledResult: false,
+            },
+          ),
+        ]),
+      inject: ['EVENT_STRATEGY'],
     }),
     ApiCallStrategySelectorProvider({
       provide: 'API_STRATEGY',
@@ -104,12 +119,33 @@ Provider options:
   - `shouldSkipJsonParse` can bypass `result.json()` when the body isn’t JSON.
 - `NestLocalEventStrategyProvider({ NestLocalStrategy? })`
   - Injects `EventEmitter2`, supports `emit` and `emitAsync`.
-- `NestRabbitMqEventStrategyProvider({ NestRabbitMqStrategy?, options })`
-  - Injects `EventEmitter2`, supports local `emit`/`emitAsync`, and publishes
-    the same event to RabbitMQ.
+- `RabbitMqEventStrategyProvider({ RabbitMqStrategy?, options })`
+  - Publishes `emit`/`emitAsync` calls to RabbitMQ.
+  - It does not emit through `EventEmitter2` by itself. Use
+    `CompositeEventStrategy` to combine local runtime handlers and broker
+    publishing.
   - `options.url` and `options.exchange` are required.
   - Optional `exchangeType`, `durable`, `persistent`, `contentType`,
     `publishOptions`, and `serialize` customize broker behavior.
+- `CompositeEventStrategy(strategies, { errorMode? })`
+  - Emits the same event through every nested strategy.
+  - Use it for local + RabbitMQ, local + Kafka, or multi-broker fan-out.
+  - `errorMode: 'throw'` is the default; `ignore` skips failed branches.
+- `ConditionalEventStrategy(strategy, { enabled?, shouldEmit?, disabledResult? })`
+  - Wraps any event strategy with a feature flag or per-event predicate.
+  - Use it to disable a broker publish while leaving the rest of a composite
+    strategy active.
+- `ConditionalCallStrategy(strategy, { enabled?, disabledResponse?, disabledError? })`
+  - Wraps any call strategy with a feature flag.
+- `FallbackCallStrategy(strategies, { shouldFallback? })`
+  - Tries call strategies in order until one succeeds.
+  - Use it for explicit migration/failover cases, not as a default replacement
+    for a clear selected transport.
+- `ShadowCallStrategy(primary, shadows, { awaitShadows?, shadowErrorMode? })`
+  - Returns the primary call response and also invokes one or more shadow
+    transports.
+  - Use it to compare an HTTP implementation with a future gRPC implementation
+    while keeping HTTP as the user-facing result.
 
 ## Strategy selector providers
 
@@ -154,9 +190,11 @@ The same pattern works for event strategies:
 
 ```ts
 import {
+  CompositeEventStrategy,
+  ConditionalEventStrategy,
   EventStrategySelectorProvider,
   NestLocalEventStrategyProvider,
-  NestRabbitMqEventStrategyProvider,
+  RabbitMqEventStrategy,
 } from '@nestjs-yalc/api-strategy';
 
 export const USER_EVENT_STRATEGY = 'USER_EVENT_STRATEGY';
@@ -165,11 +203,23 @@ export const USER_RABBITMQ_EVENT_STRATEGY = 'USER_RABBITMQ_EVENT_STRATEGY';
 
 providers: [
   NestLocalEventStrategyProvider(USER_LOCAL_EVENT_STRATEGY),
-  NestRabbitMqEventStrategyProvider(USER_RABBITMQ_EVENT_STRATEGY, {
-    options: {
-      url: process.env.RABBITMQ_URL,
-      exchange: 'users.events',
-    },
+  {
+    provide: USER_RABBITMQ_EVENT_STRATEGY,
+    useFactory: (localStrategy) =>
+      new CompositeEventStrategy([
+        localStrategy,
+        new ConditionalEventStrategy(
+          new RabbitMqEventStrategy({
+            url: process.env.RABBITMQ_URL,
+            exchange: 'users.events',
+          }),
+          {
+            enabled: () => process.env.USER_RABBITMQ_PUBLISH_ENABLED !== 'false',
+            disabledResult: false,
+          },
+        ),
+      ]),
+    inject: [USER_LOCAL_EVENT_STRATEGY],
   }),
   EventStrategySelectorProvider({
     provide: USER_EVENT_STRATEGY,
@@ -200,6 +250,36 @@ Selector options:
 Prefer selector providers for environment-level transport changes. Use context
 services only when you need to mutate the strategy instance after the provider
 has been resolved.
+
+## Strategy composition
+
+Composition is intentionally separate from selection:
+
+- selectors choose one named strategy for the current environment
+- wrappers modify or combine strategies
+- concrete strategies stay focused on one transport
+
+For events, this means a broker strategy should not also own local runtime
+dispatch. Compose both branches instead:
+
+```ts
+new CompositeEventStrategy([
+  localEventStrategy,
+  new ConditionalEventStrategy(rabbitMqEventStrategy, {
+    enabled: () => process.env.RABBITMQ_PUBLISH_ENABLED !== 'false',
+    disabledResult: false,
+  }),
+]);
+```
+
+For call strategies, prefer one selected transport in normal request paths.
+Reach for wrappers only when the use case is explicit:
+
+- `ConditionalCallStrategy` for feature-flagged outbound calls
+- `FallbackCallStrategy` for migration/failover flows where retrying a second
+  transport is acceptable
+- `ShadowCallStrategy` for dual-running a future transport without changing
+  the response returned to callers
 
 ## Real-world module client pattern
 
@@ -295,8 +375,8 @@ export class UserService {
 
 - Start with local-call/local-event for fast dev/test in a monolith, then switch to HTTP or other transports without refactoring callers.
 - Route per-environment using selector providers, while keeping caller tokens stable.
-- Keep event transport open for future brokers by selecting between `IEventStrategy`
-  implementations such as local `EventEmitter2`, local-plus-RabbitMQ, SNS, or
-  other transports.
+- Keep event transport open for future brokers by selecting or composing
+  `IEventStrategy` implementations such as local `EventEmitter2`, RabbitMQ,
+  Kafka, SNS, or other transports.
 - Use context services only for explicit runtime mutation by application code.
 - Prototype service-to-service communication before introducing full API gateways/brokers.

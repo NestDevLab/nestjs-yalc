@@ -3,11 +3,13 @@ import { HttpModule, HttpService } from '@nestjs/axios';
 import { HttpAdapterHost } from '@nestjs/core';
 import {
   ApiCallStrategySelectorProvider,
+  CompositeEventStrategy,
+  ConditionalEventStrategy,
   EventStrategySelectorProvider,
   NestHttpCallStrategy,
   NestLocalCallStrategy,
   NestLocalEventStrategy,
-  NestRabbitMqEventStrategy,
+  RabbitMqEventStrategy,
 } from '@nestjs-yalc/api-strategy';
 import type { AppConfigService } from '@nestjs-yalc/app/app-config.service.js';
 import { YalcGlobalClsService } from '@nestjs-yalc/app/cls.module.js';
@@ -114,12 +116,19 @@ import { taskItemProviders, TasksController } from './task-item.resource';
     },
     {
       provide: TASK_EVENTS_RABBITMQ_STRATEGY,
-      useFactory: (events: YalcEventService) =>
-        new NestRabbitMqEventStrategy(
-          events.emitter,
-          createTaskEventsRabbitMqOptions(),
-        ),
-      inject: [YalcEventService],
+      useFactory: (localStrategy: NestLocalEventStrategy) =>
+        new CompositeEventStrategy([
+          localStrategy,
+          new ConditionalEventStrategy(
+            new RabbitMqEventStrategy(createTaskEventsRabbitMqOptions()),
+            {
+              enabled: () =>
+                process.env.TASK_RABBITMQ_PUBLISH_ENABLED !== 'false',
+              disabledResult: false,
+            },
+          ),
+        ]),
+      inject: [TASK_EVENTS_LOCAL_STRATEGY],
     },
     EventStrategySelectorProvider({
       provide: TASK_EVENTS_STRATEGY,

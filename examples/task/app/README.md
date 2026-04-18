@@ -81,9 +81,16 @@ The task app also includes an optional RabbitMQ-backed domain event transport.
 Local development and the standard e2e suite use the local `EventEmitter2`
 strategy unless `TASK_EVENTS_STRATEGY=rabbitmq` is set.
 
-The RabbitMQ strategy is `NestRabbitMqEventStrategy` from `api-strategy`. It
-keeps the in-process `EventEmitter2` emission active for same-runtime handlers
-and also publishes the same domain event to RabbitMQ for external consumers.
+The RabbitMQ branch uses `RabbitMqEventStrategy` from `api-strategy`, composed
+with the local `EventEmitter2` strategy:
+
+```text
+CompositeEventStrategy(local EventEmitter2, conditional RabbitMQ publish)
+```
+
+This keeps in-process handlers active for same-runtime behavior and publishes
+the same domain event to RabbitMQ for external consumers when broker publishing
+is enabled.
 
 Start the local broker:
 
@@ -110,11 +117,15 @@ Runtime configuration:
 - `TASK_RABBITMQ_URL` defaults to `amqp://127.0.0.1:5672`.
 - `TASK_RABBITMQ_EXCHANGE` defaults to `task-system.events`.
 - `TASK_RABBITMQ_QUEUE` defaults to `task-system.audit` for the demo consumer.
+- `TASK_RABBITMQ_PUBLISH_ENABLED=false` disables only the RabbitMQ publish
+  branch. Local `EventEmitter2` handlers still run.
 
 The RabbitMQ e2e starts the app with `TASK_EVENTS_STRATEGY=rabbitmq`, executes
 the same workflow endpoints, verifies local `EventEmitter2` handlers still run,
 publishes `task-system.tasks.created` and `task-system.tasks.status-changed`
 through RabbitMQ, then consumes them back through a real queue-backed handler.
+It also verifies that disabling broker publishing does not disable local
+handlers.
 
 ## API Strategy Client Pattern
 
@@ -153,8 +164,8 @@ workflow service -> domain events service -> task events client -> selected even
 ```
 
 `TasksEventsClient` is exported by the reusable task-system module. The app
-wires the local `EventEmitter2` strategy and the optional local-plus-RabbitMQ
-strategy behind one stable `TASK_EVENTS_STRATEGY` token.
+wires the local `EventEmitter2` strategy and the optional composed
+local-plus-RabbitMQ strategy behind one stable `TASK_EVENTS_STRATEGY` token.
 
 ## Role In The Examples
 

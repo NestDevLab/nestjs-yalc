@@ -1,5 +1,4 @@
 import { OnModuleDestroy } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import type { ClassType } from '@nestjs-yalc/types/globals.d.js';
 import amqp, { Channel, ChannelModel, Options } from 'amqplib';
 import { IEventStrategy } from '../context-event.interface.js';
@@ -9,7 +8,7 @@ interface RabbitConnectionResource {
   heartbeater?: { clear: () => void };
 }
 
-export interface NestRabbitMqEventStrategyOptions<P = any> {
+export interface RabbitMqEventStrategyOptions<P = any> {
   url: string;
   exchange: string;
   exchangeType?: string;
@@ -20,32 +19,21 @@ export interface NestRabbitMqEventStrategyOptions<P = any> {
   serialize?: (payload: P) => Buffer | string;
 }
 
-export class NestRabbitMqEventStrategy<P = any, O = any>
+export class RabbitMqEventStrategy<P = any, O = any>
   implements IEventStrategy<P, boolean, O>, OnModuleDestroy
 {
   private connection?: ChannelModel;
   private channel?: Channel;
 
-  constructor(
-    private readonly eventEmitter: EventEmitter2,
-    private readonly options: NestRabbitMqEventStrategyOptions<P>,
-  ) {}
+  constructor(private readonly options: RabbitMqEventStrategyOptions<P>) {}
 
-  emit(path: string, payload: P, options?: O): boolean {
-    const localResult = this.eventEmitter.emit(path, payload, options);
-
+  emit(path: string, payload: P): boolean {
     void this.publish(path, payload).catch(() => undefined);
-
-    return localResult;
+    return true;
   }
 
-  async emitAsync(path: string, payload: P, options?: O): Promise<boolean> {
-    await Promise.all([
-      this.eventEmitter.emitAsync(path, payload, options),
-      this.publish(path, payload),
-    ]);
-
-    return true;
+  async emitAsync(path: string, payload: P): Promise<boolean> {
+    return this.publish(path, payload);
   }
 
   async onModuleDestroy() {
@@ -95,29 +83,27 @@ export class NestRabbitMqEventStrategy<P = any, O = any>
   }
 }
 
-export interface NestRabbitMqEventStrategyProviderOptions<P = any> {
-  NestRabbitMqStrategy?: ClassType<NestRabbitMqEventStrategy<P>>;
+export interface RabbitMqEventStrategyProviderOptions<P = any> {
+  RabbitMqStrategy?: ClassType<RabbitMqEventStrategy<P>>;
   options:
-    | NestRabbitMqEventStrategyOptions<P>
-    | ((eventEmitter: EventEmitter2) => NestRabbitMqEventStrategyOptions<P>);
+    | RabbitMqEventStrategyOptions<P>
+    | (() => RabbitMqEventStrategyOptions<P>);
 }
 
-export const NestRabbitMqEventStrategyProvider = <P = any>(
+export const RabbitMqEventStrategyProvider = <P = any>(
   provide: string,
-  options: NestRabbitMqEventStrategyProviderOptions<P>,
+  options: RabbitMqEventStrategyProviderOptions<P>,
 ) => ({
   provide,
-  useFactory: (eventEmitter: EventEmitter2) => {
-    const RabbitMqStrategy =
-      options.NestRabbitMqStrategy ?? NestRabbitMqEventStrategy;
+  useFactory: () => {
+    const Strategy = options.RabbitMqStrategy ?? RabbitMqEventStrategy;
     const strategyOptions =
       typeof options.options === 'function'
-        ? options.options(eventEmitter)
+        ? options.options()
         : options.options;
 
-    return new RabbitMqStrategy(eventEmitter, strategyOptions);
+    return new Strategy(strategyOptions);
   },
-  inject: [EventEmitter2],
 });
 
 async function closeRabbitResource(resource?: {
