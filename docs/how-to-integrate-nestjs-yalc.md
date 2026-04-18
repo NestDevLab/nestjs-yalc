@@ -166,7 +166,14 @@ Use `@nestjs-yalc/api-strategy` to swap transport without touching domain logic.
   calls the selected `IHttpCallStrategy`. The skeleton app provides the smaller
   `UsersApiClient` variant from `examples/skeleton/module`.
 
-- **Events**: extend `NestLocalEventStrategy` if you need to enrich in-process events. Inject `APP_EVENT_SERVICE` (the YALC event bus) for async flows.
+- **Events**: use `NestLocalEventStrategy` when the event should stay inside
+  the current Nest runtime. Use broker strategies such as
+  `RabbitMqEventStrategy` when the event should leave the process. If the same
+  domain event must reach both local handlers and a broker, compose strategies:
+  `CompositeEventStrategy(local, ConditionalEventStrategy(rabbitmq))`. This
+  keeps the broker transport optional and lets configuration disable only the
+  broker branch while local handlers remain active. Inject `APP_EVENT_SERVICE`
+  (the YALC event bus) for async flows.
 
 - **Switching transport**: register each concrete strategy under its own token,
   then expose one stable caller token with `ApiCallStrategySelectorProvider`.
@@ -202,6 +209,13 @@ Use `@nestjs-yalc/api-strategy` to swap transport without touching domain logic.
   Keep concrete local/http strategy tokens private to the module where possible.
   Export only the typed client or a stable client-facing token when another
   module needs the boundary.
+
+- **Strategy wrappers**: keep wrappers outside concrete transports. Use
+  `ConditionalCallStrategy` to feature-flag a call strategy,
+  `FallbackCallStrategy` for explicit migration/failover flows, and
+  `ShadowCallStrategy` to run a future transport beside the current one while
+  returning only the primary response. Use `CompositeEventStrategy` for event
+  fan-out and `ConditionalEventStrategy` for per-branch publish flags.
 
 ## Config and tokens
 - Every app declares an alias (`APP_ALIAS_*`) and uses YALC tokens (`APP_EVENT_SERVICE`, `SYSTEM_LOGGER_SERVICE`, `getAppConfigToken(alias)`, `getAppEventToken(alias)`) to isolate config/logging when multiple modules run in the same process.

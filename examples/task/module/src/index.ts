@@ -14,4 +14,5 @@ export * from './task-sync-state.entity.js';
 export * from './task-sync-state.dto.js';
 export * from './task-sync-state.resolver.js';
 export * from './client/tasks-api.client.js';
+export * from './events/tasks-events.client.js';
 export * from './task-system.module.js';

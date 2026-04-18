@@ -1,0 +1,29 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".rabbitmq-spec.ts$",
+  "transform": {
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        "tsconfig": "<rootDir>/../../../tsconfig.e2e.json",
+        "diagnostics": false
+      }
+    ]
+  },
+  "moduleNameMapper": {
+    "^@nestjs-yalc/omnikernel-module$": "<rootDir>/../../../../../omnikernel/module/src",
+    "^@nestjs-yalc/omnikernel-module/src/(.*)$": "<rootDir>/../../../../../omnikernel/module/src/$1",
+    "^@nestjs-yalc/task-system-module$": "<rootDir>/../../../../module/src",
+    "^@nestjs-yalc/task-system-module/src/(.*)$": "<rootDir>/../../../../module/src/$1",
+    "^@nestjs/(.*)$": "<rootDir>/../../../../../../node_modules/@nestjs/$1",
+    "^typeorm$": "<rootDir>/../../../../../../node_modules/typeorm",
+    "^p-map$": "<rootDir>/p-map.mock.ts",
+    "^lodash-es$": "lodash",
+    "^@nestjs-yalc/([^/]+)/(.+?)\\.js$": "<rootDir>/../../../../../../$1/src/$2",
+    "^@nestjs-yalc/([^/]+)/(.*)$": "<rootDir>/../../../../../../$1/src/$2",
+    "^@nestjs-yalc/([^/]+)$": "<rootDir>/../../../../../../$1/src",
+    "^(\\.{1,2}/.*)\\.js$": "$1"
+  }
+}

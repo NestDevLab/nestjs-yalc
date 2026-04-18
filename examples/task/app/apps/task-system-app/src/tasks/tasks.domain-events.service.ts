@@ -1,12 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { YalcEventService } from '@nestjs-yalc/event-manager';
 import { AppLoggerFactory } from '@nestjs-yalc/logger/logger.factory';
+import { TasksEventsClient } from '@nestjs-yalc/task-system-module/src/events/tasks-events.client';
 
 @Injectable()
 export class TasksDomainEventsService {
   private readonly logger = AppLoggerFactory('TaskSystem.Tasks');
 
-  constructor(private readonly events: YalcEventService) {}
+  constructor(
+    private readonly events: YalcEventService,
+    @Optional() private readonly taskEvents?: TasksEventsClient,
+  ) {}
 
   async emitTaskCreated(taskId: string, projectId?: string | null) {
     await this.events.log(['task-system', 'tasks', 'created'], {
@@ -21,6 +25,7 @@ export class TasksDomainEventsService {
         instance: this.logger,
       },
     });
+    await this.taskEvents?.emitTaskCreated(taskId, projectId);
   }
 
   async emitTaskStatusChanged(taskId: string, status: string) {
@@ -36,5 +41,6 @@ export class TasksDomainEventsService {
         instance: this.logger,
       },
     });
+    await this.taskEvents?.emitTaskStatusChanged(taskId, status);
   }
 }

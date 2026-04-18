@@ -61,10 +61,31 @@ ApiCallStrategySelectorProvider({
 ```
 
 The same selector shape applies to `IEventStrategy` via
-`EventStrategySelectorProvider`. Today the built-in event strategy is local
-`EventEmitter2`; future broker-backed strategies such as RabbitMQ, SNS, or
-Kafka should be added as separate `IEventStrategy` providers and selected
-through the same stable event token.
+`EventStrategySelectorProvider`. The built-in local event strategy uses
+`EventEmitter2` for same-runtime handlers. Broker transports such as
+`RabbitMqEventStrategy` publish externally only. When a use case needs both,
+wrap the local and broker strategies with `CompositeEventStrategy`; then wrap
+the broker branch with `ConditionalEventStrategy` if publishing must be
+feature-flagged.
+
+The task-system app demonstrates this with `TasksEventsClient`:
+
+```text
+workflow service -> domain events service -> task events client -> selected event strategy
+```
+
+The app keeps `local` as the default event transport and exposes RabbitMQ as an
+optional composed strategy selected with `TASK_EVENTS_STRATEGY=rabbitmq`. In
+that mode the selected strategy is:
+
+```text
+CompositeEventStrategy(local EventEmitter2, conditional RabbitMQ publish)
+```
+
+This keeps the workflow code independent from the broker while still allowing
+an e2e suite to exercise local handlers plus a real exchange, queue binding,
+publisher, and consumer. Setting `TASK_RABBITMQ_PUBLISH_ENABLED=false` disables
+only the broker branch; local handlers still receive the event.
 
 ## When to use YalcEventService
 
@@ -113,6 +134,22 @@ The workflow endpoints combine strategy-backed calls and domain events:
   selected strategy and emits `task-system.tasks.created`.
 - `PUT /task-workflows/tasks/:id/complete` updates through the selected strategy
   and emits `task-system.tasks.status-changed`.
+
+By default these events are handled through local `EventEmitter2`. For a
+composed local-plus-broker run, start the task app RabbitMQ compose file and
+run:
+
+```bash
+npm run rabbitmq:up --prefix examples/task/app
+npm run test:e2e:rabbitmq --prefix examples/task/app
+npm run rabbitmq:down --prefix examples/task/app
+```
+
+That suite sets `TASK_EVENTS_STRATEGY=rabbitmq` and verifies that workflow
+domain events still reach local `EventEmitter2` handlers, are published to
+RabbitMQ, and are consumed back by the task app's queue-backed handler. It also
+verifies that `TASK_RABBITMQ_PUBLISH_ENABLED=false` suppresses only the broker
+publish branch.
 
 Those endpoints are examples of integration behavior. They are intentionally
 separate from generated CRUD resources.

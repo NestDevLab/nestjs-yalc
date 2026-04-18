@@ -2,12 +2,17 @@ import { TasksDomainEventsService } from './tasks.domain-events.service';
 
 describe('TasksDomainEventsService', () => {
   const log = jest.fn();
+  const emitTaskCreated = jest.fn();
+  const emitTaskStatusChanged = jest.fn();
   const events = { log } as any;
+  const taskEvents = { emitTaskCreated, emitTaskStatusChanged } as any;
   let service: TasksDomainEventsService;
 
   beforeEach(() => {
     log.mockReset();
-    service = new TasksDomainEventsService(events);
+    emitTaskCreated.mockReset();
+    emitTaskStatusChanged.mockReset();
+    service = new TasksDomainEventsService(events, taskEvents);
   });
 
   it('emits a task created event with module-specific logger metadata', async () => {
@@ -26,6 +31,7 @@ describe('TasksDomainEventsService', () => {
         instance: expect.any(Object),
       }),
     });
+    expect(emitTaskCreated).toHaveBeenCalledWith('task-1', 'project-1');
   });
 
   it('emits a task status-changed event', async () => {
@@ -44,5 +50,6 @@ describe('TasksDomainEventsService', () => {
         instance: expect.any(Object),
       }),
     });
+    expect(emitTaskStatusChanged).toHaveBeenCalledWith('task-2', 'done');
   });
 });
