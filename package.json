@@ -19,7 +19,7 @@
     "build:watch": "tsc-watch",
     "lint": "npm run lint:no-fix -- --fix",
     "lint:no-fix": "eslint -c eslint.config.mjs \"**/src/**/*.ts\" --max-warnings=0",
-    "lint:path": "eslint -c eslint.config.mjs $npm_config_lintpath\"/**/*.ts\" --max-warnings=0",
+    "lint:path": "eslint -c eslint.config.mjs \"$npm_config_lintpath/**/*.ts\" --max-warnings=0",
     "test": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-import-meta-resolve \" npx jest ",
     "test:watch": "npm run test -- --watch",
     "test:debug": "NODE_OPTIONS=\"--experimental-vm-modules --experimental-import-meta-resolve --inspect-brk\" npx jest --runInBand --watch --no-cache ",

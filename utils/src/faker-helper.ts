@@ -40,7 +40,13 @@ export class FakerHelper {
       }
     }
 
-    return faker.internet.email({ firstName, lastName, provider });
+    const fallbackEmail = faker.internet.email({
+      firstName,
+      lastName,
+      provider,
+    });
+    this.generatedEmails.add(fallbackEmail);
+    return fallbackEmail;
   }
 
   randomFromEnum<T extends Record<string, string | number>>(

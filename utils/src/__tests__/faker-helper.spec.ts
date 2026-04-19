@@ -102,6 +102,11 @@ describe('faker helper test', () => {
     expect(helper.generateNewEmail('Elon', 'Musk', 'gmail.test')).toBe(
       'fallback@gmail.test',
     );
+    expect(
+      (
+        helper as unknown as { generatedEmails: Set<string> }
+      ).generatedEmails.has('fallback@gmail.test'),
+    ).toBe(true);
   });
 
   it('should be able to generate a valid birthDate between age 18 and 100 (YYYY-MM-DD) (min age)', () => {
