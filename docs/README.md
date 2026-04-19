@@ -6,24 +6,13 @@ layout: landing
 ---
 
 <section class="ny-landing-hero">
-  <div class="ny-hero-visual" aria-hidden="true">
-    <span>ModelObject</span>
-    <span>DTO</span>
-    <span>REST</span>
-    <span>GraphQL</span>
-    <span>Strategy Token</span>
-    <span>Event Trail</span>
-    <span>Trace</span>
-  </div>
-
   <div class="ny-hero-content">
     <img class="ny-hero-mark" src="assets/images/logo-small_yalc.png" alt="NestJS-YALC logo">
     <p class="ny-eyebrow">NestJS - Yet Another Library Collection</p>
-    <h1>Production-proof NestJS, generated from explicit architecture.</h1>
+    <h1>Production-proof NestJS without backend glue.</h1>
     <p class="ny-lead">
-      NestJS-YALC turns the repetitive backend layer into a predictable system:
-      generated CRUD, strategy-based API boundaries, and EventManager-powered
-      observability from the first module.
+      NestJS-YALC gives backend teams a clean foundation for generated APIs,
+      explicit module boundaries, and observable runtime behavior.
     </p>
     <div class="ny-actions">
       <a class="ny-button" href="{{ '/getting-started' | relative_url }}">Start in minutes</a>
@@ -40,10 +29,10 @@ layout: landing
 
 <section class="ny-section ny-section--surface">
   <div class="ny-section-header">
-    <h2>The production core.</h2>
+    <h2>Three things matter most.</h2>
     <p>
-      Three primitives carry the project: generate the standard API surface,
-      make communication explicit, and keep every operational signal connected.
+      The project is built around the three parts that usually decide whether a
+      NestJS backend stays maintainable in production.
     </p>
   </div>
 
@@ -80,44 +69,7 @@ layout: landing
   </div>
 </section>
 
-<section class="ny-system-section">
-  <div class="ny-section-header">
-    <h2>One resource definition becomes a production surface.</h2>
-    <p>
-      The value is visual: a model is not just a class, it becomes typed APIs,
-      module-safe communication, dataloading, structured errors, logs, events,
-      and traces.
-    </p>
-  </div>
-
-  <div class="ny-system-map" aria-label="NestJS-YALC generated production flow">
-    <div class="ny-system-node ny-system-node--source">
-      <span>01</span>
-      <strong>Model metadata</strong>
-      <small>ModelObject + ModelField</small>
-    </div>
-    <div class="ny-system-arrow"></div>
-    <div class="ny-system-node">
-      <span>02</span>
-      <strong>Generated contracts</strong>
-      <small>REST + GraphQL + Dataloader</small>
-    </div>
-    <div class="ny-system-arrow"></div>
-    <div class="ny-system-node">
-      <span>03</span>
-      <strong>API Strategy</strong>
-      <small>Stable service boundaries</small>
-    </div>
-    <div class="ny-system-arrow"></div>
-    <div class="ny-system-node ny-system-node--sink">
-      <span>04</span>
-      <strong>EventManager</strong>
-      <small>Errors + logs + traces</small>
-    </div>
-  </div>
-</section>
-
-<section class="ny-section ny-section--surface">
+<section class="ny-section ny-section--logos">
   <div class="ny-section-header">
     <h2>Used in real production contexts.</h2>
     <p>
@@ -136,9 +88,9 @@ layout: landing
   </div>
 </section>
 
-<section class="ny-section ny-section--split">
+<section class="ny-section ny-section--split ny-section--surface">
   <div class="ny-section-header">
-    <h2>A tiny starting point.</h2>
+    <h2>Start from one resource.</h2>
     <p>
       The skeleton app is the smallest complete example: one resource definition
       exposes generated REST and GraphQL over an in-memory SQLite app.
@@ -170,13 +122,13 @@ layout: landing
 });</code></pre>
 </section>
 
-<section class="ny-section ny-section--surface">
+<section class="ny-section">
   <div class="ny-section-header">
-    <h2>Full reference, clear path.</h2>
+    <h2>The wiki stays where docs belong.</h2>
     <p>
-      The landing page is custom, but the documentation area still uses the
-      Git-Wiki theme and keeps the wiki navigation, search, page list, and
-      tooling provided by the original site.
+      The landing page is only the entry point. The full documentation still
+      uses the Git-Wiki theme with search, navigation, page lists, and the
+      existing reference content.
     </p>
   </div>
 
