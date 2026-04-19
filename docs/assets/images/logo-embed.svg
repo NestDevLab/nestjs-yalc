@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="64" viewBox="0 0 260 64" role="img" aria-labelledby="title">
+  <title id="title">Embed</title>
+  <path fill="#2C2C2C" d="M37.8 30.8c0-7.4-6.1-13.4-13.6-13.4v6.1c4.1 0 7.4 3.3 7.4 7.3v.9h-10c1.6-2.3 2.6-5.2 2.6-8.2H18c0 4.5-3.7 8.2-8.3 8.2H9v6.1h.8c4.6 0 8.3 3.7 8.3 8.2h6.2c0-3.1-1-5.9-2.6-8.2h16.2v-7h-.1Z"/>
+  <text x="56" y="42" fill="#2C2C2C" font-family="Inter, Arial, sans-serif" font-size="31" font-weight="700" letter-spacing="0">Embed</text>
+</svg>

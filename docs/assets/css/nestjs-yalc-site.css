@@ -1,0 +1,1136 @@
+:root {
+  --ny-bg: #f6f8f7;
+  --ny-surface: #ffffff;
+  --ny-surface-strong: #111317;
+  --ny-text: #151719;
+  --ny-muted: #5b6269;
+  --ny-border: #d9dfdd;
+  --ny-red: #e0234e;
+  --ny-teal: #0f8b8d;
+  --ny-green: #177245;
+  --ny-yellow: #f1b42f;
+  --ny-code: #191c1f;
+  --ny-shadow: 0 18px 45px rgba(17, 19, 23, 0.1);
+  --ny-section-width: 76rem;
+  --ny-radius: 8px;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--ny-bg);
+  color: var(--ny-text);
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+a {
+  color: var(--ny-teal);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  color: var(--ny-red);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.ny-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.25rem;
+  padding: 0.75rem clamp(1rem, 4rem, 4rem);
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid var(--ny-border);
+  backdrop-filter: blur(16px);
+}
+
+.ny-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--ny-text);
+  font-weight: 800;
+  letter-spacing: 0;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ny-brand img {
+  border-radius: var(--ny-radius);
+}
+
+.ny-topnav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.ny-topnav a,
+.ny-button,
+.ny-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--ny-radius);
+  font-weight: 700;
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.ny-topnav a {
+  color: var(--ny-text);
+}
+
+.ny-topnav a:hover {
+  background: #eef4f2;
+  color: var(--ny-red);
+}
+
+.ny-main--landing {
+  background:
+    linear-gradient(90deg, rgba(17, 19, 23, 0.04) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(17, 19, 23, 0.04) 1px, transparent 1px),
+    var(--ny-bg);
+  background-size: 38px 38px;
+}
+
+.ny-landing-hero {
+  position: relative;
+  min-height: 36rem;
+  padding: 5.75rem clamp(1.25rem, 4rem, 4rem) 4.25rem;
+  overflow: hidden;
+  color: var(--ny-surface);
+  background:
+    linear-gradient(135deg, rgba(224, 35, 78, 0.2), transparent 30rem),
+    linear-gradient(315deg, rgba(15, 139, 141, 0.18), transparent 32rem),
+    #111317;
+}
+
+.ny-landing-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.075) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.075) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(180deg, #000, transparent 82%);
+  pointer-events: none;
+}
+
+.ny-landing-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ny-hero-content {
+  width: min(58rem, 100%);
+}
+
+.ny-hero-output {
+  position: absolute;
+  right: clamp(1rem, 5vw, 5rem);
+  bottom: 4.25rem;
+  width: min(34rem, 38vw);
+  opacity: 0.96;
+}
+
+.ny-mini-code {
+  width: min(24rem, 100%);
+  margin-left: auto;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--ny-radius);
+  background: rgba(17, 19, 23, 0.78);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+}
+
+.ny-mini-code-dot {
+  display: block;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  background: var(--ny-red);
+  box-shadow:
+    1rem 0 0 var(--ny-yellow),
+    2rem 0 0 var(--ny-teal);
+}
+
+.ny-mini-code-line {
+  display: block;
+  width: 78%;
+  height: 0.55rem;
+  margin-top: 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.ny-mini-code-line--long {
+  width: 94%;
+}
+
+.ny-mini-code-line--mid {
+  width: 66%;
+  background: rgba(184, 242, 230, 0.42);
+}
+
+.ny-mini-code-line--short {
+  width: 46%;
+  background: rgba(224, 35, 78, 0.46);
+}
+
+.ny-generated-surface {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.9rem;
+}
+
+.ny-generated-surface span {
+  min-height: 3.4rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--ny-radius);
+  background: rgba(255, 255, 255, 0.09);
+  color: #f7fbfa;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.ny-hero-mark {
+  width: 4.25rem;
+  height: 4.25rem;
+  margin-bottom: 1.5rem;
+  border-radius: var(--ny-radius);
+  box-shadow: var(--ny-shadow);
+}
+
+.ny-eyebrow {
+  margin: 0 0 0.9rem;
+  color: #b8f2e6;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ny-landing-hero h1 {
+  max-width: 52rem;
+  margin: 0;
+  font-size: 4.1rem;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.ny-landing-hero .ny-lead {
+  max-width: 44rem;
+  margin: 1.45rem 0 0;
+  color: #edf4f2;
+  font-size: 1.25rem;
+}
+
+.ny-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 2rem;
+}
+
+.ny-button {
+  background: var(--ny-red);
+  color: #ffffff;
+  border: 1px solid var(--ny-red);
+}
+
+.ny-button:hover {
+  background: #b91f43;
+  border-color: #b91f43;
+  color: #ffffff;
+}
+
+.ny-link-button {
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ny-link-button:hover {
+  border-color: #ffffff;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ny-section .ny-link-button {
+  color: var(--ny-text);
+  border-color: var(--ny-border);
+  background: var(--ny-surface);
+}
+
+.ny-section .ny-link-button:hover {
+  color: var(--ny-red);
+  border-color: var(--ny-red);
+  background: #fff8fa;
+}
+
+.ny-landing-hero .ny-link-button {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ny-landing-hero .ny-link-button:hover {
+  color: #ffffff;
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ny-hero-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0;
+  margin: 2rem 0 0;
+  list-style: none;
+}
+
+.ny-hero-points li {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: var(--ny-radius);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f7fbfa;
+  font-weight: 700;
+}
+
+.ny-section {
+  padding: 4.5rem clamp(1.25rem, 4rem, 4rem);
+}
+
+.ny-section--surface {
+  background: var(--ny-surface);
+}
+
+.ny-section--split {
+  display: grid;
+  grid-template-columns: minmax(17rem, 0.82fr) minmax(0, 1.18fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.ny-section > *,
+.ny-section--split {
+  max-width: var(--ny-section-width);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.ny-section-header {
+  max-width: 48rem;
+  margin-bottom: 2rem;
+}
+
+.ny-section--split .ny-section-header {
+  margin-bottom: 0;
+}
+
+.ny-section-header h2 {
+  margin: 0;
+  font-size: 2.25rem;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.ny-section-header p {
+  margin: 0.85rem 0 0;
+  color: var(--ny-muted);
+  font-size: 1.1rem;
+}
+
+.ny-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.ny-grid--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ny-pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.ny-card,
+.ny-pillar,
+.ny-flow-step,
+.ny-doc-index a,
+.ny-sidebar-group {
+  border: 1px solid var(--ny-border);
+  border-radius: var(--ny-radius);
+  background: var(--ny-surface);
+}
+
+.ny-card {
+  padding: 1.25rem;
+  box-shadow: 0 10px 26px rgba(17, 19, 23, 0.06);
+}
+
+.ny-pillar {
+  display: flex;
+  flex-direction: column;
+  min-height: 17rem;
+  padding: 1.45rem;
+  box-shadow: 0 12px 28px rgba(17, 19, 23, 0.06);
+}
+
+.ny-pillar-number {
+  margin: 0 0 1.2rem;
+  color: var(--ny-muted);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.ny-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.ny-pillar h3 {
+  margin: 0 0 0.65rem;
+  font-size: 1.35rem;
+  line-height: 1.15;
+}
+
+.ny-card p {
+  margin: 0;
+  color: var(--ny-muted);
+}
+
+.ny-pillar p:not(.ny-pillar-number) {
+  margin: 0;
+  color: var(--ny-muted);
+}
+
+.ny-pillar a {
+  margin-top: auto;
+  padding-top: 1.25rem;
+  font-weight: 800;
+}
+
+.ny-card--red {
+  border-top: 4px solid var(--ny-red);
+}
+
+.ny-pillar--red {
+  border-top: 5px solid var(--ny-red);
+}
+
+.ny-card--teal {
+  border-top: 4px solid var(--ny-teal);
+}
+
+.ny-pillar--teal {
+  border-top: 5px solid var(--ny-teal);
+}
+
+.ny-card--green {
+  border-top: 4px solid var(--ny-green);
+}
+
+.ny-pillar--green {
+  border-top: 5px solid var(--ny-green);
+}
+
+.ny-logo-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 16rem));
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.ny-logo-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 6.5rem;
+  padding: 1.15rem;
+  border: 1px solid var(--ny-border);
+  border-radius: var(--ny-radius);
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(17, 19, 23, 0.06);
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.ny-logo-mark:hover {
+  border-color: rgba(234, 40, 78, 0.45);
+  transform: translateY(-2px);
+}
+
+.ny-logo-mark img {
+  display: block;
+  width: auto;
+  max-width: 13.5rem;
+  max-height: 3.75rem;
+  object-fit: contain;
+}
+
+.ny-flow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+  align-items: stretch;
+}
+
+.ny-flow-step {
+  min-height: 9rem;
+  padding: 1rem;
+  background:
+    linear-gradient(180deg, rgba(15, 139, 141, 0.08), transparent 60%),
+    var(--ny-surface);
+}
+
+.ny-flow-step span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: 1rem;
+  border-radius: var(--ny-radius);
+  background: var(--ny-surface-strong);
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.ny-flow-step h3 {
+  margin: 0 0 0.45rem;
+  font-size: 1rem;
+}
+
+.ny-flow-step p {
+  margin: 0;
+  color: var(--ny-muted);
+  font-size: 0.95rem;
+}
+
+.ny-code-panel {
+  margin: 0;
+  padding: 1.2rem;
+  overflow-x: auto;
+  color: #f3f7f6;
+  background: var(--ny-code);
+  border-radius: var(--ny-radius);
+  border-left: 5px solid var(--ny-yellow);
+  box-shadow: var(--ny-shadow);
+}
+
+.ny-code-panel code {
+  color: inherit;
+  background: transparent;
+  padding: 0;
+}
+
+.ny-doc-shell {
+  display: grid;
+  grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+  gap: 2rem;
+  width: min(86rem, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 4rem;
+}
+
+.ny-site--wiki {
+  background:
+    linear-gradient(90deg, rgba(17, 19, 23, 0.04) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(17, 19, 23, 0.04) 1px, transparent 1px),
+    var(--ny-bg);
+  background-size: 38px 38px;
+}
+
+.ny-wiki-shell {
+  display: grid;
+  grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+  gap: 1.5rem;
+  width: min(92rem, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 4rem;
+}
+
+.ny-wiki-sidebar {
+  position: sticky;
+  top: 5.5rem;
+  align-self: start;
+  max-height: calc(100vh - 6.5rem);
+  overflow-y: auto;
+}
+
+.ny-wiki-menu-toggle,
+.ny-wiki-menu-overlay,
+.ny-wiki-menu-panel-header {
+  display: none;
+}
+
+.ny-wiki-menu-panel {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.ny-wiki-sidebar-card,
+.ny-wiki-page {
+  border: 1px solid var(--ny-border);
+  border-radius: var(--ny-radius);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 14px 34px rgba(17, 19, 23, 0.06);
+}
+
+.ny-wiki-sidebar-card {
+  padding: 0.85rem;
+}
+
+.ny-wiki-page {
+  min-width: 0;
+  padding: 1rem;
+}
+
+.ny-wiki-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.git-wiki-tools,
+.git-wiki-search-js,
+.git-wiki-downloads,
+.page-list {
+  margin: 0;
+  padding: 0;
+}
+
+.git-wiki-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: flex-end;
+}
+
+.tools-element a,
+.git-wiki-downloads a,
+.page-list a,
+.git-wiki-search-js a {
+  color: var(--ny-text);
+  text-decoration: none;
+}
+
+.tools-element a {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--ny-border);
+  border-radius: var(--ny-radius);
+  background: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.tools-element a:hover,
+.git-wiki-downloads a:hover,
+.page-list a:hover,
+.git-wiki-search-js a:hover {
+  color: var(--ny-red);
+}
+
+.git-wiki-search-js {
+  position: relative;
+}
+
+.git-wiki-search-js input {
+  width: 100%;
+  min-height: 2.45rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--ny-border);
+  border-radius: var(--ny-radius);
+  color: var(--ny-text);
+  background: #ffffff;
+  font: inherit;
+}
+
+#results-container {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+  padding: 0;
+  list-style: none;
+}
+
+#results-container li,
+.page-list-item,
+.git-wiki-downloads li {
+  list-style: none;
+}
+
+#results-container a,
+.page-list a,
+.git-wiki-downloads a {
+  display: block;
+  padding: 0.42rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+#results-container a:hover,
+.page-list a:hover,
+.git-wiki-downloads a:hover {
+  background: #eef4f2;
+}
+
+.page-list,
+.git-wiki-downloads {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.inline_toc {
+  margin: 0 0 1rem;
+  padding: 1rem;
+  border: 1px solid var(--ny-border);
+  border-radius: var(--ny-radius);
+  background: #f8faf9;
+}
+
+.inline_toc ul,
+.inline_toc ol {
+  margin-bottom: 0;
+}
+
+.ny-sidebar {
+  position: sticky;
+  top: 5.5rem;
+  align-self: start;
+  max-height: calc(100vh - 6.5rem);
+  overflow-y: auto;
+}
+
+.ny-sidebar-nav {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.ny-sidebar-group {
+  padding: 0.6rem;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.ny-sidebar-title {
+  margin: 0;
+  color: var(--ny-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ny-sidebar-group--open .ny-sidebar-title {
+  margin-bottom: 0.4rem;
+}
+
+.ny-sidebar-group summary.ny-sidebar-title,
+.ny-wiki-compact-list summary.ny-sidebar-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 1.8rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.ny-sidebar-group summary.ny-sidebar-title::-webkit-details-marker,
+.ny-wiki-compact-list summary.ny-sidebar-title::-webkit-details-marker {
+  display: none;
+}
+
+.ny-sidebar-group summary.ny-sidebar-title::after,
+.ny-wiki-compact-list summary.ny-sidebar-title::after {
+  content: "+";
+  color: var(--ny-red);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.ny-sidebar-group[open] summary.ny-sidebar-title,
+.ny-wiki-compact-list[open] summary.ny-sidebar-title {
+  margin-bottom: 0.4rem;
+}
+
+.ny-sidebar-group[open] summary.ny-sidebar-title::after,
+.ny-wiki-compact-list[open] summary.ny-sidebar-title::after {
+  content: "-";
+}
+
+.ny-sidebar-group a {
+  display: block;
+  padding: 0.36rem 0.45rem;
+  border-radius: 6px;
+  color: var(--ny-text);
+  font-size: 0.88rem;
+  font-weight: 650;
+  line-height: 1.25;
+  text-decoration: none;
+}
+
+.ny-sidebar-group a:hover {
+  color: var(--ny-red);
+  background: #eef4f2;
+}
+
+.ny-main--doc {
+  min-width: 0;
+}
+
+.ny-doc-content {
+  max-width: 58rem;
+  padding: 2.25rem;
+  background: var(--ny-surface);
+  border: 1px solid var(--ny-border);
+  border-radius: var(--ny-radius);
+  box-shadow: 0 14px 36px rgba(17, 19, 23, 0.07);
+}
+
+.ny-site--wiki .ny-doc-content {
+  max-width: 100%;
+  padding: 0.5rem 1.5rem 1.5rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ny-doc-content h1,
+.ny-doc-content h2,
+.ny-doc-content h3 {
+  line-height: 1.18;
+  letter-spacing: 0;
+}
+
+.ny-doc-content h1 {
+  margin-top: 0;
+  font-size: 2.45rem;
+}
+
+.ny-doc-content h2 {
+  margin-top: 2.4rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--ny-border);
+  font-size: 1.65rem;
+}
+
+.ny-doc-content h3 {
+  margin-top: 1.75rem;
+}
+
+.ny-doc-content p,
+.ny-doc-content li {
+  color: #262a2d;
+}
+
+.ny-doc-content code {
+  padding: 0.12rem 0.3rem;
+  border-radius: 5px;
+  background: #eef4f2;
+  color: #9b1735;
+  font-size: 0.92em;
+}
+
+.ny-doc-content pre {
+  padding: 1rem;
+  overflow-x: auto;
+  background: var(--ny-code);
+  border-radius: var(--ny-radius);
+}
+
+.ny-doc-content pre code {
+  padding: 0;
+  color: #f3f7f6;
+  background: transparent;
+}
+
+.ny-doc-content table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: var(--ny-radius);
+}
+
+.ny-doc-content th,
+.ny-doc-content td {
+  padding: 0.65rem;
+  border: 1px solid var(--ny-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.ny-doc-content th {
+  background: #eef4f2;
+}
+
+.ny-doc-index {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 1.25rem 0 2rem;
+}
+
+.ny-doc-index a {
+  display: block;
+  padding: 1rem;
+  color: var(--ny-text);
+  text-decoration: none;
+}
+
+.ny-doc-index strong {
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.ny-doc-index span {
+  display: block;
+  color: var(--ny-muted);
+}
+
+.ny-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1.25rem clamp(1rem, 4rem, 4rem);
+  color: #dbe8e5;
+  background: #151719;
+}
+
+@media (max-width: 980px) {
+  .ny-landing-hero {
+    min-height: auto;
+  }
+
+  .ny-hero-output {
+    display: none;
+  }
+
+  .ny-landing-hero h1 {
+    font-size: 3rem;
+  }
+
+  .ny-grid,
+  .ny-grid--two,
+  .ny-pillar-grid,
+  .ny-flow,
+  .ny-section--split {
+    grid-template-columns: 1fr;
+  }
+
+  .ny-doc-shell {
+    display: block;
+  }
+
+  .ny-wiki-shell {
+    display: block;
+  }
+
+  .ny-wiki-sidebar {
+    position: static;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    max-height: none;
+    margin-bottom: 1rem;
+    overflow: visible;
+  }
+
+  .ny-wiki-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3rem;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--ny-border);
+    border-radius: var(--ny-radius);
+    background: #ffffff;
+    color: var(--ny-text);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 850;
+  }
+
+  .ny-wiki-menu-toggle::after {
+    content: "+";
+    color: var(--ny-red);
+    font-size: 1.05rem;
+  }
+
+  .ny-wiki-sidebar--open .ny-wiki-menu-toggle::after {
+    content: "";
+  }
+
+  .ny-wiki-menu-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: block;
+    background: rgba(17, 19, 23, 0.42);
+  }
+
+  .ny-wiki-menu-overlay[hidden] {
+    display: none;
+  }
+
+  .ny-wiki-menu-panel {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 41;
+    width: min(21rem, 88vw);
+    padding: 1rem;
+    overflow-y: auto;
+    background: var(--ny-bg);
+    box-shadow: 16px 0 40px rgba(17, 19, 23, 0.18);
+    transform: translateX(-105%);
+    transition: transform 180ms ease;
+  }
+
+  .ny-wiki-sidebar--open .ny-wiki-menu-panel {
+    transform: translateX(0);
+  }
+
+  .ny-wiki-menu-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 2.5rem;
+  }
+
+  .ny-wiki-menu-close {
+    min-height: 2rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--ny-border);
+    border-radius: var(--ny-radius);
+    background: #ffffff;
+    color: var(--ny-red);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 850;
+  }
+
+  .ny-sidebar {
+    position: static;
+    max-height: none;
+    margin-bottom: 1rem;
+  }
+
+  .ny-sidebar-nav {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.45rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .ny-topbar {
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    min-height: auto;
+  }
+
+  .ny-topnav {
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.25rem;
+  }
+
+  .ny-topnav a {
+    flex: 1 1 0;
+    min-height: 2.1rem;
+    padding: 0.45rem 0.4rem;
+    font-size: 0.82rem;
+  }
+
+  .ny-landing-hero {
+    padding-top: 2.75rem;
+    padding-bottom: 2.75rem;
+  }
+
+  .ny-landing-hero::before {
+    font-size: 2.4rem;
+  }
+
+  .ny-landing-hero h1 {
+    font-size: 2.2rem;
+  }
+
+  .ny-landing-hero .ny-lead {
+    font-size: 1.05rem;
+  }
+
+  .ny-section {
+    padding: 3rem 1rem;
+  }
+
+  .ny-doc-content {
+    padding: 1.25rem;
+  }
+
+  .ny-wiki-page {
+    padding: 0.85rem;
+  }
+
+  .ny-wiki-page h1 {
+    font-size: 1.8rem;
+  }
+
+  .ny-doc-content h1 {
+    font-size: 2rem;
+  }
+
+  .ny-sidebar-nav,
+  .ny-doc-index,
+  .ny-logo-strip {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,7 @@
+.bundle/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+.jekyll-preview.log
+.jekyll-preview.pid
+_site/

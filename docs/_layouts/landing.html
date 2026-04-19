@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="{{ site.lang | default: 'en' }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+      {% if page.title %}{{ page.title | escape }} | {% endif %}{{ site.title |
+      escape }}
+    </title>
+    <meta
+      name="description"
+      content="{{ page.description | default: site.description | escape }}"
+    />
+    {% seo title=false %}
+    <link
+      rel="icon"
+      href="{{ '/assets/images/logo-small_yalc.png' | relative_url }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ '/assets/css/nestjs-yalc-site.css' | relative_url }}"
+    />
+  </head>
+  <body class="ny-site ny-site--landing">
+    <header class="ny-topbar">
+      <a
+        class="ny-brand"
+        href="{{ '/' | relative_url }}"
+        aria-label="NestJS-YALC home"
+      >
+        <img
+          src="{{ '/assets/images/logo-small_yalc.png' | relative_url }}"
+          alt=""
+          width="34"
+          height="34"
+        />
+        <span>NestJS-YALC</span>
+      </a>
+
+      <nav class="ny-topnav" aria-label="Primary navigation">
+        <a href="{{ '/getting-started' | relative_url }}">Start</a>
+        <a href="{{ '/documentation' | relative_url }}">Docs</a>
+        <a href="https://github.com/NestDevLab/nestjs-yalc">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="ny-main ny-main--landing">{{ content }}</main>
+
+    <footer class="ny-footer">
+      <span>NestJS-YALC documentation</span>
+      <span
+        >Production-proof NestJS architecture for CRUD, module boundaries, and
+        event-driven operations.</span
+      >
+    </footer>
+  </body>
+</html>
