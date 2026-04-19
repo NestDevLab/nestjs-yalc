@@ -11,7 +11,6 @@ import { logs, SeverityNumber } from '@opentelemetry/api-logs';
 import type { IEventPayload } from '@nestjs-yalc/event-manager/event.js';
 import { OBSERVABILITY_OPTIONS } from './tokens.js';
 import type { NormalizedObservabilityOptions } from './observability-options.js';
-import { OpenTelemetrySdkService } from './open-telemetry-sdk.service.js';
 
 export interface TelemetryRecordOptions {
   attributes?: Record<string, unknown>;
@@ -33,7 +32,6 @@ export class TelemetryService {
   constructor(
     @Inject(OBSERVABILITY_OPTIONS)
     private readonly options: NormalizedObservabilityOptions,
-    private readonly sdk: OpenTelemetrySdkService,
   ) {}
 
   get enabled() {
@@ -52,8 +50,8 @@ export class TelemetryService {
     const normalizedAttributes = toTelemetryAttributes(attributes);
     const startedAt = Date.now();
 
-    return this.execute(() =>
-      this.tracer.startActiveSpan(
+    try {
+      return this.tracer.startActiveSpan(
         name,
         { attributes: normalizedAttributes },
         (span) =>
@@ -64,8 +62,14 @@ export class TelemetryService {
             startedAt,
             span,
           ),
-      ),
-    ) as T | Promise<T>;
+      ) as T | Promise<T>;
+    } catch (error) {
+      if (this.options.failureMode === 'throw') {
+        throw error;
+      }
+
+      return operation();
+    }
   }
 
   recordYalcEvent(eventName: string, payload?: IEventPayload) {
@@ -90,14 +94,8 @@ export class TelemetryService {
       }
 
       this.eventCounter.add(1, attributes);
-      this.sdk.exportLogRecord(eventName, attributes, payload?.level ?? 'info');
-      this.logger.emit({
-        eventName,
-        severityText: payload?.level ?? 'info',
-        severityNumber: toSeverityNumber(payload?.level),
+      this.emitLogRecord(eventName, attributes, payload?.level ?? 'info', {
         body: payload?.message ?? eventName,
-        attributes,
-        context: context.active(),
         exception: payload?.errorInfo,
       });
     });
@@ -117,7 +115,7 @@ export class TelemetryService {
         'yalc.operation.name': name,
         ...toTelemetryAttributes(attributes),
       });
-      this.sdk.exportLogRecord(
+      this.emitLogRecord(
         name,
         {
           'yalc.telemetry.kind': 'duration',
@@ -215,6 +213,23 @@ export class TelemetryService {
     }
 
     return toTelemetryAttributes(attributes);
+  }
+
+  private emitLogRecord(
+    name: string,
+    attributes: Attributes,
+    severityText: string,
+    options: { body?: string; exception?: unknown } = {},
+  ) {
+    this.logger.emit({
+      eventName: name,
+      severityText,
+      severityNumber: toSeverityNumber(severityText),
+      body: options.body ?? name,
+      attributes,
+      context: context.active(),
+      exception: options.exception,
+    });
   }
 
   private execute<T>(operation: () => T): T | undefined {

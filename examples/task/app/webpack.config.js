@@ -21,6 +21,9 @@ const ignoredOptionalModules = new Set([
 module.exports = (options) => ({
   ...options,
   externals: [
+    ...(Array.isArray(options.externals)
+      ? options.externals
+      : [options.externals].filter(Boolean)),
     nodeExternals({
       allowlist: [/^@nestjs-yalc\//],
     }),

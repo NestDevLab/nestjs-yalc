@@ -19,7 +19,7 @@ describe("observability options", () => {
     expect(
       normalizeObservabilityOptions({ serviceName: "task-system" })
     ).toMatchObject({
-      enabled: true,
+      enabled: false,
       serviceName: "task-system",
       otlpEndpoint: "http://127.0.0.1:4318",
       eventManager: {

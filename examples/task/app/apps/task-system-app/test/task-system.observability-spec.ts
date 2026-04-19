@@ -89,6 +89,10 @@ describe("Task System observability e2e", () => {
     restoreEnv("TASK_RABBITMQ_PUBLISH_ENABLED", previousRabbitPublishEnabled);
   });
 
+  beforeEach(() => {
+    resetTelemetryFile();
+  });
+
   it("exports workflow, strategy, event, error, and RabbitMQ telemetry", async () => {
     const projectGuid = randomUUID();
     const taskGuid = randomUUID();

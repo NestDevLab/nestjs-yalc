@@ -36,7 +36,7 @@ export function normalizeObservabilityOptions(
   options: ObservabilityOptions,
 ): NormalizedObservabilityOptions {
   return {
-    enabled: options.enabled ?? true,
+    enabled: options.enabled ?? false,
     serviceName: options.serviceName,
     otlpEndpoint: trimTrailingSlash(
       options.otlpEndpoint ?? 'http://127.0.0.1:4318',

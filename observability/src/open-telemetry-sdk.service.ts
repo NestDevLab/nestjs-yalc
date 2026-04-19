@@ -8,7 +8,6 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import { SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
 import { OBSERVABILITY_OPTIONS } from './tokens.js';
 import type { NormalizedObservabilityOptions } from './observability-options.js';
-import type { Attributes } from '@opentelemetry/api';
 
 @Injectable()
 export class OpenTelemetrySdkService implements OnModuleDestroy {
@@ -29,48 +28,6 @@ export class OpenTelemetrySdkService implements OnModuleDestroy {
     await this.execute(() => this.sdk?.shutdown());
     logs.disable();
     this.sdk = undefined;
-  }
-
-  exportLogRecord(name: string, attributes: Attributes, severityText = 'info') {
-    if (!this.options.enabled) {
-      return;
-    }
-
-    void this.executeAsync(async () => {
-      await fetch(`${this.options.otlpEndpoint}/v1/logs`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          resourceLogs: [
-            {
-              resource: {
-                attributes: [
-                  {
-                    key: 'service.name',
-                    value: { stringValue: this.options.serviceName },
-                  },
-                ],
-              },
-              scopeLogs: [
-                {
-                  scope: {
-                    name: '@nestjs-yalc/observability',
-                  },
-                  logRecords: [
-                    {
-                      timeUnixNano: `${BigInt(Date.now()) * 1000000n}`,
-                      severityText,
-                      body: { stringValue: name },
-                      attributes: toOtlpAttributes(attributes),
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        }),
-      });
-    });
   }
 
   private start() {
@@ -115,35 +72,4 @@ export class OpenTelemetrySdkService implements OnModuleDestroy {
       return undefined;
     }
   }
-
-  private async executeAsync(operation: () => Promise<void>) {
-    try {
-      await operation();
-    } catch (error) {
-      if (this.options.failureMode === 'throw') {
-        throw error;
-      }
-    }
-  }
-}
-
-function toOtlpAttributes(attributes: Attributes) {
-  return Object.entries(attributes).map(([key, value]) => ({
-    key,
-    value: toOtlpAnyValue(value),
-  }));
-}
-
-function toOtlpAnyValue(value: unknown) {
-  if (typeof value === 'number') {
-    return Number.isInteger(value)
-      ? { intValue: String(value) }
-      : { doubleValue: value };
-  }
-
-  if (typeof value === 'boolean') {
-    return { boolValue: value };
-  }
-
-  return { stringValue: String(value) };
 }

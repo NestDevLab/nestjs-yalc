@@ -11,6 +11,8 @@ import {
   NestLocalEventStrategy,
   RabbitMqEventStrategy,
 } from '@nestjs-yalc/api-strategy';
+import type { IApiCallStrategy } from '@nestjs-yalc/api-strategy/context-call.interface.js';
+import type { IEventStrategy } from '@nestjs-yalc/api-strategy/context-event.interface.js';
 import type { AppConfigService } from '@nestjs-yalc/app/app-config.service.js';
 import { YalcGlobalClsService } from '@nestjs-yalc/app/cls.module.js';
 import { YalcEventService } from '@nestjs-yalc/event-manager';
@@ -82,7 +84,7 @@ import { taskItemProviders, TasksController } from './task-item.resource';
             httpAdapterHost,
             clsService,
             configService,
-          ) as any,
+          ) as IApiCallStrategy,
           telemetry,
           {
             name: 'tasks-client.local',
@@ -145,7 +147,7 @@ import { taskItemProviders, TasksController } from './task-item.resource';
     {
       provide: TASK_EVENTS_RABBITMQ_STRATEGY,
       useFactory: (
-        localStrategy: NestLocalEventStrategy,
+        localStrategy: IEventStrategy,
         telemetry: TelemetryService,
       ) =>
         new TelemetryEventStrategy(

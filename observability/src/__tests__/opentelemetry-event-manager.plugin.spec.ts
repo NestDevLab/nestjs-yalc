@@ -20,6 +20,7 @@ describe("OpenTelemetryEventManagerPlugin", () => {
       { emitter },
       telemetry as any,
       normalizeObservabilityOptions({
+        enabled: true,
         serviceName: "test",
         eventManager: {
           listenTo: ["task.**"],
