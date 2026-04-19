@@ -6,33 +6,44 @@ layout: landing
 ---
 
 <section class="ny-landing-hero">
-  <img class="ny-hero-mark" src="assets/images/logo-small_yalc.png" alt="NestJS-YALC logo">
-  <p class="ny-eyebrow">NestJS - Yet Another Library Collection</p>
-  <h1>Make NestJS production-proof without rewriting the same backend glue.</h1>
-  <p class="ny-lead">
-    NestJS-YALC is built around three production pillars: CRUD Generation,
-    API Strategy, and EventManager. Generate the standard surface, isolate
-    module communication, and make runtime behavior observable from day one.
-  </p>
-  <div class="ny-actions">
-    <a class="ny-button" href="{{ '/getting-started' | relative_url }}">Start in minutes</a>
-    <a class="ny-link-button" href="{{ '/documentation' | relative_url }}">Explore the docs</a>
+  <div class="ny-hero-visual" aria-hidden="true">
+    <span>ModelObject</span>
+    <span>DTO</span>
+    <span>REST</span>
+    <span>GraphQL</span>
+    <span>Strategy Token</span>
+    <span>Event Trail</span>
+    <span>Trace</span>
   </div>
-  <ul class="ny-hero-points">
-    <li>CRUD Generation</li>
-    <li>API Strategy</li>
-    <li>EventManager</li>
-    <li>Observability</li>
-  </ul>
+
+  <div class="ny-hero-content">
+    <img class="ny-hero-mark" src="assets/images/logo-small_yalc.png" alt="NestJS-YALC logo">
+    <p class="ny-eyebrow">NestJS - Yet Another Library Collection</p>
+    <h1>Production-proof NestJS, generated from explicit architecture.</h1>
+    <p class="ny-lead">
+      NestJS-YALC turns the repetitive backend layer into a predictable system:
+      generated CRUD, strategy-based API boundaries, and EventManager-powered
+      observability from the first module.
+    </p>
+    <div class="ny-actions">
+      <a class="ny-button" href="{{ '/getting-started' | relative_url }}">Start in minutes</a>
+      <a class="ny-link-button" href="{{ '/documentation' | relative_url }}">Open the wiki</a>
+    </div>
+    <ul class="ny-hero-points">
+      <li>CRUD Generation</li>
+      <li>API Strategy</li>
+      <li>EventManager</li>
+      <li>Observability</li>
+    </ul>
+  </div>
 </section>
 
 <section class="ny-section ny-section--surface">
   <div class="ny-section-header">
-    <h2>The three pillars.</h2>
+    <h2>The production core.</h2>
     <p>
-      The framework focuses on the parts that decide whether a NestJS backend
-      stays maintainable in production: generated resource contracts, explicit
-      service boundaries, and event-aware operations.
+      Three primitives carry the project: generate the standard API surface,
+      make communication explicit, and keep every operational signal connected.
     </p>
   </div>
 
@@ -69,39 +80,40 @@ layout: landing
   </div>
 </section>
 
-<section class="ny-section">
+<section class="ny-system-section">
   <div class="ny-section-header">
-    <h2>Production-proof by design.</h2>
+    <h2>One resource definition becomes a production surface.</h2>
     <p>
-      NestJS-YALC is not only a utility collection. It is a backend operating
-      model for teams that want generated APIs, clear boundaries, consistent
-      errors, event trails, and observability without giving up NestJS.
+      The value is visual: a model is not just a class, it becomes typed APIs,
+      module-safe communication, dataloading, structured errors, logs, events,
+      and traces.
     </p>
   </div>
 
-  <div class="ny-grid">
-    <article class="ny-card ny-card--red">
-      <h3>Generated where possible</h3>
-      <p>
-        Standard CRUD stays generated. Domain behavior moves into service,
-        repository, and metadata extension points instead of copy-pasted
-        controllers and resolvers.
-      </p>
-    </article>
-    <article class="ny-card ny-card--teal">
-      <h3>Explicit across boundaries</h3>
-      <p>
-        API Strategy keeps cross-module calls out of core domain services and
-        lets the same code run in a modular monolith or remote-service topology.
-      </p>
-    </article>
-    <article class="ny-card ny-card--green">
-      <h3>Observable at runtime</h3>
-      <p>
-        EventManager and Observability connect logs, errors, events, and traces
-        into one operational story instead of leaving each module to improvise.
-      </p>
-    </article>
+  <div class="ny-system-map" aria-label="NestJS-YALC generated production flow">
+    <div class="ny-system-node ny-system-node--source">
+      <span>01</span>
+      <strong>Model metadata</strong>
+      <small>ModelObject + ModelField</small>
+    </div>
+    <div class="ny-system-arrow"></div>
+    <div class="ny-system-node">
+      <span>02</span>
+      <strong>Generated contracts</strong>
+      <small>REST + GraphQL + Dataloader</small>
+    </div>
+    <div class="ny-system-arrow"></div>
+    <div class="ny-system-node">
+      <span>03</span>
+      <strong>API Strategy</strong>
+      <small>Stable service boundaries</small>
+    </div>
+    <div class="ny-system-arrow"></div>
+    <div class="ny-system-node ny-system-node--sink">
+      <span>04</span>
+      <strong>EventManager</strong>
+      <small>Errors + logs + traces</small>
+    </div>
   </div>
 </section>
 
@@ -124,13 +136,17 @@ layout: landing
   </div>
 </section>
 
-<section class="ny-section">
+<section class="ny-section ny-section--split">
   <div class="ny-section-header">
     <h2>A tiny starting point.</h2>
     <p>
       The skeleton app is the smallest complete example: one resource definition
       exposes generated REST and GraphQL over an in-memory SQLite app.
     </p>
+    <div class="ny-actions">
+      <a class="ny-button" href="{{ '/getting-started' | relative_url }}">Run the skeleton app</a>
+      <a class="ny-link-button" href="{{ '/crud-gen-factory' | relative_url }}">Read the factory reference</a>
+    </div>
   </div>
 
   <pre class="ny-code-panel"><code class="language-ts">export const usersResource = CrudGenResourceFactory&lt;SkeletonUser&gt;({
@@ -152,11 +168,6 @@ layout: landing
   },
   rest: { dto: SkeletonUserType, path: 'users', idField: 'guid' },
 });</code></pre>
-
-  <div class="ny-actions">
-    <a class="ny-button" href="{{ '/getting-started' | relative_url }}">Run the skeleton app</a>
-    <a class="ny-link-button" href="{{ '/crud-gen-factory' | relative_url }}">Read the factory reference</a>
-  </div>
 </section>
 
 <section class="ny-section ny-section--surface">
