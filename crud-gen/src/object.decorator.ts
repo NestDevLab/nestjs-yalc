@@ -21,8 +21,10 @@ export function isDstExtended(dst: string | DstExtended): dst is DstExtended {
   return !!_dst.name && (!!_dst.transformerDst || !!_dst.transformerSrc);
 }
 
-export interface IModelFieldMetadata<T = any>
-  extends Omit<FieldMapperProperty, 'dst'> {
+export interface IModelFieldMetadata<T = any> extends Omit<
+  FieldMapperProperty,
+  'dst'
+> {
   dst?: string | DstExtended;
   src?: string;
 

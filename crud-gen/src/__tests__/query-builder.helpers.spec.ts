@@ -9,6 +9,12 @@ class DerivedEntity {
   derived!: string;
 }
 
+@ModelObject()
+class RegularEntity {
+  @ModelField({ mode: 'regular' })
+  regular!: string;
+}
+
 const escape = (value: string) => `"${value}"`;
 
 const buildQueryBuilder = (raw: any[], entities: any[]) => {
@@ -36,6 +42,21 @@ describe('query-builder helpers', () => {
     expect(result[0].derived).toBe('computed-value');
   });
 
+  it('getMany should return entities unchanged when no model metadata exists', async () => {
+    const entity = { value: 'plain' };
+    const plainQb = buildQueryBuilder([{}], [entity]);
+    const result = await plainQb.getMany();
+    expect(result[0]).toBe(entity);
+  });
+
+  it('getMany should leave regular model fields unchanged', async () => {
+    const entity = new RegularEntity();
+    entity.regular = 'regular-value';
+    const regularQb = buildQueryBuilder([{}], [entity]);
+    const result = await regularQb.getMany();
+    expect(result[0].regular).toBe('regular-value');
+  });
+
   it('getOne should return null on empty entities', async () => {
     const emptyQb = buildQueryBuilder([], []);
     const result = await emptyQb.getOne();
@@ -45,5 +66,20 @@ describe('query-builder helpers', () => {
   it('getOne should hydrate derived field on first entity', async () => {
     const result = await qb.getOne();
     expect(result?.derived).toBe('computed-value');
+  });
+
+  it('getOne should return the first entity unchanged when no model metadata exists', async () => {
+    const entity = { value: 'plain' };
+    const plainQb = buildQueryBuilder([{}], [entity]);
+    const result = await plainQb.getOne();
+    expect(result).toBe(entity);
+  });
+
+  it('getOne should leave regular model fields unchanged', async () => {
+    const entity = new RegularEntity();
+    entity.regular = 'regular-value';
+    const regularQb = buildQueryBuilder([{}], [entity]);
+    const result = await regularQb.getOne();
+    expect(result?.regular).toBe('regular-value');
   });
 });

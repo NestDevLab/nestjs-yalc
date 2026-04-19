@@ -87,7 +87,9 @@ export interface IEventOptions<
 export interface IErrorEventOptions<
   TFormatter extends EventNameFormatter = EventNameFormatter,
   TErrorClass extends DefaultError = DefaultError,
-> extends IEventOptions<TFormatter>,
+>
+  extends
+    IEventOptions<TFormatter>,
     Omit<IErrorPayload, 'internalMessage' | 'data' | 'cause'> {
   /**
    * If set to false or undefined, the error will not be thrown.
@@ -101,14 +103,15 @@ export interface IErrorEventOptions<
 export interface IErrorEventOptionsRequired<
   TFormatter extends EventNameFormatter = EventNameFormatter,
   TErrorClass extends DefaultError = DefaultError,
-> extends Omit<IErrorEventOptions<TFormatter, TErrorClass>, 'errorClass'>,
+>
+  extends
+    Omit<IErrorEventOptions<TFormatter, TErrorClass>, 'errorClass'>,
     Required<Pick<IErrorEventOptions<TFormatter, TErrorClass>, 'errorClass'>> {}
 
 export function applyAwaitOption<
   TFormatter extends EventNameFormatter = EventNameFormatter,
-  TOpts extends
-    | IErrorEventOptions<TFormatter>
-    | IEventOptions<TFormatter> = IEventOptions<TFormatter>,
+  TOpts extends IErrorEventOptions<TFormatter> | IEventOptions<TFormatter> =
+    IEventOptions<TFormatter>,
 >(options?: TOpts): TOpts {
   let event = options?.event;
   if (event !== false && event !== undefined) {
@@ -142,8 +145,8 @@ type eventErrorReturnType<
     ? Promise<boolean | any[] | undefined>
     : boolean | any[] | undefined
   : TOpt extends { await: true }
-  ? Promise<PickError<TFormatter, TOpt>>
-  : PickError<TFormatter, TOpt>;
+    ? Promise<PickError<TFormatter, TOpt>>
+    : PickError<TFormatter, TOpt>;
 
 type eventErrorReturnTypeAsync<
   TFormatter extends EventNameFormatter = EventNameFormatter,
@@ -164,9 +167,8 @@ export function isErrorOptions(
 
 export function event<
   TFormatter extends EventNameFormatter = EventNameFormatter,
-  TOption extends
-    | IEventOptions<TFormatter>
-    | IErrorEventOptions<TFormatter> = IEventOptions<TFormatter>,
+  TOption extends IEventOptions<TFormatter> | IErrorEventOptions<TFormatter> =
+    IEventOptions<TFormatter>,
 >(
   eventName: Parameters<TFormatter> | string,
   options?: TOption,
@@ -423,7 +425,8 @@ export async function eventErrorAsync<
 
 export function eventError<
   TFormatter extends EventNameFormatter = EventNameFormatter,
-  TOption extends IErrorEventOptions<TFormatter> = IErrorEventOptions<TFormatter>,
+  TOption extends IErrorEventOptions<TFormatter> =
+    IErrorEventOptions<TFormatter>,
 >(
   eventName: Parameters<TFormatter> | string,
   options?: TOption,

@@ -1,5 +1,5 @@
 import { LogLevel, OnApplicationShutdown } from '@nestjs/common';
-import { pino, Logger } from 'pino';
+import pino, { type Logger } from 'pino';
 import {
   type IImprovedLoggerOptions,
   LoggerAbstractService,

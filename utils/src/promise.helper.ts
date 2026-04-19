@@ -32,7 +32,12 @@ export class PromiseTracker {
 
   add(promise: Promise<any>) {
     this.promises.push(promise);
-    void promise.finally(() => this.remove(promise));
+    void promise
+      .finally(() => this.remove(promise))
+      .catch(() => {
+        // The original promise is still awaited by callers; this only prevents
+        // the cleanup chain from surfacing a duplicate unhandled rejection.
+      });
   }
 
   /**

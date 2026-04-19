@@ -34,17 +34,17 @@ export function factoriesAreDefinedTest(
         let instance = aFactory(faker);
         expect(instance).toBeDefined();
 
-        jest.spyOn(faker.datatype, 'number').mockReturnValue(0);
+        jest.spyOn(faker.number, 'int').mockReturnValue(0 as never);
         jest.spyOn(faker.datatype, 'boolean').mockReturnValue(false);
         instance = aFactory(faker);
         expect(instance).toBeDefined();
 
-        jest.spyOn(faker.datatype, 'number').mockReturnValue(1);
+        jest.spyOn(faker.number, 'int').mockReturnValue(1 as never);
         jest.spyOn(faker.datatype, 'boolean').mockReturnValue(true);
         instance = aFactory(faker);
         expect(instance).toBeDefined();
 
-        jest.spyOn(faker.datatype, 'number').mockRestore();
+        jest.spyOn(faker.number, 'int').mockRestore();
         jest.spyOn(faker.datatype, 'boolean').mockRestore();
       }
     });

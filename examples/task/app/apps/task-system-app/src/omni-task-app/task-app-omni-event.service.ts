@@ -227,18 +227,18 @@ export class TaskAppOmniEventService {
       description:
         input.description !== undefined
           ? input.description
-          : current.description ?? null,
+          : (current.description ?? null),
       status: input.status ?? current.status,
       startAt: (input.startAt as Date | undefined) ?? current.startAt,
       endAt:
         input.endAt !== undefined
           ? (input.endAt as Date | null)
-          : current.endAt ?? null,
+          : (current.endAt ?? null),
       allDay: input.allDay ?? current.allDay,
       location:
         input.location !== undefined
           ? input.location
-          : current.location ?? null,
+          : (current.location ?? null),
     };
 
     await this.recordRepository.update(
@@ -416,8 +416,8 @@ export class TaskAppOmniEventService {
       ...(guid instanceof FindOperator
         ? this.mapGuidFindOperator(guid)
         : guid
-        ? { guid }
-        : {}),
+          ? { guid }
+          : {}),
       ...(where.status ? { status: where.status } : {}),
     };
   }

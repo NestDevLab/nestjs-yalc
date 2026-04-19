@@ -11,7 +11,7 @@ describe('ConfigValueManager and Utilities', () => {
 
     it('should throw an error for duplicate keys', () => {
       const execute = () => checkForDuplicateKeys(['key1', 'key1']);
-      expect(execute).toThrowError(/Duplicate key found in configuration: key1/);
+      expect(execute).toThrow(/Duplicate key found in configuration: key1/);
     });
   });
 
@@ -45,7 +45,7 @@ describe('ConfigValueManager and Utilities', () => {
     it('throws an error for duplicate keys in configurations', () => {
       const configs = [{ k: 'myKey', v:'value1'}, { k: 'myKey', v: 'value2'}];
       const execute = () => ConfigValueManager.value('myKey', configs);
-      expect(execute).toThrowError(/Duplicate key found in configuration: myKey/);
+      expect(execute).toThrow(/Duplicate key found in configuration: myKey/);
     });
   });
 

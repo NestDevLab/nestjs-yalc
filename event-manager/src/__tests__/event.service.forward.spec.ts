@@ -29,6 +29,8 @@ describe('Event errorForward', () => {
     mockLoggerService = createMock<ImprovedLoggerService>();
 
     mockEventEmitter = createMock<EventEmitter2>(new EventEmitter2());
+    jest.mocked(mockEventEmitter.emit).mockReturnValue(true);
+    jest.mocked(mockEventEmitter.emitAsync).mockResolvedValue([]);
 
     service = new YalcEventService(
       mockLoggerService as ImprovedLoggerService,

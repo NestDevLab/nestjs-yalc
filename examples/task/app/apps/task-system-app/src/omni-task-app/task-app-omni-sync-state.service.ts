@@ -183,23 +183,23 @@ export class TaskAppOmniSyncStateService {
       lastSyncedAt:
         input.lastSyncedAt !== undefined
           ? (input.lastSyncedAt as Date | null)
-          : current.lastSyncedAt ?? null,
+          : (current.lastSyncedAt ?? null),
       lastDirection:
         input.lastDirection !== undefined
           ? input.lastDirection
-          : current.lastDirection ?? null,
+          : (current.lastDirection ?? null),
       remoteVersion:
         input.remoteVersion !== undefined
           ? input.remoteVersion
-          : current.remoteVersion ?? null,
+          : (current.remoteVersion ?? null),
       localVersionHash:
         input.localVersionHash !== undefined
           ? input.localVersionHash
-          : current.localVersionHash ?? null,
+          : (current.localVersionHash ?? null),
       lastError:
         input.lastError !== undefined
           ? input.lastError
-          : current.lastError ?? null,
+          : (current.lastError ?? null),
     };
 
     await this.externalRefService.getById(merged.externalRefId!);
@@ -282,8 +282,8 @@ export class TaskAppOmniSyncStateService {
       ...(guid instanceof FindOperator
         ? this.mapGuidFindOperator(guid)
         : guid
-        ? { guid }
-        : {}),
+          ? { guid }
+          : {}),
       ...(where.status ? { status: where.status } : {}),
     };
   }

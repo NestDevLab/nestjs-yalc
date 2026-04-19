@@ -94,8 +94,9 @@ export interface IExtraInputStrict<Type> {
  * @property idName - if `not undefined` will be used as a key,
  * and the guid as value in the input object
  */
-export interface IGenericResolverMutationCreateOptions<Type>
-  extends IGenericResolverMethodOptions {
+export interface IGenericResolverMutationCreateOptions<
+  Type,
+> extends IGenericResolverMethodOptions {
   extraInputs?: { [key: string]: IExtraInput<Type> };
 }
 
@@ -103,8 +104,7 @@ export interface IGenericResolverMutationCreateOptions<Type>
  * @property idName - if `undefined` will be used ID as value,
  *  if the type is IIDArg the guid will be used as id
  */
-export interface IGenericResolverQueryOptions
-  extends IGenericResolverMethodOptions {
+export interface IGenericResolverQueryOptions extends IGenericResolverMethodOptions {
   idName?: string | IIDArg;
   throwOnNotFound?: boolean;
 }
@@ -135,8 +135,7 @@ export function checkFinalId(finalId: string | undefined) {
 //   };
 // }
 
-export interface ICustomSingleQueryOptions
-  extends IGenericResolverMethodOptions {
+export interface ICustomSingleQueryOptions extends IGenericResolverMethodOptions {
   isSingleResource: true;
   throwOnNotFound?: boolean;
   idName?: string;

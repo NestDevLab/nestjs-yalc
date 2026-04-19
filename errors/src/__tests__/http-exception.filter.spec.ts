@@ -34,7 +34,7 @@ describe('Http exceptions filter', () => {
     const error = new MissingArgumentsError();
 
     filter.catch(error, mockArgumentsHost);
-    expect(loggerServiceMock.log).toBeCalledWith(
+    expect(loggerServiceMock.log).toHaveBeenCalledWith(
       error.message,
       expect.anything(),
     );
@@ -50,7 +50,7 @@ describe('Http exceptions filter', () => {
     const exception = new Error('test');
 
     filter.catch(exception, mockArgumentsHost);
-    expect(loggerServiceMock.error).toBeCalledWith(
+    expect(loggerServiceMock.error).toHaveBeenCalledWith(
       exception.message,
       exception.stack,
       expect.anything(),
@@ -61,7 +61,7 @@ describe('Http exceptions filter', () => {
     const exception = new CreateEntityError();
 
     filter.catch(exception, mockArgumentsHost);
-    expect(loggerServiceMock.error).toBeCalledWith(
+    expect(loggerServiceMock.error).toHaveBeenCalledWith(
       exception,
       undefined,
       expect.anything(),
@@ -73,7 +73,7 @@ describe('Http exceptions filter', () => {
     const exception = new CreateEntityError(fixedError);
 
     filter.catch(exception, mockArgumentsHost);
-    expect(loggerServiceMock.error).toBeCalledWith(
+    expect(loggerServiceMock.error).toHaveBeenCalledWith(
       fixedError.message,
       expect.anything(),
       expect.objectContaining({
@@ -87,18 +87,18 @@ describe('Http exceptions filter', () => {
   it('should catch and log GqlError error', () => {
     const exception: GqlError = new GqlError('message', 'systemMessage');
     filter.catch(exception, mockArgumentsHost);
-    expect(loggerServiceMock.error).toBeCalledWith(exception.systemMessage);
+    expect(loggerServiceMock.error).toHaveBeenCalledWith(exception.systemMessage);
 
     exception.systemMessage = undefined;
     filter.catch(exception, mockArgumentsHost);
-    expect(loggerServiceMock.error).toBeCalledWith(exception.message);
+    expect(loggerServiceMock.error).toHaveBeenCalledWith(exception.message);
   });
 
   it('should catch and log Http error with host type http', () => {
     const exception = new InternalServerErrorException();
     mockArgumentsHost.getType.mockReturnValue('http');
     filter.catch(exception, mockArgumentsHost as ArgumentsHost);
-    expect(loggerServiceMock.error).toBeCalledWith(
+    expect(loggerServiceMock.error).toHaveBeenCalledWith(
       exception.message,
       exception.stack,
       expect.anything(),
@@ -109,7 +109,7 @@ describe('Http exceptions filter', () => {
     const exception = new BadRequestException();
     mockArgumentsHost.getType.mockReturnValue('http');
     filter.catch(exception, mockArgumentsHost as ArgumentsHost);
-    expect(loggerServiceMock.log).toBeCalledWith(
+    expect(loggerServiceMock.log).toHaveBeenCalledWith(
       exception.message,
       expect.anything(),
     );

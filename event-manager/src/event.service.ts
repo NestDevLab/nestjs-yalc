@@ -102,7 +102,8 @@ function InjectTrace() {
 export class YalcEventService<
   TFormatter extends EventNameFormatter = EventNameFormatter,
   TEventOptions extends IEventOptions<TFormatter> = IEventOptions<TFormatter>,
-  TErrorOptions extends IErrorEventOptions<TFormatter> = IErrorEventOptions<TFormatter>,
+  TErrorOptions extends IErrorEventOptions<TFormatter> =
+    IErrorEventOptions<TFormatter>,
 > {
   constructor(
     protected readonly loggerService: ImprovedLoggerService,

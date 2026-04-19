@@ -57,6 +57,20 @@ describe('Filter scalar', () => {
 
     testData = createdFilterScalar.serialize(fixedString);
     expect(fixedString).toEqual(fixedString);
+
+    testData = createdFilterScalar.serialize(null);
+    expect(testData).toBe('');
+  });
+
+  it('Check serialize error for non-memoized object input', async () => {
+    expect(() =>
+      createdFilterScalar.serialize({ expressions: [] }),
+    ).toThrow();
+  });
+
+  it('Check parseValue functionality with non-string input', async () => {
+    const testData = createdFilterScalar.parseValue({});
+    expect(testData).toStrictEqual({ expressions: [] });
   });
   it('Check parseLiteral functionality', async () => {
     const testData = createdFilterScalar.parseLiteral(stringValueNode);
@@ -65,7 +79,7 @@ describe('Filter scalar', () => {
   it('Check parseLiteral error', async () => {
     expect(() =>
       createdFilterScalar.parseLiteral(objectValueNode),
-    ).toThrowError();
+    ).toThrow();
   });
 
   it('test it test it', () => {

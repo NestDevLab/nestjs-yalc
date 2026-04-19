@@ -355,8 +355,9 @@ export interface IDependencyObject<Entity extends ObjectLiteral> {
   repository: ClassType<GenericTypeORMRepository<Entity>>;
 }
 
-export interface ICrudGenBackendFactoryResult<Entity extends ObjectLiteral>
-  extends IDependencyObject<Entity> {
+export interface ICrudGenBackendFactoryResult<
+  Entity extends ObjectLiteral,
+> extends IDependencyObject<Entity> {
   serviceToken?: string;
   dataLoaderToken?: string;
 }

@@ -40,6 +40,8 @@ describe('Event Service', () => {
 
   beforeEach(() => {
     eventEmitter = createMock<EventEmitter2>(new EventEmitter2());
+    jest.mocked(eventEmitter.emit).mockReturnValue(true);
+    jest.mocked(eventEmitter.emitAsync).mockResolvedValue([]);
     logger = createMock<ImprovedNestLogger>();
     options = {
       data: { key: 'value' },
@@ -79,8 +81,10 @@ describe('Event Service', () => {
   });
 
   it('should get logger option when is string', () => {
-    const result = getLoggerOption(LogLevelEnum.LOG, { logger: LogLevelEnum.DEBUG });
-    expect(result).toMatchObject({ level:  LogLevelEnum.DEBUG });
+    const result = getLoggerOption(LogLevelEnum.LOG, {
+      logger: LogLevelEnum.DEBUG,
+    });
+    expect(result).toMatchObject({ level: LogLevelEnum.DEBUG });
   });
 
   it('should log event synchronously', () => {

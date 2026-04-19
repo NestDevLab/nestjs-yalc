@@ -29,7 +29,6 @@ import { TypeORMLogger } from '@nestjs-yalc/logger/typeorm-logger.js';
 import { CURAPP_CONF_ALIAS } from './def.const.js';
 import { AppEvents } from './app.events.js';
 import { GqlComplexityPlugin } from '@nestjs-yalc/graphql/plugins/gql-complexity.plugin.js';
-import { ApolloServerPlugin } from 'apollo-server-plugin-base';
 import { ClassType } from '@nestjs-yalc/types/globals.d.js';
 import { isClass } from '@nestjs-yalc/utils/class.helper.js';
 import {
@@ -39,6 +38,10 @@ import {
 
 import * as dotenv from 'dotenv';
 dotenv.config(); // preload .env root file before all the others
+
+type ApolloServerPlugin = NonNullable<
+  ApolloFederationDriverConfig['plugins']
+>[number];
 
 export interface IAppImportsFactory {
   envPath?: string | string[];
@@ -218,13 +221,21 @@ export function AppDependencyFactory(
             useGlobalPrefix: true,
             // Makes sure not too much info. is revealed when reporting errors in non-dev stages
             // @url: https://github.com/nestjs/graphql/issues/1053#issuecomment-740739410
-            formatError: (error: GraphQLError) => {
-              const exception: any = error.extensions?.exception;
-              const message = exception?.response?.message || error.message;
+            formatError: (
+              formattedError: GraphQLFormattedError,
+              error: unknown,
+            ) => {
+              const graphQLError =
+                error instanceof GraphQLError ? error : undefined;
+              const exception: any = graphQLError?.extensions?.exception;
+              const message =
+                exception?.response?.message ||
+                graphQLError?.message ||
+                formattedError.message;
 
               if (conf && (conf.isDev || conf.isTest)) {
                 return {
-                  ...error,
+                  ...formattedError,
                   message, // override the message with meaningful info
                 };
               }
@@ -233,9 +244,9 @@ export function AppDependencyFactory(
               const productionError: GraphQLFormattedError = {
                 message,
                 extensions: {
-                  path: error.path,
-                  code: error.extensions?.code,
-                  exception: error.originalError, // error without stacktrace
+                  path: formattedError.path,
+                  code: formattedError.extensions?.code,
+                  exception: graphQLError?.originalError, // error without stacktrace
                 },
               };
 

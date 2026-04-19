@@ -61,4 +61,16 @@ describe('promise tracker test', () => {
     expect(calls).toEqual(['ok', 'deferred']);
     expect(promiseTracker['promises']).toHaveLength(0);
   });
+
+  it('It should clean up tracked promises when they reject', async () => {
+    const promiseTracker = new PromiseTracker();
+    const error = new Error('boom');
+
+    promiseTracker.add(Promise.reject(error));
+
+    await expect(promiseTracker.waitForAll()).rejects.toThrow(error);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(promiseTracker['promises']).toHaveLength(0);
+  });
 });

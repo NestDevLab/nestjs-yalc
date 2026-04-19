@@ -214,11 +214,11 @@ export class TaskAppOmniExternalRefService {
     const current = await this.getTaskExternalRefOrFail(guid);
     const merged: Partial<TaskExternalRefCreateInput> = {
       account:
-        input.account !== undefined ? input.account : current.account ?? null,
+        input.account !== undefined ? input.account : (current.account ?? null),
       container:
         input.container !== undefined
           ? input.container
-          : current.container ?? null,
+          : (current.container ?? null),
       externalId: input.externalId ?? current.externalId,
       guid,
       internalId: input.internalId ?? current.internalId,

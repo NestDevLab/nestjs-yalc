@@ -26,6 +26,7 @@ describe('Test Class Helpers', () => {
     const defaultError = DefaultError;
     expect(isClass(class Test {}, 'Test')).toBeTruthy();
     expect(isClass(class Test {}, 'Test2')).toBeFalsy();
+    expect(isES6Class(class Test {}, 'Test2')).toBeFalsy();
     expect(isClass(defaultError, DefaultError.name)).toBeTruthy();
   });
 });

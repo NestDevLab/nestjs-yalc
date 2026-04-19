@@ -2,7 +2,10 @@ import { GqlError } from '@nestjs-yalc/graphql/plugins/gql.error.js';
 import { FilterErrors } from './strings.enum.js';
 
 export class CrudGenError extends GqlError {
-  constructor(message?: string, public systemMessage?: string) {
+  constructor(
+    message?: string,
+    public systemMessage?: string,
+  ) {
     super(message, systemMessage);
   }
 }

@@ -61,8 +61,10 @@ export interface IHttpExceptionArguments {
 /**
  * The arguments used by the NestJS classes that extend the HttpException class.
  */
-export interface IHttpExceptionParentArguments
-  extends Omit<IHttpExceptionArguments, 'errorCode'> {}
+export interface IHttpExceptionParentArguments extends Omit<
+  IHttpExceptionArguments,
+  'errorCode'
+> {}
 
 export interface IErrorPayload extends ISharedErrorProperties {
   /**
@@ -91,8 +93,10 @@ export interface IErrorEventPayload extends IErrorPayload {
   stack?: string;
 }
 
-export interface ILogErrorPayload
-  extends Omit<IErrorEventPayload, keyof IHttpExceptionArguments> {
+export interface ILogErrorPayload extends Omit<
+  IErrorEventPayload,
+  keyof IHttpExceptionArguments
+> {
   [key: string]: any;
 }
 
@@ -101,7 +105,8 @@ type loggerOptionType =
   | false;
 
 export interface IAbstractDefaultError
-  extends Omit<HttpException, 'cause' | 'message'>,
+  extends
+    Omit<HttpException, 'cause' | 'message'>,
     Omit<IErrorEventPayload, 'response'> {
   logger?: loggerOptionType;
   eventEmitter?: EventEmitter2;
@@ -166,12 +171,14 @@ export interface IAbstractDefaultErrorOptions extends ISharedErrorProperties {
 }
 
 export interface IDefaultErrorBaseOptions
-  extends Omit<IAbstractDefaultErrorOptions, 'internalMessage'>,
+  extends
+    Omit<IAbstractDefaultErrorOptions, 'internalMessage'>,
     HttpExceptionOptions,
     IHttpExceptionParentArguments {}
 
 export interface IDefaultErrorOptions
-  extends Omit<IAbstractDefaultErrorOptions, 'internalMessage'>,
+  extends
+    Omit<IAbstractDefaultErrorOptions, 'internalMessage'>,
     HttpExceptionOptions,
     IHttpExceptionArguments {}
 
@@ -256,6 +263,7 @@ export const DefaultErrorMixin = <
     description?: string;
     internalMessage?: string;
     eventName?: string;
+    override cause: IFormattedCause | undefined;
     resolvedStack?: string;
 
     __DefaultErrorMixin = Object.freeze(true);
@@ -322,6 +330,7 @@ export const DefaultErrorMixin = <
       const stack = options.stack ?? this.stack;
       const errorCode = this.getStatus();
 
+      this.cause = formatCause(this.cause);
       this.internalMessage = options.internalMessage ?? this.cause?.message;
       this.eventName = options.eventName;
 
@@ -339,7 +348,7 @@ export const DefaultErrorMixin = <
         ? maskDataInObject(options.data, options.masks)
         : options.data;
 
-      const cause = formatCause(this.cause);
+      const cause = this.cause;
 
       const payload: ILogErrorPayload = {
         data: this.data,
@@ -385,8 +394,8 @@ export const DefaultErrorMixin = <
       if (stack) this.resolvedStack = stack;
 
       if (cause) {
-        this.cause = cause;
-        this.eventPayload.cause = formatCause(cause);
+        this.cause = formatCause(cause);
+        this.eventPayload.cause = this.cause;
       }
 
       if (response) {
@@ -448,7 +457,7 @@ export const DefaultErrorMixin = <
       if (typeof response === 'string' || response instanceof String) {
         message = response as string;
       } else {
-        responseObj = response;
+        responseObj = response as Record<string, any>;
       }
       /**
        * We know that passing a string as the first argument

@@ -10,6 +10,7 @@ import {
   APP_OPTION_TOKEN,
   MAIN_APP_CONFIG_SERVICE,
   MODULE_ALIAS_TOKEN,
+  MODULE_OPTION_TOKEN,
   SYSTEM_EVENT_SERVICE,
   SYSTEM_LOGGER_SERVICE,
 } from './def.const.js';
@@ -27,7 +28,6 @@ import { AppContextModule } from './app-context.module.js';
 import { NODE_ENV } from './global.enum.js';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import Joi from 'joi';
-import { MODULE_OPTIONS_TOKEN } from '@nestjs/common/cache/cache.module-definition.js';
 import { EventModule } from '@nestjs-yalc/event-manager/index.js';
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
 import { YalcClsModule } from './cls.module.js';
@@ -139,7 +139,7 @@ export function yalcBaseAppModuleMetadataFactory(
       useValue: appAlias,
     },
     {
-      provide: MODULE_OPTIONS_TOKEN,
+      provide: MODULE_OPTION_TOKEN,
       useValue: options,
     },
     {

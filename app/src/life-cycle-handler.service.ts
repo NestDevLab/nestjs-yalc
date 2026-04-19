@@ -6,9 +6,12 @@ import {
   OnModuleDestroy,
 } from '@nestjs/common';
 import { type IYalcBaseAppOptions } from './base-app.interface.js';
-import { APP_LOGGER_SERVICE, MODULE_ALIAS_TOKEN } from './def.const.js';
+import {
+  APP_LOGGER_SERVICE,
+  MODULE_ALIAS_TOKEN,
+  MODULE_OPTION_TOKEN,
+} from './def.const.js';
 import { AppContextService } from './app-context.service.js';
-import { MODULE_OPTIONS_TOKEN } from '@nestjs/common/cache/cache.module-definition.js';
 
 /**
  * This class is used to handle the lifecycle of the app
@@ -27,7 +30,7 @@ export class LifeCycleHandler implements OnModuleDestroy, OnModuleInit {
     @Inject(MODULE_ALIAS_TOKEN) private readonly moduleAlias: string,
     @Inject(AppContextService)
     private readonly appContextService: AppContextService,
-    @Inject(MODULE_OPTIONS_TOKEN)
+    @Inject(MODULE_OPTION_TOKEN)
     private readonly options?: IYalcBaseAppOptions,
   ) {
     this.logger.debug?.(

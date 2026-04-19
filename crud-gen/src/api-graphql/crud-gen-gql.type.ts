@@ -53,8 +53,7 @@ export interface IGqlSelectedFields<T> {
 }
 
 export interface ICrudGenArgs<T>
-  extends FindManyOptions,
-    IGqlSelectedFields<T> {}
+  extends FindManyOptions, IGqlSelectedFields<T> {}
 
 export interface RecursiveFindOperator<T> {
   [index: number]: RecursiveFindOperator<T> | FindOperator<T>;

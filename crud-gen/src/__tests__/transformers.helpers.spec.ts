@@ -45,4 +45,14 @@ describe('Test transformers', () => {
     expect(instance).toBeInstanceOf(Basic);
     expect(instance.value).toBe('ok');
   });
+
+  it('yalcPlainToInstance should ignore non-object plain values', () => {
+    class Basic {
+      value?: string;
+    }
+
+    const instance = yalcPlainToInstance(Basic, 'not-an-object' as any);
+    expect(instance).toBeInstanceOf(Basic);
+    expect(instance.value).toBeUndefined();
+  });
 });

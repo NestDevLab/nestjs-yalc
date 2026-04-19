@@ -29,9 +29,9 @@ export function crudGenGqlInterceptorWorker<T>(
   };
 }
 @Injectable()
-export class CrudGenGqlInterceptor<T = IFieldMapper>
-  implements NestInterceptor<T>
-{
+export class CrudGenGqlInterceptor<
+  T = IFieldMapper,
+> implements NestInterceptor<T> {
   intercept(context: ExecutionContext, next: CallHandler) {
     const gqlCtx = GqlExecutionContext.create(context);
     const { startRow, endRow } = (gqlCtx?.getArgs?.() as any) ?? {};

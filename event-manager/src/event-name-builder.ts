@@ -38,9 +38,8 @@ export abstract class EventNameBuilder {
         actionValue as object,
       )) {
         if (eventValue === EventType) {
-          actionsWithBaseEvent[actionKey][
-            eventKey
-          ] = `${baseEvent}.${actionKey}.${eventKey}`;
+          actionsWithBaseEvent[actionKey][eventKey] =
+            `${baseEvent}.${actionKey}.${eventKey}`;
         } else {
           actionsWithBaseEvent[actionKey][eventKey] = eventValue;
         }

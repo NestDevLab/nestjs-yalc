@@ -39,8 +39,10 @@ export type LogMethodError = (
   options?: LogMethodOptions,
 ) => void;
 
-export interface ILoggerPluginMethods<TClsService = any>
-  extends Record<string, { (...args: any[]): void } | undefined> {
+export interface ILoggerPluginMethods<TClsService = any> extends Record<
+  string,
+  { (...args: any[]): void } | undefined
+> {
   onBeforeLogging?: (
     message: any,
     options: LogMethodOptions,
@@ -49,8 +51,7 @@ export interface ILoggerPluginMethods<TClsService = any>
 }
 
 export interface ImprovedLoggerService
-  extends ImprovedLoggerServiceMethods,
-    PluginSystem<ILoggerPluginMethods> {}
+  extends ImprovedLoggerServiceMethods, PluginSystem<ILoggerPluginMethods> {}
 
 export interface ImprovedLoggerServiceMethods extends LoggerService {
   log: LogMethod;
