@@ -24,6 +24,8 @@ import { ErrorsEnum } from './error.enum.js';
 import { DefaultErrorBase, IDefaultErrorBaseOptions } from './default.error.js';
 import { HttpStatusCode } from 'axios';
 
+type AxiosHttpStatusCode = (typeof HttpStatusCode)[keyof typeof HttpStatusCode];
+
 function buildArgs(
   errorName: ErrorsEnum,
   internalMessage?: string,
@@ -50,7 +52,7 @@ function buildArgsHttpException(
   errorName: ErrorsEnum,
   internalMessage?: string,
   options?: IDefaultErrorBaseOptions,
-  errorCode?: HttpStatus | HttpStatusCode,
+  errorCode?: HttpStatus | AxiosHttpStatusCode,
 ): [
   string,
   IDefaultErrorBaseOptions,

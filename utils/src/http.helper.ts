@@ -28,7 +28,8 @@ export const HttpStatusCodes = {
   ...HttpStatusCode,
 };
 
-export type HttpStatusCodes = HttpStatusCode | HttpStatus;
+export type HttpStatusCodes =
+  (typeof HttpStatusCodes)[keyof typeof HttpStatusCodes];
 
 const httpStatusDescriptions: {
   [key in HttpStatusCodes]?: string;
