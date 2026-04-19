@@ -65,6 +65,14 @@ const options: IOptions = {
         lines: 99,
       },
     },
+    '@nestjs-yalc/observability': {
+      coverageThreshold: {
+        statements: 75,
+        branches: 70,
+        functions: 75,
+        lines: 75,
+      },
+    },
     '@nestjs-yalc/utils': {
       coverageThreshold: {
         statements: 99,

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { GraphQLModule } from '@nestjs/graphql';
+import { MercuriusDriver, MercuriusDriverConfig } from '@nestjs/mercurius';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar';
 import {
@@ -11,6 +11,10 @@ import {
   OmniRecordEntity,
   OmniRelationEntity,
 } from '@nestjs-yalc/omnikernel-module';
+import {
+  ObservabilityModule,
+  createObservabilityOptionsFromEnv,
+} from '@nestjs-yalc/observability';
 import { EventsModule } from './events/events.module';
 import {
   TaskEventRelationsResolver,
@@ -25,12 +29,15 @@ import { TaskAppEventModule } from './task-app-event.module';
 
 @Module({
   imports: [
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
+    GraphQLModule.forRoot<MercuriusDriverConfig>({
+      driver: MercuriusDriver,
       autoSchemaFile: true,
       path: '/graphql',
     }),
     TaskAppEventModule,
+    ObservabilityModule.forRoot(() =>
+      createObservabilityOptionsFromEnv('task-system-app'),
+    ),
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: ':memory:',

@@ -6,6 +6,11 @@ It is also the recommended entry point for orchestrating error logging, domain e
 
 Please also see [Event helpers](./event-manager-event.md), [Event module](./event-manager-module.md), [Logger](./logger.md), [Errors](./errors.md), and the higher-level [Error handling guide](./error-handling.md).
 
+For external monitoring, use `@nestjs-yalc/observability`. It subscribes to
+the EventManager `EventEmitter2` stream and exports `YalcEventService` events
+to OpenTelemetry logs, metrics, span events, and exceptions while keeping this
+service focused on local event/log/error orchestration.
+
 ## Constructor
 
 ```ts
@@ -67,14 +72,14 @@ Each helper deep-merges the provided options with the constructor defaults, sets
 Module wiring with Nest:
 
 ```ts
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { EventModule } from '@nestjs-yalc/event-manager';
+import { EventEmitterModule } from "@nestjs/event-emitter";
+import { EventModule } from "@nestjs-yalc/event-manager";
 
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
     EventModule.forRootAsync({
-      loggerProvider: { context: 'AppEvents' },
+      loggerProvider: { context: "AppEvents" },
     }),
   ],
 })
@@ -84,7 +89,7 @@ export class AppModule {}
 Usage in a provider:
 
 ```ts
-import { YalcEventService } from '@nestjs-yalc/event-manager';
+import { YalcEventService } from "@nestjs-yalc/event-manager";
 
 @Injectable()
 export class UserService {
@@ -93,14 +98,14 @@ export class UserService {
   async create(user: CreateUserDto) {
     try {
       // Emit + log a success event
-      await this.events.log(['user', 'created'], {
+      await this.events.log(["user", "created"], {
         data: { userId: user.id },
         event: { await: true },
       });
       return user;
     } catch (error) {
       // Forward and log the error with merged context
-      throw this.events.errorForward('user.create.failed', error, {
+      throw this.events.errorForward("user.create.failed", error, {
         data: { userId: user.id },
       });
     }

@@ -95,3 +95,49 @@ jobs:
       - name: Stop RabbitMQ
         if: always()
         run: npm run rabbitmq:down --prefix examples/task/app
+
+  task-observability-e2e:
+    name: Task observability example e2e
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          submodules: recursive
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            examples/task/app/package-lock.json
+
+      - name: Install framework dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Install task example dependencies
+        run: npm ci --prefer-offline --no-audit --prefix examples/task/app
+
+      - name: Build task example app
+        run: npm run build --prefix examples/task/app
+
+      - name: Start OpenTelemetry Collector
+        run: npm run observability:ci:up --prefix examples/task/app
+
+      - name: Start RabbitMQ
+        run: npm run rabbitmq:up --prefix examples/task/app
+
+      - name: Run observability e2e tests
+        run: npm run test:e2e:observability --prefix examples/task/app
+
+      - name: Stop RabbitMQ
+        if: always()
+        run: npm run rabbitmq:down --prefix examples/task/app
+
+      - name: Stop OpenTelemetry Collector
+        if: always()
+        run: npm run observability:ci:down --prefix examples/task/app

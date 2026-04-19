@@ -2,7 +2,7 @@
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
   "testEnvironment": "node",
-  "testRegex": ".rabbitmq-spec.ts$",
+  "testRegex": ".observability-spec.ts$",
   "transform": {
     "^.+\\.ts$": [
       "ts-jest",

@@ -1,3 +1,7 @@
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const nodeExternals = require('webpack-node-externals');
+const webpack = require('webpack');
+
 const ignoredOptionalModules = new Set([
   '@apollo/gateway',
   '@grpc/grpc-js',
@@ -20,6 +24,9 @@ module.exports = (options) => ({
     ...(Array.isArray(options.externals)
       ? options.externals
       : [options.externals].filter(Boolean)),
+    nodeExternals({
+      allowlist: [/^@nestjs-yalc\//],
+    }),
     ({ request }, callback) => {
       if (ignoredOptionalModules.has(request)) {
         callback(null, `commonjs ${request}`);
@@ -31,6 +38,13 @@ module.exports = (options) => ({
   ],
   resolve: {
     ...options.resolve,
+    plugins: [
+      ...(options.resolve?.plugins ?? []),
+      new TsconfigPathsPlugin({
+        configFile: './tsconfig.json',
+        extensions: ['.ts', '.js', '.mjs', '.cjs'],
+      }),
+    ],
     extensionAlias: {
       ...(options.resolve?.extensionAlias ?? {}),
       '.js': ['.ts', '.js'],
@@ -38,4 +52,13 @@ module.exports = (options) => ({
       '.cjs': ['.cts', '.cjs'],
     },
   },
+  plugins: [
+    ...(options.plugins ?? []),
+    new webpack.NormalModuleReplacementPlugin(
+      /^@nestjs-yalc\/.*\.js$/,
+      (resource) => {
+        resource.request = resource.request.replace(/\.js$/, '');
+      },
+    ),
+  ],
 });

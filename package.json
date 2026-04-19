@@ -69,6 +69,7 @@
     "jest/src/config",
     "kafka",
     "logger",
+    "observability",
     "types",
     "types-extends",
     "utils"

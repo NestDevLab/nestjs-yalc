@@ -106,6 +106,12 @@
       "@nestjs-yalc/logger/*": [
         "./logger/src/*"
       ],
+      "@nestjs-yalc/observability": [
+        "./observability/src/index.ts"
+      ],
+      "@nestjs-yalc/observability/*": [
+        "./observability/src/*"
+      ],
       "@nestjs-yalc/utils": [
         "./utils/src/index.ts"
       ],

@@ -23,6 +23,7 @@ Nest-yalc stands for Nestjs - Yet Another Library Collection
 - [OmniKernel as a CrudGen backend](./omnikernel-crudgen-backend.md)
 - [Task-system app composition guide](./task-system-app-composition.md)
 - [API Strategy + EventManager integration patterns](./api-strategy-event-manager-patterns.md)
+- [Observability and OpenTelemetry integration](./observability.md)
 
 - [Examples overview](../examples/README.md) — the architectural map for the skeleton, OmniKernel, and task examples.
 - [Skeleton App](../examples/skeleton/app/README.md) — the minimal all-in-one `CrudGenResourceFactory` path with a small module API-client example.
@@ -83,5 +84,6 @@ the nestjs-yalc directory structure is flat to let it be integrated in other pro
 - [other_libraries]/
 
 ### Repo-specific utilities
+
 - `var/asl-test.cjs`: manual AsyncLocalStorage sanity check (Fastify + ALS). Not used by builds/tests; run manually if you need to confirm ALS behaviour across injected requests.
 - `build-dist.mjs`: local pack script that writes `dist/package.json` for each package with exports pointing at compiled output. Source `package.json` files stay untouched; the dist `package.json` is generated after `npm run build`. This is a repo-specific helper (not standard npm) to keep local file-based consumption aligned with the compiled layout.
