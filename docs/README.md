@@ -27,10 +27,11 @@ layout: landing
   <div class="ny-hero-content">
     <img class="ny-hero-mark" src="assets/images/logo-small_yalc.png" alt="NestJS-YALC logo">
     <p class="ny-eyebrow">NestJS - Yet Another Library Collection</p>
-    <h1>Generate the boilerplate. Keep the production architecture.</h1>
+    <h1>Production-grade NestJS, generated from your domain model.</h1>
     <p class="ny-lead">
-      NestJS-YALC turns NestJS metadata into generated REST and GraphQL APIs,
-      API Strategy boundaries, and EventManager-powered observability.
+      Define resources once. NestJS-YALC generates CRUD APIs, protects service
+      boundaries with API Strategy, and standardizes events, errors, and
+      observability with EventManager.
     </p>
     <div class="ny-actions">
       <a class="ny-button" href="{{ '/getting-started' | relative_url }}">Start in minutes</a>

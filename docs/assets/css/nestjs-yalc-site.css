@@ -592,18 +592,15 @@ img {
   overflow-y: auto;
 }
 
-.ny-wiki-menu,
-.ny-wiki-menu-body {
-  display: grid;
-  gap: 0.9rem;
-}
-
-.ny-wiki-menu-summary {
+.ny-wiki-menu-toggle,
+.ny-wiki-menu-overlay,
+.ny-wiki-menu-panel-header {
   display: none;
 }
 
-.ny-wiki-menu:not([open]) > .ny-wiki-menu-body {
-  display: grid !important;
+.ny-wiki-menu-panel {
+  display: grid;
+  gap: 0.9rem;
 }
 
 .ny-wiki-sidebar-card,
@@ -978,11 +975,7 @@ img {
     overflow: visible;
   }
 
-  .ny-wiki-menu {
-    gap: 0.6rem;
-  }
-
-  .ny-wiki-menu-summary {
+  .ny-wiki-menu-toggle {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -993,26 +986,66 @@ img {
     background: #ffffff;
     color: var(--ny-text);
     cursor: pointer;
+    font: inherit;
     font-weight: 850;
-    list-style: none;
   }
 
-  .ny-wiki-menu-summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .ny-wiki-menu-summary::after {
+  .ny-wiki-menu-toggle::after {
     content: "+";
     color: var(--ny-red);
     font-size: 1.05rem;
   }
 
-  .ny-wiki-menu[open] > .ny-wiki-menu-summary::after {
-    content: "-";
+  .ny-wiki-sidebar--open .ny-wiki-menu-toggle::after {
+    content: "";
   }
 
-  .ny-wiki-menu:not([open]) > .ny-wiki-menu-body {
-    display: none !important;
+  .ny-wiki-menu-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: block;
+    background: rgba(17, 19, 23, 0.42);
+  }
+
+  .ny-wiki-menu-overlay[hidden] {
+    display: none;
+  }
+
+  .ny-wiki-menu-panel {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 41;
+    width: min(21rem, 88vw);
+    padding: 1rem;
+    overflow-y: auto;
+    background: var(--ny-bg);
+    box-shadow: 16px 0 40px rgba(17, 19, 23, 0.18);
+    transform: translateX(-105%);
+    transition: transform 180ms ease;
+  }
+
+  .ny-wiki-sidebar--open .ny-wiki-menu-panel {
+    transform: translateX(0);
+  }
+
+  .ny-wiki-menu-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 2.5rem;
+  }
+
+  .ny-wiki-menu-close {
+    min-height: 2rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--ny-border);
+    border-radius: var(--ny-radius);
+    background: #ffffff;
+    color: var(--ny-red);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 850;
   }
 
   .ny-sidebar {
