@@ -577,7 +577,7 @@ img {
 
 .ny-wiki-shell {
   display: grid;
-  grid-template-columns: minmax(16rem, 21rem) minmax(0, 1fr);
+  grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
   gap: 1.5rem;
   width: min(92rem, calc(100% - 2rem));
   margin: 0 auto;
@@ -588,10 +588,22 @@ img {
   position: sticky;
   top: 5.5rem;
   align-self: start;
-  display: grid;
-  gap: 0.9rem;
   max-height: calc(100vh - 6.5rem);
   overflow-y: auto;
+}
+
+.ny-wiki-menu,
+.ny-wiki-menu-body {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.ny-wiki-menu-summary {
+  display: none;
+}
+
+.ny-wiki-menu:not([open]) > .ny-wiki-menu-body {
+  display: grid !important;
 }
 
 .ny-wiki-sidebar-card,
@@ -734,16 +746,16 @@ img {
 
 .ny-sidebar-nav {
   display: grid;
-  gap: 0.8rem;
+  gap: 0.55rem;
 }
 
 .ny-sidebar-group {
-  padding: 0.75rem;
+  padding: 0.6rem;
   background: rgba(255, 255, 255, 0.82);
 }
 
 .ny-sidebar-title {
-  margin: 0 0 0.45rem;
+  margin: 0;
   color: var(--ny-muted);
   font-size: 0.76rem;
   font-weight: 800;
@@ -751,12 +763,50 @@ img {
   text-transform: uppercase;
 }
 
+.ny-sidebar-group--open .ny-sidebar-title {
+  margin-bottom: 0.4rem;
+}
+
+.ny-sidebar-group summary.ny-sidebar-title,
+.ny-wiki-compact-list summary.ny-sidebar-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 1.8rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.ny-sidebar-group summary.ny-sidebar-title::-webkit-details-marker,
+.ny-wiki-compact-list summary.ny-sidebar-title::-webkit-details-marker {
+  display: none;
+}
+
+.ny-sidebar-group summary.ny-sidebar-title::after,
+.ny-wiki-compact-list summary.ny-sidebar-title::after {
+  content: "+";
+  color: var(--ny-red);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.ny-sidebar-group[open] summary.ny-sidebar-title,
+.ny-wiki-compact-list[open] summary.ny-sidebar-title {
+  margin-bottom: 0.4rem;
+}
+
+.ny-sidebar-group[open] summary.ny-sidebar-title::after,
+.ny-wiki-compact-list[open] summary.ny-sidebar-title::after {
+  content: "-";
+}
+
 .ny-sidebar-group a {
   display: block;
-  padding: 0.45rem 0.5rem;
+  padding: 0.36rem 0.45rem;
   border-radius: 6px;
   color: var(--ny-text);
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 650;
   line-height: 1.25;
   text-decoration: none;
@@ -921,8 +971,48 @@ img {
 
   .ny-wiki-sidebar {
     position: static;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     max-height: none;
     margin-bottom: 1rem;
+    overflow: visible;
+  }
+
+  .ny-wiki-menu {
+    gap: 0.6rem;
+  }
+
+  .ny-wiki-menu-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 3rem;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--ny-border);
+    border-radius: var(--ny-radius);
+    background: #ffffff;
+    color: var(--ny-text);
+    cursor: pointer;
+    font-weight: 850;
+    list-style: none;
+  }
+
+  .ny-wiki-menu-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .ny-wiki-menu-summary::after {
+    content: "+";
+    color: var(--ny-red);
+    font-size: 1.05rem;
+  }
+
+  .ny-wiki-menu[open] > .ny-wiki-menu-summary::after {
+    content: "-";
+  }
+
+  .ny-wiki-menu:not([open]) > .ny-wiki-menu-body {
+    display: none !important;
   }
 
   .ny-sidebar {
@@ -932,7 +1022,8 @@ img {
   }
 
   .ny-sidebar-nav {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.45rem;
   }
 }
 
@@ -981,6 +1072,14 @@ img {
 
   .ny-doc-content {
     padding: 1.25rem;
+  }
+
+  .ny-wiki-page {
+    padding: 0.85rem;
+  }
+
+  .ny-wiki-page h1 {
+    font-size: 1.8rem;
   }
 
   .ny-doc-content h1 {

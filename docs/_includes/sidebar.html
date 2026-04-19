@@ -1,13 +1,13 @@
 <nav class="ny-sidebar-nav">
-  <section class="ny-sidebar-group">
-    <p class="ny-sidebar-title">Start</p>
+  <section class="ny-sidebar-group ny-sidebar-group--open">
+    <div class="ny-sidebar-title">Start</div>
     <a href="{{ '/' | relative_url }}">Landing</a>
     <a href="{{ '/getting-started' | relative_url }}">Getting started</a>
     <a href="{{ '/documentation' | relative_url }}">Documentation index</a>
   </section>
 
-  <section class="ny-sidebar-group">
-    <p class="ny-sidebar-title">Architecture</p>
+  <details class="ny-sidebar-group">
+    <summary class="ny-sidebar-title">Architecture</summary>
     <a href="{{ '/backend-blueprint' | relative_url }}">Backend blueprint</a>
     <a href="{{ '/how-to-integrate-nestjs-yalc' | relative_url }}"
       >Modular platform guide</a
@@ -18,10 +18,10 @@
     <a href="{{ '/omnikernel-crudgen-backend' | relative_url }}"
       >OmniKernel backend</a
     >
-  </section>
+  </details>
 
-  <section class="ny-sidebar-group">
-    <p class="ny-sidebar-title">CrudGen</p>
+  <details class="ny-sidebar-group">
+    <summary class="ny-sidebar-title">CrudGen</summary>
     <a href="{{ '/api-creation' | relative_url }}">GraphQL API creation</a>
     <a href="{{ '/crud-gen-modeling' | relative_url }}">Modeling metadata</a>
     <a href="{{ '/crud-gen-factory' | relative_url }}">Factory reference</a>
@@ -29,10 +29,10 @@
     <a href="{{ '/odata-like-query-facade' | relative_url }}"
       >REST query facade</a
     >
-  </section>
+  </details>
 
-  <section class="ny-sidebar-group">
-    <p class="ny-sidebar-title">Runtime</p>
+  <details class="ny-sidebar-group">
+    <summary class="ny-sidebar-title">Runtime</summary>
     <a href="{{ '/api-strategy' | relative_url }}">API Strategy</a>
     <a href="{{ '/api-strategy-event-manager-patterns' | relative_url }}"
       >Strategy + EventManager</a
@@ -46,15 +46,15 @@
     <a href="{{ '/errors' | relative_url }}">DefaultError</a>
     <a href="{{ '/logger' | relative_url }}">Logger</a>
     <a href="{{ '/observability' | relative_url }}">Observability</a>
-  </section>
+  </details>
 
-  <section class="ny-sidebar-group">
-    <p class="ny-sidebar-title">Reference</p>
+  <details class="ny-sidebar-group">
+    <summary class="ny-sidebar-title">Reference</summary>
     <a href="{{ '/api-naming-conventions' | relative_url }}">API naming</a>
     <a href="{{ '/npm-publication' | relative_url }}">NPM publication</a>
     <a href="{{ '/public-example-mirrors' | relative_url }}">Public examples</a>
     <a href="{{ '/framework-hardening-followups' | relative_url }}"
       >Hardening follow-ups</a
     >
-  </section>
+  </details>
 </nav>

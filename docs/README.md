@@ -27,7 +27,7 @@ layout: landing
   <div class="ny-hero-content">
     <img class="ny-hero-mark" src="assets/images/logo-small_yalc.png" alt="NestJS-YALC logo">
     <p class="ny-eyebrow">NestJS - Yet Another Library Collection</p>
-    <h1>Define one resource. Ship the production surface.</h1>
+    <h1>Generate the boilerplate. Keep the production architecture.</h1>
     <p class="ny-lead">
       NestJS-YALC turns NestJS metadata into generated REST and GraphQL APIs,
       API Strategy boundaries, and EventManager-powered observability.

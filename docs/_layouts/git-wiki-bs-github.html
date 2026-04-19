@@ -39,41 +39,50 @@
     </header>
 
     <main class="ny-wiki-shell">
-      <aside class="ny-wiki-sidebar" aria-label="Wiki navigation">
-        <div class="ny-wiki-sidebar-card ny-wiki-search-card">
-          <p class="ny-sidebar-title">Search</p>
-          {% include git-wiki/components/search/index.html %}
-        </div>
+      <aside class="ny-wiki-sidebar">
+        <details class="ny-wiki-menu" open>
+          <summary class="ny-wiki-menu-summary">Wiki navigation</summary>
+          <div class="ny-wiki-menu-body" aria-label="Wiki navigation">
+            <div class="ny-wiki-sidebar-card ny-wiki-search-card">
+              <p class="ny-sidebar-title">Search</p>
+              {% include git-wiki/components/search/index.html %}
+            </div>
 
-        <div class="ny-wiki-sidebar-card">{% include sidebar.html %}</div>
+            <div class="ny-wiki-sidebar-card">{% include sidebar.html %}</div>
 
-        <div class="ny-wiki-sidebar-card ny-wiki-page-list">
-          <p class="ny-sidebar-title">
-            Pages {% if site.show_wiki_pages_limit >= 1 %}(Latest {{
-            site.show_wiki_pages_limit }} updated){% endif %}
-          </p>
-          <ul class="page-list">
-            {% assign numPages = 0 %} {% assign items = site.html_pages | sort:
-            'date' | reverse %} {% for wiki_page in items %} {% if numPages >=
-            site.show_wiki_pages_limit %} {% break %} {% endif %} {% if
-            wiki_page.is_wiki_page != false and wiki_page.sitemap != false %}
-            <li class="page-list-item">
-              {% assign wiki_title = wiki_page.title | default: wiki_page.name
-              %}
-              <a href="{{ wiki_page.url | relative_url }}"
-                >{{ wiki_title | escape }}</a
-              >
-            </li>
-            {% assign numPages = numPages | plus: 1 %} {% endif %} {% endfor %}
-          </ul>
-        </div>
+            <div class="ny-wiki-sidebar-card ny-wiki-page-list">
+              <details class="ny-wiki-compact-list">
+                <summary class="ny-sidebar-title">
+                  Pages {% if site.show_wiki_pages_limit >= 1 %}(Latest {{
+                  site.show_wiki_pages_limit }} updated){% endif %}
+                </summary>
+                <ul class="page-list">
+                  {% assign numPages = 0 %} {% assign items = site.html_pages |
+                  sort: 'date' | reverse %} {% for wiki_page in items %} {% if
+                  numPages >= site.show_wiki_pages_limit %} {% break %} {% endif
+                  %} {% if wiki_page.is_wiki_page != false and wiki_page.sitemap
+                  != false %}
+                  <li class="page-list-item">
+                    {% assign wiki_title = wiki_page.title | default:
+                    wiki_page.name %}
+                    <a href="{{ wiki_page.url | relative_url }}"
+                      >{{ wiki_title | escape }}</a
+                    >
+                  </li>
+                  {% assign numPages = numPages | plus: 1 %} {% endif %} {%
+                  endfor %}
+                </ul>
+              </details>
+            </div>
 
-        {% if site.show_downloads %}
-        <div class="ny-wiki-sidebar-card ny-wiki-downloads-card">
-          <p class="ny-sidebar-title">Repository</p>
-          {% include git-wiki/components/action_btn/downloads.html %}
-        </div>
-        {% endif %}
+            {% if site.show_downloads %}
+            <div class="ny-wiki-sidebar-card ny-wiki-downloads-card">
+              <p class="ny-sidebar-title">Repository</p>
+              {% include git-wiki/components/action_btn/downloads.html %}
+            </div>
+            {% endif %}
+          </div>
+        </details>
       </aside>
 
       <article class="ny-wiki-page">
@@ -101,5 +110,12 @@
     </footer>
 
     {% include git-wiki/sections/tail/tail.html %}
+    <script>
+      if (window.matchMedia("(max-width: 980px)").matches) {
+        document
+          .querySelectorAll(".ny-wiki-menu")
+          .forEach((menu) => menu.removeAttribute("open"));
+      }
+    </script>
   </body>
 </html>
