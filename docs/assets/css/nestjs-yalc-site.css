@@ -492,6 +492,15 @@ img {
   border-radius: var(--ny-radius);
   background: #ffffff;
   box-shadow: 0 10px 26px rgba(17, 19, 23, 0.06);
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.ny-logo-mark:hover {
+  border-color: rgba(234, 40, 78, 0.45);
+  transform: translateY(-2px);
 }
 
 .ny-logo-mark img {

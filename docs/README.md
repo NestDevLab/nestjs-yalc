@@ -98,12 +98,12 @@ layout: landing
   </div>
 
   <div class="ny-logo-strip" aria-label="Organizations using NestJS-YALC patterns">
-    <div class="ny-logo-mark">
+    <a class="ny-logo-mark" href="https://bitvavo.com/" target="_blank" rel="noopener">
       <img src="assets/images/logo-bitvavo.svg" alt="Bitvavo">
-    </div>
-    <div class="ny-logo-mark">
+    </a>
+    <a class="ny-logo-mark" href="https://www.embed.co/" target="_blank" rel="noopener">
       <img src="assets/images/logo-embed.svg" alt="Embed">
-    </div>
+    </a>
   </div>
 </section>
 
