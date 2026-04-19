@@ -465,11 +465,6 @@ img {
   object-fit: contain;
 }
 
-.ny-logo-mark:nth-child(2) img {
-  max-width: 4.7rem;
-  max-height: 4.7rem;
-}
-
 .ny-system-section {
   padding: 5rem clamp(1.25rem, 4rem, 4rem);
   color: #f7fbfa;
