@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="80" viewBox="0 0 280 80" role="img" aria-labelledby="title">
+  <title id="title">Embed</title>
+  <rect width="280" height="80" rx="8" fill="#ffffff"/>
+  <g fill="none" stroke="#14b8a6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M42 24 26 40l16 16"/>
+    <path d="M70 24 86 40 70 56"/>
+    <path d="M58 22 52 58"/>
+  </g>
+  <text x="112" y="51" fill="#151719" font-family="Inter, Arial, sans-serif" font-size="35" font-weight="800" letter-spacing="0">Embed</text>
+</svg>

@@ -398,19 +398,18 @@ img {
   align-items: center;
   justify-content: center;
   min-height: 6.5rem;
-  padding: 1.1rem;
+  padding: 1rem;
   border: 1px solid var(--ny-border);
   border-radius: var(--ny-radius);
   background: #ffffff;
-  color: #151719;
-  font-size: 1.8rem;
-  font-weight: 850;
-  letter-spacing: 0;
   box-shadow: 0 10px 26px rgba(17, 19, 23, 0.06);
 }
 
-.ny-logo-mark:nth-child(2) {
-  color: var(--ny-teal);
+.ny-logo-mark img {
+  display: block;
+  width: 100%;
+  max-width: 15rem;
+  height: auto;
 }
 
 .ny-flow {
