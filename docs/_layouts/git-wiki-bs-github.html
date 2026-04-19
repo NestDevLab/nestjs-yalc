@@ -1,0 +1,105 @@
+{% include git-wiki/defines/defines.html %}
+<!doctype html>
+<html lang="{{ site.lang | default: 'en' }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {% include git-wiki/sections/head/meta.html %} {% include
+    git-wiki/sections/head/scripts.html %}
+    <link
+      rel="icon"
+      href="{{ '/assets/images/logo-small_yalc.png' | relative_url }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ '/assets/css/nestjs-yalc-site.css' | relative_url }}"
+    />
+  </head>
+  <body class="ny-site ny-site--wiki">
+    <header class="ny-topbar">
+      <a
+        class="ny-brand"
+        href="{{ '/' | relative_url }}"
+        aria-label="NestJS-YALC home"
+      >
+        <img
+          src="{{ '/assets/images/logo-small_yalc.png' | relative_url }}"
+          alt=""
+          width="34"
+          height="34"
+        />
+        <span>NestJS-YALC</span>
+      </a>
+
+      <nav class="ny-topnav" aria-label="Primary navigation">
+        <a href="{{ '/getting-started' | relative_url }}">Start</a>
+        <a href="{{ '/documentation' | relative_url }}">Docs</a>
+        <a href="https://github.com/NestDevLab/nestjs-yalc">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="ny-wiki-shell">
+      <aside class="ny-wiki-sidebar" aria-label="Wiki navigation">
+        <div class="ny-wiki-sidebar-card ny-wiki-search-card">
+          <p class="ny-sidebar-title">Search</p>
+          {% include git-wiki/components/search/index.html %}
+        </div>
+
+        <div class="ny-wiki-sidebar-card">{% include sidebar.html %}</div>
+
+        <div class="ny-wiki-sidebar-card ny-wiki-page-list">
+          <p class="ny-sidebar-title">
+            Pages {% if site.show_wiki_pages_limit >= 1 %}(Latest {{
+            site.show_wiki_pages_limit }} updated){% endif %}
+          </p>
+          <ul class="page-list">
+            {% assign numPages = 0 %} {% assign items = site.html_pages | sort:
+            'date' | reverse %} {% for wiki_page in items %} {% if numPages >=
+            site.show_wiki_pages_limit %} {% break %} {% endif %} {% if
+            wiki_page.is_wiki_page != false and wiki_page.sitemap != false %}
+            <li class="page-list-item">
+              {% assign wiki_title = wiki_page.title | default: wiki_page.name
+              %}
+              <a href="{{ wiki_page.url | relative_url }}"
+                >{{ wiki_title | escape }}</a
+              >
+            </li>
+            {% assign numPages = numPages | plus: 1 %} {% endif %} {% endfor %}
+          </ul>
+        </div>
+
+        {% if site.show_downloads %}
+        <div class="ny-wiki-sidebar-card ny-wiki-downloads-card">
+          <p class="ny-sidebar-title">Repository</p>
+          {% include git-wiki/components/action_btn/downloads.html %}
+        </div>
+        {% endif %}
+      </aside>
+
+      <article class="ny-wiki-page">
+        <div class="ny-wiki-tools">
+          {% include git-wiki/components/action_btn/page_actions.html %}
+        </div>
+
+        {% include git-wiki/components/toc/toc.html %} {% if
+        site.inc_before_content %} {% include {{ site.inc_before_content }} %}
+        {% endif %}
+
+        <div id="git-wiki-content" class="ny-doc-content">{{ content }}</div>
+
+        {% if site.inc_after_content %} {% include {{ site.inc_after_content }}
+        %} {% endif %}
+      </article>
+    </main>
+
+    <footer class="ny-footer">
+      <span>NestJS-YALC documentation</span>
+      <span
+        >Production-proof NestJS architecture for CRUD, module boundaries, and
+        event-driven operations.</span
+      >
+    </footer>
+
+    {% include git-wiki/sections/tail/tail.html %}
+  </body>
+</html>

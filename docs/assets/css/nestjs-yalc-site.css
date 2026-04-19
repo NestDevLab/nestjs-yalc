@@ -157,6 +157,77 @@ img {
   width: min(58rem, 100%);
 }
 
+.ny-hero-output {
+  position: absolute;
+  right: clamp(1rem, 5vw, 5rem);
+  bottom: 4.25rem;
+  width: min(34rem, 38vw);
+  opacity: 0.96;
+}
+
+.ny-mini-code {
+  width: min(24rem, 100%);
+  margin-left: auto;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--ny-radius);
+  background: rgba(17, 19, 23, 0.78);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+}
+
+.ny-mini-code-dot {
+  display: block;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  background: var(--ny-red);
+  box-shadow:
+    1rem 0 0 var(--ny-yellow),
+    2rem 0 0 var(--ny-teal);
+}
+
+.ny-mini-code-line {
+  display: block;
+  width: 78%;
+  height: 0.55rem;
+  margin-top: 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.ny-mini-code-line--long {
+  width: 94%;
+}
+
+.ny-mini-code-line--mid {
+  width: 66%;
+  background: rgba(184, 242, 230, 0.42);
+}
+
+.ny-mini-code-line--short {
+  width: 46%;
+  background: rgba(224, 35, 78, 0.46);
+}
+
+.ny-generated-surface {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.9rem;
+}
+
+.ny-generated-surface span {
+  min-height: 3.4rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--ny-radius);
+  background: rgba(255, 255, 255, 0.09);
+  color: #f7fbfa;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 .ny-hero-mark {
   width: 4.25rem;
   height: 4.25rem;
@@ -496,6 +567,163 @@ img {
   padding: 2rem 0 4rem;
 }
 
+.ny-site--wiki {
+  background:
+    linear-gradient(90deg, rgba(17, 19, 23, 0.04) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(17, 19, 23, 0.04) 1px, transparent 1px),
+    var(--ny-bg);
+  background-size: 38px 38px;
+}
+
+.ny-wiki-shell {
+  display: grid;
+  grid-template-columns: minmax(16rem, 21rem) minmax(0, 1fr);
+  gap: 1.5rem;
+  width: min(92rem, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 4rem;
+}
+
+.ny-wiki-sidebar {
+  position: sticky;
+  top: 5.5rem;
+  align-self: start;
+  display: grid;
+  gap: 0.9rem;
+  max-height: calc(100vh - 6.5rem);
+  overflow-y: auto;
+}
+
+.ny-wiki-sidebar-card,
+.ny-wiki-page {
+  border: 1px solid var(--ny-border);
+  border-radius: var(--ny-radius);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 14px 34px rgba(17, 19, 23, 0.06);
+}
+
+.ny-wiki-sidebar-card {
+  padding: 0.85rem;
+}
+
+.ny-wiki-page {
+  min-width: 0;
+  padding: 1rem;
+}
+
+.ny-wiki-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.git-wiki-tools,
+.git-wiki-search-js,
+.git-wiki-downloads,
+.page-list {
+  margin: 0;
+  padding: 0;
+}
+
+.git-wiki-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: flex-end;
+}
+
+.tools-element a,
+.git-wiki-downloads a,
+.page-list a,
+.git-wiki-search-js a {
+  color: var(--ny-text);
+  text-decoration: none;
+}
+
+.tools-element a {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--ny-border);
+  border-radius: var(--ny-radius);
+  background: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.tools-element a:hover,
+.git-wiki-downloads a:hover,
+.page-list a:hover,
+.git-wiki-search-js a:hover {
+  color: var(--ny-red);
+}
+
+.git-wiki-search-js {
+  position: relative;
+}
+
+.git-wiki-search-js input {
+  width: 100%;
+  min-height: 2.45rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--ny-border);
+  border-radius: var(--ny-radius);
+  color: var(--ny-text);
+  background: #ffffff;
+  font: inherit;
+}
+
+#results-container {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+  padding: 0;
+  list-style: none;
+}
+
+#results-container li,
+.page-list-item,
+.git-wiki-downloads li {
+  list-style: none;
+}
+
+#results-container a,
+.page-list a,
+.git-wiki-downloads a {
+  display: block;
+  padding: 0.42rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+#results-container a:hover,
+.page-list a:hover,
+.git-wiki-downloads a:hover {
+  background: #eef4f2;
+}
+
+.page-list,
+.git-wiki-downloads {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.inline_toc {
+  margin: 0 0 1rem;
+  padding: 1rem;
+  border: 1px solid var(--ny-border);
+  border-radius: var(--ny-radius);
+  background: #f8faf9;
+}
+
+.inline_toc ul,
+.inline_toc ol {
+  margin-bottom: 0;
+}
+
 .ny-sidebar {
   position: sticky;
   top: 5.5rem;
@@ -550,6 +778,14 @@ img {
   border: 1px solid var(--ny-border);
   border-radius: var(--ny-radius);
   box-shadow: 0 14px 36px rgba(17, 19, 23, 0.07);
+}
+
+.ny-site--wiki .ny-doc-content {
+  max-width: 100%;
+  padding: 0.5rem 1.5rem 1.5rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .ny-doc-content h1,
@@ -659,6 +895,10 @@ img {
     min-height: auto;
   }
 
+  .ny-hero-output {
+    display: none;
+  }
+
   .ny-landing-hero h1 {
     font-size: 3rem;
   }
@@ -673,6 +913,16 @@ img {
 
   .ny-doc-shell {
     display: block;
+  }
+
+  .ny-wiki-shell {
+    display: block;
+  }
+
+  .ny-wiki-sidebar {
+    position: static;
+    max-height: none;
+    margin-bottom: 1rem;
   }
 
   .ny-sidebar {

@@ -6,13 +6,31 @@ layout: landing
 ---
 
 <section class="ny-landing-hero">
+  <div class="ny-hero-output" aria-hidden="true">
+    <div class="ny-mini-code">
+      <span class="ny-mini-code-dot"></span>
+      <span class="ny-mini-code-line ny-mini-code-line--long"></span>
+      <span class="ny-mini-code-line"></span>
+      <span class="ny-mini-code-line ny-mini-code-line--mid"></span>
+      <span class="ny-mini-code-line ny-mini-code-line--short"></span>
+    </div>
+    <div class="ny-generated-surface">
+      <span>REST</span>
+      <span>GraphQL</span>
+      <span>Dataloader</span>
+      <span>API Strategy</span>
+      <span>Events</span>
+      <span>Traces</span>
+    </div>
+  </div>
+
   <div class="ny-hero-content">
     <img class="ny-hero-mark" src="assets/images/logo-small_yalc.png" alt="NestJS-YALC logo">
     <p class="ny-eyebrow">NestJS - Yet Another Library Collection</p>
-    <h1>Production-proof NestJS without backend glue.</h1>
+    <h1>Define one resource. Ship the production surface.</h1>
     <p class="ny-lead">
-      NestJS-YALC gives backend teams a clean foundation for generated APIs,
-      explicit module boundaries, and observable runtime behavior.
+      NestJS-YALC turns NestJS metadata into generated REST and GraphQL APIs,
+      API Strategy boundaries, and EventManager-powered observability.
     </p>
     <div class="ny-actions">
       <a class="ny-button" href="{{ '/getting-started' | relative_url }}">Start in minutes</a>
