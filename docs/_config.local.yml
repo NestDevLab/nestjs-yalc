@@ -1,0 +1,12 @@
+# Local-only Jekyll preview overrides.
+# GitHub Pages accepts `markdown: GFM` from `_config.yml`; plain local Jekyll
+# expects a registered processor such as `kramdown`.
+markdown: kramdown
+kramdown:
+  input: GFM
+exclude:
+  - .bundle
+  - .jekyll-preview.log
+  - .jekyll-preview.pid
+  - Gemfile
+  - Gemfile.lock

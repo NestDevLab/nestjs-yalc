@@ -1,0 +1,718 @@
+:root {
+  --ny-bg: #f5f7f6;
+  --ny-surface: #ffffff;
+  --ny-surface-strong: #111317;
+  --ny-text: #151719;
+  --ny-muted: #5b6269;
+  --ny-border: #d9dfdd;
+  --ny-red: #e0234e;
+  --ny-teal: #0f8b8d;
+  --ny-green: #177245;
+  --ny-yellow: #f1b42f;
+  --ny-code: #191c1f;
+  --ny-shadow: 0 18px 45px rgba(17, 19, 23, 0.1);
+  --ny-radius: 8px;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--ny-bg);
+  color: var(--ny-text);
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+a {
+  color: var(--ny-teal);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  color: var(--ny-red);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.ny-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.25rem;
+  padding: 0.75rem clamp(1rem, 4rem, 4rem);
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid var(--ny-border);
+  backdrop-filter: blur(16px);
+}
+
+.ny-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--ny-text);
+  font-weight: 800;
+  letter-spacing: 0;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ny-brand img {
+  border-radius: var(--ny-radius);
+}
+
+.ny-topnav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.ny-topnav a,
+.ny-button,
+.ny-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--ny-radius);
+  font-weight: 700;
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.ny-topnav a {
+  color: var(--ny-text);
+}
+
+.ny-topnav a:hover {
+  background: #eef4f2;
+  color: var(--ny-red);
+}
+
+.ny-main--landing {
+  background:
+    linear-gradient(90deg, rgba(17, 19, 23, 0.05) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(17, 19, 23, 0.05) 1px, transparent 1px),
+    var(--ny-bg);
+  background-size: 38px 38px;
+}
+
+.ny-landing-hero {
+  position: relative;
+  display: grid;
+  align-content: center;
+  min-height: calc(100vh - 4.25rem);
+  padding: 5.5rem clamp(1.25rem, 4rem, 4rem) 4rem;
+  overflow: hidden;
+  color: var(--ny-surface);
+  background: #151719;
+}
+
+.ny-landing-hero::before {
+  content: "ModelObject  ModelField  CrudGenResourceFactory  REST  GraphQL  YalcEventService  ApiStrategy";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 0 2rem 0;
+  color: rgba(255, 255, 255, 0.08);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1.05;
+  white-space: nowrap;
+  transform: rotate(-8deg) translateX(-4rem);
+  pointer-events: none;
+}
+
+.ny-landing-hero > * {
+  position: relative;
+  z-index: 1;
+  max-width: 58rem;
+}
+
+.ny-hero-mark {
+  width: 4.25rem;
+  height: 4.25rem;
+  margin-bottom: 1.5rem;
+  border-radius: var(--ny-radius);
+  box-shadow: var(--ny-shadow);
+}
+
+.ny-eyebrow {
+  margin: 0 0 0.9rem;
+  color: #b8f2e6;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ny-landing-hero h1 {
+  max-width: 52rem;
+  margin: 0;
+  font-size: 4rem;
+  line-height: 0.98;
+  letter-spacing: 0;
+}
+
+.ny-landing-hero .ny-lead {
+  max-width: 44rem;
+  margin: 1.45rem 0 0;
+  color: #edf4f2;
+  font-size: 1.25rem;
+}
+
+.ny-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 2rem;
+}
+
+.ny-button {
+  background: var(--ny-red);
+  color: #ffffff;
+  border: 1px solid var(--ny-red);
+}
+
+.ny-button:hover {
+  background: #b91f43;
+  border-color: #b91f43;
+  color: #ffffff;
+}
+
+.ny-link-button {
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ny-link-button:hover {
+  border-color: #ffffff;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ny-section .ny-link-button {
+  color: var(--ny-text);
+  border-color: var(--ny-border);
+  background: var(--ny-surface);
+}
+
+.ny-section .ny-link-button:hover {
+  color: var(--ny-red);
+  border-color: var(--ny-red);
+  background: #fff8fa;
+}
+
+.ny-landing-hero .ny-link-button {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ny-landing-hero .ny-link-button:hover {
+  color: #ffffff;
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ny-hero-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0;
+  margin: 2rem 0 0;
+  list-style: none;
+}
+
+.ny-hero-points li {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: var(--ny-radius);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f7fbfa;
+  font-weight: 700;
+}
+
+.ny-section {
+  padding: 4.5rem clamp(1.25rem, 4rem, 4rem);
+}
+
+.ny-section--surface {
+  background: var(--ny-surface);
+}
+
+.ny-section-header {
+  max-width: 48rem;
+  margin-bottom: 2rem;
+}
+
+.ny-section-header h2 {
+  margin: 0;
+  font-size: 2.25rem;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.ny-section-header p {
+  margin: 0.85rem 0 0;
+  color: var(--ny-muted);
+  font-size: 1.1rem;
+}
+
+.ny-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.ny-grid--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ny-pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.ny-card,
+.ny-pillar,
+.ny-flow-step,
+.ny-doc-index a,
+.ny-sidebar-group {
+  border: 1px solid var(--ny-border);
+  border-radius: var(--ny-radius);
+  background: var(--ny-surface);
+}
+
+.ny-card {
+  padding: 1.25rem;
+  box-shadow: 0 10px 26px rgba(17, 19, 23, 0.06);
+}
+
+.ny-pillar {
+  display: flex;
+  flex-direction: column;
+  min-height: 19rem;
+  padding: 1.35rem;
+  box-shadow: 0 10px 26px rgba(17, 19, 23, 0.06);
+}
+
+.ny-pillar-number {
+  margin: 0 0 1.2rem;
+  color: var(--ny-muted);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.ny-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.ny-pillar h3 {
+  margin: 0 0 0.65rem;
+  font-size: 1.35rem;
+  line-height: 1.15;
+}
+
+.ny-card p {
+  margin: 0;
+  color: var(--ny-muted);
+}
+
+.ny-pillar p:not(.ny-pillar-number) {
+  margin: 0;
+  color: var(--ny-muted);
+}
+
+.ny-pillar a {
+  margin-top: auto;
+  padding-top: 1.25rem;
+  font-weight: 800;
+}
+
+.ny-card--red {
+  border-top: 4px solid var(--ny-red);
+}
+
+.ny-pillar--red {
+  border-top: 5px solid var(--ny-red);
+}
+
+.ny-card--teal {
+  border-top: 4px solid var(--ny-teal);
+}
+
+.ny-pillar--teal {
+  border-top: 5px solid var(--ny-teal);
+}
+
+.ny-card--green {
+  border-top: 4px solid var(--ny-green);
+}
+
+.ny-pillar--green {
+  border-top: 5px solid var(--ny-green);
+}
+
+.ny-logo-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 16rem));
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.ny-logo-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 6.5rem;
+  padding: 1.1rem;
+  border: 1px solid var(--ny-border);
+  border-radius: var(--ny-radius);
+  background: #ffffff;
+  color: #151719;
+  font-size: 1.8rem;
+  font-weight: 850;
+  letter-spacing: 0;
+  box-shadow: 0 10px 26px rgba(17, 19, 23, 0.06);
+}
+
+.ny-logo-mark:nth-child(2) {
+  color: var(--ny-teal);
+}
+
+.ny-flow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+  align-items: stretch;
+}
+
+.ny-flow-step {
+  min-height: 9rem;
+  padding: 1rem;
+  background:
+    linear-gradient(180deg, rgba(15, 139, 141, 0.08), transparent 60%),
+    var(--ny-surface);
+}
+
+.ny-flow-step span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: 1rem;
+  border-radius: var(--ny-radius);
+  background: var(--ny-surface-strong);
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.ny-flow-step h3 {
+  margin: 0 0 0.45rem;
+  font-size: 1rem;
+}
+
+.ny-flow-step p {
+  margin: 0;
+  color: var(--ny-muted);
+  font-size: 0.95rem;
+}
+
+.ny-code-panel {
+  margin: 0;
+  padding: 1.2rem;
+  overflow-x: auto;
+  color: #f3f7f6;
+  background: var(--ny-code);
+  border-radius: var(--ny-radius);
+  border-left: 5px solid var(--ny-yellow);
+  box-shadow: var(--ny-shadow);
+}
+
+.ny-code-panel code {
+  color: inherit;
+  background: transparent;
+  padding: 0;
+}
+
+.ny-doc-shell {
+  display: grid;
+  grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+  gap: 2rem;
+  width: min(86rem, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 4rem;
+}
+
+.ny-sidebar {
+  position: sticky;
+  top: 5.5rem;
+  align-self: start;
+  max-height: calc(100vh - 6.5rem);
+  overflow-y: auto;
+}
+
+.ny-sidebar-nav {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.ny-sidebar-group {
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.ny-sidebar-title {
+  margin: 0 0 0.45rem;
+  color: var(--ny-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ny-sidebar-group a {
+  display: block;
+  padding: 0.45rem 0.5rem;
+  border-radius: 6px;
+  color: var(--ny-text);
+  font-size: 0.92rem;
+  font-weight: 650;
+  line-height: 1.25;
+  text-decoration: none;
+}
+
+.ny-sidebar-group a:hover {
+  color: var(--ny-red);
+  background: #eef4f2;
+}
+
+.ny-main--doc {
+  min-width: 0;
+}
+
+.ny-doc-content {
+  max-width: 58rem;
+  padding: 2.25rem;
+  background: var(--ny-surface);
+  border: 1px solid var(--ny-border);
+  border-radius: var(--ny-radius);
+  box-shadow: 0 14px 36px rgba(17, 19, 23, 0.07);
+}
+
+.ny-doc-content h1,
+.ny-doc-content h2,
+.ny-doc-content h3 {
+  line-height: 1.18;
+  letter-spacing: 0;
+}
+
+.ny-doc-content h1 {
+  margin-top: 0;
+  font-size: 2.45rem;
+}
+
+.ny-doc-content h2 {
+  margin-top: 2.4rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--ny-border);
+  font-size: 1.65rem;
+}
+
+.ny-doc-content h3 {
+  margin-top: 1.75rem;
+}
+
+.ny-doc-content p,
+.ny-doc-content li {
+  color: #262a2d;
+}
+
+.ny-doc-content code {
+  padding: 0.12rem 0.3rem;
+  border-radius: 5px;
+  background: #eef4f2;
+  color: #9b1735;
+  font-size: 0.92em;
+}
+
+.ny-doc-content pre {
+  padding: 1rem;
+  overflow-x: auto;
+  background: var(--ny-code);
+  border-radius: var(--ny-radius);
+}
+
+.ny-doc-content pre code {
+  padding: 0;
+  color: #f3f7f6;
+  background: transparent;
+}
+
+.ny-doc-content table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: var(--ny-radius);
+}
+
+.ny-doc-content th,
+.ny-doc-content td {
+  padding: 0.65rem;
+  border: 1px solid var(--ny-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.ny-doc-content th {
+  background: #eef4f2;
+}
+
+.ny-doc-index {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 1.25rem 0 2rem;
+}
+
+.ny-doc-index a {
+  display: block;
+  padding: 1rem;
+  color: var(--ny-text);
+  text-decoration: none;
+}
+
+.ny-doc-index strong {
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.ny-doc-index span {
+  display: block;
+  color: var(--ny-muted);
+}
+
+.ny-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1.25rem clamp(1rem, 4rem, 4rem);
+  color: #dbe8e5;
+  background: #151719;
+}
+
+@media (max-width: 980px) {
+  .ny-landing-hero {
+    min-height: auto;
+  }
+
+  .ny-landing-hero h1 {
+    font-size: 3rem;
+  }
+
+  .ny-grid,
+  .ny-grid--two,
+  .ny-pillar-grid,
+  .ny-flow {
+    grid-template-columns: 1fr;
+  }
+
+  .ny-doc-shell {
+    display: block;
+  }
+
+  .ny-sidebar {
+    position: static;
+    max-height: none;
+    margin-bottom: 1rem;
+  }
+
+  .ny-sidebar-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .ny-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ny-topnav {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .ny-topnav a {
+    flex: 1 1 auto;
+  }
+
+  .ny-landing-hero {
+    padding-top: 3rem;
+  }
+
+  .ny-landing-hero::before {
+    font-size: 2.4rem;
+  }
+
+  .ny-landing-hero h1 {
+    font-size: 2.35rem;
+  }
+
+  .ny-landing-hero .ny-lead {
+    font-size: 1.05rem;
+  }
+
+  .ny-section {
+    padding: 3rem 1rem;
+  }
+
+  .ny-doc-content {
+    padding: 1.25rem;
+  }
+
+  .ny-doc-content h1 {
+    font-size: 2rem;
+  }
+
+  .ny-sidebar-nav,
+  .ny-doc-index,
+  .ny-logo-strip {
+    grid-template-columns: 1fr;
+  }
+}

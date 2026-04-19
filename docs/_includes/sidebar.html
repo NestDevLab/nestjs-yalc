@@ -1,7 +1,60 @@
-Menu (<a href="{{ site.github.repository_url }}/edit/{{site.git_branch | escape}}/_includes/sidebar.html">Edit</a>):
+<nav class="ny-sidebar-nav">
+  <section class="ny-sidebar-group">
+    <p class="ny-sidebar-title">Start</p>
+    <a href="{{ '/' | relative_url }}">Landing</a>
+    <a href="{{ '/getting-started' | relative_url }}">Getting started</a>
+    <a href="{{ '/documentation' | relative_url }}">Documentation index</a>
+  </section>
 
-<ul>
-  <li>
-    <a href="{{ 'api-creation' | relative_url }}">NestJS-Yalc/Crud-Gen: How To Create API</a>
-  </li>
-</ul>
+  <section class="ny-sidebar-group">
+    <p class="ny-sidebar-title">Architecture</p>
+    <a href="{{ '/backend-blueprint' | relative_url }}">Backend blueprint</a>
+    <a href="{{ '/how-to-integrate-nestjs-yalc' | relative_url }}"
+      >Modular platform guide</a
+    >
+    <a href="{{ '/crudgen-first-composition' | relative_url }}"
+      >CrudGen-first composition</a
+    >
+    <a href="{{ '/omnikernel-crudgen-backend' | relative_url }}"
+      >OmniKernel backend</a
+    >
+  </section>
+
+  <section class="ny-sidebar-group">
+    <p class="ny-sidebar-title">CrudGen</p>
+    <a href="{{ '/api-creation' | relative_url }}">GraphQL API creation</a>
+    <a href="{{ '/crud-gen-modeling' | relative_url }}">Modeling metadata</a>
+    <a href="{{ '/crud-gen-factory' | relative_url }}">Factory reference</a>
+    <a href="{{ '/crud-gen-rest' | relative_url }}">REST usage</a>
+    <a href="{{ '/odata-like-query-facade' | relative_url }}"
+      >REST query facade</a
+    >
+  </section>
+
+  <section class="ny-sidebar-group">
+    <p class="ny-sidebar-title">Runtime</p>
+    <a href="{{ '/api-strategy' | relative_url }}">API Strategy</a>
+    <a href="{{ '/api-strategy-event-manager-patterns' | relative_url }}"
+      >Strategy + EventManager</a
+    >
+    <a href="{{ '/event-manager-module' | relative_url }}"
+      >EventManager module</a
+    >
+    <a href="{{ '/event-manager-service' | relative_url }}">YalcEventService</a>
+    <a href="{{ '/event-manager-event' | relative_url }}">Event helper</a>
+    <a href="{{ '/error-handling' | relative_url }}">Error handling</a>
+    <a href="{{ '/errors' | relative_url }}">DefaultError</a>
+    <a href="{{ '/logger' | relative_url }}">Logger</a>
+    <a href="{{ '/observability' | relative_url }}">Observability</a>
+  </section>
+
+  <section class="ny-sidebar-group">
+    <p class="ny-sidebar-title">Reference</p>
+    <a href="{{ '/api-naming-conventions' | relative_url }}">API naming</a>
+    <a href="{{ '/npm-publication' | relative_url }}">NPM publication</a>
+    <a href="{{ '/public-example-mirrors' | relative_url }}">Public examples</a>
+    <a href="{{ '/framework-hardening-followups' | relative_url }}"
+      >Hardening follow-ups</a
+    >
+  </section>
+</nav>

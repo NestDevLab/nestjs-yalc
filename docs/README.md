@@ -1,89 +1,186 @@
-# Nestjs-yalc library
+---
+title: NestJS-YALC
+description: A CrudGen-first toolkit for generating NestJS REST and GraphQL backends without giving up explicit architecture.
+permalink: /
+layout: landing
+---
 
-Nest-yalc stands for Nestjs - Yet Another Library Collection
+<section class="ny-landing-hero">
+  <img class="ny-hero-mark" src="assets/images/logo-small_yalc.png" alt="NestJS-YALC logo">
+  <p class="ny-eyebrow">NestJS - Yet Another Library Collection</p>
+  <h1>Make NestJS production-proof without rewriting the same backend glue.</h1>
+  <p class="ny-lead">
+    NestJS-YALC is built around three production pillars: CRUD Generation,
+    API Strategy, and EventManager. Generate the standard surface, isolate
+    module communication, and make runtime behavior observable from day one.
+  </p>
+  <div class="ny-actions">
+    <a class="ny-button" href="{{ '/getting-started' | relative_url }}">Start in minutes</a>
+    <a class="ny-link-button" href="{{ '/documentation' | relative_url }}">Explore the docs</a>
+  </div>
+  <ul class="ny-hero-points">
+    <li>CRUD Generation</li>
+    <li>API Strategy</li>
+    <li>EventManager</li>
+    <li>Observability</li>
+  </ul>
+</section>
 
-## Features
+<section class="ny-section ny-section--surface">
+  <div class="ny-section-header">
+    <h2>The three pillars.</h2>
+    <p>
+      The framework focuses on the parts that decide whether a NestJS backend
+      stays maintainable in production: generated resource contracts, explicit
+      service boundaries, and event-aware operations.
+    </p>
+  </div>
 
-- Support of the [CrudGen](https://www.crud-gen.com/) filters for the GraphQL endpoints
-- Automatic runtime generation of CRUD endpoints using the NestJS dependency factory method
-- Parametrized the generation of: Resolver, Service, Dataloader, TypeORM repository based on ORM entities and DTOs.
-- Implemented JSON support for TypeORM entities by using decorators
-- Possibility to handle MySQL views (read) and their relative table (write) via the same repository
-- Custom decorators to extend the NestJS GraphQL library with features such as: field middleware, graphql-typeorm field mapping, nested field resolver with dataloader or join etc.
-- Helper methods for jest to be integrated in a monorepo solution
-- Utils classes and methods
+  <div class="ny-pillar-grid" aria-label="NestJS-YALC production pillars">
+    <article class="ny-pillar ny-pillar--red">
+      <p class="ny-pillar-number">01</p>
+      <h3>CRUD Generation</h3>
+      <p>
+        Turn entity and DTO metadata into generated REST controllers, GraphQL
+        resolvers, services, repositories, and dataloaders that share one
+        contract.
+      </p>
+      <a href="{{ '/crud-gen-factory' | relative_url }}">Read CrudGen docs</a>
+    </article>
+    <article class="ny-pillar ny-pillar--teal">
+      <p class="ny-pillar-number">02</p>
+      <h3>API Strategy</h3>
+      <p>
+        Put module-to-module and service-to-service communication behind stable
+        strategy tokens, so local calls, HTTP calls, and future transports can
+        change without rewriting the caller.
+      </p>
+      <a href="{{ '/api-strategy' | relative_url }}">Read API Strategy docs</a>
+    </article>
+    <article class="ny-pillar ny-pillar--green">
+      <p class="ny-pillar-number">03</p>
+      <h3>EventManager</h3>
+      <p>
+        Standardize events, structured logs, HTTP-aware errors, and observability
+        hooks with `YalcEventService` and OpenTelemetry integration patterns.
+      </p>
+      <a href="{{ '/event-manager-service' | relative_url }}">Read EventManager docs</a>
+    </article>
+  </div>
+</section>
 
-## Documentation
+<section class="ny-section">
+  <div class="ny-section-header">
+    <h2>Production-proof by design.</h2>
+    <p>
+      NestJS-YALC is not only a utility collection. It is a backend operating
+      model for teams that want generated APIs, clear boundaries, consistent
+      errors, event trails, and observability without giving up NestJS.
+    </p>
+  </div>
 
-- [How to create graphql API with nestjs-yalc/crud-gen](./api-creation.md)
-- [CRUD-Gen modeling (ModelObject/ModelField)](./crud-gen-modeling.md)
-- [CRUD-Gen dependency factory reference](./crud-gen-factory.md)
-- [CRUD-Gen REST usage](./crud-gen-rest.md)
-- [CrudGen-first composition guide](./crudgen-first-composition.md)
-- [OmniKernel as a CrudGen backend](./omnikernel-crudgen-backend.md)
-- [Task-system app composition guide](./task-system-app-composition.md)
-- [API Strategy + EventManager integration patterns](./api-strategy-event-manager-patterns.md)
-- [Observability and OpenTelemetry integration](./observability.md)
+  <div class="ny-grid">
+    <article class="ny-card ny-card--red">
+      <h3>Generated where possible</h3>
+      <p>
+        Standard CRUD stays generated. Domain behavior moves into service,
+        repository, and metadata extension points instead of copy-pasted
+        controllers and resolvers.
+      </p>
+    </article>
+    <article class="ny-card ny-card--teal">
+      <h3>Explicit across boundaries</h3>
+      <p>
+        API Strategy keeps cross-module calls out of core domain services and
+        lets the same code run in a modular monolith or remote-service topology.
+      </p>
+    </article>
+    <article class="ny-card ny-card--green">
+      <h3>Observable at runtime</h3>
+      <p>
+        EventManager and Observability connect logs, errors, events, and traces
+        into one operational story instead of leaving each module to improvise.
+      </p>
+    </article>
+  </div>
+</section>
 
-- [Examples overview](../examples/README.md) — the architectural map for the skeleton, OmniKernel, and task examples.
-- [Skeleton App](../examples/skeleton/app/README.md) — the minimal all-in-one `CrudGenResourceFactory` path with a small module API-client example.
-- [OmniKernel App](../examples/omnikernel/app/README.md) — generated REST and GraphQL over a backend-only OmniKernel substrate.
-- [Task App](../examples/task/app/README.md) — the advanced OmniKernel-backed composition with module API-client workflows and CI/e2e validation.
+<section class="ny-section ny-section--surface">
+  <div class="ny-section-header">
+    <h2>Used in real production contexts.</h2>
+    <p>
+      The framework patterns have been used in backend work for teams and
+      products that needed stronger NestJS foundations.
+    </p>
+  </div>
 
-- [How to use the Api-Strategy library](./api-strategy.md)
+  <div class="ny-logo-strip" aria-label="Organizations using NestJS-YALC patterns">
+    <div class="ny-logo-mark">Bitvavo</div>
+    <div class="ny-logo-mark">Embed</div>
+  </div>
+</section>
 
-- [How to use the DefaultError library](./errors.md)
+<section class="ny-section">
+  <div class="ny-section-header">
+    <h2>A tiny starting point.</h2>
+    <p>
+      The skeleton app is the smallest complete example: one resource definition
+      exposes generated REST and GraphQL over an in-memory SQLite app.
+    </p>
+  </div>
 
-- [How to orchestrate errors, logging and HTTP status codes with EventManager and DefaultError](./error-handling.md)
+  <pre class="ny-code-panel"><code class="language-ts">export const usersResource = CrudGenResourceFactory&lt;SkeletonUser&gt;({
+  entityModel: SkeletonUser,
+  backend: {
+    service: { dbConnection: 'default', entityModel: SkeletonUser },
+    dataloader: { databaseKey: 'guid' },
+  },
+  graphql: {
+    resolver: {
+      dto: SkeletonUserType,
+      input: {
+        create: SkeletonUserCreateInput,
+        update: SkeletonUserUpdateInput,
+        conditions: SkeletonUserCondition,
+      },
+      prefix: 'SkeletonModule_',
+    },
+  },
+  rest: { dto: SkeletonUserType, path: 'users', idField: 'guid' },
+});</code></pre>
 
-- [How to use the EventManager module library](./event-manager-module.md), [Event](./event-manager-event.md), [Service](./event-manager-service.md)
+  <div class="ny-actions">
+    <a class="ny-button" href="{{ '/getting-started' | relative_url }}">Run the skeleton app</a>
+    <a class="ny-link-button" href="{{ '/crud-gen-factory' | relative_url }}">Read the factory reference</a>
+  </div>
+</section>
 
-- [How to use the Logger library](./logger.md)
-- [How to build a modular platform with nestjs-yalc](./how-to-integrate-nestjs-yalc.md)
-- [Backend blueprint: the opinionated way to use nestjs-yalc for new backends](./backend-blueprint.md)
-- [Framework hardening follow-ups after PR #121](./framework-hardening-followups.md)
-- [Public npm publication](./npm-publication.md)
-- [Public example mirrors](./public-example-mirrors.md)
+<section class="ny-section ny-section--surface">
+  <div class="ny-section-header">
+    <h2>Full reference, clear path.</h2>
+    <p>
+      The landing page is custom, but the documentation area still uses the
+      Git-Wiki theme and keeps the wiki navigation, search, page list, and
+      tooling provided by the original site.
+    </p>
+  </div>
 
-## NPM package.json and Workspace
-
-To handle scripts and dependencies between all the libraries of this collection we use a root `package.json`.
-At the moment it handles both the `devDependencies` needed to run the tests and the build process, as well as the
-dependencies of the libraries itself.
-
-The [npm workspace](https://docs.npmjs.com/cli/v7/using-npm/workspaces) approach must be preferred by the way. It allows us to
-specify the dependencies and some scripts directly inside the package itself but still having the possibility of managing them
-from the root `package.json`. (see aws-sdk library for example)
-
-## Unit tests
-
-The main `package.json` contain some scripts to run the unit test for all the libraries of this collection.
-It uses the jest `projects` feature in background configured by `jest.config.ts` by using a customized mechanism
-implemented in our `@nest-yalc/jest` library.
-
-**ESM mocking note:** when Jest errors with messages like “Cannot assign to read only property …” while mocking ESM modules (common with GraphQL decorators or helpers), load the module via `importMockedEsm` from `@nestjs-yalc/jest/esm.helper` before importing the SUT. `importMockedEsm` wraps functions with `jest.fn` and registers them using `jest.unstable_mockModule`, which avoids read-only export issues. Use `mockNestJSGraphql(import.meta)` for `@nestjs/graphql` convenience.
-
-To run the tests with the coverage use `npm run test:cov` and then you can check the status of the tests by running `npm run test:cov:serve`
-Then you should be able to browse the coverage reports via: [http://127.0.0.1:8080/lcov-report/](http://127.0.0.1:8080/lcov-report/)
-
-## Pipeline
-
-Currently our github pipeline checks that the linter and the tests are passing with 100% of coverage threshold
-
-## Directories and file names
-
-the nestjs-yalc directory structure is flat to let it be integrated in other projects easily
-
-- tsconfig.\*.json
-  - tsconfig.json -> used by the compiler and the IDE
-  - tsconfig.test.json -> used by jest
-  - tsconfig.dev.json -> used by other dev tools such as eslint
-- test.js
-- examples/ ->
-- docs/ -> used for the the github pages markdown
-- [other_libraries]/
-
-### Repo-specific utilities
-
-- `var/asl-test.cjs`: manual AsyncLocalStorage sanity check (Fastify + ALS). Not used by builds/tests; run manually if you need to confirm ALS behaviour across injected requests.
-- `build-dist.mjs`: local pack script that writes `dist/package.json` for each package with exports pointing at compiled output. Source `package.json` files stay untouched; the dist `package.json` is generated after `npm run build`. This is a repo-specific helper (not standard npm) to keep local file-based consumption aligned with the compiled layout.
+  <div class="ny-grid ny-grid--two">
+    <article class="ny-card ny-card--red">
+      <h3>New to the project?</h3>
+      <p>
+        Start with the short setup path, then open the skeleton app and copy the
+        resource factory pattern into your own module.
+      </p>
+      <p><a href="{{ '/getting-started' | relative_url }}">Go to getting started</a></p>
+    </article>
+    <article class="ny-card ny-card--teal">
+      <h3>Need the full wiki?</h3>
+      <p>
+        The documentation index keeps the guide list, repository notes, test
+        commands, planning docs, and every existing reference page together.
+      </p>
+      <p><a href="{{ '/documentation' | relative_url }}">Open the documentation index</a></p>
+    </article>
+  </div>
+</section>
