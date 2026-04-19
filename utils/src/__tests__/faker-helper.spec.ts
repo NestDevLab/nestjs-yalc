@@ -8,7 +8,10 @@ import {
   test,
 } from '@jest/globals';
 
-import { FakerHelper } from '../faker-helper.js';
+import {
+  DEF_FAKER_MAX_TIME,
+  FakerHelper,
+} from '../faker-helper.js';
 import { faker } from '@faker-js/faker';
 
 enum testEnum {
@@ -19,8 +22,8 @@ describe('faker helper test', () => {
   // Don't do beforeEach, since we need a single instance
   const fakerHelper = new FakerHelper();
   it('should generate a person object, with first-, lastName, gender and email', () => {
-    jest.spyOn(faker.name, 'firstName').mockReturnValueOnce('Elon');
-    jest.spyOn(faker.name, 'lastName').mockReturnValueOnce('Musk');
+    jest.spyOn(faker.person, 'firstName').mockReturnValueOnce('Elon');
+    jest.spyOn(faker.person, 'lastName').mockReturnValueOnce('Musk');
     jest
       .spyOn(faker.internet, 'email')
       .mockReturnValueOnce('Elon_Musk@gmail.test');
@@ -33,8 +36,8 @@ describe('faker helper test', () => {
   });
 
   it('should not reuse already generated names', () => {
-    jest.spyOn(faker.name, 'firstName').mockReturnValueOnce('Elon');
-    jest.spyOn(faker.name, 'lastName').mockReturnValueOnce('Musk');
+    jest.spyOn(faker.person, 'firstName').mockReturnValueOnce('Elon');
+    jest.spyOn(faker.person, 'lastName').mockReturnValueOnce('Musk');
     jest
       .spyOn(faker.internet, 'email')
       .mockReturnValueOnce('Elon_Musk@gmail.test');
@@ -78,6 +81,27 @@ describe('faker helper test', () => {
 
     expect(email1).not.toEqual(email2);
     expect(email2).not.toEqual(email3);
+  });
+
+  it('should fall back when unique email generation exceeds the time limit', () => {
+    const helper = new FakerHelper();
+    jest
+      .spyOn(faker.internet, 'email')
+      .mockReturnValueOnce('same@gmail.test');
+    helper.generateNewEmail('Elon', 'Musk', 'gmail.test');
+
+    jest
+      .spyOn(Date, 'now')
+      .mockReturnValueOnce(0)
+      .mockReturnValueOnce(DEF_FAKER_MAX_TIME + 1);
+    jest
+      .spyOn(faker.internet, 'email')
+      .mockReturnValueOnce('same@gmail.test')
+      .mockReturnValueOnce('fallback@gmail.test');
+
+    expect(helper.generateNewEmail('Elon', 'Musk', 'gmail.test')).toBe(
+      'fallback@gmail.test',
+    );
   });
 
   it('should be able to generate a valid birthDate between age 18 and 100 (YYYY-MM-DD) (min age)', () => {
@@ -125,33 +149,34 @@ describe('faker helper test', () => {
 
   it('should generate valid lock dates in the past', () => {
     jest.clearAllMocks();
-    jest.spyOn(faker.datatype, 'number').mockReturnValue(0);
+    jest.spyOn(faker.number, 'int').mockReturnValue(0 as never);
     expect(fakerHelper.randomLockDate().valueOf()).toBeLessThan(Date.now());
   });
 
   it('should generate valid lock dates in the future', () => {
     jest.clearAllMocks();
-    jest.spyOn(faker.datatype, 'number').mockReturnValueOnce(1);
-    // internally used by date.future to add to Date.now()
-    jest.spyOn(faker.datatype, 'number').mockReturnValueOnce(1000);
+    jest.spyOn(faker.number, 'int').mockReturnValueOnce(1 as never);
+    jest
+      .spyOn(faker.date, 'future')
+      .mockReturnValueOnce(new Date(Date.now() + 1000));
     expect(fakerHelper.randomLockDate().valueOf()).toBeGreaterThan(Date.now());
   });
 
   it('should return undefined when no lock is present', () => {
     jest.clearAllMocks();
-    jest.spyOn(faker.datatype, 'number').mockReturnValue(2);
+    jest.spyOn(faker.number, 'int').mockReturnValue(2 as never);
     expect(fakerHelper.randomLockDate()).toEqual(undefined);
   });
 
   it('should return the first element of the enum', () => {
     jest.clearAllMocks();
-    jest.spyOn(faker.datatype, 'number').mockReturnValue(0);
+    jest.spyOn(faker.number, 'int').mockReturnValue(0 as never);
     expect(fakerHelper.randomFromEnum(testEnum)).toEqual(testEnum.KEY);
   });
 
   it('should return a decimal', () => {
     jest.clearAllMocks();
-    jest.spyOn(faker.datatype, 'float').mockReturnValue(3.14);
+    jest.spyOn(faker.number, 'float').mockReturnValue(3.14 as never);
     expect(fakerHelper.randomDecimal(0, 42, 2)).toEqual('3.14');
   });
 });

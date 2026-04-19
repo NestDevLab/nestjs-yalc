@@ -6,8 +6,10 @@ export interface IObjectWithData<TData> {
  * @template TData - type of data to be sent to the server (body data in case of http)
  * @template TParams - type of parameters to be sent to the server (query params in case of http)
  */
-export interface ICallOptions<TData, TParams extends Record<string, any>>
-  extends IObjectWithData<TData> {
+export interface ICallOptions<
+  TData,
+  TParams extends Record<string, any>,
+> extends IObjectWithData<TData> {
   data?: TData;
   parameters?: TParams;
 }

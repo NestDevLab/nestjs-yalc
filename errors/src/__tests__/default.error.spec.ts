@@ -98,6 +98,15 @@ describe('DefaultErrorMixin', () => {
     const error = new (DefaultErrorMixin())({ eventEmitter }, 'message', 500);
     expect(eventHandler).toHaveBeenCalled();
   });
+
+  it('should not emit an event when eventEmitter option is false', () => {
+    const error = new (DefaultErrorMixin())(
+      { eventEmitter: false },
+      'message',
+      500,
+    );
+    expect(error.eventEmitter).toBeUndefined();
+  });
 });
 
 describe('newDefaultError', () => {
@@ -164,6 +173,19 @@ describe('DefaultError', () => {
     expect(error.getEventPayload()).toMatchObject({
       data: { test: 'test error info' },
       message: 'Default Error',
+    });
+  });
+
+  it('should merge error info without replacing data when no data is provided', () => {
+    const error = new DefaultError('my internal message', {
+      data: { existing: true },
+    });
+    error.mergeErrorInfo({
+      response: { message: 'updated response' },
+    });
+    expect(error.getEventPayload()).toMatchObject({
+      data: { existing: true },
+      message: 'updated response',
     });
   });
 

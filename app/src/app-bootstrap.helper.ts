@@ -41,8 +41,7 @@ export interface ICreateOptions {
 }
 
 export interface INestCreateOptions
-  extends ICreateOptions,
-    NestApplicationOptions {}
+  extends ICreateOptions, NestApplicationOptions {}
 
 export class AppBootstrap<
   TGlobalOptions extends IGlobalOptions = IGlobalOptions,

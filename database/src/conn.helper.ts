@@ -15,10 +15,15 @@ export function getDBNameByConnection(connName: string) {
   return connName.substring(0, connName.indexOf(CONN_SUFFIX));
 }
 
+const readString = (value: unknown) =>
+  typeof value === 'string' ? value : undefined;
+
 export const dbConnectionMap = (c: DataSource) => ({
   conn: c,
   dbName:
-    c.options.database?.toString() ??
-    c.driver.schema ??
-    getDBNameByConnection(c.name),
+    readString(c.options.database) ??
+    readString(c.driver.schema) ??
+    getDBNameByConnection(
+      readString(c.name) ?? readString(c.options.name) ?? '',
+    ),
 });

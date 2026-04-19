@@ -400,7 +400,7 @@ export function CGExtendedRepositoryFactory<Entity extends ObjectLiteral>(
   if ((cached = repositoryMap.get(entity))) return cached;
 
   const dynamicClass = (name: string) =>
-    ({ [name]: class extends GenericTypeORMRepository<Entity> {} }[name]);
+    ({ [name]: class extends GenericTypeORMRepository<Entity> {} })[name];
 
   const repo: ClassType<GenericTypeORMRepository<Entity>> = dynamicClass(
     `${entity.name}Repository`,

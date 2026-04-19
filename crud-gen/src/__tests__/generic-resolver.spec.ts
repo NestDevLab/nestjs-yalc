@@ -489,7 +489,7 @@ describe.skip('Generic Resolver', () => {
     );
     expect(resolver).toBeDefined();
     const queries = getQueriesFromResolver(resolver);
-    expect(() => queries.getSingleRes()).rejects.toThrowError();
+    expect(() => queries.getSingleRes()).rejects.toThrow();
   });
 
   it('Should create a resolver with a proper execution of the queries (without prefix)', async () => {
@@ -610,7 +610,7 @@ describe.skip('Generic Resolver', () => {
       spiedGetPropertyDescriptor.mockReturnValueOnce(undefined);
       const testFunction = () =>
         generateResolver(customMetadatList, baseResolverOption);
-      expect(testFunction).toThrowError();
+      expect(testFunction).toThrow();
 
       // Need to restore the original not-mocked implementation
       spiedGetPropertyDescriptor.mockRestore();
@@ -895,11 +895,11 @@ describe.skip('Generic Resolver', () => {
         defineDeleteMutation('', BaseEntity, ResolverClass, {} as any, {}),
     };
 
-    expect(testFunction.getSingle).toThrowError();
-    expect(testFunction.getGrid).toThrowError();
-    expect(testFunction.create).toThrowError();
-    expect(testFunction.update).toThrowError();
-    expect(testFunction.delete).toThrowError();
+    expect(testFunction.getSingle).toThrow();
+    expect(testFunction.getGrid).toThrow();
+    expect(testFunction.create).toThrow();
+    expect(testFunction.update).toThrow();
+    expect(testFunction.delete).toThrow();
     spiedGetPropertyDescriptor.mockRestore();
   });
 
@@ -1034,7 +1034,7 @@ describe.skip('Generic Resolver', () => {
 
     expect(() =>
       defineFieldResolver([resolverInfo], ResolverClass),
-    ).toThrowError();
+    ).toThrow();
   });
 
   it('Should throw an error if descriptor is not definded in defineFieldResolver', () => {
@@ -1057,7 +1057,7 @@ describe.skip('Generic Resolver', () => {
       defineFieldResolver([resolverInfo], {
         prototype: {},
       });
-    expect(testFn).toThrowError(
+    expect(testFn).toThrow(
       new ReferenceError(
         `GenericResolver.${propertyRelationName} must have a descriptor`,
       ),
@@ -1072,7 +1072,7 @@ describe.skip('Generic Resolver', () => {
     };
     expect(() =>
       defineFieldResolver([resolverInfoOneToOne], { prototype: {} }),
-    ).toThrowError(
+    ).toThrow(
       new ReferenceError(
         `GenericResolver.${propertyRelationName} must have a descriptor`,
       ),
@@ -1081,6 +1081,6 @@ describe.skip('Generic Resolver', () => {
   });
 
   it('should throw an error if receive an undefined', () => {
-    expect(() => checkFinalId(undefined)).toThrowError();
+    expect(() => checkFinalId(undefined)).toThrow();
   });
 });

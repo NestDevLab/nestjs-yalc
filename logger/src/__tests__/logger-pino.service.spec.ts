@@ -143,7 +143,7 @@ describe('Pino logger service test', () => {
 
     expect(
       async () => await container.logger?.onApplicationShutdown(),
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
     expect(method).toHaveBeenCalled();
   });
 });

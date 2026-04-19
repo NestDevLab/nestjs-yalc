@@ -30,7 +30,7 @@ describe('System exceptions filter', () => {
     const exception = new UnprocessableEntityException();
 
     filter.catch(exception);
-    expect(loggerServiceMock.error).toBeCalledWith(
+    expect(loggerServiceMock.error).toHaveBeenCalledWith(
       exception,
       exception.stack,
       ExceptionContextEnum.SYSTEM,

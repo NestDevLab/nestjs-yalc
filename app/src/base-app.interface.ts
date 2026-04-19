@@ -21,8 +21,7 @@ export interface ISingletonOption {
 }
 
 export interface ISingletonDynamicModule
-  extends ISingletonOption,
-    DynamicModule {}
+  extends ISingletonOption, DynamicModule {}
 
 export interface IYalcBaseAppOptions extends Partial<ISingletonDynamicModule> {
   configFactory?: ConfigFactory<ConfigObject>;

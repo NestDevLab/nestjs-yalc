@@ -175,7 +175,7 @@ const defaultConf = (
       /** @see https://github.com/kulshekhar/ts-jest/issues/727 */
       'source-map-support/register': 'identity-obj-proxy',
       // for ESM support
-      '^(\\.{1,2}/.*)\\.js$': '$1',
+      '^(\\.{1,2}/.*)\\.js$': '$1.ts',
       ...pathsToModuleNameMapper(compilerOptions.paths ?? {}, {
         prefix: `${dirname}/`,
         useESM: true,

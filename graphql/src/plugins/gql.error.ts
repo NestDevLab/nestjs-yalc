@@ -5,7 +5,10 @@ export enum GqlErrorMsgs {
 }
 
 export class GqlError extends Error {
-  constructor(message?: string, public systemMessage?: string) {
+  constructor(
+    message?: string,
+    public systemMessage?: string,
+  ) {
     super(message);
   }
 }

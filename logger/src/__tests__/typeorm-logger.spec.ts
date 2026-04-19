@@ -97,15 +97,15 @@ describe('TypeORMLogger with a invalid logger', () => {
   );
 
   it('All che level should ignore a missing logger function ', async () => {
-    expect(() => testLogger.logQuery('aQuery')).not.toThrowError();
+    expect(() => testLogger.logQuery('aQuery')).not.toThrow();
     expect(() =>
       testLogger.logQueryError('error', 'aQuery'),
-    ).not.toThrowError();
-    expect(() => testLogger.logQuerySlow(10000, 'aQuery')).not.toThrowError();
-    expect(() => testLogger.logSchemaBuild('aQuery')).not.toThrowError();
-    expect(() => testLogger.logMigration('aQuery')).not.toThrowError();
-    expect(() => testLogger.log('log', 'aQuery')).not.toThrowError();
-    expect(() => testLogger.log('info', 'aQuery')).not.toThrowError();
-    expect(() => testLogger.log('warn', 'aQuery')).not.toThrowError();
+    ).not.toThrow();
+    expect(() => testLogger.logQuerySlow(10000, 'aQuery')).not.toThrow();
+    expect(() => testLogger.logSchemaBuild('aQuery')).not.toThrow();
+    expect(() => testLogger.logMigration('aQuery')).not.toThrow();
+    expect(() => testLogger.log('log', 'aQuery')).not.toThrow();
+    expect(() => testLogger.log('info', 'aQuery')).not.toThrow();
+    expect(() => testLogger.log('warn', 'aQuery')).not.toThrow();
   });
 });

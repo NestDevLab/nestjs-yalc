@@ -166,6 +166,20 @@ describe("RabbitMqEventStrategy", () => {
     await expect(strategy.onModuleDestroy()).resolves.toBeUndefined();
   });
 
+  it("ignores synchronous closing errors on module destroy", async () => {
+    const strategy = new RabbitMqEventStrategy({
+      url: "amqp://localhost",
+      exchange: "test.events",
+    });
+    channelClose.mockImplementationOnce(() => {
+      throw new Error("already closing");
+    });
+
+    await strategy.emitAsync("task.created", { id: "task-1" });
+
+    await expect(strategy.onModuleDestroy()).resolves.toBeUndefined();
+  });
+
   it("throws unexpected close errors on module destroy", async () => {
     const strategy = new RabbitMqEventStrategy({
       url: "amqp://localhost",

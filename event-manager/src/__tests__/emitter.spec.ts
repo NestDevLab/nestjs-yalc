@@ -29,6 +29,8 @@ describe('Event Emitter', () => {
 
   beforeEach(() => {
     eventEmitter = createMock(EventEmitter2);
+    jest.mocked(eventEmitter.emit).mockReturnValue(true);
+    jest.mocked(eventEmitter.emitAsync).mockResolvedValue([]);
     spiedMaskDataInObject = jest.spyOn(loggerHelper, 'maskDataInObject');
   });
 

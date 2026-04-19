@@ -58,9 +58,9 @@ export function crudGenRestPaginationInterceptorWorker<T>(
  *    }
  */
 @Injectable()
-export class CrudGenRestPaginationInterceptor<T = IFieldMapper>
-  implements NestInterceptor<T>
-{
+export class CrudGenRestPaginationInterceptor<
+  T = IFieldMapper,
+> implements NestInterceptor<T> {
   intercept(context: ExecutionContext, next: CallHandler) {
     const http = context.switchToHttp();
     const request = http.getRequest();

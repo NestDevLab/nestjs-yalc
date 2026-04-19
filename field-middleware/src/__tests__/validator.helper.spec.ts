@@ -55,7 +55,7 @@ describe('validator helper test', () => {
         `invalid_${FieldErrorsEnum.INVALID_VALUE}`,
         FieldErrorsEnum,
       ),
-    ).toThrowError();
+    ).toThrow();
   });
 
   it('validateDate should work', async () => {
@@ -64,13 +64,16 @@ describe('validator helper test', () => {
 
     testData = validateDate('');
     expect(testData).toBeFalsy();
+
+    testData = validateDate({} as Date);
+    expect(testData).toBeFalsy();
   });
 
   it('validateDateOrThrow should work', async () => {
     const testData = validateDateOrThrow(new Date());
     expect(testData).toBeTruthy();
 
-    expect(() => validateDateOrThrow('')).toThrowError();
+    expect(() => validateDateOrThrow('')).toThrow();
   });
 
   it('validateStringFormat should work', async () => {
@@ -82,8 +85,8 @@ describe('validator helper test', () => {
   });
 
   it('errorTrhow should work', async () => {
-    expect(() => errorTrhow('')).toThrowError(FieldErrorsEnum.INVALID_VALUE);
+    expect(() => errorTrhow('')).toThrow(FieldErrorsEnum.INVALID_VALUE);
 
-    expect(() => errorTrhow('', 'customError')).toThrowError('customError');
+    expect(() => errorTrhow('', 'customError')).toThrow('customError');
   });
 });

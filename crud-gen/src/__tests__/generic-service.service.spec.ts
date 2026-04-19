@@ -179,7 +179,7 @@ describe('GenericService', () => {
     const spiedGetEntity = jest.spyOn(service, 'getEntity');
     expect(spiedGetEntity).not.toHaveBeenCalled();
     await service.getEntity({}, [], ['RelatedEntity']);
-    expect(baseEntityRepository.findOne).toBeCalledWith({
+    expect(baseEntityRepository.findOne).toHaveBeenCalledWith({
       where: {},
       select: [],
       relations: ['RelatedEntity'],
@@ -256,7 +256,7 @@ describe('GenericService', () => {
     const entityList = await service.getEntityList({}, false, [
       'RelatedEntity',
     ]);
-    expect(baseEntityRepository.find).toBeCalledWith({
+    expect(baseEntityRepository.find).toHaveBeenCalledWith({
       relations: ['RelatedEntity'],
     });
     expect(entityList).toBe(mockedList);
@@ -508,7 +508,7 @@ describe('GenericService', () => {
     const testService = new GenericService(repo);
 
     await testService.getEntityListExtended({}, true);
-    expect(repo.getManyAndCountExtended).toBeCalledWith({});
+    expect(repo.getManyAndCountExtended).toHaveBeenCalledWith({});
   });
 
   it('test getEntityListCrudGen with false count', async () => {
@@ -525,7 +525,7 @@ describe('GenericService', () => {
     const testService = new GenericService(repo);
 
     await testService.getEntityListExtended({}, false);
-    expect(repo.getManyExtended).toBeCalledWith({});
+    expect(repo.getManyExtended).toHaveBeenCalledWith({});
   });
 
   it('test getEntityListCrudGen with relations', async () => {
@@ -542,7 +542,7 @@ describe('GenericService', () => {
     const testService = new GenericService(repo);
 
     await testService.getEntityListExtended({}, false, ['RelatedEntity']);
-    expect(repo.getManyExtended).toBeCalledWith({
+    expect(repo.getManyExtended).toHaveBeenCalledWith({
       relations: ['RelatedEntity'],
     });
   });

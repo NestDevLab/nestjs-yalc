@@ -87,7 +87,7 @@ describe('Crud-gen Interceptor test', () => {
     crudGenInterceptor.intercept(mockedExecutionContext, callHandler);
 
     expect(mockedExecutionContext.switchToHttp()).toBeDefined();
-    expect(callHandler.handle).toBeCalledTimes(1);
+    expect(callHandler.handle).toHaveBeenCalledTimes(1);
   });
 
   it('Check CrudGenInterceptorWorker with endRow', async () => {

@@ -19,7 +19,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@kafkajs/confluent-schema-registry": "^3.3.0",
-    "@nestjs/microservices": "^9.3.9"
+    "@kafkajs/confluent-schema-registry": "^4.0.8",
+    "@nestjs/microservices": "^11.1.19"
   }
 }

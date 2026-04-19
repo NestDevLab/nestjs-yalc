@@ -200,15 +200,15 @@ export class TaskAppOmniTaskService {
       description:
         input.description !== undefined
           ? input.description
-          : current.description ?? null,
+          : (current.description ?? null),
       dueAt:
         input.dueAt !== undefined
           ? (input.dueAt as Date | null)
-          : current.dueAt ?? null,
+          : (current.dueAt ?? null),
       guid,
       projectId: Object.prototype.hasOwnProperty.call(input, 'projectId')
-        ? input.projectId ?? null
-        : current.projectId ?? null,
+        ? (input.projectId ?? null)
+        : (current.projectId ?? null),
       referenceIds: (input as TaskItemOmniWriteInput).referenceIds,
       relatedToIds: (input as TaskItemOmniWriteInput).relatedToIds,
       status: input.status ?? current.status,
@@ -459,18 +459,18 @@ export class TaskAppOmniTaskService {
       ...(guid instanceof FindOperator
         ? this.mapGuidFindOperator(guid)
         : guid
-        ? { guid }
-        : {}),
+          ? { guid }
+          : {}),
       ...(projectId instanceof FindOperator
         ? this.mapProjectIdFindOperator(projectId)
         : projectId
-        ? { projectId }
-        : {}),
+          ? { projectId }
+          : {}),
       ...(title instanceof FindOperator
         ? this.mapTitleFindOperator(title)
         : title
-        ? { title }
-        : {}),
+          ? { title }
+          : {}),
     };
   }
 

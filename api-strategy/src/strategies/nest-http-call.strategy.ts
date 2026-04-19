@@ -9,6 +9,7 @@ import {
 import { AxiosRequestConfig } from 'axios';
 import { YalcGlobalClsService } from '@nestjs-yalc/app/cls.module.js';
 import { filterHeaders } from '../header-whitelist.helper.js';
+import type { OutgoingHttpHeaders } from 'node:http2';
 
 export type NestHttpCallStrategyOptions = IHttpCallStrategyOptions & {
   internalRequestHeader?: string;
@@ -80,6 +81,7 @@ export class NestHttpCallStrategy extends HttpAbstractStrategy {
 
     return {
       ...res,
+      headers: res.headers as OutgoingHttpHeaders,
       data,
     };
   }

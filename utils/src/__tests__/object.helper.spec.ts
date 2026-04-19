@@ -1,12 +1,13 @@
 import { describe, expect, it } from '@jest/globals';
 import {
+  _deepMerge,
   deepMerge,
-  objectSetProp,
+  deepMergeWithoutArrayConcat,
+  getObjectId,
   isObject,
   isObjectStrict,
-  getObjectId,
   objectsHaveSameKeys,
-  deepMergeWithoutArrayConcat
+  objectSetProp,
 } from '../object.helper.js';
 
 describe('test object.helper.ts', () => {
@@ -20,6 +21,12 @@ describe('test object.helper.ts', () => {
     const obj: any = {};
     const res = objectSetProp(obj, 'test.foo', 1);
     expect(obj.test.foo).toBe(1);
+    expect(res.test.foo).toBe(1);
+  });
+
+  it('should set a subproperty on an existing parent object', () => {
+    const obj: any = { test: {} };
+    const res = objectSetProp(obj, 'test.foo', 1);
     expect(res.test.foo).toBe(1);
   });
 
@@ -60,6 +67,13 @@ describe('test object.helper.ts', () => {
         test2: 2,
       },
     });
+  });
+
+  it('should skip merge work for non-object targets and sources', () => {
+    const inherited = Object.create({ inherited: true });
+    expect(_deepMerge(true, null as any, { test: 1 })).toBeNull();
+    expect(deepMerge({}, undefined as any)).toStrictEqual({});
+    expect(deepMerge({}, inherited)).toStrictEqual({});
   });
 
   it('should merge objects  correctly with array concat', () => {

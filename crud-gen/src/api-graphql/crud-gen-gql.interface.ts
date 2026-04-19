@@ -187,8 +187,9 @@ export interface ICrudGenFindExtraOptions {
   _aliasType?: string;
 }
 
-export interface CrudGenFindManyOptions<T extends ObjectLiteral = any>
-  extends Omit<FindManyOptions<T>, 'where'> {
+export interface CrudGenFindManyOptions<
+  T extends ObjectLiteral = any,
+> extends Omit<FindManyOptions<T>, 'where'> {
   where?: IWhereCondition<T>;
   /** Contains useful information about the graphql request */
   info?: GraphQLResolveInfo;
@@ -267,12 +268,10 @@ export interface ICrudGenArgsOptions extends ICrudGenArgsSingleOptions {
 }
 
 export interface ICrudGenGqlArgsSingleOptions
-  extends ICrudGenArgsSingleOptions,
-    IGqlArgsOptions {}
+  extends ICrudGenArgsSingleOptions, IGqlArgsOptions {}
 
 export interface ICrudGenGqlArgsOptions
-  extends ICrudGenArgsOptions,
-    IGqlArgsOptions {
+  extends ICrudGenArgsOptions, IGqlArgsOptions {
   /**
    * Filters with direct arguments
    */
@@ -295,7 +294,8 @@ export interface ICrudGenBaseParams<T = any> extends ICrudGenPaginationParams {
 }
 
 export interface ICrudGenSimpleParams<T = any>
-  extends ICrudGenPaginationParams,
+  extends
+    ICrudGenPaginationParams,
     Omit<FindOneOptions<T>, 'where' | 'join' | 'order' | 'skip' | 'take'> {
   /**
    * @property where is used to filter the result

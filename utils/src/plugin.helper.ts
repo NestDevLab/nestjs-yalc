@@ -2,8 +2,10 @@ import { ClassType } from '@nestjs-yalc/types/globals.d.js';
 
 class DefaultBase {}
 
-export interface PluginMethods
-  extends Record<string, { (...args: any[]): void } | undefined> {}
+export interface PluginMethods extends Record<
+  string,
+  { (...args: any[]): void } | undefined
+> {}
 
 export interface Plugin<T extends PluginMethods> {
   pluginMethods: T;

@@ -72,8 +72,7 @@ export async function importMockedEsm(
 
   const moduleMock = factory(moduleCopy);
 
-  if (!skipActualMock)
-    jest.unstable_mockModule(moduleSpecifier, () => moduleMock);
+  if (!skipActualMock) jest.unstable_mockModule(modulePath, () => moduleMock);
 
   return moduleMock;
 }

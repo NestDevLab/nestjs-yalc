@@ -15,6 +15,6 @@ describe('Test errors helpers', () => {
     const fixedError = new Error(fixedErrorMessage);
 
     expect(() => throwWrap(fixedErrorMessage)).toThrow(fixedErrorMessage);
-    expect(() => throwWrap(fixedError)).toThrowError(fixedErrorMessage);
+    expect(() => throwWrap(fixedError)).toThrow(fixedErrorMessage);
   });
 });

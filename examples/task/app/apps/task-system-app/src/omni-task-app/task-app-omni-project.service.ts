@@ -193,7 +193,7 @@ export class TaskAppOmniProjectService {
       description:
         input.description !== undefined
           ? input.description
-          : current.summary ?? null,
+          : (current.summary ?? null),
       name: input.name ?? current.title,
       status:
         input.status ?? this.mapper.mapOmniCollectionToProject(current).status,
@@ -294,8 +294,8 @@ export class TaskAppOmniProjectService {
       ...(guid instanceof FindOperator
         ? this.mapGuidFindOperator(guid)
         : guid
-        ? { guid }
-        : {}),
+          ? { guid }
+          : {}),
       ...(where.status ? { status: where.status } : {}),
     };
   }

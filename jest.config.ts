@@ -3,12 +3,12 @@ import {
   IOptions,
   IProjectInfo,
   jestConfGenerator,
-} from './jest/src/config';
+} from './jest/src/config/index.ts';
 import path from 'node:path';
 
 console.log('=================== LOADING JEST OPTIONS ================');
 
-import tsProjects from './tsconfig.json';
+import tsProjects from './tsconfig.json' with { type: 'json' };
 
 const appProjectsSettings: { [key: string]: IAppProjSetting } = {};
 

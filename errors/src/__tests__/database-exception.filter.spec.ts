@@ -38,7 +38,7 @@ describe('Database exceptions filter', () => {
     const error = new EntityNotFoundError(mockedEntityTarget, []);
 
     const returnedError = filter.catch(error, mockArgumentsHost);
-    expect(loggerServiceMock.error).toBeCalledWith(
+    expect(loggerServiceMock.error).toHaveBeenCalledWith(
       error,
       ExceptionContextEnum.DATABASE,
     );
@@ -51,7 +51,7 @@ describe('Database exceptions filter', () => {
     const error = new ConnectionNotFoundError('test connection');
 
     filter.catch(error, mockArgumentsHost);
-    expect(loggerServiceMock.error).toBeCalledWith(
+    expect(loggerServiceMock.error).toHaveBeenCalledWith(
       error,
       error.stack,
       ExceptionContextEnum.DATABASE,

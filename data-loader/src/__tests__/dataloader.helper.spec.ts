@@ -127,7 +127,7 @@ describe('GQLDataLoader class', () => {
       .spyOn(dataLoader, 'loadOneToMany')
       .mockResolvedValue(null);
 
-    await expect(dataLoader.loadOne('asset_1', {}, true)).rejects.toThrowError(
+    await expect(dataLoader.loadOne('asset_1', {}, true)).rejects.toThrow(
       NotFoundException,
     );
     expect(loadOneToManySpy).toHaveBeenCalledTimes(1);
@@ -152,7 +152,7 @@ describe('GQLDataLoader class', () => {
         new EntityTest('asset_2'),
       ]);
 
-    await expect(dataLoader.loadOne('asset_1', {}, false)).rejects.toThrowError(
+    await expect(dataLoader.loadOne('asset_1', {}, false)).rejects.toThrow(
       NotAcceptableException,
     );
     expect(loadOneToManySpy).toHaveBeenCalledTimes(1);

@@ -381,7 +381,7 @@ describe('Crud-gen helpers', () => {
       whereObjectToSqlString<BaseEntity>(mockedQueryBuilder, {
         filters,
       });
-    }).toThrowError(CrudGenConditionNotSupportedError);
+    }).toThrow(CrudGenConditionNotSupportedError);
   });
 
   it('should throw error on wrong filter', async () => {
@@ -396,7 +396,7 @@ describe('Crud-gen helpers', () => {
       whereObjectToSqlString<BaseEntity>(mockedQueryBuilder, {
         filters,
       });
-    }).toThrowError(CrudGenConditionNotSupportedError);
+    }).toThrow(CrudGenConditionNotSupportedError);
   });
 
   it('should run isAskingForCount', async () => {
@@ -526,7 +526,7 @@ describe('Crud-gen helpers', () => {
     //     objectToFieldMapper({
     //       badFiled: {},
     //     } as any);
-    //   expect(fieldMapper).toThrowError();
+    //   expect(fieldMapper).toThrow();
     // });
   });
 
@@ -696,6 +696,17 @@ describe('Crud-gen helpers', () => {
       expect(resource.serviceToken).toBeUndefined();
       expect(resource.dataLoaderToken).toBeUndefined();
     });
+
+    it('Should skip REST controllers when resource REST is disabled', () => {
+      const resource = CrudGenResourceFactory<TestEntity>({
+        entityModel: TestEntity,
+        backend: false,
+        rest: false,
+      });
+
+      expect(resource.providers).toEqual([]);
+      expect(resource.controllers).toEqual([]);
+    });
   });
 
   const testTypeFiler: [FilterType, any][] = [
@@ -712,7 +723,7 @@ describe('Crud-gen helpers', () => {
   );
   it('Should throw error if it is not supported the native conversion', () => {
     const testFn = () => filterTypeToNativeType(FilterType.MULTI);
-    expect(testFn).toThrowError();
+    expect(testFn).toThrow();
   });
 
   it('Should check if a filter has a filterExpressionInput', () => {
