@@ -1,11 +1,5 @@
 import { CrudGenDependencyFactory } from '@nestjs-yalc/crud-gen/crud-gen.helpers';
-import {
-  GQLDataLoader,
-  getDataloaderToken,
-  getFn,
-} from '@nestjs-yalc/data-loader';
-import { getServiceToken } from '@nestjs-yalc/crud-gen/typeorm/generic.service';
-import { TaskExternalRef } from '@nestjs-yalc/task-system-module/src/task-external-ref.entity';
+import { OmniExternalRefEntity } from '@nestjs-yalc/omnikernel-module';
 import { TaskAppOmniExternalRefService } from '../omni-task-app/task-app-omni-external-ref.service';
 import {
   TaskExternalRefCondition,
@@ -14,9 +8,9 @@ import {
   TaskExternalRefUpdateInput,
 } from './task-external-ref.dto';
 
-export const taskExternalRefProviders =
-  CrudGenDependencyFactory<TaskExternalRef>({
-    entityModel: TaskExternalRef,
+export const taskExternalRefProvidersFactory = (dbConnection: string) =>
+  CrudGenDependencyFactory<OmniExternalRefEntity>({
+    entityModel: OmniExternalRefEntity,
     resolver: {
       dto: TaskExternalRefType,
       input: {
@@ -27,17 +21,27 @@ export const taskExternalRefProviders =
       prefix: 'TaskSystem_',
     },
     service: {
+      dbConnection,
+      entityModel: OmniExternalRefEntity,
       provider: {
-        provide: getServiceToken(TaskExternalRef),
+        provide: 'TaskExternalRefGenericService',
         useExisting: TaskAppOmniExternalRefService,
       },
     },
-    dataloader: {
-      provider: {
-        provide: getDataloaderToken(TaskExternalRef),
-        useFactory: (service: TaskAppOmniExternalRefService) =>
-          new GQLDataLoader(getFn(service as any), 'guid'),
-        inject: [getServiceToken(TaskExternalRef)],
-      },
-    },
+    dataloader: { databaseKey: 'guid' },
   });
+
+const taskExternalRefProviderSet = taskExternalRefProvidersFactory('default');
+
+export const taskExternalRefProviders = taskExternalRefProviderSet.providers;
+export const taskExternalRefDataloaderEventEmitterToken =
+  (taskExternalRefProviders.find((provider) => {
+    const providerDef = provider as any;
+    const token =
+      typeof providerDef.provide === 'function'
+        ? providerDef.provide.name
+        : providerDef.provide;
+    return typeof token === 'string'
+      ? token.includes('Dataloader')
+      : token === 'OmniExternalRefEntityDataloader';
+  }) as any)?.inject?.[1];

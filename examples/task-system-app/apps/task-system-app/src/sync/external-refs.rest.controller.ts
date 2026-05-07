@@ -1,13 +1,13 @@
 import { crudRestControllerFactory } from '@nestjs-yalc/crud-gen/api-rest/crud-gen-rest.controller.factory';
-import { getServiceToken } from '@nestjs-yalc/crud-gen/typeorm/generic.service';
-import { TaskExternalRef } from '@nestjs-yalc/task-system-module/src/task-external-ref.entity';
+import { OmniExternalRefEntity } from '@nestjs-yalc/omnikernel-module';
 import { TaskExternalRefType } from './task-external-ref.dto';
 
-export const ExternalRefsController =
-  crudRestControllerFactory<TaskExternalRef>({
-    entityModel: TaskExternalRef,
+export const ExternalRefsController = crudRestControllerFactory<OmniExternalRefEntity>(
+  {
+    entityModel: OmniExternalRefEntity,
     dto: TaskExternalRefType,
     path: 'external-refs',
     idField: 'guid',
-    serviceToken: getServiceToken(TaskExternalRef),
-  });
+    serviceToken: 'TaskExternalRefGenericService',
+  },
+);
