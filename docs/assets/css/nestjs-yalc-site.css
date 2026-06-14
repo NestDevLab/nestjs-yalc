@@ -116,6 +116,24 @@ img {
   color: var(--ny-red);
 }
 
+.ny-logo-link,
+.ny-icon-link {
+  width: 2.5rem;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.ny-logo-link img {
+  width: 1.45rem;
+  height: 1.45rem;
+  object-fit: contain;
+}
+
+.ny-icon-link svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
 .ny-main--landing {
   background:
     linear-gradient(90deg, rgba(17, 19, 23, 0.04) 1px, transparent 1px),
@@ -1674,6 +1692,13 @@ img {
   color: var(--ny-yellow);
 }
 
+.ny-footer .ny-logo-link,
+.ny-footer .ny-icon-link {
+  min-height: 2.35rem;
+  border: 1px solid rgba(248, 251, 250, 0.14);
+  background: rgba(248, 251, 250, 0.04);
+}
+
 @media (max-width: 980px) {
   .ny-landing-hero {
     grid-template-columns: 1fr;
@@ -1816,6 +1841,12 @@ img {
     min-height: 2.1rem;
     padding: 0.45rem 0.4rem;
     font-size: 0.82rem;
+  }
+
+  .ny-topnav a.ny-logo-link,
+  .ny-topnav a.ny-icon-link {
+    flex: 0 0 2.1rem;
+    padding: 0;
   }
 
   .ny-landing-hero {
