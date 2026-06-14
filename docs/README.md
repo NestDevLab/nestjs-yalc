@@ -397,32 +397,6 @@ export class UserService {
   </div>
 </section>
 
-<section class="ny-section ny-section--logos">
-  <div class="ny-section-header ny-section-header--center">
-    <h2>Used in real production contexts.</h2>
-    <p>
-      The framework patterns have been used in backend work for teams and
-      products that needed stronger NestJS foundations.
-    </p>
-  </div>
-
-  <div class="ny-logo-strip" aria-label="Organizations using NestJS-YALC patterns">
-    <a class="ny-logo-mark" href="https://bitvavo.com/" target="_blank" rel="noopener">
-      <img src="assets/images/logo-bitvavo.svg" alt="Bitvavo">
-    </a>
-    <a class="ny-logo-mark" href="https://www.embed.co/" target="_blank" rel="noopener">
-      <img src="assets/images/logo-embed.svg" alt="Embed">
-    </a>
-    <a class="ny-logo-mark ny-logo-mark--azerothcore" href="https://www.azerothcore.org/" target="_blank" rel="noopener">
-      <img src="assets/images/logo-azerothcore.png" alt="AzerothCore emblem">
-      <span>AzerothCore</span>
-    </a>
-    <div class="ny-logo-mark ny-logo-mark--static">
-      <img src="assets/images/logo-tirrenia.svg" alt="Tirrenia">
-    </div>
-  </div>
-</section>
-
 <section class="ny-section">
   <div class="ny-section-header">
     <h2>The wiki stays where docs belong.</h2>

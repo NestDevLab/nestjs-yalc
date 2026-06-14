@@ -22,11 +22,11 @@ describe('faker helper test', () => {
   // Don't do beforeEach, since we need a single instance
   const fakerHelper = new FakerHelper();
   it('should generate a person object, with first-, lastName, gender and email', () => {
-    jest.spyOn(faker.person, 'firstName').mockReturnValueOnce('Elon');
-    jest.spyOn(faker.person, 'lastName').mockReturnValueOnce('Musk');
+    jest.spyOn(faker.person, 'firstName').mockReturnValueOnce('Alex');
+    jest.spyOn(faker.person, 'lastName').mockReturnValueOnce('Example');
     jest
       .spyOn(faker.internet, 'email')
-      .mockReturnValueOnce('Elon_Musk@gmail.test');
+      .mockReturnValueOnce('alex.example@example.test');
     const person = fakerHelper.createPerson();
     expect(person).toBeDefined();
     expect(person.email).toBeDefined();
@@ -36,22 +36,22 @@ describe('faker helper test', () => {
   });
 
   it('should not reuse already generated names', () => {
-    jest.spyOn(faker.person, 'firstName').mockReturnValueOnce('Elon');
-    jest.spyOn(faker.person, 'lastName').mockReturnValueOnce('Musk');
+    jest.spyOn(faker.person, 'firstName').mockReturnValueOnce('Alex');
+    jest.spyOn(faker.person, 'lastName').mockReturnValueOnce('Example');
     jest
       .spyOn(faker.internet, 'email')
-      .mockReturnValueOnce('Elon_Musk@gmail.test');
+      .mockReturnValueOnce('alex.example@example.test');
     const person = fakerHelper.createPerson();
     expect(person).toBeDefined();
-    expect(person.email).not.toEqual('ElonMusk@google.test');
+    expect(person.email).not.toEqual('alex.example@example.test');
     expect(person.firstName).toBeDefined();
     expect(person.lastName).toBeDefined();
     expect(person.gender).toBeDefined();
   });
 
   it('should be able to use first and lastname to generate email', () => {
-    const firstName = 'Elon';
-    const lastName = 'Musk';
+    const firstName = 'Alex';
+    const lastName = 'Example';
 
     const email = fakerHelper.generateNewEmail(firstName, lastName);
     expect(email).toContain(firstName);
@@ -61,9 +61,9 @@ describe('faker helper test', () => {
   });
 
   it('should be able to use first name, lastname and provider to generate email', () => {
-    const firstName = 'Elon';
-    const lastName = 'Musk';
-    const provider = 'tesla.com';
+    const firstName = 'Alex';
+    const lastName = 'Example';
+    const provider = 'example.test';
 
     const email = fakerHelper.generateNewEmail(firstName, lastName, provider);
     expect(email).toContain(firstName);
@@ -71,9 +71,9 @@ describe('faker helper test', () => {
   });
 
   it('should generate unique emails on multiple calls', () => {
-    const firstName = 'Elon';
-    const lastName = 'Musk';
-    const provider = 'dogecoin.lol';
+    const firstName = 'Alex';
+    const lastName = 'Example';
+    const provider = 'example.test';
 
     const email1 = fakerHelper.generateNewEmail(firstName, lastName, provider);
     const email2 = fakerHelper.generateNewEmail(firstName, lastName, provider);
@@ -87,8 +87,8 @@ describe('faker helper test', () => {
     const helper = new FakerHelper();
     jest
       .spyOn(faker.internet, 'email')
-      .mockReturnValueOnce('same@gmail.test');
-    helper.generateNewEmail('Elon', 'Musk', 'gmail.test');
+      .mockReturnValueOnce('same@example.test');
+    helper.generateNewEmail('Alex', 'Example', 'example.test');
 
     jest
       .spyOn(Date, 'now')
@@ -96,16 +96,16 @@ describe('faker helper test', () => {
       .mockReturnValueOnce(DEF_FAKER_MAX_TIME + 1);
     jest
       .spyOn(faker.internet, 'email')
-      .mockReturnValueOnce('same@gmail.test')
-      .mockReturnValueOnce('fallback@gmail.test');
+      .mockReturnValueOnce('same@example.test')
+      .mockReturnValueOnce('fallback@example.test');
 
-    expect(helper.generateNewEmail('Elon', 'Musk', 'gmail.test')).toBe(
-      'fallback@gmail.test',
+    expect(helper.generateNewEmail('Alex', 'Example', 'example.test')).toBe(
+      'fallback@example.test',
     );
     expect(
       (
         helper as unknown as { generatedEmails: Set<string> }
-      ).generatedEmails.has('fallback@gmail.test'),
+      ).generatedEmails.has('fallback@example.test'),
     ).toBe(true);
   });
 

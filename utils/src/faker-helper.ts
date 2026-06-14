@@ -20,7 +20,7 @@ export class FakerHelper {
       gender,
       firstName,
       lastName,
-      email: this.generateNewEmail(firstName, lastName, 'gmail.test'),
+      email: this.generateNewEmail(firstName, lastName, 'example.test'),
     };
   }
 
