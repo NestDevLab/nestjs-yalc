@@ -64,7 +64,9 @@ site_root: 'docs/'
 # git-wiki includes some internal themes that you can choose
 # check _layouts folder
 #
-markdown: GFM
+markdown: kramdown
+kramdown:
+  input: GFM
 highlighter: rouge
 encoding: UTF-8
 
