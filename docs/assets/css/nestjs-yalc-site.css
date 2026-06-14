@@ -1665,6 +1665,15 @@ img {
   background: #151719;
 }
 
+.ny-footer a {
+  color: #f8fbfa;
+  font-weight: 700;
+}
+
+.ny-footer a:hover {
+  color: var(--ny-yellow);
+}
+
 @media (max-width: 980px) {
   .ny-landing-hero {
     grid-template-columns: 1fr;
