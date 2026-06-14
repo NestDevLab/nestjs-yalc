@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "defaults": {
+    "canonical_remote": "origin",
+    "publication_remote": "origin",
+    "base_branch": "dev",
+    "base_ref": "origin/dev"
+  },
+  "integration": {
+    "branch": "dev-integration",
+    "base": "origin/dev",
+    "strategy": "cherry-pick",
+    "stacks": []
+  },
+  "stacks": [],
+  "syncwheel_worktree_root": "var/syncwheel",
+  "syncwheel_tracking": "git-tracked"
+}

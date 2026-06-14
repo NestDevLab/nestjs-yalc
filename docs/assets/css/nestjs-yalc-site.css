@@ -123,6 +123,20 @@ img {
   flex: 0 0 auto;
 }
 
+.ny-topnav .ny-logo-link,
+.ny-topnav .ny-icon-link {
+  color: #ffffff;
+  background: #151719;
+  border: 1px solid rgba(17, 19, 23, 0.18);
+}
+
+.ny-topnav .ny-logo-link:hover,
+.ny-topnav .ny-icon-link:hover {
+  color: #ffffff;
+  background: #2a2f35;
+  border-color: rgba(224, 35, 78, 0.46);
+}
+
 .ny-logo-link img {
   width: 1.45rem;
   height: 1.45rem;
