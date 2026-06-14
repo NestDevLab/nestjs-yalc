@@ -30,7 +30,7 @@ import {
   parseODataQueryParams,
   type ODataQueryParams,
 } from './odata-query.interface.js';
-import type { FindOptionsOrder } from 'typeorm';
+import { getMetadataArgsStorage, type FindOptionsOrder } from 'typeorm';
 
 export interface CrudRestMutationOptions {
   disabled?: boolean;
@@ -91,6 +91,23 @@ const toKebabCase = (value: string) =>
     .replace(/_+/g, '-')
     .toLowerCase();
 
+function inferSinglePrimaryField<Entity extends Record<string, any>>(
+  entityModel: ClassType<Entity>,
+) {
+  const primaryColumns = getMetadataArgsStorage().columns.filter((column) => {
+    return (
+      typeof column.target === 'function' &&
+      (column.target === entityModel ||
+        entityModel.prototype instanceof column.target) &&
+      column.options.primary
+    );
+  });
+
+  return primaryColumns.length === 1
+    ? (primaryColumns[0].propertyName as keyof Entity & string)
+    : undefined;
+}
+
 export function crudRestControllerFactory<Entity extends Record<string, any>>(
   options: CrudRestControllerOptions<Entity>,
 ) {
@@ -100,7 +117,8 @@ export function crudRestControllerFactory<Entity extends Record<string, any>>(
     path = toKebabCase(entityModel.name),
     serviceToken = getServiceToken(entityModel),
     query = { entityType: entityModel } as ICrudGenGqlArgsOptions,
-    idField = 'id' as keyof Entity & string,
+    idField = inferSinglePrimaryField(entityModel) ??
+      ('id' as keyof Entity & string),
     readonly: isReadonly = false,
     mutations,
   } = options;

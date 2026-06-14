@@ -58,10 +58,18 @@ wants one declaration that composes the smaller factories:
 ```ts
 const userResource = CrudGenResourceFactory({
   entityModel: UserEntity,
-  backend: {
-    service: { dbConnection: 'default' },
-    dataloader: { databaseKey: 'id' },
-  },
+  graphql: true,
+  rest: true,
+});
+```
+
+By default, this creates backend providers against the default TypeORM
+connection and infers the dataloader key and REST id field from the entity's
+single primary column. Customize only what differs from the default:
+
+```ts
+const userResource = CrudGenResourceFactory({
+  entityModel: UserEntity,
   graphql: {
     resolver: {
       dto: UserType,
@@ -84,6 +92,12 @@ const userResource = CrudGenResourceFactory({
 Spread `userResource.providers` into module providers and
 `userResource.controllers` into module controllers. Set any layer to `false` to
 disable it, or omit `rest`/`graphql` when the app should not expose that surface.
+Use `backend.dbConnection` for a named TypeORM connection and
+`backend.databaseKey` when the dataloader key cannot be inferred from a single
+primary column. Use `graphql: true` as shorthand for the default resolver
+(`resolver: {}`) and `rest: true` as shorthand for the default REST controller
+(`rest: {}`); both shorthands reuse the backend tokens inferred by the resource
+factory.
 When `backend: false`, the resource factory does not create backend providers,
 repository references, service tokens, or dataloader tokens; REST/GraphQL must
 therefore point at providers registered elsewhere when they are enabled.

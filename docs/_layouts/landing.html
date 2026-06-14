@@ -18,6 +18,10 @@
     />
     <link
       rel="stylesheet"
+      href="{{ '/assets/vendor/prism/prism-tomorrow.min.css' | relative_url }}"
+    />
+    <link
+      rel="stylesheet"
       href="{{ '/assets/css/nestjs-yalc-site.css' | relative_url }}"
     />
   </head>
@@ -53,5 +57,21 @@
         event-driven operations.</span
       >
     </footer>
+    <script
+      defer
+      src="{{ '/assets/vendor/prism/prism-core.min.js' | relative_url }}"
+    ></script>
+    <script
+      defer
+      src="{{ '/assets/vendor/prism/prism-clike.min.js' | relative_url }}"
+    ></script>
+    <script
+      defer
+      src="{{ '/assets/vendor/prism/prism-javascript.min.js' | relative_url }}"
+    ></script>
+    <script
+      defer
+      src="{{ '/assets/vendor/prism/prism-typescript.min.js' | relative_url }}"
+    ></script>
   </body>
 </html>

@@ -680,6 +680,94 @@ describe('Crud-gen helpers', () => {
       expect(resource.serviceToken).toBe('GenericService');
     });
 
+    it('Should enable GraphQL and REST with boolean resource flags', () => {
+      const resource = CrudGenResourceFactory<TestEntity>({
+        entityModel: TestEntity,
+        backend: {
+          service: {
+            dbConnection: 'id',
+            providerClass: GenericService,
+          },
+          dataloader: {
+            databaseKey: 'id',
+          },
+        },
+        graphql: true,
+        rest: true,
+      });
+
+      expect(resource.providers.length).toBeGreaterThan(1);
+      expect(resource.controllers.length).toBe(1);
+      expect(resource.serviceToken).toBe('GenericService');
+      expect(resource.dataLoaderToken).toBeDefined();
+    });
+
+    it('Should create default backend providers for generated resource surfaces', () => {
+      const resource = CrudGenResourceFactory<TestEntity>({
+        entityModel: TestEntity,
+        graphql: true,
+        rest: true,
+      });
+
+      expect(resource.providers.length).toBeGreaterThan(1);
+      expect(resource.controllers.length).toBe(1);
+      expect(resource.serviceToken).toBe('TestEntityGenericService');
+      expect(resource.dataLoaderToken).toBeDefined();
+    });
+
+    it('Should skip default backend providers for an overridden GraphQL resolver', () => {
+      class CustomResolver {}
+
+      const resource = CrudGenResourceFactory<TestEntity>({
+        entityModel: TestEntity,
+        graphql: {
+          resolver: {
+            provider: CustomResolver,
+          },
+        },
+      });
+
+      expect(resource.providers).toEqual([CustomResolver]);
+      expect(resource.controllers).toEqual([]);
+      expect(resource.repository).toBeDefined();
+      expect(resource.serviceToken).toBeUndefined();
+      expect(resource.dataLoaderToken).toBeUndefined();
+    });
+
+    it('Should not create default backend providers when GraphQL tokens are explicit', () => {
+      const resource = CrudGenResourceFactory<TestEntity>({
+        entityModel: TestEntity,
+        graphql: {
+          resolver: {
+            dto: TestEntityDto,
+            service: {
+              serviceToken: 'ExistingService',
+              dataLoaderToken: 'ExistingDataLoader',
+            },
+          },
+        },
+      });
+
+      expect(resource.providers.length).toBe(1);
+      expect(resource.controllers).toEqual([]);
+      expect(resource.repository).toBeDefined();
+      expect(resource.serviceToken).toBeUndefined();
+      expect(resource.dataLoaderToken).toBeUndefined();
+    });
+
+    it('Should throw when default dataloader key cannot be inferred', () => {
+      class NoPrimaryEntity {}
+
+      expect(() =>
+        CrudGenResourceFactory<NoPrimaryEntity>({
+          entityModel: NoPrimaryEntity,
+          graphql: true,
+        }),
+      ).toThrow(
+        'CrudGenResourceFactory could not infer a single primary key for NoPrimaryEntity.',
+      );
+    });
+
     it('Should skip backend artifacts when resource backend is disabled', () => {
       const resource = CrudGenResourceFactory<TestEntity>({
         entityModel: TestEntity,

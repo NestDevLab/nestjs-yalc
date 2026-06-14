@@ -13,10 +13,22 @@ When the app owns the whole resource surface, use the resource combinator:
 ```ts
 export const userResource = CrudGenResourceFactory<User>({
   entityModel: User,
-  backend: {
-    service: { dbConnection: 'default' },
-    dataloader: { databaseKey: 'id' },
-  },
+  graphql: true,
+  rest: true,
+});
+```
+
+By default, the resource factory uses the default TypeORM connection, infers the
+dataloader key and REST id field from a single TypeORM primary column, and
+generates the default service, dataloader, GraphQL resolver, and REST
+controller. Omit `graphql` or `rest` when the app should not expose that
+surface.
+
+Customize only the surfaces that need application-specific contracts:
+
+```ts
+export const userResource = CrudGenResourceFactory<User>({
+  entityModel: User,
   graphql: {
     resolver: {
       dto: UserType,
@@ -38,6 +50,9 @@ export const userResource = CrudGenResourceFactory<User>({
 Spread `userResource.providers` into module providers,
 `userResource.controllers` into module controllers, and pass
 `userResource.repository` to `TypeOrmModule.forFeature`.
+Set `backend.dbConnection` when the resource uses a named TypeORM connection.
+Set `backend.databaseKey` when the model has no single primary column or uses a
+custom dataloader key.
 
 For existing GraphQL-only modules, the compatibility helper still creates the
 backend and resolver providers together:

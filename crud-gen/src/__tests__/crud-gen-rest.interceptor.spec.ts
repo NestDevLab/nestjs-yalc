@@ -12,6 +12,7 @@ import {
 } from '../api-rest/crud-gen-rest.interceptor.js';
 import { crudRestControllerFactory } from '../api-rest/crud-gen-rest.controller.factory.js';
 import { GenericService } from '../typeorm/generic.service.js';
+import { PrimaryColumn } from 'typeorm';
 
 class TestEntity {
   constructor(
@@ -27,6 +28,13 @@ class TestDto {
   constructor(data: { id: string; name: string }) {
     Object.assign(this, data);
   }
+}
+
+class GuidEntity {
+  @PrimaryColumn()
+  guid!: string;
+
+  name!: string;
 }
 
 const buildHttpContext = (query: any = {}, body: any = {}) =>
@@ -262,6 +270,45 @@ describe('crudRestControllerFactory', () => {
     const removed = await controller.remove('1');
     expect(service.deleteEntity).toHaveBeenCalledWith({ id: '1' } as any);
     expect(removed).toEqual({ deleted: true });
+  });
+
+  it('should infer the REST id field from a single primary column', async () => {
+    const service = {
+      getEntityListExtended: jest.fn(),
+      getEntity: jest.fn().mockResolvedValue({ guid: 'user-1', name: 'user' }),
+      createEntity: jest.fn(),
+      updateEntity: jest.fn().mockResolvedValue({
+        guid: 'user-1',
+        name: 'updated',
+      }),
+      deleteEntity: jest.fn().mockResolvedValue(true),
+    } as unknown as GenericService<GuidEntity>;
+
+    const Controller = crudRestControllerFactory<GuidEntity>({
+      entityModel: GuidEntity,
+    });
+
+    const controller = new Controller(service);
+
+    await controller.getById('user-1');
+    expect(service.getEntity).toHaveBeenCalledWith(
+      { guid: 'user-1' } as any,
+      undefined,
+      undefined,
+      undefined,
+      { failOnNull: true },
+    );
+
+    await controller.update('user-1', { name: 'updated' });
+    expect(service.updateEntity).toHaveBeenCalledWith(
+      { guid: 'user-1' } as any,
+      { name: 'updated' },
+    );
+
+    await controller.remove('user-1');
+    expect(service.deleteEntity).toHaveBeenCalledWith({
+      guid: 'user-1',
+    } as any);
   });
 
   it('maps OData query params and validates expand allowlist', async () => {

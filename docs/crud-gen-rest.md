@@ -35,7 +35,9 @@ object.
 - If you want a ready-made REST controller, use:
   - `crudRestControllerFactory({ entityModel, dto?, path?, decorators?, query?, idField?, readonly?, mutations? })`
   - register the returned class inside your module `controllers`.
-  - By default it wires **full CRUD** using `GenericService`:
+  - By default it wires **full CRUD** using `GenericService`. The REST `:id`
+    parameter is mapped to the entity's single TypeORM primary column when it
+    can be inferred; otherwise it falls back to `id`.
     - `GET /path` → `getEntityListExtended` (with pagination helpers)
     - `GET /path/:id` → `getEntity`
     - `POST /path` → `createEntity`

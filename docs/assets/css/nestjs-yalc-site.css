@@ -126,6 +126,11 @@ img {
 
 .ny-landing-hero {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 39rem) minmax(24rem, 43rem);
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: center;
+  justify-content: center;
   min-height: 36rem;
   padding: 5.75rem clamp(1.25rem, 4rem, 4rem) 4.25rem;
   overflow: hidden;
@@ -154,78 +159,709 @@ img {
 }
 
 .ny-hero-content {
-  width: min(58rem, 100%);
+  min-width: 0;
+  width: 100%;
 }
 
-.ny-hero-output {
-  position: absolute;
-  right: clamp(1rem, 5vw, 5rem);
-  bottom: 4.25rem;
-  width: min(34rem, 38vw);
-  opacity: 0.96;
-}
-
-.ny-mini-code {
-  width: min(24rem, 100%);
-  margin-left: auto;
+.ny-showcase {
+  min-width: 0;
+  width: 100%;
   padding: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: var(--ny-radius);
-  background: rgba(17, 19, 23, 0.78);
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+  background: rgba(17, 19, 23, 0.82);
+  box-shadow: 0 24px 58px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(16px);
 }
 
-.ny-mini-code-dot {
-  display: block;
-  width: 0.6rem;
-  height: 0.6rem;
-  margin-bottom: 1rem;
-  border-radius: 50%;
-  background: var(--ny-red);
-  box-shadow:
-    1rem 0 0 var(--ny-yellow),
-    2rem 0 0 var(--ny-teal);
+.ny-showcase-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.ny-mini-code-line {
-  display: block;
-  width: 78%;
-  height: 0.55rem;
-  margin-top: 0.55rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.28);
-}
-
-.ny-mini-code-line--long {
-  width: 94%;
-}
-
-.ny-mini-code-line--mid {
-  width: 66%;
-  background: rgba(184, 242, 230, 0.42);
-}
-
-.ny-mini-code-line--short {
-  width: 46%;
-  background: rgba(224, 35, 78, 0.46);
-}
-
-.ny-generated-surface {
+.ny-showcase-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.65rem;
-  margin-top: 0.9rem;
+  gap: 0.45rem;
+  margin-bottom: 0.9rem;
 }
 
-.ny-generated-surface span {
-  min-height: 3.4rem;
-  padding: 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+.ny-showcase-tabs label {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.35rem;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.26);
   border-radius: var(--ny-radius);
-  background: rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f7fbfa;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.ny-showcase-tabs label:hover {
+  border-color: rgba(255, 255, 255, 0.56);
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.ny-showcase-panel {
+  display: none;
+  gap: 0.85rem;
+}
+
+#ny-showcase-crud:checked
+  ~ .ny-showcase-tabs
+  label[for="ny-showcase-crud"],
+#ny-showcase-strategy:checked
+  ~ .ny-showcase-tabs
+  label[for="ny-showcase-strategy"],
+#ny-showcase-events:checked
+  ~ .ny-showcase-tabs
+  label[for="ny-showcase-events"] {
+  color: #ffffff;
+  background: rgba(224, 35, 78, 0.24);
+  border-color: rgba(224, 35, 78, 0.72);
+}
+
+#ny-showcase-strategy:checked
+  ~ .ny-showcase-tabs
+  label[for="ny-showcase-strategy"] {
+  background: rgba(15, 139, 141, 0.28);
+  border-color: rgba(15, 139, 141, 0.78);
+}
+
+#ny-showcase-events:checked
+  ~ .ny-showcase-tabs
+  label[for="ny-showcase-events"] {
+  background: rgba(23, 114, 69, 0.3);
+  border-color: rgba(23, 114, 69, 0.78);
+}
+
+#ny-showcase-crud:checked
+  ~ .ny-showcase-panels
+  .ny-showcase-panel--crud,
+#ny-showcase-strategy:checked
+  ~ .ny-showcase-panels
+  .ny-showcase-panel--strategy,
+#ny-showcase-events:checked
+  ~ .ny-showcase-panels
+  .ny-showcase-panel--events {
+  display: grid;
+}
+
+.ny-showcase-intro {
+  margin: 0;
+  color: #edf4f2;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.ny-showcase .ny-code-panel {
+  padding: 0.95rem;
+  border-left-width: 4px;
+  box-shadow: none;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.ny-showcase-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.ny-showcase-actions .ny-button,
+.ny-showcase-actions .ny-link-button {
+  min-height: 2.25rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.86rem;
+}
+
+.ny-strategy-showcase {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ny-strategy-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ny-strategy-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.ny-strategy-tabs label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: calc(var(--ny-radius) - 2px);
+  background: rgba(255, 255, 255, 0.07);
+  color: #f7fbfa;
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 850;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.ny-strategy-panel {
+  display: none;
+  gap: 0.75rem;
+}
+
+#ny-strategy-local:checked
+  ~ .ny-strategy-tabs
+  label[for="ny-strategy-local"],
+#ny-strategy-http:checked
+  ~ .ny-strategy-tabs
+  label[for="ny-strategy-http"],
+#ny-strategy-event:checked
+  ~ .ny-strategy-tabs
+  label[for="ny-strategy-event"] {
+  color: #ffffff;
+  background: rgba(15, 139, 141, 0.22);
+  border-color: rgba(15, 139, 141, 0.72);
+}
+
+#ny-strategy-http:checked
+  ~ .ny-strategy-tabs
+  label[for="ny-strategy-http"] {
+  background: rgba(224, 35, 78, 0.22);
+  border-color: rgba(224, 35, 78, 0.72);
+}
+
+#ny-strategy-event:checked
+  ~ .ny-strategy-tabs
+  label[for="ny-strategy-event"] {
+  background: rgba(241, 180, 47, 0.22);
+  border-color: rgba(241, 180, 47, 0.72);
+}
+
+#ny-strategy-local:checked
+  ~ .ny-strategy-panels
+  .ny-strategy-panel--local,
+#ny-strategy-http:checked
+  ~ .ny-strategy-panels
+  .ny-strategy-panel--http,
+#ny-strategy-event:checked
+  ~ .ny-strategy-panels
+  .ny-strategy-panel--event {
+  display: grid;
+}
+
+.ny-visual-output {
+  position: relative;
+  min-height: 13rem;
+  padding: 0.9rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--ny-radius);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    rgba(255, 255, 255, 0.07);
+  background-size: 28px 28px;
+}
+
+.ny-resource-node,
+.ny-api-card,
+.ny-service-node,
+.ny-strategy-router,
+.ny-transport-lane,
+.ny-event-stream,
+.ny-event-timeline,
+.ny-structured-event,
+.ny-event-flow,
+.ny-telemetry-stack,
+.ny-telemetry-card,
+.ny-otlp-route {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--ny-radius);
+  background: rgba(17, 19, 23, 0.68);
+  min-width: 0;
+}
+
+.ny-resource-node {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+
+.ny-resource-node span,
+.ny-scene-label,
+.ny-service-node span,
+.ny-strategy-router span,
+.ny-transport-lane span,
+.ny-event-stream span,
+.ny-telemetry-card span,
+.ny-otlp-route span {
+  color: #b8f2e6;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.ny-resource-node strong,
+.ny-service-node strong,
+.ny-strategy-router strong,
+.ny-transport-lane strong,
+.ny-event-stream strong,
+.ny-structured-event strong,
+.ny-otlp-route strong {
+  color: #ffffff;
+}
+
+.ny-crud-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.7rem;
+}
+
+.ny-api-card {
+  padding: 0.7rem;
+}
+
+.ny-endpoint-row,
+.ny-query-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 1.6rem;
+  margin-top: 0.4rem;
+  color: #f7fbfa;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.74rem;
+}
+
+.ny-endpoint-row span,
+.ny-query-row span {
+  flex: 0 0 3.2rem;
+  color: var(--ny-yellow);
+  font-weight: 900;
+}
+
+.ny-query-row span {
+  color: #b8f2e6;
+}
+
+.ny-endpoint-row strong,
+.ny-query-row strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ny-loader-rail {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.7rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(23, 114, 69, 0.5);
+  border-radius: var(--ny-radius);
+  background: rgba(23, 114, 69, 0.16);
+}
+
+.ny-loader-rail span {
+  margin-right: auto;
   color: #f7fbfa;
   font-size: 0.78rem;
   font-weight: 800;
+}
+
+.ny-loader-rail i {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 3px;
+  background: var(--ny-green);
+  animation: ny-cache-pulse 1800ms ease-in-out infinite;
+}
+
+.ny-loader-rail i:nth-child(3) {
+  animation-delay: 160ms;
+}
+
+.ny-loader-rail i:nth-child(4) {
+  animation-delay: 320ms;
+}
+
+.ny-visual-output--strategy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(8rem, 0.9fr) minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.ny-strategy-call-card {
+  grid-column: 1 / -1;
+  position: relative;
+  min-height: 3rem;
+  padding: 0.6rem 0.75rem 0.6rem 2.45rem;
+  overflow: hidden;
+}
+
+.ny-strategy-call-card::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0.85rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 999px;
+  background: var(--ny-yellow);
+  box-shadow: 0 0 0 0 rgba(254, 199, 53, 0.4);
+  transform: translateY(-50%);
+  animation: ny-call-pulse 2200ms ease-out infinite;
+}
+
+.ny-service-node,
+.ny-strategy-router,
+.ny-strategy-call-card,
+.ny-strategy-result {
+  min-height: 4.9rem;
+  padding: 0.75rem;
+}
+
+.ny-strategy-call-card,
+.ny-strategy-result {
+  min-height: 0;
+  border: 1px solid rgba(254, 199, 53, 0.45);
+  border-radius: var(--ny-radius);
+  background: rgba(254, 199, 53, 0.1);
+}
+
+.ny-strategy-router {
+  border-color: rgba(15, 139, 141, 0.6);
+  background: rgba(15, 139, 141, 0.17);
+  text-align: center;
+}
+
+.ny-transport-lanes {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 0.5rem;
+}
+
+.ny-transport-lane {
+  position: relative;
+  min-height: 2.75rem;
+  padding: 0.45rem 0.75rem 0.45rem 2.3rem;
+  overflow: hidden;
+}
+
+.ny-transport-lane::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0.8rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--ny-teal);
+  transform: translateY(-50%);
+  animation: ny-packet-route 2800ms linear infinite;
+}
+
+.ny-transport-lane--http::before {
+  background: var(--ny-red);
+  animation-delay: 900ms;
+}
+
+.ny-transport-lane--event::before {
+  background: var(--ny-yellow);
+  animation-delay: 1400ms;
+}
+
+.ny-transport-lane strong {
+  display: block;
+  font-size: 0.85rem;
+}
+
+.ny-strategy-call-card span,
+.ny-strategy-result span {
+  display: block;
+  color: #f6d875;
+  font-size: 0.67rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ny-strategy-call-card strong,
+.ny-strategy-result strong {
+  display: block;
+  min-width: 0;
+  margin-top: 0.25rem;
+  overflow: hidden;
+  color: #ffffff;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.83rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ny-visual-output--events {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: 0.65rem;
+  align-items: stretch;
+}
+
+.ny-event-flow,
+.ny-telemetry-stack {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.65rem;
+}
+
+.ny-event-stream {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.8rem;
+}
+
+.ny-event-dot {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--ny-green);
+  box-shadow: 0 0 0 0 rgba(23, 114, 69, 0.55);
+  animation: ny-event-pulse 1900ms ease-out infinite;
+}
+
+.ny-event-stream strong {
+  display: block;
+}
+
+.ny-event-timeline {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.ny-event-timeline span {
+  position: relative;
+  min-height: 1.65rem;
+  padding: 0.35rem 0.45rem 0.35rem 1.4rem;
+  border-radius: calc(var(--ny-radius) - 2px);
+  background: rgba(255, 255, 255, 0.07);
+  color: #f7fbfa;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.ny-event-timeline span::before {
+  content: "";
+  position: absolute;
+  top: 0.8rem;
+  left: 0.55rem;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--ny-yellow);
+}
+
+.ny-structured-event {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  color: #f7fbfa;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.78rem;
+}
+
+.ny-structured-event span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ny-telemetry-card {
+  min-height: 4.85rem;
+  padding: 0.65rem;
+}
+
+.ny-telemetry-card span {
+  display: block;
+  margin-bottom: 0.65rem;
+}
+
+.ny-telemetry-card--traces i {
+  display: block;
+  height: 0.5rem;
+  margin-top: 0.42rem;
+  border-radius: 999px;
+  background: rgba(15, 139, 141, 0.82);
+  animation: ny-trace-glow 2400ms ease-in-out infinite;
+}
+
+.ny-telemetry-card--traces i:nth-child(2) {
+  width: 92%;
+}
+
+.ny-telemetry-card--traces i:nth-child(3) {
+  width: 64%;
+  margin-left: 18%;
+  animation-delay: 220ms;
+}
+
+.ny-telemetry-card--traces i:nth-child(4) {
+  width: 44%;
+  margin-left: 38%;
+  animation-delay: 420ms;
+}
+
+.ny-telemetry-card--metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: auto 1fr;
+  gap: 0.35rem;
+  align-items: end;
+}
+
+.ny-telemetry-card--metrics span {
+  grid-column: 1 / -1;
+}
+
+.ny-telemetry-card--metrics i {
+  display: block;
+  border-radius: 4px 4px 0 0;
+  background: var(--ny-yellow);
+  animation: ny-metric-rise 2200ms ease-in-out infinite;
+}
+
+.ny-telemetry-card--metrics i:nth-child(2) {
+  height: 2rem;
+}
+
+.ny-telemetry-card--metrics i:nth-child(3) {
+  height: 3.2rem;
+  animation-delay: 180ms;
+}
+
+.ny-telemetry-card--metrics i:nth-child(4) {
+  height: 2.55rem;
+  animation-delay: 360ms;
+}
+
+.ny-otlp-route {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.7rem;
+}
+
+@keyframes ny-cache-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.88);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ny-packet-route {
+  0% {
+    left: 0.8rem;
+    opacity: 0;
+  }
+
+  15%,
+  85% {
+    opacity: 1;
+  }
+
+  100% {
+    left: calc(100% - 1.35rem);
+    opacity: 0;
+  }
+}
+
+@keyframes ny-call-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(254, 199, 53, 0.35);
+  }
+
+  70% {
+    box-shadow: 0 0 0 0.75rem rgba(254, 199, 53, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(254, 199, 53, 0);
+  }
+}
+
+@keyframes ny-event-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(23, 114, 69, 0.55);
+  }
+
+  70% {
+    box-shadow: 0 0 0 0.75rem rgba(23, 114, 69, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(23, 114, 69, 0);
+  }
+}
+
+@keyframes ny-trace-glow {
+  0%,
+  100% {
+    opacity: 0.52;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes ny-metric-rise {
+  0%,
+  100% {
+    transform: scaleY(0.75);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
 }
 
 .ny-hero-mark {
@@ -246,15 +882,15 @@ img {
 }
 
 .ny-landing-hero h1 {
-  max-width: 52rem;
+  max-width: 39rem;
   margin: 0;
-  font-size: 4.1rem;
+  font-size: 3.45rem;
   line-height: 1;
   letter-spacing: 0;
 }
 
 .ny-landing-hero .ny-lead {
-  max-width: 44rem;
+  max-width: 37rem;
   margin: 1.45rem 0 0;
   color: #edf4f2;
   font-size: 1.25rem;
@@ -315,24 +951,6 @@ img {
   background: rgba(255, 255, 255, 0.14);
 }
 
-.ny-hero-points {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  padding: 0;
-  margin: 2rem 0 0;
-  list-style: none;
-}
-
-.ny-hero-points li {
-  padding: 0.45rem 0.7rem;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: var(--ny-radius);
-  background: rgba(255, 255, 255, 0.08);
-  color: #f7fbfa;
-  font-weight: 700;
-}
-
 .ny-section {
   padding: 4.5rem clamp(1.25rem, 4rem, 4rem);
 }
@@ -341,15 +959,7 @@ img {
   background: var(--ny-surface);
 }
 
-.ny-section--split {
-  display: grid;
-  grid-template-columns: minmax(17rem, 0.82fr) minmax(0, 1.18fr);
-  gap: 2rem;
-  align-items: start;
-}
-
-.ny-section > *,
-.ny-section--split {
+.ny-section > * {
   max-width: var(--ny-section-width);
   margin-right: auto;
   margin-left: auto;
@@ -360,8 +970,10 @@ img {
   margin-bottom: 2rem;
 }
 
-.ny-section--split .ny-section-header {
-  margin-bottom: 0;
+.ny-section-header--center {
+  margin-right: auto;
+  margin-left: auto;
+  text-align: center;
 }
 
 .ny-section-header h2 {
@@ -387,14 +999,14 @@ img {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.ny-pillar-grid {
+.ny-capability-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
   gap: 1rem;
 }
 
 .ny-card,
-.ny-pillar,
+.ny-capability-card,
 .ny-flow-step,
 .ny-doc-index a,
 .ny-sidebar-group {
@@ -408,20 +1020,66 @@ img {
   box-shadow: 0 10px 26px rgba(17, 19, 23, 0.06);
 }
 
-.ny-pillar {
+.ny-capability-card {
   display: flex;
   flex-direction: column;
-  min-height: 17rem;
+  min-height: 18.5rem;
   padding: 1.45rem;
   box-shadow: 0 12px 28px rgba(17, 19, 23, 0.06);
 }
 
-.ny-pillar-number {
-  margin: 0 0 1.2rem;
+.ny-capability-meta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.ny-capability-number {
+  margin: 0;
   color: var(--ny-muted);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.9rem;
   font-weight: 800;
+}
+
+.ny-capability-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 2.45rem;
+  height: 2.45rem;
+  padding: 0.55rem;
+  border-radius: calc(var(--ny-radius) - 2px);
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--ny-border);
+}
+
+.ny-capability-icon::before {
+  content: "";
+  width: 1.35rem;
+  height: 1.35rem;
+  background: currentColor;
+  -webkit-mask: var(--ny-capability-icon) center / contain no-repeat;
+  mask: var(--ny-capability-icon) center / contain no-repeat;
+}
+
+.ny-capability-icon--blocks {
+  --ny-capability-icon: url("../icons/blocks.svg");
+}
+
+.ny-capability-icon--waypoints {
+  --ny-capability-icon: url("../icons/waypoints.svg");
+}
+
+.ny-capability-icon--network {
+  --ny-capability-icon: url("../icons/network.svg");
+}
+
+.ny-capability-icon--activity {
+  --ny-capability-icon: url("../icons/activity.svg");
 }
 
 .ny-card h3 {
@@ -429,7 +1087,7 @@ img {
   font-size: 1.1rem;
 }
 
-.ny-pillar h3 {
+.ny-capability-card h3 {
   margin: 0 0 0.65rem;
   font-size: 1.35rem;
   line-height: 1.15;
@@ -440,14 +1098,29 @@ img {
   color: var(--ny-muted);
 }
 
-.ny-pillar p:not(.ny-pillar-number) {
+.ny-capability-card p:not(.ny-capability-number) {
   margin: 0;
   color: var(--ny-muted);
 }
 
-.ny-pillar a {
+.ny-capability-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
   margin-top: auto;
   padding-top: 1.25rem;
+}
+
+.ny-capability-tags span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.85rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--ny-border);
+  border-radius: calc(var(--ny-radius) - 2px);
+  background: #f7fbfa;
+  color: var(--ny-text);
+  font-size: 0.78rem;
   font-weight: 800;
 }
 
@@ -455,37 +1128,65 @@ img {
   border-top: 4px solid var(--ny-red);
 }
 
-.ny-pillar--red {
+.ny-capability-card--red {
   border-top: 5px solid var(--ny-red);
+}
+
+.ny-capability-card--red .ny-capability-icon {
+  color: var(--ny-red);
+  background: rgba(211, 61, 55, 0.08);
 }
 
 .ny-card--teal {
   border-top: 4px solid var(--ny-teal);
 }
 
-.ny-pillar--teal {
+.ny-capability-card--teal {
   border-top: 5px solid var(--ny-teal);
+}
+
+.ny-capability-card--teal .ny-capability-icon {
+  color: var(--ny-teal);
+  background: rgba(15, 139, 141, 0.09);
 }
 
 .ny-card--green {
   border-top: 4px solid var(--ny-green);
 }
 
-.ny-pillar--green {
+.ny-capability-card--green {
   border-top: 5px solid var(--ny-green);
 }
 
+.ny-capability-card--green .ny-capability-icon {
+  color: var(--ny-green);
+  background: rgba(23, 114, 69, 0.09);
+}
+
+.ny-capability-card--yellow {
+  border-top: 5px solid var(--ny-yellow);
+}
+
+.ny-capability-card--yellow .ny-capability-icon {
+  color: #9a650f;
+  background: rgba(254, 199, 53, 0.16);
+}
+
 .ny-logo-strip {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 16rem));
+  display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   align-items: stretch;
+  justify-content: center;
 }
 
 .ny-logo-mark {
   display: flex;
+  flex: 1 1 16rem;
   align-items: center;
   justify-content: center;
+  gap: 0.8rem;
+  max-width: 17rem;
   min-height: 6.5rem;
   padding: 1.15rem;
   border: 1px solid var(--ny-border);
@@ -509,6 +1210,17 @@ img {
   max-width: 13.5rem;
   max-height: 3.75rem;
   object-fit: contain;
+}
+
+.ny-logo-mark--azerothcore img {
+  max-width: 3.5rem;
+  max-height: 3.5rem;
+}
+
+.ny-logo-mark--azerothcore span {
+  color: var(--ny-text);
+  font-size: 1.15rem;
+  font-weight: 850;
 }
 
 .ny-flow {
@@ -565,6 +1277,13 @@ img {
   color: inherit;
   background: transparent;
   padding: 0;
+}
+
+.ny-code-panel code[class*="language-"] {
+  display: block;
+  min-width: max-content;
+  font: inherit;
+  text-shadow: none;
 }
 
 .ny-doc-shell {
@@ -948,11 +1667,12 @@ img {
 
 @media (max-width: 980px) {
   .ny-landing-hero {
+    grid-template-columns: 1fr;
     min-height: auto;
   }
 
-  .ny-hero-output {
-    display: none;
+  .ny-showcase {
+    max-width: 48rem;
   }
 
   .ny-landing-hero h1 {
@@ -961,9 +1681,7 @@ img {
 
   .ny-grid,
   .ny-grid--two,
-  .ny-pillar-grid,
-  .ny-flow,
-  .ny-section--split {
+  .ny-flow {
     grid-template-columns: 1fr;
   }
 
@@ -1108,6 +1826,37 @@ img {
     font-size: 1.05rem;
   }
 
+  .ny-showcase {
+    padding: 0.8rem;
+  }
+
+  .ny-showcase-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ny-crud-grid,
+  .ny-visual-output--strategy,
+  .ny-visual-output--events {
+    grid-template-columns: 1fr;
+  }
+
+  .ny-transport-lanes,
+  .ny-structured-event,
+  .ny-otlp-route {
+    grid-column: auto;
+  }
+
+  .ny-structured-event,
+  .ny-otlp-route {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ny-logo-mark {
+    flex-basis: 100%;
+    max-width: 100%;
+  }
+
   .ny-section {
     padding: 3rem 1rem;
   }
@@ -1129,8 +1878,7 @@ img {
   }
 
   .ny-sidebar-nav,
-  .ny-doc-index,
-  .ny-logo-strip {
+  .ny-doc-index {
     grid-template-columns: 1fr;
   }
 }
