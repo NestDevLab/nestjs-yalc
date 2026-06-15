@@ -6,8 +6,8 @@ permalink: /documentation
 
 # Documentation
 
-NestJS-YALC stands for NestJS - Yet Another Library Collection. Use this index
-as the entrypoint for the full wiki, examples, and repository reference.
+Use this index as the entrypoint for setup guides, architecture references,
+runtime libraries, examples, and repository maintenance notes.
 
 ## Start here
 

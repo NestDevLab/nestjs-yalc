@@ -8,7 +8,7 @@ layout: landing
 <section class="ny-landing-hero">
   <div class="ny-hero-content">
     <img class="ny-hero-mark" src="assets/images/logo-small_yalc.png" alt="NestJS-YALC logo">
-    <p class="ny-eyebrow">NestJS - Yet Another Library Collection</p>
+    <p class="ny-eyebrow">NestJS production toolkit</p>
     <h1>Production-grade NestJS, generated from your domain model.</h1>
     <p class="ny-lead">
       Define resources once. NestJS-YALC generates CRUD APIs, protects service
@@ -320,12 +320,14 @@ export class UserService {
 </section>
 
 <section class="ny-section ny-section--surface">
-  <div class="ny-section-header">
+  <div class="ny-section-header ny-section-header--center">
     <h2>Everything NestJS gives you, plus the YALC production layer.</h2>
     <p>
       NestJS already gives you modular architecture, dependency injection,
       TypeScript, and a strong backend ecosystem. YALC adds generated resource
-      contracts, swappable service boundaries, and operational primitives on top.
+      contracts, swappable service boundaries, operational primitives, and
+      pre-optimized modules with AppBootstrap helpers for production-ready
+      NestJS applications.
     </p>
   </div>
 
@@ -424,12 +426,11 @@ export class UserService {
 </section>
 
 <section class="ny-section">
-  <div class="ny-section-header">
-    <h2>The wiki stays where docs belong.</h2>
+  <div class="ny-section-header ny-section-header--center">
+    <h2>Explore the full documentation.</h2>
     <p>
-      The landing page is only the entry point. The full documentation still
-      uses the Git-Wiki theme with search, navigation, page lists, and the
-      existing reference content.
+      Move from first setup to production architecture, generated resources,
+      runtime strategies, EventManager, observability, and runnable examples.
     </p>
   </div>
 
@@ -443,10 +444,10 @@ export class UserService {
       <p><a href="{{ '/getting-started' | relative_url }}">Go to getting started</a></p>
     </article>
     <article class="ny-card ny-card--teal">
-      <h3>Need the full wiki?</h3>
+      <h3>Need the full reference?</h3>
       <p>
-        The documentation index keeps the guide list, repository notes, test
-        commands, planning docs, and every existing reference page together.
+        The documentation index groups architecture guides, package references,
+        example applications, test commands, and publication notes.
       </p>
       <p><a href="{{ '/documentation' | relative_url }}">Open the documentation index</a></p>
     </article>
