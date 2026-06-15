@@ -118,14 +118,14 @@ img {
 
 .ny-logo-link,
 .ny-icon-link {
-  width: 2.5rem;
+  width: 2.85rem;
   padding: 0;
   flex: 0 0 auto;
 }
 
 .ny-logo-link img {
-  width: 1.45rem;
-  height: 1.45rem;
+  width: 1.8rem;
+  height: 1.8rem;
   object-fit: contain;
 }
 
@@ -135,8 +135,8 @@ img {
 }
 
 .ny-icon-link svg {
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 1.55rem;
+  height: 1.55rem;
 }
 
 .ny-main--landing {
@@ -1850,7 +1850,7 @@ img {
 
   .ny-topnav a.ny-logo-link,
   .ny-topnav a.ny-icon-link {
-    flex: 0 0 2.1rem;
+    flex: 0 0 2.55rem;
     padding: 0;
   }
 
