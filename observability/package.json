@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-yalc/observability",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "type": "module",
   "description": "Observability utilities and OpenTelemetry integration for nestjs-yalc",
   "exports": {
