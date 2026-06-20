@@ -13,8 +13,11 @@ The repository uses independent package versioning. A `patch`, `minor`, or
 that need their internal dependency ranges updated.
 
 Select the workspace package or packages that changed. Do not select
-`@nestjs-yalc/framework`: it is the generated aggregate package, and
-it is published from the repository root.
+`@nestjs-yalc/framework`: it is the generated aggregate package, published from
+the repository root, and is not part of the Changesets workspace list. If the
+root package artifact itself changes, such as root `README.md`, package
+metadata, or generated aggregate behavior, bump the root package version
+separately.
 
 After changes land on `dev`, `.github/workflows/changesets.yml` creates or
 updates the `chore(release): version packages` PR. Merging that PR applies the

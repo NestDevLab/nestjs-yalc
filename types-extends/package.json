@@ -11,7 +11,7 @@
     "./*.d.js": "./dist/src/*.d.ts",
     "./*": "./dist/src/*"
   },
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Type definitions to extend modules",
   "author": "Drassil",
   "dependencies": {

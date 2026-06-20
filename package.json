@@ -1,7 +1,7 @@
 {
   "name": "@nestjs-yalc/framework",
   "type": "module",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "NestJS - Yet Another Library Collection",
   "repository": {
     "type": "git",
