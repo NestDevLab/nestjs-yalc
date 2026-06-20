@@ -82,6 +82,36 @@ const normalizeRelPath = (value) => {
   return `./${normalized}`;
 };
 
+const assertNpmReadmeSafe = (readmePath, pkgName) => {
+  const content = fs.readFileSync(readmePath, 'utf8');
+  const forbiddenPatterns = [
+    {
+      pattern: /^---\s*$/m,
+      label: 'Jekyll front matter delimiter',
+    },
+    {
+      pattern: /\{\{.*\}\}/,
+      label: 'Liquid template expression',
+    },
+    {
+      pattern:
+        /<\/?(section|article|div|span|img|a|p|h[1-6]|pre|input|label|strong|i)\b/i,
+      label: 'HTML landing-page markup',
+    },
+  ];
+
+  for (const { pattern, label } of forbiddenPatterns) {
+    if (pattern.test(content)) {
+      throw new Error(
+        `${pkgName} README.md is not npm-safe (${label} found): ${path.relative(
+          cwd,
+          readmePath,
+        )}`,
+      );
+    }
+  }
+};
+
 const toJsPath = (value) => {
   if (value.endsWith('.d.ts')) return normalizeRelPath(value);
   return normalizeRelPath(value.replace(/\.ts$/i, '.js'));
@@ -297,10 +327,13 @@ for (const workspace of packages) {
     fs.copyFileSync(licensePath, path.join(distDir, 'LICENSE'));
   }
 
-  const readmePath = fs.existsSync(path.join(pkgDir, 'README.md'))
-    ? path.join(pkgDir, 'README.md')
-    : path.join(cwd, 'docs', 'README.md');
-  if (fs.existsSync(readmePath)) {
-    fs.copyFileSync(readmePath, path.join(distDir, 'README.md'));
+  const readmePath = path.join(pkgDir, 'README.md');
+  if (!fs.existsSync(readmePath)) {
+    throw new Error(
+      `${pkgName} must provide a package-local README.md before it can be published. ` +
+        'Do not publish docs/README.md because it is the Jekyll landing page.',
+    );
   }
+  assertNpmReadmeSafe(readmePath, pkgName);
+  fs.copyFileSync(readmePath, path.join(distDir, 'README.md'));
 }

@@ -86,8 +86,13 @@ Spread `userProviders.providers` into your module providers and pass `userProvid
 > Note: some helpers are imported from subpaths (e.g., `@nestjs-yalc/crud-gen/object.decorator`, `.../crud-gen.helpers`) while the top-level `src/index.ts` export surface is being finalized.
 
 ## Documentation
-- Overview: `../docs/README.md`
-- GraphQL CRUD guide: `../docs/api-creation.md`
-- Modeling (ModelObject/ModelField): `../docs/crud-gen-modeling.md`
-- Dependency factory options: `../docs/crud-gen-factory.md`
-- REST usage: `../docs/crud-gen-rest.md` (includes controller factory); note you can also expose REST via GraphQL Sofa if you prefer automatic REST from resolvers.
+- Documentation index:
+  https://github.com/NestDevLab/nestjs-yalc/blob/dev/docs/documentation.md
+- GraphQL CRUD guide:
+  https://github.com/NestDevLab/nestjs-yalc/blob/dev/docs/api-creation.md
+- Modeling with `ModelObject` and `ModelField`:
+  https://github.com/NestDevLab/nestjs-yalc/blob/dev/docs/crud-gen-modeling.md
+- Dependency factory options:
+  https://github.com/NestDevLab/nestjs-yalc/blob/dev/docs/crud-gen-factory.md
+- REST usage:
+  https://github.com/NestDevLab/nestjs-yalc/blob/dev/docs/crud-gen-rest.md

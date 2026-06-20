@@ -29,6 +29,12 @@ path aliases, and tests. Public npm packages need a different shape:
 `build-dist.mjs` is the boundary between those two worlds. It rewrites the
 package metadata for npm and keeps generated artifacts out of git.
 
+Every published package must keep its own npm-safe `README.md` next to its
+`package.json`. The build intentionally fails when a publishable package is
+missing that file, or when the README contains Jekyll front matter, Liquid
+expressions, or landing-page HTML. `docs/README.md` is the documentation site
+landing page and must not be used as an npm README fallback.
+
 ## Release commands
 
 Run the full checks before any publication:
