@@ -1,6 +1,15 @@
 name: Publish public npm packages
 
 on:
+  push:
+    branches:
+      - dev
+    paths:
+      - package.json
+      - package-lock.json
+      - '**/package.json'
+      - '**/CHANGELOG.md'
+      - .github/workflows/npm-publish.yml
   release:
     types:
       - published
@@ -72,7 +81,7 @@ jobs:
         run: npm run smoke:public:tarball
 
       - name: Configure npm token fallback
-        if: github.event_name == 'release' || inputs.publish
+        if: github.event_name == 'release' || github.event_name == 'push' || inputs.publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
@@ -81,9 +90,9 @@ jobs:
           fi
 
       - name: Publish packages
-        if: github.event_name == 'release' || inputs.publish
+        if: github.event_name == 'release' || github.event_name == 'push' || inputs.publish
         env:
-          SKIP_EXISTING: ${{ github.event_name == 'release' || inputs['skip-existing'] }}
+          SKIP_EXISTING: ${{ github.event_name == 'release' || github.event_name == 'push' || inputs['skip-existing'] }}
         run: |
           args=(--provenance)
           if [[ "$SKIP_EXISTING" == "true" ]]; then
@@ -93,7 +102,7 @@ jobs:
           node ./scripts/publish-public-packages.mjs "${args[@]}"
 
       - name: Run registry consumer smoke test
-        if: (github.event_name == 'release' || inputs.publish) && inputs['registry-smoke'] != false
+        if: (github.event_name == 'release' || github.event_name == 'push' || inputs.publish) && inputs['registry-smoke'] != false
         run: |
           for attempt in {1..6}; do
             if npm run smoke:public:registry; then

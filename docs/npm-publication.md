@@ -104,16 +104,19 @@ the manual process:
 - `npm publish --access public --provenance`
 - `npm run smoke:public:registry`
 
-The workflow has two entrypoints:
+The workflow has three entrypoints:
 
+- `push` to `dev` when package version metadata, changelogs, or the publish
+  workflow changes: validates, publishes missing package versions, and runs the
+  registry smoke test.
 - `release.published`: validates, publishes, and runs the registry smoke test.
 - `workflow_dispatch`: validates by default. Set `publish = true` to publish
   manually.
 
-The workflow uses `--skip-existing` for release runs and for manual runs by
-default. This makes the job safe to retry after npm propagation delays or a
-partially completed publish: package versions that already exist are skipped,
-and missing package versions are still published.
+The workflow uses `--skip-existing` for automatic push runs, release runs, and
+manual runs by default. This makes the job safe to retry after npm propagation
+delays or a partially completed publish: package versions that already exist are
+skipped, and missing package versions are still published.
 
 Preferred authentication is npm Trusted Publishing with GitHub OIDC. Configure
 each published package under the `@nestjs-yalc` scope with this trusted
