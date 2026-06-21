@@ -102,7 +102,7 @@ jobs:
           node ./scripts/publish-public-packages.mjs "${args[@]}"
 
       - name: Run registry consumer smoke test
-        if: (github.event_name == 'release' || github.event_name == 'push' || inputs.publish) && inputs['registry-smoke'] != false
+        if: (github.event_name == 'release' || github.event_name == 'push' || inputs.publish) && (github.event_name != 'workflow_dispatch' || inputs['registry-smoke'] != false)
         run: |
           for attempt in {1..6}; do
             if npm run smoke:public:registry; then
