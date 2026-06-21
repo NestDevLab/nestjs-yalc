@@ -15,6 +15,16 @@ layout: landing
       boundaries with API Strategy, and standardizes events, errors, and
       observability with EventManager.
     </p>
+    <div class="ny-hero-install" aria-label="Install NestJS-YALC">
+      <p class="ny-install-label">Install the full framework</p>
+<pre class="ny-install-command"><code>npm install @nestjs-yalc/framework</code></pre>
+      <p class="ny-install-alt">...or just what you need:</p>
+      <div class="ny-package-chips" aria-label="Install individual packages">
+        {% for pkg in site.data.public_packages %}
+        <a class="ny-package-chip" href="{{ pkg.npmUrl }}" target="_blank" rel="noopener">{{ pkg.shortName }}</a>
+        {% endfor %}
+      </div>
+    </div>
     <div class="ny-actions">
       <a class="ny-button" href="{{ '/getting-started' | relative_url }}">Start in minutes</a>
       <a class="ny-link-button" href="{{ '/documentation' | relative_url }}">Open the wiki</a>

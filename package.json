@@ -12,7 +12,7 @@
   },
   "homepage": "https://github.com/NestDevLab/nestjs-yalc#readme",
   "scripts": {
-    "ci:checks": "npm run lint && npm run build && npm run test:cov && npm run test:e2e",
+    "ci:checks": "npm run lint && npm run docs:packages:check && npm run build && npm run test:cov && npm run test:e2e",
     "prebuild": "node ./scripts/clean-dist.mjs",
     "build": "tsc --project ./tsconfig.json",
     "postbuild": "node ./build-dist.mjs",
@@ -39,6 +39,8 @@
     "publish:public:ci": "npm run build && node ./scripts/publish-public-packages.mjs --skip-existing --provenance",
     "smoke:public:tarball": "npm run build && node ./scripts/smoke-public-packages.mjs --source=tarball",
     "smoke:public:registry": "node ./scripts/smoke-public-packages.mjs --source=registry",
+    "docs:packages": "node ./scripts/generate-docs-package-data.mjs",
+    "docs:packages:check": "node ./scripts/generate-docs-package-data.mjs --check",
     "changeset": "changeset",
     "changeset:status": "changeset status",
     "version:packages": "changeset version && npm install --package-lock-only --ignore-scripts",

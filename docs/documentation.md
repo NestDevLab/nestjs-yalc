@@ -11,7 +11,7 @@ runtime libraries, examples, and repository maintenance notes.
 
 ## Start here
 
-- [Getting started](./getting-started.md): install the workspace, run the skeleton app, and inspect the copyable resource definition.
+- [Getting started](./getting-started.md): install from npm or set up the workspace, run the skeleton app, and inspect the copyable resource definition.
 - [Backend blueprint](./backend-blueprint.md): the opinionated playbook for new NestJS-YALC backends.
 - [CrudGen-first composition](./crudgen-first-composition.md): how to keep generated CRUD surfaces while customizing the right layer.
 - [Modular platform guide](./how-to-integrate-nestjs-yalc.md): how to build a modular platform with NestJS-YALC.

@@ -919,6 +919,82 @@ img {
   font-size: 1.25rem;
 }
 
+.ny-hero-install {
+  display: grid;
+  max-width: 37rem;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+}
+
+.ny-install-label,
+.ny-install-alt {
+  margin: 0;
+  color: #d9e9e5;
+  font-size: 0.86rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.ny-install-label {
+  color: #b8f2e6;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ny-install-command {
+  max-width: 100%;
+  margin: 0;
+  padding: 0.8rem 0.95rem;
+  overflow-x: auto;
+  border: 1px solid rgba(248, 251, 250, 0.18);
+  border-left: 4px solid var(--ny-red);
+  border-radius: var(--ny-radius);
+  background: rgba(17, 19, 23, 0.64);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
+}
+
+.ny-install-command code {
+  color: #ffffff;
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  font-size: 0.94rem;
+  font-weight: 750;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+.ny-package-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  max-width: 100%;
+}
+
+.ny-package-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  max-width: 100%;
+  padding: 0.32rem 0.62rem;
+  border: 1px solid rgba(248, 251, 250, 0.28);
+  border-radius: 999px;
+  background: rgba(248, 251, 250, 0.08);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.ny-package-chip:hover {
+  border-color: #ffffff;
+  background: rgba(248, 251, 250, 0.16);
+  color: #ffffff;
+}
+
 .ny-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1869,6 +1945,24 @@ img {
 
   .ny-landing-hero .ny-lead {
     font-size: 1.05rem;
+  }
+
+  .ny-hero-install {
+    margin-top: 1.25rem;
+  }
+
+  .ny-install-command {
+    padding: 0.72rem 0.78rem;
+  }
+
+  .ny-install-command code {
+    font-size: 0.84rem;
+  }
+
+  .ny-package-chip {
+    min-height: 1.9rem;
+    padding: 0.3rem 0.52rem;
+    font-size: 0.78rem;
   }
 
   .ny-showcase {

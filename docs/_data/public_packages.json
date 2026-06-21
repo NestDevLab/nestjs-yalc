@@ -1,0 +1,116 @@
+[
+  {
+    "name": "@nestjs-yalc/app",
+    "shortName": "app",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/app",
+    "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/crud-gen",
+    "shortName": "crud-gen",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/crud-gen",
+    "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/api-strategy",
+    "shortName": "api-strategy",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/api-strategy",
+    "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/aws-helpers",
+    "shortName": "aws-helpers",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/aws-helpers",
+    "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/data-loader",
+    "shortName": "data-loader",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/data-loader",
+    "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/database",
+    "shortName": "database",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/database",
+    "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/errors",
+    "shortName": "errors",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/errors",
+    "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/event-manager",
+    "shortName": "event-manager",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/event-manager",
+    "description": "This package offers different tools to manage centralized events"
+  },
+  {
+    "name": "@nestjs-yalc/field-middleware",
+    "shortName": "field-middleware",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/field-middleware",
+    "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/graphql",
+    "shortName": "graphql",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/graphql",
+    "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/interfaces",
+    "shortName": "interfaces",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/interfaces",
+    "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/jest",
+    "shortName": "jest",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/jest",
+    "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/jest-config",
+    "shortName": "jest-config",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/jest-config",
+    "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/kafka",
+    "shortName": "kafka",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/kafka",
+    "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/logger",
+    "shortName": "logger",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/logger",
+    "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/observability",
+    "shortName": "observability",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/observability",
+    "description": "Observability utilities and OpenTelemetry integration for nestjs-yalc"
+  },
+  {
+    "name": "@nestjs-yalc/types",
+    "shortName": "types",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/types",
+    "description": "Type definitions for nestjs yalc"
+  },
+  {
+    "name": "@nestjs-yalc/types-extends",
+    "shortName": "types-extends",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/types-extends",
+    "description": "Type definitions to extend modules"
+  },
+  {
+    "name": "@nestjs-yalc/utils",
+    "shortName": "utils",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/utils",
+    "description": ""
+  }
+]

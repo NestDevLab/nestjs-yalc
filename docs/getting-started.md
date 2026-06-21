@@ -6,11 +6,35 @@ permalink: /getting-started
 
 # Getting Started
 
-This is the shortest useful path through the repository: install dependencies,
-run the minimal example, then inspect the one file that composes a generated
-REST and GraphQL resource.
+This guide starts with the npm install path for application consumers, then
+covers the repository workflow for running the examples and inspecting the one
+file that composes a generated REST and GraphQL resource.
 
-## 1. Install the workspace
+## 1. Install from npm
+
+For a new application that wants the aggregate package, install the full
+framework:
+
+```bash
+npm install @nestjs-yalc/framework
+```
+
+Install only focused packages when you want to keep the dependency surface
+smaller:
+
+```bash
+npm install @nestjs-yalc/crud-gen
+npm install @nestjs-yalc/event-manager @nestjs-yalc/errors @nestjs-yalc/logger
+npm install @nestjs-yalc/observability
+npm install --save-dev @nestjs-yalc/jest @nestjs-yalc/jest-config
+```
+
+Install the NestJS, TypeORM, GraphQL, OpenTelemetry, or testing peer
+dependencies required by the modules you enable. See
+[Consumer installation](./npm-publication.md#consumer-installation) for the
+publication and package details.
+
+## 2. Install the repository workspace
 
 Run this from the repository root:
 
@@ -20,7 +44,7 @@ npm ci
 
 The workspace uses Node 20, ESM, strict TypeScript, and npm workspaces.
 
-## 2. Run the smallest complete example
+## 3. Run the smallest complete example
 
 ```bash
 npm run test:e2e --prefix examples/skeleton/app
@@ -30,7 +54,7 @@ The skeleton app uses an in-memory SQLite database and exposes generated users
 and phones APIs. It is the best first reference because it keeps the app small
 while still showing REST, GraphQL, service, repository, and dataloader wiring.
 
-## 3. Open the copyable resource definition
+## 4. Open the copyable resource definition
 
 Start with:
 
@@ -47,7 +71,7 @@ That file uses `CrudGenResourceFactory` to compose:
 - dataloader wiring
 - GraphQL query and mutation customization
 
-## 4. Use this mental model
+## 5. Use this mental model
 
 ```text
 entity + DTO metadata
@@ -65,7 +89,7 @@ Keep this order when designing a new resource:
 4. Override the service or repository when business logic or persistence behavior changes.
 5. Write a manual controller or resolver only when the API contract is no longer CRUD-shaped.
 
-## 5. Pick the right next guide
+## 6. Pick the right next guide
 
 - [Factory reference](./crud-gen-factory.md): learn which factory to use for backend-only, GraphQL-only, REST-only, or full-resource composition.
 - [Modeling metadata](./crud-gen-modeling.md): understand `ModelObject`, `ModelField`, DTO separation, aliases, joins, and relation metadata.
