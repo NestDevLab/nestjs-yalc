@@ -6,6 +6,12 @@
     "description": ""
   },
   {
+    "name": "@nestjs-yalc/audit",
+    "shortName": "audit",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/audit",
+    "description": "Engine-level database mutation journal utilities for NestJS applications"
+  },
+  {
     "name": "@nestjs-yalc/crud-gen",
     "shortName": "crud-gen",
     "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/crud-gen",

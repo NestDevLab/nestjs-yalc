@@ -49,6 +49,12 @@
       "@nestjs-yalc/app/*": [
         "./app/src/*"
       ],
+      "@nestjs-yalc/audit": [
+        "./audit/src/index.ts"
+      ],
+      "@nestjs-yalc/audit/*": [
+        "./audit/src/*"
+      ],
       "@nestjs-yalc/crud-gen": [
         "./crud-gen/src/index.ts"
       ],
