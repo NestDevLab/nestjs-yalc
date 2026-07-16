@@ -34,6 +34,12 @@
     "useDefineForClassFields": false,
     "emitDeclarationOnly": false,
     "paths": {
+      "@nestjs-yalc/audit": [
+        "./audit/src/index.ts"
+      ],
+      "@nestjs-yalc/audit/*": [
+        "./audit/src/*"
+      ],
       "@nestjs-yalc/api-strategy": [
         "./api-strategy/src/index.ts"
       ],
