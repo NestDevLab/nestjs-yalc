@@ -32,6 +32,7 @@
     "@fastify/static": "^9.1.1",
     "@fastify/view": "^11.1.1",
     "@nestjs-yalc/api-strategy": "file:../../../api-strategy",
+    "@nestjs-yalc/audit": "file:../../../audit",
     "@nestjs-yalc/app": "file:../../../app",
     "@nestjs-yalc/crud-gen": "file:../../../crud-gen",
     "@nestjs-yalc/data-loader": "file:../../../data-loader",
