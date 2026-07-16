@@ -312,4 +312,87 @@ describe('SqliteTriggerJournalDriver', () => {
     expect(offsetRows).toHaveLength(1);
     expect(journalTable).toEqual([{ name: DEFAULT_JOURNAL_TABLE }]);
   });
+
+  it('releases failed installation query runners when no transaction is active', async () => {
+    const queryRunner = {
+      connect: jest.fn(async () => {
+        throw new Error('connection failed');
+      }),
+      isTransactionActive: false,
+      isReleased: false,
+      release: jest.fn(async () => undefined),
+    };
+    const dataSource = {
+      createQueryRunner: jest.fn(() => queryRunner),
+    } as unknown as DataSource;
+
+    await expect(driver.install(dataSource, journalOptions)).rejects.toThrow(
+      'connection failed',
+    );
+
+    expect(queryRunner.release).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not release already released runners and returns zero when cleanup has no change row', async () => {
+    const releasedQueryRunner = {
+      connect: jest.fn(async () => {
+        throw new Error('connection failed');
+      }),
+      isTransactionActive: false,
+      isReleased: true,
+      release: jest.fn(async () => undefined),
+    };
+    const cleanupQueryRunner = {
+      connect: jest.fn(async () => undefined),
+      query: jest.fn(async () => []),
+      release: jest.fn(async () => undefined),
+    };
+    const dataSource = {
+      createQueryRunner: jest
+        .fn()
+        .mockReturnValueOnce(releasedQueryRunner)
+        .mockReturnValueOnce(cleanupQueryRunner),
+    } as unknown as DataSource;
+
+    await expect(driver.install(dataSource, journalOptions)).rejects.toThrow(
+      'connection failed',
+    );
+    await expect(driver.cleanup(dataSource, journalOptions, 1)).resolves.toBe(0);
+
+    expect(releasedQueryRunner.release).not.toHaveBeenCalled();
+    expect(cleanupQueryRunner.release).toHaveBeenCalledTimes(1);
+  });
+
+  it('treats a table with an unavailable SQL definition as a non-virtual table', async () => {
+    const queryRunner = {
+      connect: jest.fn(async () => undefined),
+      startTransaction: jest.fn(async () => undefined),
+      commitTransaction: jest.fn(async () => undefined),
+      rollbackTransaction: jest.fn(async () => undefined),
+      isTransactionActive: false,
+      isReleased: false,
+      release: jest.fn(async () => undefined),
+      query: jest.fn(async (query: string) => {
+        if (query.startsWith('SELECT name, sql')) {
+          return [{ name: 'unavailable_sql', sql: null }];
+        }
+        if (query.startsWith('PRAGMA table_info')) {
+          return [{ name: 'payload', type: 'BLOB' }];
+        }
+        return [];
+      }),
+    };
+    const dataSource = {
+      createQueryRunner: jest.fn(() => queryRunner),
+      name: 'default',
+    } as unknown as DataSource;
+
+    await expect(driver.install(dataSource, journalOptions)).resolves.toEqual(
+      expect.objectContaining({
+        skippedTables: [
+          { tableName: 'unavailable_sql', reason: 'blob-column' },
+        ],
+      }),
+    );
+  });
 });
