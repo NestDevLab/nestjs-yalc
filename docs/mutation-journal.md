@@ -58,6 +58,13 @@ By default the module targets TypeORM's default data source, creates the
 `_mutation_journal` table, and installs SQLite triggers at application
 bootstrap. Reports are available from `MutationJournalService.getReports()`.
 
+## Reference integration
+
+The [task example app module](../examples/task/app/apps/task-system-app/src/app.module.ts)
+uses the module immediately after `TypeOrmModule.forRoot()`. It enables the
+journal by default; set `MUTATION_JOURNAL_ENABLED=false` to disable it, or set
+`MUTATION_JOURNAL_RETENTION_DAYS` to change its 30-day retention period.
+
 ## Configuration
 
 `MutationJournalModule.forRoot()` receives `MutationJournalOptions`.

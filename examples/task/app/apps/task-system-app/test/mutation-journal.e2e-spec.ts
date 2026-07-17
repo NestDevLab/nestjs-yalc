@@ -4,7 +4,6 @@ import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
 import {
   MutationJournalCleanupService,
-  MutationJournalModule,
   MutationJournalQueryService,
   MutationJournalService,
   type MutationJournalRow,
@@ -28,13 +27,7 @@ describe('Mutation journal e2e', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        AppModule,
-        MutationJournalModule.forRoot({
-          enabled: true,
-          retentionDays: RETENTION_DAYS,
-        }),
-      ],
+      imports: [AppModule],
     }).compile();
 
     app = moduleRef.createNestApplication(new FastifyAdapter());

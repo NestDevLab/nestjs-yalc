@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { MercuriusDriver, MercuriusDriverConfig } from '@nestjs/mercurius';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MutationJournalModule } from '@nestjs-yalc/audit';
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar';
 import {
   OmniCollectionEntity,
@@ -51,6 +52,10 @@ import { TaskAppEventModule } from './task-app-event.module';
         OmniExternalRefEntity,
       ],
       synchronize: true,
+    }),
+    MutationJournalModule.forRoot({
+      enabled: process.env.MUTATION_JOURNAL_ENABLED !== 'false',
+      retentionDays: Number(process.env.MUTATION_JOURNAL_RETENTION_DAYS ?? 30),
     }),
     OmniTaskAppModule,
     TasksModule,
