@@ -48,6 +48,7 @@ runtime libraries, examples, and repository maintenance notes.
 ## Runtime libraries
 
 - [API Strategy](./api-strategy.md)
+- [Mutation journal](./mutation-journal.md)
 - [API Strategy and EventManager integration patterns](./api-strategy-event-manager-patterns.md)
 - [EventManager module](./event-manager-module.md)
 - [EventManager event helper](./event-manager-event.md)

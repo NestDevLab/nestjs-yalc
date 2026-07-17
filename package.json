@@ -57,6 +57,7 @@
   "license": "MIT",
   "workspaces": [
     "app",
+    "audit",
     "crud-gen",
     "api-strategy",
     "aws-helpers",
