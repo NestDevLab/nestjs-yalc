@@ -644,8 +644,14 @@ export function getMappedTypeProperties<Entity>(
 ) {
   const fieldMapper = objectToFieldMapper(entityModel);
 
-  return getTypeProperties(entityModel).reduce((r, v) => {
-    const src = getFieldMapperSrcByDst(fieldMapper.field, v.propertyName);
+  const fieldMetadata = getModelFieldMetadataList(entityModel) ?? {};
+  const propertyNames = new Set([
+    ...getTypeProperties(entityModel).map((column) => column.propertyName),
+    ...Object.keys(fieldMetadata),
+  ]);
+
+  return [...propertyNames].reduce((r, propertyName) => {
+    const src = getFieldMapperSrcByDst(fieldMapper.field, propertyName);
 
     if (!fieldMapper.field[src]?.denyFilter) r.push(src);
     return r;
