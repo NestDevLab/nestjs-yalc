@@ -19,6 +19,12 @@
     "dist"
   ],
   "dependencies": {
+    "sofa-api": "^0.18.10",
     "tslib": "^2.6.3"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.1.19",
+    "@nestjs/graphql": "^13.2.5",
+    "graphql": "^16.13.2"
   }
 }
