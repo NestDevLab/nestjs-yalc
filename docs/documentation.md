@@ -43,6 +43,8 @@ runtime libraries, examples, and repository maintenance notes.
 - [CRUD-Gen modeling with ModelObject and ModelField](./crud-gen-modeling.md)
 - [CRUD-Gen dependency factory reference](./crud-gen-factory.md)
 - [CRUD-Gen REST usage](./crud-gen-rest.md)
+- [Scoped JSON projections](./crud-gen-projections.md): one metadata contract
+  for scoped JSON-backed generated CRUD on SQLite and PostgreSQL.
 - [OData-like query facade for REST](./odata-like-query-facade.md)
 
 ## Runtime libraries

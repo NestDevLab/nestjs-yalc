@@ -175,7 +175,26 @@ if (runtimeReferences.length !== 6) {
 
   fs.writeFileSync(
     path.join(targetDir, 'smoke-runtime.mjs'),
-    `const packages = [
+    `import fs from 'node:fs';
+
+const crudGenPackage = JSON.parse(
+  fs.readFileSync(
+    new URL('./node_modules/@nestjs-yalc/crud-gen/package.json', import.meta.url),
+    'utf8',
+  ),
+);
+for (const dependencyName of [
+  '@nestjs-yalc/event-manager',
+  'graphql-type-json',
+]) {
+  if (!crudGenPackage.dependencies?.[dependencyName]) {
+    throw new Error(
+      \`CrudGen package is missing runtime dependency: \${dependencyName}\`,
+    );
+  }
+}
+
+const packages = [
   '@nestjs-yalc/framework',
   '@nestjs-yalc/api-strategy',
   '@nestjs-yalc/crud-gen',

@@ -35,3 +35,8 @@ export * from './api-rest/odata-query.interface.js';
 
 export * from './typeorm/generic.repository.js';
 export * from './typeorm/generic.service.js';
+export * from './projection/projection-resource.js';
+export * from './projection/projection-dialect.js';
+export * from './projection/projection-graphql.js';
+export * from './projection/projection.service.js';
+export * from './projection/projection-schema.js';

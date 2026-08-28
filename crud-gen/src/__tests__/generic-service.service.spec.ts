@@ -1,7 +1,10 @@
 import { jest } from '@jest/globals';
 import { importMockedEsm } from '@nestjs-yalc/jest/esm.helper.js';
 import * as GenericServiceModule from '../typeorm/generic.service.js';
-import { GenericService, GenericServiceFactory } from '../typeorm/generic.service.js';
+import {
+  GenericService,
+  GenericServiceFactory,
+} from '../typeorm/generic.service.js';
 import { BadRequestException } from '@nestjs/common';
 import {
   BaseEntity,
@@ -330,7 +333,7 @@ describe('GenericService', () => {
     mockedIsClass.mockRestore();
   });
 
-  it('should correctly map entities from read to write', () => {
+  it('maps an extended destination only to its declared write property', () => {
     const writeRepo = new CGExtendedRepository();
     writeRepo.target = WriteEntity;
 
@@ -346,8 +349,29 @@ describe('GenericService', () => {
       jsonProperty: 'test',
       noDest: 'test',
       noTransform: '',
+      simpleRename: 'renamed',
     });
-    expect(res).toBeDefined();
+
+    const historicalDuplicateDestination = {
+      data: { sub: { jsonProperty: 'test' } },
+      jsonProperty: { sub: { jsonProperty: 'test' } },
+      noDest: 'test',
+      noTransform: '',
+      simpleRename: 'renamed',
+    };
+
+    // Before this regression fix, JsonTransformer mutated `data` and
+    // GenericService also wrote its return value to the read-only
+    // `jsonProperty`, producing this exact duplicate destination shape.
+    expect(res).not.toEqual(historicalDuplicateDestination);
+    expect(res).toEqual({
+      data: { sub: { jsonProperty: 'test' } },
+      noDest: 'test',
+      noTransform: '',
+      renamed: 'renamed',
+    });
+    expect(res).not.toHaveProperty('jsonProperty');
+    expect(res).not.toHaveProperty('simpleRename');
   });
 
   it('should correctly map entities from read to write (without mapper)', () => {
@@ -704,10 +728,7 @@ describe('GenericService', () => {
     );
 
     const callArgs = plainRepo.find.mock.calls[0][0];
-    expect(callArgs.where).toEqual([
-      { status: 'open' },
-      { status: 'blocked' },
-    ]);
+    expect(callArgs.where).toEqual([{ status: 'open' }, { status: 'blocked' }]);
   });
 
   it('should reject fallback nested OR filters inside AND expressions', async () => {
@@ -804,7 +825,9 @@ describe('GenericService', () => {
 
     const service = new GenericService<any>(repo);
 
-    await expect(service.getEntityListExtended({} as any, false)).rejects.toThrow(
+    await expect(
+      service.getEntityListExtended({} as any, false),
+    ).rejects.toThrow(
       'Repository declares extended query support but does not implement the required extended query methods.',
     );
   });

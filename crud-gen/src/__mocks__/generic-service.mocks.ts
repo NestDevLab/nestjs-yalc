@@ -8,7 +8,7 @@ import { JsonTransformer } from '../transformers.helpers.js';
 export class ReadEntity {
   @ModelField({
     dst: {
-      name: 'jsonProperty',
+      name: 'data',
       transformerDst: JsonTransformer('data', 'sub.jsonProperty'),
     },
   })
@@ -17,13 +17,17 @@ export class ReadEntity {
   @ModelField({})
   noTransform: string;
 
+  @ModelField({ dst: 'renamed' })
+  simpleRename: string;
+
   // should never happen
   @ModelField({ dst: undefined })
   noDest: string;
 }
 
 export class WriteEntity {
-  data: string;
+  data: Record<string, unknown>;
+  renamed: string;
 }
 
 export class MockedEntity extends BaseEntity {}

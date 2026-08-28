@@ -3,11 +3,13 @@
 Factory-driven CRUD generator for NestJS with TypeORM and GraphQL/REST helpers (resolvers/controllers, services, dataloaders, repositories, DTO/field mapping).
 
 ## Install & build (from repo root)
+
 - `npm ci`
 - Build: `npm run build`
 - Tests/coverage: `npm run test:cov` (uses Jest projects; set `JEST_WORKERS` to limit parallelism)
 
 ## Quick start
+
 When the app owns the whole resource surface, use the resource combinator:
 
 ```ts
@@ -72,9 +74,11 @@ export const userProviders = CrudGenDependencyFactory<User>({
   dataloader: { databaseKey: 'id' },
 });
 ```
+
 Spread `userProviders.providers` into your module providers and pass `userProviders.repository` to `TypeOrmModule.forFeature`.
 
 ## Key pieces
+
 - Decorators: `ModelObject`, `ModelField` (mapping, relations, filters, derived fields)
 - Resource composition: `CrudGenResourceFactory` combines backend, GraphQL, and REST generation with per-surface enable/disable options.
 - Layer factories: `CrudGenBackendFactory` for service/repository/dataloader providers, `CrudGenGraphqlFactory` for resolver providers against existing backend tokens, and `CrudGenDependencyFactory` for the legacy backend + GraphQL pack.
@@ -83,9 +87,25 @@ Spread `userProviders.providers` into your module providers and pass `userProvid
 - REST helpers: `CGQueryArgs`, pagination/filter/sorting DTOs, Swagger response helper, `crudRestControllerFactory` to generate full CRUD controllers (list/getById/create/update/delete) wired to your `GenericService`, with optional `readonly`, structured JSON `sorting`/`filters`, flat equality query filters, custom `serviceToken`, and per-mutation toggles
 - Errors: entity CRUD errors, missing arguments/conditions
 
+## Scoped JSON projections
+
+`defineProjectionResource` declares one immutable, server-scoped projection
+contract. It drives generated REST/GraphQL DTOs, TypeORM schema options,
+capability checks, typed SQLite/PostgreSQL queries, expression indexes, and a
+revision-checked generic service. The consuming application provides only a
+trusted scope adapter, repository, and one metadata declaration; it does not
+provide custom standard CRUD methods, duplicate JSON-path logic, or dialect
+SQL.
+
+See [Scoped JSON projections](../docs/crud-gen-projections.md) for the public
+metadata contract, generated read/write semantics, query capabilities,
+SQLite/PostgreSQL behavior, migration-oriented index DDL, promotion policy,
+limitations, and runnable verification.
+
 > Note: some helpers are imported from subpaths (e.g., `@nestjs-yalc/crud-gen/object.decorator`, `.../crud-gen.helpers`) while the top-level `src/index.ts` export surface is being finalized.
 
 ## Documentation
+
 - Documentation index:
   https://github.com/NestDevLab/nestjs-yalc/blob/dev/docs/documentation.md
 - GraphQL CRUD guide:
