@@ -74,7 +74,7 @@ the same service and therefore have the same behavior:
 - Create writes `revision = 1` and uses the trusted scope.
   A duplicate identity in the same scope is an explicit conflict; the same
   identity remains valid in a different scope.
-- Update requires a positive safe-JavaScript-integer `expectedRevision` and at
+- Update requires `expectedRevision` between `1` and `2147483646` and at
   least one declared projected field. The identity is available only in output,
   create input, and conditions: generated REST and GraphQL update inputs omit
   it, and direct update input that supplies it fails closed. The update
@@ -99,7 +99,10 @@ as values but cannot be filtered, sorted, or indexed.
 ## Supported fields and queries
 
 `string`, `integer`, and `instant` fields have the same validation and query
-operators on SQLite and PostgreSQL. `integer` accepts only safe JavaScript integers.
+operators on SQLite and PostgreSQL. `integer` is a signed 32-bit value
+(`-2147483648` through `2147483647`), matching GraphQL `Int` and PostgreSQL
+`integer`. The upper revision value is reserved as the terminal revision so an
+update can never overflow that portable range.
 `instant` accepts canonical UTC ISO strings and normalizes a JavaScript `Date`
 to that string. String equality is supported; string range is intentionally
 not supported. Integer and instant equality/range filters, sorting, and

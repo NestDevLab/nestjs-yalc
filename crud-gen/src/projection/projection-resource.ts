@@ -6,6 +6,10 @@
  */
 export type ProjectionCodec = 'string' | 'instant' | 'integer' | 'json';
 
+/** GraphQL Int and PostgreSQL integer share this portable signed range. */
+export const PROJECTION_INTEGER_MIN = -(2 ** 31);
+export const PROJECTION_INTEGER_MAX = 2 ** 31 - 1;
+
 export type ProjectionStorage = 'column' | 'json';
 
 export type ProjectionFilterOperator = 'eq' | 'range';
@@ -341,8 +345,8 @@ export function assertProjectionResourceDefinition(
  * - string: a JavaScript string; equality and sorting are textual.
  * - instant: a canonical Date#toISOString UTC timestamp; equality, range,
  *   sorting and indexes compare the canonical text representation.
- * - integer: a safe JavaScript integer; equality, range, sorting and indexes
- *   use a signed BIGINT SQL expression.
+ * - integer: a signed 32-bit integer; equality, range, sorting and indexes
+ *   use a signed SQL integer expression.
  * - json: a JSON-compatible value; it is transport-only and has no query or
  *   index capability.
  */
@@ -380,9 +384,13 @@ export function assertProjectionCodecValue(
   }
 
   if (field.codec === 'integer') {
-    if (!Number.isSafeInteger(value)) {
+    if (
+      !Number.isInteger(value) ||
+      (value as number) < PROJECTION_INTEGER_MIN ||
+      (value as number) > PROJECTION_INTEGER_MAX
+    ) {
       throw new TypeError(
-        `Projection integer field ${field.name} must be a safe integer.`,
+        `Projection integer field ${field.name} must be a signed 32-bit integer.`,
       );
     }
     return;

@@ -7,6 +7,7 @@ import {
   getProjectionField,
   getProjectionPathValue,
   normalizeProjectionCodecValue,
+  PROJECTION_INTEGER_MAX,
   setProjectionPathValue,
   type ProjectionResourceDefinition,
 } from './projection-resource.js';
@@ -154,10 +155,13 @@ export class ProjectionResourceService<Entity extends ObjectLiteral> {
     const expectedRevision = input.expectedRevision;
     if (
       typeof expectedRevision !== 'number' ||
-      !Number.isSafeInteger(expectedRevision) ||
-      expectedRevision < 1
+      !Number.isInteger(expectedRevision) ||
+      expectedRevision < 1 ||
+      expectedRevision >= PROJECTION_INTEGER_MAX
     ) {
-      this.invalid('expectedRevision must be a positive safe integer.');
+      this.invalid(
+        `expectedRevision must be an integer between 1 and ${PROJECTION_INTEGER_MAX - 1}.`,
+      );
     }
 
     const patch: ProjectionPatch = {

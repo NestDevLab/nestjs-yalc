@@ -5,6 +5,8 @@ import {
   createProjectionSchemaOptions,
   defineProjectionResource,
   getModelFieldMetadataList,
+  PROJECTION_INTEGER_MAX,
+  PROJECTION_INTEGER_MIN,
   type ProjectionDialect,
 } from '@nestjs-yalc/crud-gen';
 import request from 'supertest';
@@ -389,6 +391,33 @@ describe(`projection spike semantic suite (${dialect})`, () => {
   });
 
   it('keeps integer and instant query semantics portable across dialects', async () => {
+    for (const [guid, priority] of [
+      ['minimum-priority', PROJECTION_INTEGER_MIN],
+      ['maximum-priority', PROJECTION_INTEGER_MAX],
+    ] as const) {
+      await request(app.getHttpServer())
+        .post('/projection-records')
+        .set(authenticated(scopeA))
+        .send({ guid, title: guid, status: 'typed-query', priority })
+        .expect(201);
+    }
+
+    for (const priority of [
+      PROJECTION_INTEGER_MIN - 1,
+      PROJECTION_INTEGER_MAX + 1,
+    ]) {
+      await request(app.getHttpServer())
+        .post('/projection-records')
+        .set(authenticated(scopeA))
+        .send({
+          guid: `out-of-range-${priority}`,
+          title: 'out of range',
+          status: 'typed-query',
+          priority,
+        })
+        .expect(400);
+    }
+
     await request(app.getHttpServer())
       .post('/projection-records')
       .set(authenticated(scopeA))
@@ -399,6 +428,25 @@ describe(`projection spike semantic suite (${dialect})`, () => {
         priority: '10',
       })
       .expect(400);
+
+    const graphOutOfRange = await gql(
+      app,
+      scopeA,
+      `mutation CreateProjectionRecord($input: ProjectionRecordCreateInput!) {
+        createProjectionRecord(input: $input) { guid }
+      }`,
+      {
+        input: {
+          guid: 'graph-out-of-range',
+          title: 'graph out of range',
+          status: 'typed-query',
+          priority: PROJECTION_INTEGER_MAX + 1,
+        },
+      },
+    ).expect(400);
+    expect(graphOutOfRange.body.errors?.[0]?.message).toContain(
+      '32-bit signed integer',
+    );
 
     await request(app.getHttpServer())
       .post('/projection-records')

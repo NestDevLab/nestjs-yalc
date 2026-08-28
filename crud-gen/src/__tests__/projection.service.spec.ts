@@ -6,6 +6,7 @@ import { createProjectionDialect } from '../projection/projection-dialect.js';
 import type { ProjectionDialect } from '../projection/projection-dialect.js';
 import {
   defineProjectionResource,
+  PROJECTION_INTEGER_MAX,
   type ProjectionResourceDefinition,
 } from '../projection/projection-resource.js';
 import {
@@ -546,19 +547,19 @@ describe('ProjectionResourceService', () => {
         { guid: 'record-1' },
         { expectedRevision: 0, title: 'Changed' },
       ),
-    ).rejects.toThrow('positive safe integer');
+    ).rejects.toThrow('integer between 1 and');
     await expect(
       missing.service.updateEntity(
         { guid: 'record-1' },
-        { expectedRevision: Number.MAX_SAFE_INTEGER + 1, title: 'Changed' },
+        { expectedRevision: PROJECTION_INTEGER_MAX, title: 'Changed' },
       ),
-    ).rejects.toThrow('positive safe integer');
+    ).rejects.toThrow(`1 and ${PROJECTION_INTEGER_MAX - 1}`);
     await expect(
       missing.service.updateEntity(
         { guid: 'record-1' },
         { expectedRevision: '1', title: 'Changed' },
       ),
-    ).rejects.toThrow('positive safe integer');
+    ).rejects.toThrow('integer between 1 and');
     await expect(
       missing.service.updateEntity(
         { guid: 'record-1' },

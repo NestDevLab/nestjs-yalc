@@ -9,6 +9,8 @@ import {
   getProjectionField,
   getProjectionPathValue,
   normalizeProjectionCodecValue,
+  PROJECTION_INTEGER_MAX,
+  PROJECTION_INTEGER_MIN,
   setProjectionPathValue,
   type ProjectionFieldDefinition,
   type ProjectionResourceDefinition,
@@ -380,11 +382,26 @@ describe('projection resource contract', () => {
       normalizeProjectionCodecValue(instantField, '2030-01-02'),
     ).toThrow('canonical UTC ISO timestamp');
     expect(() => normalizeProjectionCodecValue(priorityField, '10')).toThrow(
-      'safe integer',
+      'signed 32-bit integer',
     );
     expect(() =>
       normalizeProjectionCodecValue(instantField, new Date('invalid')),
     ).toThrow('valid Date');
+  });
+
+  it('bounds portable integers to the GraphQL and PostgreSQL int32 range', () => {
+    expect(() =>
+      assertProjectionCodecValue(priorityField, PROJECTION_INTEGER_MIN),
+    ).not.toThrow();
+    expect(() =>
+      assertProjectionCodecValue(priorityField, PROJECTION_INTEGER_MAX),
+    ).not.toThrow();
+    expect(() =>
+      assertProjectionCodecValue(priorityField, PROJECTION_INTEGER_MIN - 1),
+    ).toThrow('signed 32-bit integer');
+    expect(() =>
+      assertProjectionCodecValue(priorityField, PROJECTION_INTEGER_MAX + 1),
+    ).toThrow('signed 32-bit integer');
   });
 
   it('enforces nullable, scalar, and JSON codec semantics', () => {
