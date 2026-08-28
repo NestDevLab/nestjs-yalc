@@ -33,7 +33,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
   group: npm-publish-${{ github.ref }}
@@ -46,10 +45,9 @@ env:
   JWT_SECRET_PUB: dummydummy
 
 jobs:
-  publish:
-    name: Validate and publish npm packages
+  validate:
+    name: Validate public npm packages
     runs-on: ubuntu-latest
-    environment: npm
 
     steps:
       - name: Checkout
@@ -80,8 +78,42 @@ jobs:
       - name: Run tarball consumer smoke test
         run: npm run smoke:public:tarball
 
+      - name: Validation-only summary
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.publish)
+        run: |
+          echo "Validation completed without publishing."
+
+  publish:
+    name: Publish public npm packages
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish)
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Build public package distribution
+        run: npm run build
+
       - name: Configure npm token fallback
-        if: github.event_name == 'release' || github.event_name == 'push' || inputs.publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
@@ -90,9 +122,8 @@ jobs:
           fi
 
       - name: Publish packages
-        if: github.event_name == 'release' || github.event_name == 'push' || inputs.publish
         env:
-          SKIP_EXISTING: ${{ github.event_name == 'release' || github.event_name == 'push' || inputs['skip-existing'] }}
+          SKIP_EXISTING: ${{ github.event_name == 'release' || inputs['skip-existing'] }}
         run: |
           args=(--provenance)
           if [[ "$SKIP_EXISTING" == "true" ]]; then
@@ -102,7 +133,7 @@ jobs:
           node ./scripts/publish-public-packages.mjs "${args[@]}"
 
       - name: Run registry consumer smoke test
-        if: (github.event_name == 'release' || github.event_name == 'push' || inputs.publish) && (github.event_name != 'workflow_dispatch' || inputs['registry-smoke'] != false)
+        if: github.event_name == 'release' || inputs['registry-smoke']
         run: |
           for attempt in {1..6}; do
             if npm run smoke:public:registry; then
@@ -114,8 +145,3 @@ jobs:
           done
 
           npm run smoke:public:registry
-
-      - name: Dry-run summary
-        if: github.event_name == 'workflow_dispatch' && !inputs.publish
-        run: |
-          echo "Publish input is false; validation completed without publishing."

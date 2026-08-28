@@ -86,37 +86,43 @@ After publishing, run the same smoke test against the npm registry:
 npm run smoke:public:registry
 ```
 
-The smoke test creates a temporary consumer project outside the monorepo,
-installs the packages, type-checks public imports, and executes runtime imports
-from the public package roots. Use the tarball smoke before publication and the
-registry smoke immediately after publication.
+The smoke test creates temporary consumer projects outside the monorepo. One
+installs the aggregate framework; the other declares only
+`@nestjs-yalc/crud-gen`, type-checks the projection API, and executes both the
+SQLite and PostgreSQL dialect factories. In tarball mode, local package
+overrides let npm resolve transitive Yalc dependencies without adding them as
+top-level consumer dependencies. The smoke also rejects undeclared runtime
+imports anywhere in CrudGen's reachable package graph. Use the tarball smoke
+before publication and the registry smoke immediately after publication.
 
 ## GitHub Actions publication
 
 Public npm releases are automated by
-`.github/workflows/npm-publish.yml`. The workflow runs the same release gates as
-the manual process:
+`.github/workflows/npm-publish.yml`. The workflow separates validation from
+publication. The validation job has no npm environment, token, or OIDC
+permission and runs the same release gates as the manual process:
 
 - `npm run ci:checks`
 - `npm run pack:dry-run`
 - `npm run publish:dry-run`
 - `npm run smoke:public:tarball`
-- `npm publish --access public --provenance`
-- `npm run smoke:public:registry`
+
+Only the separately gated publication job receives the `npm` environment and
+`id-token: write`; it rebuilds the already validated commit, publishes with
+provenance, and runs `npm run smoke:public:registry`.
 
 The workflow has three entrypoints:
 
 - `push` to `dev` when package version metadata, changelogs, or the publish
-  workflow changes: validates, publishes missing package versions, and runs the
-  registry smoke test.
+  workflow changes: validation only; it can never reach npm publication.
 - `release.published`: validates, publishes, and runs the registry smoke test.
 - `workflow_dispatch`: validates by default. Set `publish = true` to publish
   manually.
 
-The workflow uses `--skip-existing` for automatic push runs, release runs, and
-manual runs by default. This makes the job safe to retry after npm propagation
-delays or a partially completed publish: package versions that already exist are
-skipped, and missing package versions are still published.
+The publication job uses `--skip-existing` for release runs and manual runs by
+default. This makes the job safe to retry after npm propagation delays or a
+partially completed publish: package versions that already exist are skipped,
+and missing package versions are still published.
 
 Preferred authentication is npm Trusted Publishing with GitHub OIDC. Configure
 each published package under the `@nestjs-yalc` scope with this trusted
@@ -128,12 +134,13 @@ Workflow: .github/workflows/npm-publish.yml
 Environment: npm
 ```
 
-The workflow requests `id-token: write` and publishes with `--provenance`, so no
-long-lived npm token is required once Trusted Publishing is configured. If a new
-package must be published before npm allows Trusted Publishing to be configured,
-use a short-lived granular npm token with read/write access to `@nestjs-yalc`,
-enable bypass 2FA, store it as the `NPM_TOKEN` repository secret, publish once,
-then remove the secret after the package is converted to Trusted Publishing.
+The publication job requests `id-token: write` and publishes with
+`--provenance`, so no long-lived npm token is required once Trusted Publishing
+is configured. If a new package must be published before npm allows Trusted
+Publishing to be configured, use a short-lived granular npm token with
+read/write access to `@nestjs-yalc`, enable bypass 2FA, store it as the
+`NPM_TOKEN` repository secret, publish once, then remove the secret after the
+package is converted to Trusted Publishing.
 
 ## Versioning model
 
@@ -203,11 +210,15 @@ versions.
 
 ## Publishing order
 
-The helper scripts publish packages in dependency-first order. This prevents the
-aggregate `@nestjs-yalc/framework` package from being published before the
-individual `@nestjs-yalc/*` packages it depends on. For the first real public
-release, publish from a clean git state and verify that the npm user has publish
-rights for the `@nestjs-yalc` scope before running `npm run publish:public`.
+The helper scripts publish acyclic packages in dependency-first order and treat
+mutually dependent packages as one strongly connected component with stable
+lexical order. This keeps the aggregate `@nestjs-yalc/framework` package after
+the individual libraries while representing the framework's existing runtime
+cycles honestly. npm accepts package metadata before every referenced version
+is present; the registry smoke runs only after the complete component has been
+published. For the first real public release, publish from a clean git state and
+verify that the npm user has publish rights for the `@nestjs-yalc` scope before
+running `npm run publish:public`.
 
 If npm rejects a package because the version already exists, create or merge the
 next Changesets version PR and rebuild. npm package versions are immutable.
@@ -226,9 +237,10 @@ Install only a specific library:
 npm install @nestjs-yalc/crud-gen
 ```
 
-Single-library installs are supported, but consumers still need the relevant
-NestJS, GraphQL, TypeORM, or transport peer dependencies required by the feature
-they use.
+Single-library installs are supported. npm installs the declared NestJS,
+GraphQL, TypeORM, and Yalc peer graph for `@nestjs-yalc/crud-gen`; consumers
+still choose and install the concrete TypeORM database driver required by their
+application, such as `sqlite3` or `pg`.
 
 ## Public example mirrors
 

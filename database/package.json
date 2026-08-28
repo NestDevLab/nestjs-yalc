@@ -19,6 +19,10 @@
     "dist"
   ],
   "dependencies": {
+    "@nestjs-yalc/interfaces": "^1.3.3",
     "tslib": "^2.6.3"
+  },
+  "peerDependencies": {
+    "typeorm": "^0.3.28"
   }
 }
