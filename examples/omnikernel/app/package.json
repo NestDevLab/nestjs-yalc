@@ -17,6 +17,7 @@
   "dependencies": {
     "@apollo/server": "^5.5.0",
     "@as-integrations/express5": "^1.1.2",
+    "@nestjs-yalc/app": "file:../../../app",
     "@nestjs-yalc/crud-gen": "file:../../../crud-gen",
     "@nestjs-yalc/data-loader": "file:../../../data-loader",
     "@nestjs-yalc/database": "file:../../../database",

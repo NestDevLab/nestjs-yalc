@@ -24,6 +24,8 @@
     "paths": {
       "@nestjs/*": ["../../../node_modules/@nestjs/*"],
       "typeorm": ["../../../node_modules/typeorm"],
+      "@nestjs-yalc/app": ["../../../app/src/index.ts"],
+      "@nestjs-yalc/app/*": ["../../../app/src/*"],
       "@nestjs-yalc/crud-gen": ["../../../crud-gen/src/index.ts"],
       "@nestjs-yalc/crud-gen/*.js": ["../../../crud-gen/src/*.ts"],
       "@nestjs-yalc/crud-gen/*": ["../../../crud-gen/src/*"],
