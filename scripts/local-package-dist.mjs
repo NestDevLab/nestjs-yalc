@@ -67,7 +67,7 @@ export const getLocalPackageDistEntries = () => {
         pkg,
         compiledSourceDir: path.join(
           compiledDistRoot,
-          path.relative(repoRoot, packageDir),
+          pkg.name.split('/').pop(),
           'src',
         ),
         localDistDir: path.join(packageDir, 'dist'),

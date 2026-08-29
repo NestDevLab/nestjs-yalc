@@ -4,7 +4,8 @@
     "canonical_remote": "origin",
     "publication_remote": "origin",
     "base_branch": "dev",
-    "base_ref": "origin/dev"
+    "base_ref": "origin/dev",
+    "integration_membership": "legacy"
   },
   "integration": {
     "branch": "dev-integration",
@@ -12,7 +13,24 @@
     "strategy": "cherry-pick",
     "stacks": []
   },
-  "stacks": [],
+  "stacks": [
+    {
+      "id": "release-publish-omnikernel",
+      "branch": "pr/release-publish-omnikernel",
+      "base": "origin/dev",
+      "target_remote": "origin",
+      "target_branch": "dev",
+      "integration_branch": "dev-integration",
+      "commits": [],
+      "state": "published",
+      "publication": {
+        "enabled": true
+      },
+      "meta": {}
+    }
+  ],
   "syncwheel_worktree_root": "var/syncwheel",
-  "syncwheel_tracking": "git-tracked"
+  "syncwheel_tracking": "git-tracked",
+  "repository_mode": "delivery",
+  "channels": []
 }

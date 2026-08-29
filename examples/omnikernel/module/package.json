@@ -2,8 +2,7 @@
   "name": "@nestjs-yalc/omnikernel-module",
   "version": "1.0.0",
   "type": "module",
-  "private": true,
-  "description": "Foundational OmniKernel example module for nestjs-yalc",
+  "description": "Foundational OmniKernel persistence module for nestjs-yalc",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "exports": {
@@ -35,6 +34,7 @@
     "@nestjs/event-emitter": "^3.0.1",
     "@nestjs/graphql": "^13.2.5",
     "@nestjs/typeorm": "^11.0.1",
+    "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "graphql": "^16.13.2",
     "graphql-type-json": "^0.3.2",

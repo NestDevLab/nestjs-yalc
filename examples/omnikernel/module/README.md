@@ -1,8 +1,8 @@
 # OmniKernel Module
 
-`@nestjs-yalc/omnikernel-module` is a private workspace package that provides
-the reusable OmniKernel persistence substrate. It is buildable with the normal
-root workspace build, but is not a published framework package.
+`@nestjs-yalc/omnikernel-module` is the public package that provides the
+reusable OmniKernel persistence substrate. It is built and published with the
+normal framework release pipeline.
 
 The module deliberately contains no REST controllers, GraphQL resolvers, or
 application authentication. A consuming app owns those protocol and trust
@@ -16,12 +16,12 @@ compiled directory and declares only versioned internal dependencies, so a
 tarball does not depend on a consumer being adjacent to this repository.
 
 ```bash
-npm run build
-npm pack --dry-run --json ./examples/omnikernel/module
+npm install @nestjs-yalc/omnikernel-module
 ```
 
-The package stays `private` and is excluded from the public framework export
-and publishing pipeline. `dist` is generated output and is not committed.
+The source workspace builds into its local `dist/src`; the root release build
+then materializes the package into `var/dist/omnikernel-module` with versioned
+internal dependencies. Generated output is not committed.
 
 ## Server-owned scope
 
