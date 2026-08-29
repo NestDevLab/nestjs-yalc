@@ -118,5 +118,11 @@
     "shortName": "utils",
     "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/utils",
     "description": ""
+  },
+  {
+    "name": "@nestjs-yalc/omnikernel-module",
+    "shortName": "omnikernel-module",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/omnikernel-module",
+    "description": "Foundational OmniKernel persistence module for nestjs-yalc"
   }
 ]

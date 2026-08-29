@@ -27,6 +27,11 @@ const version = args.get('version') ?? rootPackage.version;
 const crudGenPackage = readJson(path.join(repoRoot, 'crud-gen', 'package.json'));
 const crudGenVersion =
   args.get('crud-gen-version') ?? crudGenPackage.version;
+const omniKernelPackage = readJson(
+  path.join(repoRoot, 'examples', 'omnikernel', 'module', 'package.json'),
+);
+const omniKernelVersion =
+  args.get('omnikernel-version') ?? omniKernelPackage.version;
 
 if (!['tarball', 'registry'].includes(source)) {
   console.error(`Unsupported smoke source: ${source}`);
@@ -39,10 +44,12 @@ const tempRoot = fs.mkdtempSync(
 const tarballDir = path.join(tempRoot, 'tarballs');
 const frameworkConsumerDir = path.join(tempRoot, 'framework-consumer');
 const crudGenConsumerDir = path.join(tempRoot, 'crud-gen-consumer');
+const omniKernelConsumerDir = path.join(tempRoot, 'omnikernel-consumer');
 
 fs.mkdirSync(tarballDir, { recursive: true });
 fs.mkdirSync(frameworkConsumerDir, { recursive: true });
 fs.mkdirSync(crudGenConsumerDir, { recursive: true });
+fs.mkdirSync(omniKernelConsumerDir, { recursive: true });
 
 try {
   const tarballs =
@@ -104,6 +111,37 @@ try {
     crudGenConsumerDir,
   );
   run('node', ['smoke-runtime.mjs'], crudGenConsumerDir);
+
+  const omniKernelClosure =
+    source === 'tarball'
+      ? getRuntimeDependencyClosure('@nestjs-yalc/omnikernel-module')
+      : undefined;
+  if (omniKernelClosure?.errors.length) {
+    throw new Error(
+      `OmniKernel runtime dependency closure is incomplete:\n- ${omniKernelClosure.errors.join(
+        '\n- ',
+      )}`,
+    );
+  }
+
+  writeOmniKernelConsumerProject(
+    omniKernelConsumerDir,
+    source,
+    omniKernelVersion,
+    tarballs,
+    source === 'tarball' ? Array.from(tarballs.keys()) : [],
+  );
+  run(
+    'npm',
+    ['install', '--no-audit', '--no-fund', '--ignore-scripts'],
+    omniKernelConsumerDir,
+  );
+  run(
+    'node',
+    [path.join(repoRoot, 'node_modules', 'typescript', 'bin', 'tsc'), '-p', '.'],
+    omniKernelConsumerDir,
+  );
+  run('node', ['smoke-runtime.mjs'], omniKernelConsumerDir);
 
   console.log(`Public package smoke test passed (${source}).`);
 } finally {
@@ -430,6 +468,115 @@ if (
 }
 
 console.log('Standalone CrudGen import passed.');
+`,
+  );
+}
+
+function writeOmniKernelConsumerProject(
+  targetDir,
+  packageSource,
+  packageVersion,
+  tarballs,
+  closurePackageNames,
+) {
+  const omniKernelTarget =
+    packageSource === 'tarball'
+      ? `file:${requireTarball(tarballs, '@nestjs-yalc/omnikernel-module')}`
+      : packageVersion;
+  const overrides =
+    packageSource === 'tarball'
+      ? Object.fromEntries(
+          closurePackageNames
+            .filter(
+              (packageName) =>
+                packageName !== '@nestjs-yalc/omnikernel-module',
+            )
+            .map((packageName) => [
+              packageName,
+              `file:${requireTarball(tarballs, packageName)}`,
+            ]),
+        )
+      : undefined;
+
+  fs.writeFileSync(
+    path.join(targetDir, 'package.json'),
+    JSON.stringify(
+      {
+        private: true,
+        type: 'module',
+        dependencies: {
+          '@nestjs-yalc/omnikernel-module': omniKernelTarget,
+        },
+        ...(overrides && Object.keys(overrides).length > 0
+          ? { overrides }
+          : {}),
+      },
+      null,
+      2,
+    ),
+  );
+
+  fs.writeFileSync(
+    path.join(targetDir, 'tsconfig.json'),
+    JSON.stringify(
+      {
+        compilerOptions: {
+          module: 'NodeNext',
+          moduleResolution: 'NodeNext',
+          target: 'ES2022',
+          strict: true,
+          skipLibCheck: true,
+          noEmit: true,
+        },
+        include: ['smoke-types.ts'],
+      },
+      null,
+      2,
+    ),
+  );
+
+  fs.writeFileSync(
+    path.join(targetDir, 'smoke-types.ts'),
+    `import {
+  OmniKernelModule,
+  OmniRecordEntity,
+  createOmniExtensionProjectionRegistration,
+} from '@nestjs-yalc/omnikernel-module';
+
+void [
+  OmniKernelModule,
+  OmniRecordEntity,
+  createOmniExtensionProjectionRegistration,
+];
+`,
+  );
+
+  fs.writeFileSync(
+    path.join(targetDir, 'smoke-runtime.mjs'),
+    `import fs from 'node:fs';
+import * as omniKernel from '@nestjs-yalc/omnikernel-module';
+
+const consumerPackage = JSON.parse(
+  fs.readFileSync(new URL('./package.json', import.meta.url), 'utf8'),
+);
+if (
+  Object.keys(consumerPackage.dependencies ?? {}).join(',') !==
+  '@nestjs-yalc/omnikernel-module'
+) {
+  throw new Error('Standalone consumer must declare only OmniKernel.');
+}
+
+for (const exportName of [
+  'OmniKernelModule',
+  'OmniRecordEntity',
+  'createOmniExtensionProjectionRegistration',
+]) {
+  if (!(exportName in omniKernel)) {
+    throw new Error(\`Missing OmniKernel export: \${exportName}\`);
+  }
+}
+
+console.log('Standalone OmniKernel import passed.');
 `,
   );
 }

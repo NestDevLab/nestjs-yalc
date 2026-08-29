@@ -168,9 +168,15 @@ for (const workspace of packages) {
   if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
   const srcDir = path.join(pkgDir, 'src');
   const hasSrcDir = fs.existsSync(srcDir);
-  const sourceOutputDir = hasSrcDir
+  const packageLocalOutputDir = hasSrcDir
+    ? path.join(pkgDir, 'dist', 'src')
+    : path.join(pkgDir, 'dist');
+  const rootOutputDir = hasSrcDir
     ? path.join(distRoot, path.relative(cwd, pkgDir), 'src')
     : path.join(distRoot, path.relative(cwd, pkgDir));
+  const sourceOutputDir = fs.existsSync(packageLocalOutputDir)
+    ? packageLocalOutputDir
+    : rootOutputDir;
 
   if (workspace === '.') {
     const frameworkSrcDir = path.join(distDir, 'src');
