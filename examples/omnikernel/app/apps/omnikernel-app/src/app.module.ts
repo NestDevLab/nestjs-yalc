@@ -36,7 +36,7 @@ import { OmniApiModule } from './omni/omni-api.module';
       ],
       synchronize: true,
     }),
-    OmniApiModule,
+    OmniApiModule.register('default'),
   ],
   providers: [UUIDScalar],
 })

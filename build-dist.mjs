@@ -52,6 +52,7 @@ const frameworkExcludedPackageNames = new Set([
 const frameworkRuntimeExports = workspacePackages.filter(({ pkg }) => {
   return (
     pkg.name.startsWith('@nestjs-yalc/') &&
+    pkg.private !== true &&
     !pkg.name.includes('/types') &&
     !frameworkExcludedPackageNames.has(pkg.name)
   );
@@ -60,6 +61,7 @@ const frameworkRuntimeExports = workspacePackages.filter(({ pkg }) => {
 const frameworkTypeExports = workspacePackages.filter(({ pkg }) => {
   return (
     pkg.name.startsWith('@nestjs-yalc/') &&
+    pkg.private !== true &&
     !frameworkExcludedPackageNames.has(pkg.name)
   );
 });
@@ -158,6 +160,7 @@ for (const workspace of packages) {
   const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
   const pkgName = pkg.name;
   if (!pkgName) continue;
+  if (workspace !== '.' && pkg.private === true) continue;
 
   const pkgFolder = pkgName.split('/').pop();
   const relativeDir = pkgFolder;

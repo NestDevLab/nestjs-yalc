@@ -1,14 +1,20 @@
-import { CrudGenBackendFactory } from '@nestjs-yalc/crud-gen/crud-gen.helpers';
-import { OmniExternalRefEntity } from './base/omni-external-ref.entity';
-import { OmniExternalRefService } from './omni-external-ref.service';
+import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
+import { OmniExternalRefService } from './omni-external-ref.service.js';
+import {
+  omniBackendServiceToken,
+  omniScopedBackendProvidersFactory,
+} from './omni-scoped.backend.js';
 
 export const omniExternalRefBackendProvidersFactory = (dbConnection: string) =>
-  CrudGenBackendFactory<OmniExternalRefEntity>({
+  omniScopedBackendProvidersFactory<OmniExternalRefEntity>({
     entityModel: OmniExternalRefEntity,
-    service: {
-      dbConnection,
-      entityModel: OmniExternalRefEntity,
-      providerClass: OmniExternalRefService,
-    },
-    dataloader: { databaseKey: 'guid' },
+    dbConnection,
+    serviceToken: omniBackendServiceToken(OmniExternalRefService),
+    serviceProvider: OmniExternalRefService,
+    createService: (repository, scope, options) =>
+      new OmniExternalRefService(
+        repository,
+        scope,
+        options.deletion.externalRef,
+      ),
   });

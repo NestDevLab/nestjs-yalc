@@ -14,7 +14,7 @@
   "scripts": {
     "ci:checks": "npm run lint && npm run docs:packages:check && npm run build && npm run test:cov && npm run test:e2e",
     "prebuild": "node ./scripts/clean-dist.mjs",
-    "build": "tsc --project ./tsconfig.json",
+    "build": "tsc --project ./tsconfig.json && npm run build --workspace @nestjs-yalc/omnikernel-module",
     "postbuild": "node ./build-dist.mjs",
     "build:watch": "tsc-watch",
     "lint": "npm run lint:no-fix -- --fix",
@@ -75,7 +75,8 @@
     "observability",
     "types",
     "types-extends",
-    "utils"
+    "utils",
+    "examples/omnikernel/module"
   ],
   "peerDependencies": {
     "@nestjs/apollo": "^13.2.5",

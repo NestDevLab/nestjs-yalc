@@ -16,6 +16,11 @@ backend substrate, while this app composes protocol-specific APIs in
 - Structured REST `sorting` and `filters` query parameters on generated
   controllers.
 - A single SQLite in-memory persistence surface shared by REST and GraphQL.
+- Server-owned Omni scope propagated through generated CRUD, repositories, and
+  GraphQL dataloaders. The normal example uses the configured `default` scope;
+  a production app should supply an authenticated scope resolver.
+- Scoped uniqueness, composite relation indexes, payload schema/revision
+  metadata, and the documented hard-delete/tombstone lifecycle policy.
 
 ## Exposed REST Resources
 
@@ -36,6 +41,25 @@ backend substrate, while this app composes protocol-specific APIs in
 ```bash
 npm run test:e2e --prefix examples/omnikernel/app
 ```
+
+### OmniKernel B2 dialect verification
+
+`apps/omnikernel-app/test/omnikernel-b2.e2e-spec.ts` is a test-only app that
+uses a simple bearer-token fixture to exercise two trusted server scopes. It is
+not production authentication. The suite proves generated REST and GraphQL
+CRUD parity, cross-scope negative cases, relation dataloader isolation, raw
+JSON validation, and bounded `EXPLAIN` evidence for SQLite and PostgreSQL.
+
+Run SQLite (the default):
+
+```bash
+OMNIKERNEL_B2_DIALECT=sqlite npm run test:e2e --prefix examples/omnikernel/app -- --runInBand --runTestsByPath apps/omnikernel-app/test/omnikernel-b2.e2e-spec.ts
+```
+
+For PostgreSQL, provide a disposable loopback-only PostgreSQL 16 instance and
+set `OMNIKERNEL_B2_DIALECT=postgres` plus `OMNIKERNEL_B2_POSTGRES_URL`. This
+bounded fixture checks index selection at a small diagnostic volume; it is not
+a production capacity benchmark.
 
 ### Isolated projection contract verification
 

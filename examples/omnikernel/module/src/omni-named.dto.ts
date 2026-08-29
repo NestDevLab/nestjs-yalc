@@ -1,12 +1,25 @@
-import { InputType, ObjectType, OmitType, PartialType } from '@nestjs/graphql';
+import {
+  InputType,
+  Int,
+  ObjectType,
+  OmitType,
+  PartialType,
+} from '@nestjs/graphql';
 import {
   ModelField,
   ModelObject,
-} from '@nestjs-yalc/crud-gen/object.decorator';
-import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar';
-import returnValue from '@nestjs-yalc/utils/returnValue';
-import { IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
-import { OmniNamedEntity } from './base/omni-named.entity';
+} from '@nestjs-yalc/crud-gen/object.decorator.js';
+import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
+import returnValue from '@nestjs-yalc/utils/returnValue.js';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
+import { OmniNamedEntity } from './base/omni-named.entity.js';
+import { assignOmniPublicDto } from './omni-dto.helpers.js';
 
 @ObjectType()
 @ModelObject()
@@ -14,13 +27,17 @@ export class OmniNamedType extends OmniNamedEntity {
   constructor(data?: Partial<OmniNamedType>) {
     super();
     if (data) {
-      Object.assign(this, data);
+      assignOmniPublicDto(this, data);
     }
   }
 
   @ModelField({ gqlType: returnValue(UUIDScalar), isRequired: true })
   @IsUUID()
   guid!: string;
+
+  @ModelField({ gqlType: returnValue(Int) })
+  @IsInt()
+  revision!: number;
 
   @ModelField({
     gqlType: returnValue(String),
@@ -50,7 +67,7 @@ export class OmniNamedType extends OmniNamedEntity {
 @ModelObject()
 export class OmniNamedCreateInput extends OmitType(
   OmniNamedType,
-  ['createdAt', 'updatedAt'] as const,
+  ['createdAt', 'updatedAt', 'revision'] as const,
   InputType,
 ) {}
 

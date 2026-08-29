@@ -1,7 +1,9 @@
-import { GenericService } from '@nestjs-yalc/crud-gen/typeorm/generic.service';
-import type { DeepPartial } from 'typeorm';
-import { OmniExternalRefEntity } from './base/omni-external-ref.entity';
-import { OmniExternalRefInternalType } from './omni-external-ref-internal-type.enum';
+import { ConflictException } from '@nestjs/common';
+import type { CrudGenFindManyOptions } from '@nestjs-yalc/crud-gen/api-graphql/crud-gen-gql.interface.js';
+import type { DeepPartial, FindOptionsWhere } from 'typeorm';
+import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
+import { OmniExternalRefInternalType } from './omni-external-ref-internal-type.enum.js';
+import { OmniScopedService } from './omni-scoped.service.js';
 
 export interface OmniExternalRefLookup {
   provider: string;
@@ -23,7 +25,7 @@ export type OmniExternalRefUpsertInput = Omit<
     'provider' | 'externalId' | 'internalType' | 'internalId'
   >;
 
-export class OmniExternalRefService extends GenericService<OmniExternalRefEntity> {
+export class OmniExternalRefService extends OmniScopedService<OmniExternalRefEntity> {
   async findByExternalIdentity({
     provider,
     externalId,
@@ -32,10 +34,11 @@ export class OmniExternalRefService extends GenericService<OmniExternalRefEntity
   }: OmniExternalRefLookup): Promise<OmniExternalRefEntity | null> {
     return this.getRepository().findOne({
       where: {
+        scopeId: this.scopeId,
         provider,
         externalId,
-        account,
-        container,
+        account: account ?? '',
+        container: container ?? '',
       },
     });
   }
@@ -47,6 +50,7 @@ export class OmniExternalRefService extends GenericService<OmniExternalRefEntity
   ): Promise<OmniExternalRefEntity[]> {
     return this.getRepository().find({
       where: {
+        scopeId: this.scopeId,
         internalType,
         internalId,
         ...(provider ? { provider } : {}),
@@ -78,11 +82,13 @@ export class OmniExternalRefService extends GenericService<OmniExternalRefEntity
     if (existing) {
       return this.updateEntity(
         { guid: existing.guid },
-        input,
+        this.normalizeExternalIdentity(input),
       ) as Promise<OmniExternalRefEntity>;
     }
 
-    return this.createEntity(input) as Promise<OmniExternalRefEntity>;
+    return this.createEntity(
+      this.normalizeExternalIdentity(input),
+    ) as Promise<OmniExternalRefEntity>;
   }
 
   async syncDocumentReference(
@@ -105,5 +111,81 @@ export class OmniExternalRefService extends GenericService<OmniExternalRefEntity
       internalType: OmniExternalRefInternalType.Collection,
       internalId,
     });
+  }
+
+  override async createEntity(
+    input: DeepPartial<OmniExternalRefEntity>,
+    findOptions?: CrudGenFindManyOptions<OmniExternalRefEntity>,
+    returnEntity?: true,
+  ): Promise<OmniExternalRefEntity>;
+  override async createEntity(
+    input: DeepPartial<OmniExternalRefEntity>,
+    findOptions?: CrudGenFindManyOptions<OmniExternalRefEntity>,
+    returnEntity?: boolean,
+  ): Promise<OmniExternalRefEntity | boolean>;
+  override async createEntity(
+    input: DeepPartial<OmniExternalRefEntity>,
+    findOptions?: CrudGenFindManyOptions<OmniExternalRefEntity>,
+    returnEntity = true,
+  ): Promise<OmniExternalRefEntity | boolean> {
+    const normalized = this.normalizeExternalIdentity(input);
+    this.rejectServerFields(normalized as object);
+    if (
+      typeof normalized.provider === 'string' &&
+      typeof normalized.externalId === 'string'
+    ) {
+      const existing = await this.findByExternalIdentity({
+        provider: normalized.provider,
+        externalId: normalized.externalId,
+        account: normalized.account ?? null,
+        container: normalized.container ?? null,
+      });
+      if (existing) {
+        throw new ConflictException(
+          'External reference identity already exists in this scope.',
+        );
+      }
+    }
+    return super.createEntity(normalized, findOptions, returnEntity);
+  }
+
+  override async updateEntity(
+    conditions: FindOptionsWhere<OmniExternalRefEntity>,
+    input: DeepPartial<OmniExternalRefEntity>,
+    findOptions?: CrudGenFindManyOptions<OmniExternalRefEntity>,
+    returnEntity?: true,
+  ): Promise<OmniExternalRefEntity>;
+  override async updateEntity(
+    conditions: FindOptionsWhere<OmniExternalRefEntity>,
+    input: DeepPartial<OmniExternalRefEntity>,
+    findOptions?: CrudGenFindManyOptions<OmniExternalRefEntity>,
+    returnEntity?: boolean,
+  ): Promise<OmniExternalRefEntity | boolean>;
+  override async updateEntity(
+    conditions: FindOptionsWhere<OmniExternalRefEntity>,
+    input: DeepPartial<OmniExternalRefEntity>,
+    findOptions?: CrudGenFindManyOptions<OmniExternalRefEntity>,
+    returnEntity = true,
+  ): Promise<OmniExternalRefEntity | boolean> {
+    return super.updateEntity(
+      conditions,
+      this.normalizeExternalIdentity(input),
+      findOptions,
+      returnEntity,
+    );
+  }
+
+  private normalizeExternalIdentity<
+    T extends DeepPartial<OmniExternalRefEntity>,
+  >(input: T): T {
+    return {
+      ...input,
+      ...(Object.prototype.hasOwnProperty.call(input, 'account')
+        ? { account: input.account ?? '' }
+        : {}),
+      ...(Object.prototype.hasOwnProperty.call(input, 'container')
+        ? { container: input.container ?? '' }
+        : {}),
+    };
   }
 }

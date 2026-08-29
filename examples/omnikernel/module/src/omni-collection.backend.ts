@@ -1,14 +1,16 @@
-import { CrudGenBackendFactory } from '@nestjs-yalc/crud-gen/crud-gen.helpers';
-import { OmniCollectionEntity } from './omni-collection.entity';
-import { OmniCollectionService } from './omni-collection.service';
+import { OmniCollectionEntity } from './omni-collection.entity.js';
+import { OmniCollectionService } from './omni-collection.service.js';
+import {
+  omniBackendServiceToken,
+  omniScopedBackendProvidersFactory,
+} from './omni-scoped.backend.js';
 
 export const omniCollectionBackendProvidersFactory = (dbConnection: string) =>
-  CrudGenBackendFactory<OmniCollectionEntity>({
+  omniScopedBackendProvidersFactory<OmniCollectionEntity>({
     entityModel: OmniCollectionEntity,
-    service: {
-      dbConnection,
-      entityModel: OmniCollectionEntity,
-      providerClass: OmniCollectionService,
-    },
-    dataloader: { databaseKey: 'guid' },
+    dbConnection,
+    serviceToken: omniBackendServiceToken(OmniCollectionService),
+    serviceProvider: OmniCollectionService,
+    createService: (repository, scope, options) =>
+      new OmniCollectionService(repository, scope, options.deletion.collection),
   });
