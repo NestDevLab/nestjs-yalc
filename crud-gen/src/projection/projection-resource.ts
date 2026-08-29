@@ -9,6 +9,7 @@ export type ProjectionCodec =
   | 'uuid'
   | 'instant'
   | 'integer'
+  | 'boolean'
   | 'json';
 
 /** GraphQL Int and PostgreSQL integer share this portable signed range. */
@@ -35,6 +36,36 @@ export const projectionCanonicalUuidPattern =
 
 export interface ProjectionIndexDefinition {
   name: string;
+}
+
+/** Portable scalar values accepted by a predicate unique constraint. */
+export type ProjectionPredicateLiteral = string | number | boolean;
+
+/**
+ * A same-scope foreign key over promoted column fields. The resource scope is
+ * always the first local column; the target scope is always the first remote
+ * column, so applications cannot accidentally create cross-scope references.
+ */
+export interface ProjectionReferenceDefinition {
+  name: string;
+  fields: readonly string[];
+  target: {
+    tableName: string;
+    scopeColumn: string;
+    identityColumns: readonly string[];
+  };
+  onDelete: 'RESTRICT' | 'NO ACTION';
+}
+
+/**
+ * A same-scope partial unique index over promoted column fields. Predicates
+ * stay structural here and are compiled by the entity/table builder.
+ */
+export interface ProjectionPredicateUniqueConstraint {
+  name: string;
+  fields: readonly string[];
+  /** Omit for a full unique index; provide a map for a portable partial one. */
+  predicate?: Readonly<Record<string, ProjectionPredicateLiteral>>;
 }
 
 export interface ProjectionFieldDefinition {
@@ -72,6 +103,8 @@ export interface ProjectionResourceDefinition {
   };
   deletion: 'hard';
   fields: readonly ProjectionFieldDefinition[];
+  references?: readonly ProjectionReferenceDefinition[];
+  uniqueConstraints?: readonly ProjectionPredicateUniqueConstraint[];
 }
 
 function freezeDeep<T>(value: T): T {
@@ -111,6 +144,22 @@ function assertIdentifier(
 ): asserts value is string {
   if (typeof value !== 'string' || value.length === 0) {
     throw new TypeError(`${label} must be a non-empty identifier.`);
+  }
+}
+
+const projectionSchemaIdentifierPattern = /^[A-Za-z_][A-Za-z0-9_-]*$/;
+
+function assertSchemaIdentifier(
+  value: unknown,
+  label: string,
+): asserts value is string {
+  if (
+    typeof value !== 'string' ||
+    !projectionSchemaIdentifierPattern.test(value)
+  ) {
+    throw new TypeError(
+      `${label} must match /${projectionSchemaIdentifierPattern.source}/.`,
+    );
   }
 }
 
@@ -154,12 +203,210 @@ function assertFieldQueryCapabilities(field: ProjectionFieldDefinition): void {
   }
 
   if (
-    (field.codec === 'string' || field.codec === 'uuid') &&
+    (field.codec === 'string' ||
+      field.codec === 'uuid' ||
+      field.codec === 'boolean') &&
     filters.includes('range')
   ) {
     throw new TypeError(
       `Projection ${field.codec} field ${field.name} cannot declare range filtering.`,
     );
+  }
+}
+
+function promotedColumnField(
+  definition: ProjectionResourceDefinition,
+  fieldName: string,
+  label: string,
+): ProjectionFieldDefinition {
+  assertSchemaIdentifier(fieldName, label);
+  if (fieldName === definition.identity.column) {
+    throw new TypeError(`${label} cannot use the projection identity field.`);
+  }
+  if (fieldName === definition.scope.column) {
+    throw new TypeError(`${label} cannot use the projection scope field.`);
+  }
+
+  const field = definition.fields.find(
+    (candidate) => candidate.name === fieldName,
+  );
+  if (!field) {
+    throw new TypeError(`${label} is not a declared projection field.`);
+  }
+  if (field.storage !== 'column' || field.codec === 'json') {
+    throw new TypeError(`${label} must use a promoted column field.`);
+  }
+  assertSchemaIdentifier(field.column, `${label} column`);
+  return field;
+}
+
+function assertDistinctFieldNames(
+  fields: readonly string[],
+  label: string,
+): void {
+  if (!Array.isArray(fields) || fields.length === 0) {
+    throw new TypeError(`${label} requires at least one promoted field.`);
+  }
+  if (new Set(fields).size !== fields.length) {
+    throw new TypeError(`${label} cannot declare the same field twice.`);
+  }
+}
+
+function assertProjectionReferences(
+  definition: ProjectionResourceDefinition,
+  indexNames: Set<string>,
+): void {
+  const references = definition.references ?? [];
+  if (!Array.isArray(references)) {
+    throw new TypeError('Projection references must be an array.');
+  }
+
+  const referenceNames = new Set<string>();
+  for (const reference of references) {
+    assertSchemaIdentifier(reference?.name, 'Projection reference name');
+    if (referenceNames.has(reference.name)) {
+      throw new TypeError(
+        `Projection reference ${reference.name} is declared twice.`,
+      );
+    }
+    referenceNames.add(reference.name);
+
+    const childIndexName = getProjectionReferenceIndexName(reference);
+    if (indexNames.has(childIndexName)) {
+      throw new TypeError(
+        `Projection reference ${reference.name} child index collides with another index.`,
+      );
+    }
+    indexNames.add(childIndexName);
+
+    assertDistinctFieldNames(
+      reference.fields,
+      `Projection reference ${reference.name}`,
+    );
+    const localFields = reference.fields.map((fieldName: string) =>
+      promotedColumnField(
+        definition,
+        fieldName,
+        `Projection reference ${reference.name} field ${fieldName}`,
+      ),
+    );
+    assertSchemaIdentifier(
+      reference.target?.tableName,
+      `Projection reference ${reference.name} target table`,
+    );
+    assertSchemaIdentifier(
+      reference.target?.scopeColumn,
+      `Projection reference ${reference.name} target scope column`,
+    );
+    if (
+      !Array.isArray(reference.target?.identityColumns) ||
+      reference.target.identityColumns.length === 0
+    ) {
+      throw new TypeError(
+        `Projection reference ${reference.name} requires target identity columns.`,
+      );
+    }
+    if (reference.target.identityColumns.length !== localFields.length) {
+      throw new TypeError(
+        `Projection reference ${reference.name} local and target identity column counts must match.`,
+      );
+    }
+    if (
+      new Set(reference.target.identityColumns).size !==
+      reference.target.identityColumns.length
+    ) {
+      throw new TypeError(
+        `Projection reference ${reference.name} cannot repeat target identity columns.`,
+      );
+    }
+    for (const targetColumn of reference.target.identityColumns) {
+      assertSchemaIdentifier(
+        targetColumn,
+        `Projection reference ${reference.name} target identity column`,
+      );
+      if (targetColumn === reference.target.scopeColumn) {
+        throw new TypeError(
+          `Projection reference ${reference.name} target identity cannot use its scope column.`,
+        );
+      }
+    }
+    if (
+      reference.onDelete !== 'RESTRICT' &&
+      reference.onDelete !== 'NO ACTION'
+    ) {
+      throw new TypeError(
+        `Projection reference ${reference.name} only supports RESTRICT or NO ACTION on delete.`,
+      );
+    }
+  }
+}
+
+function assertProjectionUniqueConstraints(
+  definition: ProjectionResourceDefinition,
+  indexNames: Set<string>,
+): void {
+  const constraints = definition.uniqueConstraints ?? [];
+  if (!Array.isArray(constraints)) {
+    throw new TypeError('Projection unique constraints must be an array.');
+  }
+
+  const constraintNames = new Set<string>();
+  for (const constraint of constraints) {
+    assertSchemaIdentifier(
+      constraint?.name,
+      'Projection unique constraint name',
+    );
+    if (
+      constraintNames.has(constraint.name) ||
+      indexNames.has(constraint.name)
+    ) {
+      throw new TypeError(
+        `Projection unique constraint ${constraint.name} collides with another index or constraint.`,
+      );
+    }
+    constraintNames.add(constraint.name);
+    indexNames.add(constraint.name);
+
+    assertDistinctFieldNames(
+      constraint.fields,
+      `Projection unique constraint ${constraint.name}`,
+    );
+    for (const fieldName of constraint.fields) {
+      promotedColumnField(
+        definition,
+        fieldName,
+        `Projection unique constraint ${constraint.name} field ${fieldName}`,
+      );
+    }
+
+    if (constraint.predicate === undefined) continue;
+    if (
+      typeof constraint.predicate !== 'object' ||
+      Array.isArray(constraint.predicate)
+    ) {
+      throw new TypeError(
+        `Projection unique constraint ${constraint.name} requires a predicate map.`,
+      );
+    }
+    const predicateEntries = Object.entries(constraint.predicate);
+    if (predicateEntries.length === 0) {
+      throw new TypeError(
+        `Projection unique constraint ${constraint.name} requires at least one predicate field.`,
+      );
+    }
+    for (const [fieldName, value] of predicateEntries) {
+      const field = promotedColumnField(
+        definition,
+        fieldName,
+        `Projection unique constraint ${constraint.name} predicate ${fieldName}`,
+      );
+      if (value === null || value === undefined) {
+        throw new TypeError(
+          `Projection unique constraint ${constraint.name} predicate ${fieldName} must be a scalar literal.`,
+        );
+      }
+      assertProjectionCodecValue(field, value);
+    }
   }
 }
 
@@ -300,7 +547,9 @@ export function assertProjectionResourceDefinition(
       );
     }
     if (
-      !['string', 'uuid', 'instant', 'integer', 'json'].includes(field.codec)
+      !['string', 'uuid', 'instant', 'integer', 'boolean', 'json'].includes(
+        field.codec,
+      )
     ) {
       throw new TypeError(
         `Projection field ${field.name} has an unsupported codec.`,
@@ -355,6 +604,148 @@ export function assertProjectionResourceDefinition(
       `Projection identity ${definition.identity.column} must be a required non-null string or UUID column field.`,
     );
   }
+
+  assertProjectionReferences(definition, indexNames);
+  assertProjectionUniqueConstraints(definition, indexNames);
+  const declaredConstraintNames = [
+    ...(definition.references ?? []).map((reference) => reference.name),
+    ...(definition.uniqueConstraints ?? []).map(
+      (constraint) => constraint.name,
+    ),
+  ];
+  if (
+    new Set(declaredConstraintNames).size !== declaredConstraintNames.length
+  ) {
+    throw new TypeError(
+      'Projection reference and unique constraint names must be distinct.',
+    );
+  }
+}
+
+/** The stable child-supporting index generated for a declarative reference. */
+export function getProjectionReferenceIndexName(
+  reference: ProjectionReferenceDefinition,
+): string {
+  return `${reference.name}_idx`;
+}
+
+/** Returns the scope-prefixed local columns for a declarative reference. */
+export function getProjectionReferenceColumnNames(
+  definition: ProjectionResourceDefinition,
+  reference: ProjectionReferenceDefinition,
+): string[] {
+  assertProjectionResourceDefinition(definition);
+  return [
+    definition.scope.column,
+    ...reference.fields.map(
+      (fieldName) =>
+        promotedColumnField(
+          definition,
+          fieldName,
+          `Projection reference ${reference.name} field ${fieldName}`,
+        ).column!,
+    ),
+  ];
+}
+
+/** Returns the scope-prefixed target columns for a declarative reference. */
+export function getProjectionReferenceTargetColumnNames(
+  reference: ProjectionReferenceDefinition,
+): string[] {
+  return [reference.target.scopeColumn, ...reference.target.identityColumns];
+}
+
+/** Returns the scope-prefixed columns covered by a partial unique constraint. */
+export function getProjectionUniqueConstraintColumnNames(
+  definition: ProjectionResourceDefinition,
+  constraint: ProjectionPredicateUniqueConstraint,
+): string[] {
+  assertProjectionResourceDefinition(definition);
+  return [
+    definition.scope.column,
+    ...constraint.fields.map(
+      (fieldName) =>
+        promotedColumnField(
+          definition,
+          fieldName,
+          `Projection unique constraint ${constraint.name} field ${fieldName}`,
+        ).column!,
+    ),
+  ];
+}
+
+function quoteProjectionIdentifier(identifier: string): string {
+  assertSchemaIdentifier(identifier, 'Projection SQL identifier');
+  return `"${identifier}"`;
+}
+
+function compileProjectionPredicateLiteral(
+  field: ProjectionFieldDefinition,
+  value: ProjectionPredicateLiteral,
+  dialect: 'sqlite' | 'postgres',
+): string {
+  if (field.codec === 'boolean') {
+    return value
+      ? dialect === 'sqlite'
+        ? '1'
+        : 'TRUE'
+      : dialect === 'sqlite'
+        ? '0'
+        : 'FALSE';
+  }
+  if (field.codec === 'integer') return String(value);
+  if (
+    field.codec === 'string' ||
+    field.codec === 'uuid' ||
+    field.codec === 'instant'
+  ) {
+    return `'${String(value).replaceAll("'", "''")}'`;
+  }
+  throw new TypeError(
+    `Projection unique predicates cannot use ${field.codec} field ${field.name}.`,
+  );
+}
+
+/**
+ * Compiles a structural partial-index predicate without accepting raw SQL.
+ * Identifiers are validated and quoted; values are first checked against their
+ * declared field codecs and then emitted as dialect-specific scalar literals.
+ */
+export function compileProjectionUniqueConstraintPredicate(
+  definition: ProjectionResourceDefinition,
+  constraint: ProjectionPredicateUniqueConstraint,
+  dialect: 'sqlite' | 'postgres',
+): string | undefined {
+  assertProjectionResourceDefinition(definition);
+  if (dialect !== 'sqlite' && dialect !== 'postgres') {
+    throw new TypeError(`Unsupported projection predicate dialect ${dialect}.`);
+  }
+  const declared = definition.uniqueConstraints?.find(
+    (candidate) => candidate.name === constraint.name,
+  );
+  if (!declared) {
+    throw new TypeError(
+      `Projection unique constraint ${constraint.name} is not declared by the resource.`,
+    );
+  }
+  if (declared.predicate === undefined) return undefined;
+
+  return Object.entries(declared.predicate)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([fieldName, value]) => {
+      const field = promotedColumnField(
+        definition,
+        fieldName,
+        `Projection unique constraint ${declared.name} predicate ${fieldName}`,
+      );
+      assertProjectionCodecValue(field, value);
+      return `${quoteProjectionIdentifier(field.column!)} = ${compileProjectionPredicateLiteral(
+        field,
+        value,
+        dialect,
+      )}`;
+    })
+    .join(' AND ');
 }
 
 /**
@@ -422,6 +813,15 @@ export function assertProjectionCodecValue(
     ) {
       throw new TypeError(
         `Projection integer field ${field.name} must be a signed 32-bit integer.`,
+      );
+    }
+    return;
+  }
+
+  if (field.codec === 'boolean') {
+    if (typeof value !== 'boolean') {
+      throw new TypeError(
+        `Projection boolean field ${field.name} must be a boolean.`,
       );
     }
     return;

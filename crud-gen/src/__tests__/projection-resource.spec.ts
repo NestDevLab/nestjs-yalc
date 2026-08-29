@@ -6,9 +6,14 @@ import { createProjectionSchemaOptions } from '../projection/projection-schema.j
 import {
   assertProjectionCodecValue,
   assertProjectionPayloadValue,
+  compileProjectionUniqueConstraintPredicate,
   defineProjectionResource,
   getProjectionField,
   getProjectionPathValue,
+  getProjectionReferenceColumnNames,
+  getProjectionReferenceIndexName,
+  getProjectionReferenceTargetColumnNames,
+  getProjectionUniqueConstraintColumnNames,
   normalizeProjectionCodecValue,
   PROJECTION_INTEGER_MAX,
   PROJECTION_INTEGER_MIN,
@@ -78,6 +83,77 @@ const uuidDefinition = (): ProjectionResourceDefinition => ({
       requiredOnCreate: true,
       query: { filter: ['eq'], sort: true },
       index: { name: 'projection_unit_external_ref_idx' },
+    },
+  ],
+});
+
+const constrainedDefinition = (): ProjectionResourceDefinition => ({
+  id: 'projection.unit.constraints.v1',
+  tableName: 'projection_unit_constraints',
+  identity: { column: 'guid', uniqueWithinScope: true },
+  scope: { column: 'scopeId', serverOwned: true },
+  revision: { column: 'revision' },
+  payload: { column: 'payload', allowCreate: true },
+  deletion: 'hard',
+  fields: [
+    {
+      name: 'guid',
+      storage: 'column',
+      column: 'guid',
+      codec: 'uuid',
+      nullable: false,
+      requiredOnCreate: true,
+    },
+    {
+      name: 'parentGuid',
+      storage: 'column',
+      column: 'parent_guid',
+      codec: 'uuid',
+      nullable: true,
+    },
+    {
+      name: 'kind',
+      storage: 'column',
+      column: 'kind',
+      codec: 'string',
+      nullable: false,
+      requiredOnCreate: true,
+    },
+    {
+      name: 'isInitial',
+      storage: 'column',
+      column: 'is_initial',
+      codec: 'boolean',
+      nullable: false,
+      requiredOnCreate: true,
+      query: { filter: ['eq'], sort: true },
+    },
+    {
+      name: 'state',
+      storage: 'column',
+      column: 'state',
+      codec: 'string',
+      nullable: false,
+      requiredOnCreate: true,
+    },
+  ],
+  references: [
+    {
+      name: 'projection_unit_parent',
+      fields: ['parentGuid'],
+      target: {
+        tableName: 'projection_unit_parent',
+        scopeColumn: 'scopeId',
+        identityColumns: ['guid'],
+      },
+      onDelete: 'RESTRICT',
+    },
+  ],
+  uniqueConstraints: [
+    {
+      name: 'projection_unit_initial_kind_unique',
+      fields: ['kind'],
+      predicate: { isInitial: true, state: 'active' },
     },
   ],
 });
@@ -191,6 +267,136 @@ describe('projection resource contract', () => {
       type: String,
       length: 255,
     });
+  });
+
+  it('derives generic same-scope constraints and boolean transport metadata', () => {
+    const resource = defineProjectionResource(constrainedDefinition());
+    const reference = resource.references![0]!;
+    const constraint = resource.uniqueConstraints![0]!;
+    const graphql = createProjectionGraphqlTypes(resource, {
+      object: 'ProjectionConstraintRecord',
+      create: 'ProjectionConstraintRecordCreate',
+      patch: 'ProjectionConstraintRecordPatch',
+      conditions: 'ProjectionConstraintRecordCondition',
+    });
+
+    expect(getProjectionReferenceIndexName(reference)).toBe(
+      'projection_unit_parent_idx',
+    );
+    expect(getProjectionReferenceColumnNames(resource, reference)).toEqual([
+      'scopeId',
+      'parent_guid',
+    ]);
+    expect(getProjectionReferenceTargetColumnNames(reference)).toEqual([
+      'scopeId',
+      'guid',
+    ]);
+    expect(getProjectionUniqueConstraintColumnNames(resource, constraint)).toEqual([
+      'scopeId',
+      'kind',
+    ]);
+    expect(
+      compileProjectionUniqueConstraintPredicate(resource, constraint, 'sqlite'),
+    ).toBe('"is_initial" = 1 AND "state" = \'active\'');
+    expect(
+      compileProjectionUniqueConstraintPredicate(
+        resource,
+        constraint,
+        'postgres',
+      ),
+    ).toBe('"is_initial" = TRUE AND "state" = \'active\'');
+    expect(
+      getModelFieldMetadataList(graphql.object)!.isInitial.gqlType!(),
+    ).toBe(Boolean);
+    expect(
+      createProjectionSchemaOptions(
+        resource,
+        createProjectionDialect('sqlite'),
+      ).columns.is_initial.type,
+    ).toBe(Boolean);
+
+    const booleanField = getProjectionField(resource, 'isInitial');
+    expect(() => assertProjectionCodecValue(booleanField, true)).not.toThrow();
+    expect(() => assertProjectionCodecValue(booleanField, false)).not.toThrow();
+    expect(() => assertProjectionCodecValue(booleanField, 'true')).toThrow(
+      'must be a boolean',
+    );
+    expect(() => assertProjectionCodecValue(booleanField, null)).toThrow(
+      'cannot be null',
+    );
+  });
+
+  it.each([
+    [
+      'an undeclared reference field',
+      (resource: ProjectionResourceDefinition) => {
+        resource.references![0]!.fields = ['missing'];
+      },
+      'is not a declared projection field',
+    ],
+    [
+      'an invalid reference delete action',
+      (resource: ProjectionResourceDefinition) => {
+        resource.references![0]!.onDelete = 'CASCADE' as never;
+      },
+      'only supports RESTRICT or NO ACTION',
+    ],
+    [
+      'a reference target identity count mismatch',
+      (resource: ProjectionResourceDefinition) => {
+        resource.references![0]!.target.identityColumns = ['guid', 'other'];
+      },
+      'local and target identity column counts must match',
+    ],
+    [
+      'a partial constraint with no predicate',
+      (resource: ProjectionResourceDefinition) => {
+        resource.uniqueConstraints![0]!.predicate = {};
+      },
+      'requires at least one predicate field',
+    ],
+    [
+      'a partial constraint predicate with an invalid boolean',
+      (resource: ProjectionResourceDefinition) => {
+        resource.uniqueConstraints![0]!.predicate = { isInitial: 'true' } as never;
+      },
+      'must be a boolean',
+    ],
+    [
+      'a duplicated reference and unique-constraint name',
+      (resource: ProjectionResourceDefinition) => {
+        resource.uniqueConstraints![0]!.name = resource.references![0]!.name;
+      },
+      'reference and unique constraint names must be distinct',
+    ],
+  ] as const)(
+    'rejects %s',
+    (_label, mutate, expectedMessage) => {
+      const resource = constrainedDefinition();
+      mutate(resource);
+
+      expect(() => defineProjectionResource(resource)).toThrow(expectedMessage);
+    },
+  );
+
+  it('rejects undeclared constraints and unsupported predicate dialects', () => {
+    const resource = defineProjectionResource(constrainedDefinition());
+    const constraint = resource.uniqueConstraints![0]!;
+
+    expect(() =>
+      compileProjectionUniqueConstraintPredicate(
+        resource,
+        { ...constraint, name: 'missing_constraint' },
+        'sqlite',
+      ),
+    ).toThrow('is not declared by the resource');
+    expect(() =>
+      compileProjectionUniqueConstraintPredicate(
+        resource,
+        constraint,
+        'mysql' as never,
+      ),
+    ).toThrow('Unsupported projection predicate dialect');
   });
 
   it('fails closed when a JSON codec declares query capabilities', () => {

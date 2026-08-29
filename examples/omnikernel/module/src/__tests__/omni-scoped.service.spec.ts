@@ -22,6 +22,9 @@ const { createOmniRelationKindContract } =
 const { OmniRelationService } = await import("../omni-relation.service.js");
 const { OmniExternalRefService } =
   await import("../omni-external-ref.service.js");
+const { OmniExternalRefBindingValidator } = await import(
+  '../omni-external-ref-binding.validator.js'
+);
 const { OmniScopedService } = await import("../omni-scoped.service.js");
 
 const alphaScope = {
@@ -288,22 +291,42 @@ describe("OmniScopedService", () => {
 
   it("keeps external identities unique within scope while normalizing null partitions", async () => {
     const repository = dataSource.getRepository(OmniExternalRefEntity);
+    const records = dataSource.getRepository(OmniRecordEntity);
+    const internalId = "a0000000-0000-4000-8000-000000000019";
+    await records.save([
+      {
+        scopeId: alphaScope.scopeId,
+        guid: internalId,
+        title: "alpha external target",
+        kind: "generic",
+        status: OmniRecordStatus.Active,
+      },
+      {
+        scopeId: bravoScope.scopeId,
+        guid: internalId,
+        title: "bravo external target",
+        kind: "generic",
+        status: OmniRecordStatus.Active,
+      },
+    ]);
     const alpha = new OmniExternalRefService(
       repository as never,
       alphaScope,
       "hard",
+      new OmniExternalRefBindingValidator(records, alphaScope),
     );
     const bravo = new OmniExternalRefService(
       repository as never,
       bravoScope,
       "hard",
+      new OmniExternalRefBindingValidator(records, bravoScope),
     );
     const input = {
       guid: "a0000000-0000-4000-8000-000000000020",
       provider: "github",
       externalId: "42",
-      internalType: OmniExternalRefInternalType.Document,
-      internalId: "document-42",
+      internalType: OmniExternalRefInternalType.Record,
+      internalId,
       account: null,
       container: null,
     };
@@ -329,8 +352,8 @@ describe("OmniScopedService", () => {
     });
     expect(
       await alpha.findForInternalRecord(
-        OmniExternalRefInternalType.Document,
-        "document-42",
+        OmniExternalRefInternalType.Record,
+        internalId,
       ),
     ).toHaveLength(1);
   });

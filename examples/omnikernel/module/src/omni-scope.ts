@@ -20,6 +20,8 @@ export interface OmniKernelRegistrationOptions {
    * authentication adapter. It is server configuration, never request input.
    */
   defaultScopeId?: string;
+  /** Kinds exclusively owned by registered extension projections. */
+  reservedRecordKinds?: readonly string[];
   relationKinds?: readonly string[];
   deletion?: Partial<OmniDeletionPolicies>;
 }
@@ -78,8 +80,13 @@ export function normalizeOmniKernelRegistrationOptions(
 > &
   Omit<
     OmniKernelRegistrationOptions,
-    'dbConnection' | 'defaultScopeId' | 'relationKinds' | 'deletion'
+    | 'dbConnection'
+    | 'defaultScopeId'
+    | 'relationKinds'
+    | 'reservedRecordKinds'
+    | 'deletion'
   > & {
+    reservedRecordKinds: readonly string[];
     deletion: OmniDeletionPolicies;
   } {
   const candidate =
@@ -96,11 +103,27 @@ export function normalizeOmniKernelRegistrationOptions(
   ) {
     throw new TypeError('OmniKernel defaultScopeId must be 1-64 characters.');
   }
+  const reservedRecordKinds = candidate.reservedRecordKinds ?? [];
+  if (
+    !Array.isArray(reservedRecordKinds) ||
+    reservedRecordKinds.some(
+      (kind) =>
+        typeof kind !== 'string' ||
+        kind.trim().length === 0 ||
+        kind.length > 64,
+    ) ||
+    new Set(reservedRecordKinds).size !== reservedRecordKinds.length
+  ) {
+    throw new TypeError(
+      'OmniKernel reservedRecordKinds must be unique 1-64 character strings.',
+    );
+  }
 
   return {
     ...candidate,
     defaultScopeId: candidate.defaultScopeId ?? 'default',
     relationKinds: candidate.relationKinds ?? [],
+    reservedRecordKinds: Object.freeze([...reservedRecordKinds]),
     deletion: normalizeOmniDeletionPolicies(candidate.deletion),
   };
 }

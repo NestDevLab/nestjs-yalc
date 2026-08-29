@@ -26,8 +26,8 @@ export class OmniRelationService extends OmniScopedService<OmniRelationEntity> {
     repository: any,
     scope: OmniScope,
     deletion: OmniDeletePolicy,
-    private readonly recordRepository: Repository<OmniRecordEntity>,
-    private readonly kinds: OmniRelationKindContract,
+    protected readonly recordRepository: Repository<OmniRecordEntity>,
+    protected readonly kinds: OmniRelationKindContract,
   ) {
     super(repository, scope, deletion);
   }
@@ -76,7 +76,7 @@ export class OmniRelationService extends OmniScopedService<OmniRelationEntity> {
       }
     }
 
-    const current = await this.getEntity(
+    const current = await super.getEntity(
       conditions,
       undefined,
       undefined,
@@ -90,8 +90,9 @@ export class OmniRelationService extends OmniScopedService<OmniRelationEntity> {
     return super.updateEntity(conditions, input, findOptions, returnEntity);
   }
 
-  private async assertRelation(
+  protected async assertRelation(
     input: DeepPartial<OmniRelationEntity>,
+    recordRepository: Repository<OmniRecordEntity> = this.recordRepository,
   ): Promise<void> {
     const sourceRecordId = this.requiredIdentifier(
       input.sourceRecordId,
@@ -112,7 +113,7 @@ export class OmniRelationService extends OmniScopedService<OmniRelationEntity> {
       );
     }
 
-    const records = await this.recordRepository.find({
+    const records = await recordRepository.find({
       where: [
         { scopeId: this.scopeId, guid: sourceRecordId, deletedAt: IsNull() },
         { scopeId: this.scopeId, guid: targetRecordId, deletedAt: IsNull() },
@@ -121,6 +122,8 @@ export class OmniRelationService extends OmniScopedService<OmniRelationEntity> {
     const source = records.find((record) => record.guid === sourceRecordId);
     const target = records.find((record) => record.guid === targetRecordId);
     if (!source || !target) this.notFound();
+
+    this.assertEndpointKinds(source, target);
 
     const isCanonical = canonicalOmniRelationKinds.includes(
       kind as (typeof canonicalOmniRelationKinds)[number],
@@ -139,7 +142,13 @@ export class OmniRelationService extends OmniScopedService<OmniRelationEntity> {
     }
   }
 
-  private requiredIdentifier(value: unknown, field: string): string {
+  /** Resource-specific relation projections may narrow endpoint kinds. */
+  protected assertEndpointKinds(
+    _source: OmniRecordEntity,
+    _target: OmniRecordEntity,
+  ): void {}
+
+  protected requiredIdentifier(value: unknown, field: string): string {
     if (typeof value !== 'string' || value.trim().length === 0) {
       throw new BadRequestException(
         `Omni relation ${field} must be a non-empty string.`,

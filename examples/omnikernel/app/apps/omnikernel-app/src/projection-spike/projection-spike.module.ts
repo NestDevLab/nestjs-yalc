@@ -161,6 +161,7 @@ const projectionRecordResource = CrudGenResourceFactory<ProjectionRecord>({
   },
   rest: {
     dto: projectionRecordTypes.object,
+    serialize: true,
     path: 'projection-records',
     idField: 'guid',
     serviceToken: getServiceToken(ProjectionRecord),
@@ -196,6 +197,7 @@ const projectionRelationResource = CrudGenResourceFactory<ProjectionRelation>({
   },
   rest: {
     dto: ProjectionRelationType,
+    serialize: true,
     path: 'projection-relations',
     idField: 'guid',
     serviceToken: getServiceToken(ProjectionRelation),

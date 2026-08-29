@@ -11,6 +11,7 @@ import {
   Body,
   Query,
   BadRequestException,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import type {
   CrudGenFindManyOptions,
@@ -23,7 +24,6 @@ import {
 } from './crud-gen-rest.interceptor.js';
 import { GenericService, getServiceToken } from '../typeorm/generic.service.js';
 import type { ClassType } from '@nestjs-yalc/types/globals.d.js';
-import { yalcPlainToInstance } from '../transformers.helpers.js';
 import { getProviderToken } from '../crud-gen.helpers.js';
 import type { IDecoratorType } from '@nestjs-yalc/interfaces';
 import {
@@ -49,6 +49,11 @@ export interface CrudRestControllerOptions<Entity extends Record<string, any>> {
    * DTO used to serialize output. Defaults to `entityModel`.
    */
   dto?: ClassType<any>;
+  /**
+   * Apply Nest's class-transformer serialization after DTO mapping.
+   * Enable this when the DTO uses @Exclude/@Expose to define a public surface.
+   */
+  serialize?: boolean;
   /**
    * Optional path override. Defaults to the entity name in kebab-case.
    */
@@ -114,6 +119,7 @@ export function crudRestControllerFactory<Entity extends Record<string, any>>(
   const {
     entityModel,
     dto = entityModel,
+    serialize = false,
     path = toKebabCase(entityModel.name),
     serviceToken = getServiceToken(entityModel),
     query = { entityType: entityModel } as ICrudGenGqlArgsOptions,
@@ -132,6 +138,7 @@ export function crudRestControllerFactory<Entity extends Record<string, any>>(
 
     @Get()
     @UseInterceptors(
+      ...(serialize ? [ClassSerializerInterceptor] : []),
       CrudGenRestPaginationInterceptor,
       buildCrudGenRestSimpleMapperInterceptor(dto, true),
     )
@@ -149,7 +156,10 @@ export function crudRestControllerFactory<Entity extends Record<string, any>>(
     }
 
     @Get(':id')
-    @UseInterceptors(buildCrudGenRestSimpleMapperInterceptor(dto, false))
+    @UseInterceptors(
+      ...(serialize ? [ClassSerializerInterceptor] : []),
+      buildCrudGenRestSimpleMapperInterceptor(dto, false),
+    )
     async getById(@Param('id') id: string) {
       const entity = await this.service.getEntity(
         { [idField]: id } as any,
@@ -158,7 +168,7 @@ export function crudRestControllerFactory<Entity extends Record<string, any>>(
         undefined,
         { failOnNull: true },
       );
-      return dto === entityModel ? entity : yalcPlainToInstance(dto, entity);
+      return entity;
     }
 
     /**
@@ -284,7 +294,10 @@ export function crudRestControllerFactory<Entity extends Record<string, any>>(
     if (!mutations?.create?.disabled) {
       applyDecorators(
         Post(),
-        UseInterceptors(buildCrudGenRestSimpleMapperInterceptor(dto, false)),
+        UseInterceptors(
+          ...(serialize ? [ClassSerializerInterceptor] : []),
+          buildCrudGenRestSimpleMapperInterceptor(dto, false),
+        ),
         ...(mutations?.create?.decorators ?? []),
       )(proto, 'create', createDescriptor);
     }
@@ -298,7 +311,10 @@ export function crudRestControllerFactory<Entity extends Record<string, any>>(
     if (!mutations?.update?.disabled) {
       applyDecorators(
         Put(':id'),
-        UseInterceptors(buildCrudGenRestSimpleMapperInterceptor(dto, false)),
+        UseInterceptors(
+          ...(serialize ? [ClassSerializerInterceptor] : []),
+          buildCrudGenRestSimpleMapperInterceptor(dto, false),
+        ),
         ...(mutations?.update?.decorators ?? []),
       )(proto, 'update', updateDescriptor);
 

@@ -1,5 +1,5 @@
 import { InputType, Int, ObjectType } from '@nestjs/graphql';
-import GraphQLJSON from 'graphql-type-json';
+import { GraphQLJSON } from 'graphql-type-json';
 import { Exclude, Expose } from 'class-transformer';
 import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
@@ -30,11 +30,13 @@ function namedClass(name: string): ProjectionGraphqlClass {
 function typeForCodec(codec: ProjectionCodec) {
   return codec === 'integer'
     ? Int
-    : codec === 'json'
-      ? GraphQLJSON
-      : codec === 'uuid'
-        ? UUIDScalar
-        : String;
+    : codec === 'boolean'
+      ? Boolean
+      : codec === 'json'
+        ? GraphQLJSON
+        : codec === 'uuid'
+          ? UUIDScalar
+          : String;
 }
 
 function applyField(

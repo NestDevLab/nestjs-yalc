@@ -16,8 +16,10 @@ export interface ProjectionSchemaOptions {
 
 function typeForCodec(
   codec: ProjectionCodec,
-): StringConstructor | NumberConstructor {
-  return codec === 'integer' ? Number : String;
+): StringConstructor | NumberConstructor | BooleanConstructor {
+  if (codec === 'integer') return Number;
+  if (codec === 'boolean') return Boolean;
+  return String;
 }
 
 /**
