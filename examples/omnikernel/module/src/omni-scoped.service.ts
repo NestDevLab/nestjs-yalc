@@ -1,5 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import type { CrudGenFindManyOptions } from '@nestjs-yalc/crud-gen/api-graphql/crud-gen-gql.interface.js';
+import type { IWhereCondition } from '@nestjs-yalc/crud-gen/api-graphql/crud-gen-gql.type.js';
+import { Operators } from '@nestjs-yalc/crud-gen/crud-gen.enum.js';
 import { GenericService } from '@nestjs-yalc/crud-gen/typeorm/generic.service.js';
 import type { DeepPartial, FindOptionsWhere, ObjectLiteral } from 'typeorm';
 import { IsNull } from 'typeorm';
@@ -116,21 +118,30 @@ export class OmniScopedService<
     databaseName?: string,
   ): Promise<Entity[] | [Entity[], number]> {
     this.rejectScopeInWhere(findOptions.where);
-    const userWhere = findOptions.where as Record<string, unknown> | undefined;
-    const where = {
-      operator: 'AND',
-      filters: {
-        scopeId: this.scopeId,
-        ...(this.deletion === 'tombstone' ? { deletedAt: IsNull() } : {}),
-      },
+    const userWhere = findOptions.where;
+    const filters: IWhereCondition<Entity>['filters'] = {};
+    filters.scopeId = this.scopeId;
+    if (this.deletion === 'tombstone') filters.deletedAt = IsNull();
+    const where: IWhereCondition<Entity> = {
+      operator: Operators.AND,
+      filters,
       ...(userWhere ? { childExpressions: [userWhere] } : {}),
     };
+    const scopedOptions = { ...findOptions, where };
+    if (withCount) {
+      return super.getEntityListExtended(
+        scopedOptions,
+        true,
+        relations,
+        databaseName,
+      );
+    }
     return super.getEntityListExtended(
-      { ...findOptions, where } as CrudGenFindManyOptions<Entity>,
-      withCount as true,
+      scopedOptions,
+      false,
       relations,
       databaseName,
-    ) as Promise<Entity[] | [Entity[], number]>;
+    );
   }
 
   override async createEntity(
