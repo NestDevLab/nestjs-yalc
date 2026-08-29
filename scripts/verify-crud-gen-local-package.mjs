@@ -22,6 +22,8 @@ const tempRoot = fs.mkdtempSync(
 const tarballDir = path.join(tempRoot, 'tarballs');
 const npmConsumerDir = path.join(tempRoot, 'npm-consumer');
 const pnpmConsumerDir = path.join(tempRoot, 'pnpm-consumer');
+const pinnedPnpmVersion = '11.20.0';
+const pnpmInvocation = resolvePnpmInvocation();
 
 fs.mkdirSync(tarballDir, { recursive: true });
 fs.mkdirSync(npmConsumerDir, { recursive: true });
@@ -131,19 +133,28 @@ function verifyConsumer({
   overrides,
 }) {
   writeConsumer({ targetDir, packageManager, dependencies, overrides });
-  run(
-    packageManager,
+  const install =
     packageManager === 'npm'
-      ? [
-          'install',
-          '--ignore-scripts',
-          '--no-audit',
-          '--no-fund',
-          '--omit=optional',
-        ]
-      : ['install', '--ignore-scripts', '--no-frozen-lockfile'],
-    targetDir,
-  );
+      ? {
+          command: 'npm',
+          args: [
+            'install',
+            '--ignore-scripts',
+            '--no-audit',
+            '--no-fund',
+            '--omit=optional',
+          ],
+        }
+      : {
+          command: pnpmInvocation.command,
+          args: [
+            ...pnpmInvocation.args,
+            'install',
+            '--ignore-scripts',
+            '--no-frozen-lockfile',
+          ],
+        };
+  run(install.command, install.args, targetDir);
   run(
     'node',
     [
@@ -184,6 +195,32 @@ function verifyConsumer({
   );
 
   return installedCounts;
+}
+
+function resolvePnpmInvocation() {
+  if (process.env.NESTJS_YALC_FORCE_NPM_EXEC_PNPM !== '1') {
+    const probe = spawnSync('pnpm', ['--version'], {
+      encoding: 'utf8',
+      stdio: 'pipe',
+    });
+    if (probe.status === 0) {
+      return { command: 'pnpm', args: [] };
+    }
+  }
+
+  console.log(
+    `pnpm is not directly available; using npm exec with pnpm@${pinnedPnpmVersion}.`,
+  );
+  return {
+    command: 'npm',
+    args: [
+      'exec',
+      '--yes',
+      `--package=pnpm@${pinnedPnpmVersion}`,
+      '--',
+      'pnpm',
+    ],
+  };
 }
 
 function writeConsumer({ targetDir, packageManager, dependencies, overrides }) {
