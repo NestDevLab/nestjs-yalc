@@ -1,5 +1,4 @@
 ---
-"@nestjs-yalc/framework": minor
 "@nestjs-yalc/omnikernel-module": minor
 "@nestjs-yalc/event-manager": patch
 ---
