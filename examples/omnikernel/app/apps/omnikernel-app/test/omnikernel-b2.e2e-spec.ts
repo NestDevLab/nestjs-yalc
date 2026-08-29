@@ -55,6 +55,12 @@ describe(`OmniKernel B2 generated API parity (${dialect})`, () => {
     await app?.close();
   });
 
+  it("fails closed when the trusted scope adapter rejects a request", async () => {
+    await request(app.getHttpServer())
+      .get("/omni/records/10000000-0000-4000-8000-000000000000")
+      .expect(401);
+  });
+
   it("uses the authenticated server scope for generated REST records", async () => {
     const alphaOnlyGuid = "10000000-0000-4000-8000-000000000001";
     const created = await request(app.getHttpServer())

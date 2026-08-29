@@ -24,11 +24,26 @@ describe("Omni scoped substrate", () => {
     expect(scope.scopeId).toBe("scope-alpha");
     expect(scope.cacheKey("record-1")).toBe("scope-alpha:record-1");
     expect(options.deletion.document).toBe("tombstone");
+    expect(() => new OmniScopeContext({ req: {} }, options)).toThrow(
+      "unavailable",
+    );
     expect(() =>
       normalizeOmniKernelRegistrationOptions({
         dbConnection: "",
       }),
     ).toThrow("database connection");
+    expect(() =>
+      normalizeOmniKernelRegistrationOptions({
+        dbConnection: "default",
+        deletion: { record: "erase" as never },
+      }),
+    ).toThrow("must be hard or tombstone");
+    expect(() =>
+      normalizeOmniKernelRegistrationOptions({
+        dbConnection: "default",
+        deletion: { records: "tombstone" } as never,
+      }),
+    ).toThrow("Unknown OmniKernel deletion policy resource");
   });
 
   it("keeps canonical relation kinds stable while validating registered extensions", () => {

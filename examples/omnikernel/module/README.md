@@ -49,8 +49,10 @@ export class AppModule {}
 ```
 
 `resolveScope` must authenticate and authorize the request before returning a
-scope. The optional `defaultScopeId` is a server configuration compatibility
-partition for an app without an adapter; it does not read a client field.
+scope. When a resolver is configured, an absent or invalid result fails closed
+and never falls back to the default partition. The optional `defaultScopeId` is
+a server configuration compatibility partition only for an app without an
+adapter; it does not read a client field.
 
 ## Resources and lifecycle
 

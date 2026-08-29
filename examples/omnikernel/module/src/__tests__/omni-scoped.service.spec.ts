@@ -1,4 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  jest,
+} from "@jest/globals";
 import { DataSource } from "typeorm";
 
 const { OmniNamedEntity } = await import("../base/omni-named.entity.js");
@@ -138,6 +145,50 @@ describe("OmniScopedService", () => {
     await expect(alpha.getEntity("guid = ?" as never)).rejects.toThrow(
       "String where clauses",
     );
+  });
+
+  it("applies scope recursively to extended subquery filters", async () => {
+    const getManyExtended = jest.fn(async () => []);
+    const service = new OmniScopedService(
+      {
+        getCrudGenCapabilities: () => ({
+          extendedQueries: true,
+          structuredGraphqlFilters: true,
+        }),
+        getManyExtended,
+        getManyAndCountExtended: jest.fn(async () => [[], 0]),
+      } as never,
+      alphaScope,
+      "tombstone",
+    );
+
+    await service.getEntityListExtended({
+      where: { filters: { title: "outer" as never } },
+      subQueryFilters: {
+        where: { filters: { title: "inner" as never } },
+        take: 1,
+      },
+    });
+
+    expect(getManyExtended).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          filters: expect.objectContaining({ scopeId: "scope-alpha" }),
+        }),
+        subQueryFilters: expect.objectContaining({
+          where: expect.objectContaining({
+            filters: expect.objectContaining({ scopeId: "scope-alpha" }),
+          }),
+        }),
+      }),
+    );
+    await expect(
+      service.getEntityListExtended({
+        subQueryFilters: {
+          where: { filters: { scopeId: "scope-bravo" as never } },
+        },
+      }),
+    ).rejects.toThrow("server context");
   });
 
   it("validates scoped relation endpoints and the extensible kind contract", async () => {

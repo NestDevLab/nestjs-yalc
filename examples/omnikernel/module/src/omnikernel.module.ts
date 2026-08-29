@@ -1,4 +1,4 @@
-import { DynamicModule, Module, Provider } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
@@ -24,23 +24,6 @@ import {
   type OmniKernelRegistrationOptions,
 } from './omni-scope.js';
 
-type ProviderWithInject = Provider & { inject?: unknown[] };
-
-const bindGeneratedDataloaderEventEmitter = (
-  providers: Provider[],
-): Provider[] =>
-  providers.map((provider) => {
-    if (typeof provider !== 'object' || provider === null) return provider;
-
-    const providerWithInject = provider as ProviderWithInject;
-    if (!Array.isArray(providerWithInject.inject)) return provider;
-
-    return {
-      ...providerWithInject,
-      inject: providerWithInject.inject.map((token) => token ?? EventEmitter2),
-    } as Provider;
-  });
-
 @Module({})
 export class OmniKernelModule {
   static register(
@@ -48,24 +31,18 @@ export class OmniKernelModule {
   ): DynamicModule {
     const options = normalizeOmniKernelRegistrationOptions(registration);
     const { dbConnection } = options;
-    const omniNamedProviders = bindGeneratedDataloaderEventEmitter(
-      omniNamedBackendProvidersFactory(dbConnection).providers,
-    );
-    const omniRecordProviders = bindGeneratedDataloaderEventEmitter(
-      omniRecordBackendProvidersFactory(dbConnection).providers,
-    );
-    const omniRelationProviders = bindGeneratedDataloaderEventEmitter(
-      omniRelationBackendProvidersFactory(dbConnection).providers,
-    );
-    const omniCollectionProviders = bindGeneratedDataloaderEventEmitter(
-      omniCollectionBackendProvidersFactory(dbConnection).providers,
-    );
-    const omniDocumentProviders = bindGeneratedDataloaderEventEmitter(
-      omniDocumentBackendProvidersFactory(dbConnection).providers,
-    );
-    const omniExternalRefProviders = bindGeneratedDataloaderEventEmitter(
-      omniExternalRefBackendProvidersFactory(dbConnection).providers,
-    );
+    const omniNamedProviders =
+      omniNamedBackendProvidersFactory(dbConnection).providers;
+    const omniRecordProviders =
+      omniRecordBackendProvidersFactory(dbConnection).providers;
+    const omniRelationProviders =
+      omniRelationBackendProvidersFactory(dbConnection).providers;
+    const omniCollectionProviders =
+      omniCollectionBackendProvidersFactory(dbConnection).providers;
+    const omniDocumentProviders =
+      omniDocumentBackendProvidersFactory(dbConnection).providers;
+    const omniExternalRefProviders =
+      omniExternalRefBackendProvidersFactory(dbConnection).providers;
     const omniKernelQueryServiceProvider =
       omniKernelQueryServiceProviderFactory(dbConnection);
     const eventEmitter = new EventEmitter2();

@@ -1,5 +1,9 @@
 import { ApolloDriver, type ApolloDriverConfig } from '@nestjs/apollo';
-import { type DynamicModule, Module } from '@nestjs/common';
+import {
+  type DynamicModule,
+  Module,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -17,14 +21,14 @@ type OmniKernelB2Request = {
   headers?: { authorization?: string };
 };
 
-const scopeFromAuthenticatedRequest = (
-  request: unknown,
-): string | undefined => {
+const scopeFromAuthenticatedRequest = (request: unknown): string => {
   const authorization = (request as OmniKernelB2Request | undefined)?.headers
     ?.authorization;
-  return /^Bearer omnikernel-b2:(scope-(?:alpha|bravo))$/.exec(
+  const scopeId = /^Bearer omnikernel-b2:(scope-(?:alpha|bravo))$/.exec(
     authorization ?? '',
   )?.[1];
+  if (!scopeId) throw new UnauthorizedException();
+  return scopeId;
 };
 
 @Module({})

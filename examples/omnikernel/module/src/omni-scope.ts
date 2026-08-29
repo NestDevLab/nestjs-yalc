@@ -46,6 +46,28 @@ export const defaultOmniDeletionPolicies: OmniDeletionPolicies = {
   externalRef: 'hard',
 };
 
+function normalizeOmniDeletionPolicies(
+  deletion: Partial<OmniDeletionPolicies> | undefined,
+): OmniDeletionPolicies {
+  const knownResources = new Set(Object.keys(defaultOmniDeletionPolicies));
+  for (const [resource, policy] of Object.entries(deletion ?? {})) {
+    if (!knownResources.has(resource)) {
+      throw new TypeError(
+        `Unknown OmniKernel deletion policy resource: ${resource}.`,
+      );
+    }
+    if (policy !== 'hard' && policy !== 'tombstone') {
+      throw new TypeError(
+        `OmniKernel deletion policy for ${resource} must be hard or tombstone.`,
+      );
+    }
+  }
+  return {
+    ...defaultOmniDeletionPolicies,
+    ...deletion,
+  };
+}
+
 export function normalizeOmniKernelRegistrationOptions(
   options: string | OmniKernelRegistrationOptions,
 ): Required<
@@ -79,10 +101,7 @@ export function normalizeOmniKernelRegistrationOptions(
     ...candidate,
     defaultScopeId: candidate.defaultScopeId ?? 'default',
     relationKinds: candidate.relationKinds ?? [],
-    deletion: {
-      ...defaultOmniDeletionPolicies,
-      ...candidate.deletion,
-    },
+    deletion: normalizeOmniDeletionPolicies(candidate.deletion),
   };
 }
 
@@ -104,8 +123,9 @@ export class OmniScopeContext implements OmniScope {
   ) {
     const requestForResolver =
       (request as RequestEnvelope | undefined)?.req ?? request;
-    const scopeId =
-      options.resolveScope?.(requestForResolver) ?? options.defaultScopeId;
+    const scopeId = options.resolveScope
+      ? options.resolveScope(requestForResolver)
+      : options.defaultScopeId;
     if (!scopeId || scopeId.trim().length === 0 || scopeId.length > 64) {
       throw new TypeError('Omni scope context is unavailable.');
     }

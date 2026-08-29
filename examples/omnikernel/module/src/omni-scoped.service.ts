@@ -117,17 +117,7 @@ export class OmniScopedService<
     relations?: string[],
     databaseName?: string,
   ): Promise<Entity[] | [Entity[], number]> {
-    this.rejectScopeInWhere(findOptions.where);
-    const userWhere = findOptions.where;
-    const filters: IWhereCondition<Entity>['filters'] = {};
-    filters.scopeId = this.scopeId;
-    if (this.deletion === 'tombstone') filters.deletedAt = IsNull();
-    const where: IWhereCondition<Entity> = {
-      operator: Operators.AND,
-      filters,
-      ...(userWhere ? { childExpressions: [userWhere] } : {}),
-    };
-    const scopedOptions = { ...findOptions, where };
+    const scopedOptions = this.scopeFindOptions(findOptions);
     if (withCount) {
       return super.getEntityListExtended(
         scopedOptions,
@@ -142,6 +132,30 @@ export class OmniScopedService<
       relations,
       databaseName,
     );
+  }
+
+  private scopeFindOptions(
+    findOptions: CrudGenFindManyOptions<Entity>,
+  ): CrudGenFindManyOptions<Entity> {
+    this.rejectScopeInWhere(findOptions.where);
+    const userWhere = findOptions.where;
+    const filters: IWhereCondition<Entity>['filters'] = {};
+    filters.scopeId = this.scopeId;
+    if (this.deletion === 'tombstone') filters.deletedAt = IsNull();
+    const where: IWhereCondition<Entity> = {
+      operator: Operators.AND,
+      filters,
+      ...(userWhere ? { childExpressions: [userWhere] } : {}),
+    };
+    return {
+      ...findOptions,
+      where,
+      ...(findOptions.subQueryFilters
+        ? {
+            subQueryFilters: this.scopeFindOptions(findOptions.subQueryFilters),
+          }
+        : {}),
+    };
   }
 
   override async createEntity(
