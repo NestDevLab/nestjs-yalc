@@ -1,10 +1,20 @@
-import { Module } from '@nestjs/common';
-import { OmniKernelModule } from '@nestjs-yalc/omnikernel-module';
+import { type DynamicModule, Module } from '@nestjs/common';
+import {
+  OmniKernelModule,
+  type OmniKernelRegistrationOptions,
+} from '@nestjs-yalc/omnikernel-module';
 import { omniApiControllers, omniApiProviders } from './omni-api.resources';
 
-@Module({
-  imports: [OmniKernelModule.register('default')],
-  controllers: omniApiControllers,
-  providers: omniApiProviders,
-})
-export class OmniApiModule {}
+@Module({})
+export class OmniApiModule {
+  static register(
+    registration: string | OmniKernelRegistrationOptions,
+  ): DynamicModule {
+    return {
+      module: OmniApiModule,
+      imports: [OmniKernelModule.register(registration)],
+      controllers: omniApiControllers,
+      providers: omniApiProviders,
+    };
+  }
+}

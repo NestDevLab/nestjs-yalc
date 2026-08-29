@@ -1,11 +1,11 @@
-import { OmniCollectionKind } from './omni-collection-kind.enum';
-import { OmniDocumentKind } from './omni-document-kind.enum';
-import { OmniRelationKind } from './omni-relation-kind.enum';
+import { OmniCollectionKind } from './omni-collection-kind.enum.js';
+import { OmniDocumentKind } from './omni-document-kind.enum.js';
+import { OmniRelationKind } from './omni-relation-kind.enum.js';
 
 export interface OmniRelationSemanticsInput {
   sourceKind: string;
   targetKind: string;
-  relationKind: OmniRelationKind;
+  relationKind: string;
 }
 
 export const OMNI_COLLECTION_MEMBERSHIP_RELATION_KIND =
@@ -46,7 +46,7 @@ export const isAllowedOmniRelation = ({
     case OmniRelationKind.References:
     case OmniRelationKind.RelatedTo:
       return true;
+    default:
+      return false;
   }
-
-  return false;
 };

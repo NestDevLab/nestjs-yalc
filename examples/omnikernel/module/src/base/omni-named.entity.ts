@@ -1,6 +1,6 @@
 import { ObjectType } from '@nestjs/graphql';
 import { Column, Entity } from 'typeorm';
-import { OmniBaseEntity } from './omni-base.entity';
+import { OmniBaseEntity } from './omni-base.entity.js';
 
 @Entity('omni-named')
 @ObjectType({ isAbstract: true })

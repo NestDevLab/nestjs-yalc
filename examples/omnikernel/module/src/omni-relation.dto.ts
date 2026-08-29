@@ -1,18 +1,33 @@
-import { InputType, ObjectType, OmitType, PartialType } from '@nestjs/graphql';
+import {
+  InputType,
+  Int,
+  ObjectType,
+  OmitType,
+  PartialType,
+} from '@nestjs/graphql';
 import {
   ModelField,
   ModelObject,
-} from '@nestjs-yalc/crud-gen/object.decorator';
-import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar';
-import returnValue from '@nestjs-yalc/utils/returnValue';
-import { IsEnum, IsObject, IsOptional, IsUUID } from 'class-validator';
+} from '@nestjs-yalc/crud-gen/object.decorator.js';
+import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
+import returnValue from '@nestjs-yalc/utils/returnValue.js';
+import {
+  IsEnum,
+  IsInt,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Matches,
+} from 'class-validator';
 import { GraphQLJSONObject } from 'graphql-type-json';
 import type { Relation } from 'typeorm';
-import { OmniRecordEntity } from './base/omni-record.entity';
-import { OmniRelationEntity } from './base/omni-relation.entity';
-import { OmniRecordType } from './omni-record.dto';
-import { OmniRelationKind } from './omni-relation-kind.enum';
-import { OmniRelationStatus } from './omni-relation-status.enum';
+import { OmniRecordEntity } from './base/omni-record.entity.js';
+import { OmniRelationEntity } from './base/omni-relation.entity.js';
+import { assignOmniPublicDto } from './omni-dto.helpers.js';
+import { OmniRecordType } from './omni-record.dto.js';
+import { omniRelationKindPattern } from './omni-relation-kind.contract.js';
+import { OmniRelationStatus } from './omni-relation-status.enum.js';
 
 @ObjectType()
 @ModelObject()
@@ -20,13 +35,17 @@ export class OmniRelationType extends OmniRelationEntity {
   constructor(data?: Partial<OmniRelationType>) {
     super();
     if (data) {
-      Object.assign(this, data);
+      assignOmniPublicDto(this, data);
     }
   }
 
   @ModelField({ gqlType: returnValue(UUIDScalar), isRequired: true })
   @IsUUID()
   guid!: string;
+
+  @ModelField({ gqlType: returnValue(Int) })
+  @IsInt()
+  revision!: number;
 
   @ModelField({ gqlType: returnValue(UUIDScalar), isRequired: true })
   @IsUUID()
@@ -60,9 +79,10 @@ export class OmniRelationType extends OmniRelationEntity {
   })
   targetRecord!: Relation<OmniRecordType>;
 
-  @ModelField({ gqlType: returnValue(OmniRelationKind) })
-  @IsEnum(OmniRelationKind)
-  kind!: OmniRelationKind;
+  @ModelField({ gqlType: returnValue(String) })
+  @IsString()
+  @Matches(omniRelationKindPattern)
+  kind!: string;
 
   @ModelField({ gqlType: returnValue(OmniRelationStatus) })
   @IsEnum(OmniRelationStatus)
@@ -75,13 +95,35 @@ export class OmniRelationType extends OmniRelationEntity {
   @IsOptional()
   @IsObject()
   payload?: Record<string, unknown> | null;
+
+  @ModelField({
+    gqlType: returnValue(String),
+    gqlOptions: { nullable: true },
+  })
+  @IsOptional()
+  @IsString()
+  payloadSchemaId?: string | null;
+
+  @ModelField({
+    gqlType: returnValue(Int),
+    gqlOptions: { nullable: true },
+  })
+  @IsOptional()
+  @IsInt()
+  payloadSchemaVersion?: number | null;
 }
 
 @InputType()
 @ModelObject()
 export class OmniRelationCreateInput extends OmitType(
   OmniRelationType,
-  ['createdAt', 'updatedAt', 'sourceRecord', 'targetRecord'] as const,
+  [
+    'createdAt',
+    'updatedAt',
+    'revision',
+    'sourceRecord',
+    'targetRecord',
+  ] as const,
   InputType,
 ) {}
 

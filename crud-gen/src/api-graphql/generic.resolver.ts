@@ -41,7 +41,7 @@ import {
   getDataloaderToken,
   GQLDataLoader,
 } from '@nestjs-yalc/data-loader/dataloader.helper.js';
-import { ContextId, ContextIdFactory, ModuleRef } from '@nestjs/core';
+import { ContextIdFactory, ModuleRef } from '@nestjs/core';
 import { Mutation } from '@nestjs/graphql';
 import { ClassType } from '@nestjs-yalc/types/globals.d.js';
 import {
@@ -246,6 +246,7 @@ export function defineFieldResolver<Entity extends Record<string, any> = any>(
           value: async function (
             parent: Entity,
             findOptions: CrudGenFindManyOptions,
+            context: ExecutionContext,
           ): Promise<[Array<Entity | null>, number] | Array<Entity | null>> {
             const parentRes = parent[resolverInfo.relation.propertyName];
 
@@ -261,7 +262,11 @@ export function defineFieldResolver<Entity extends Record<string, any> = any>(
             const dataLoader: GQLDataLoader<Entity> =
               await this.moduleRef.resolve(
                 getDataloaderToken(relType),
-                this.contextId,
+                ContextIdFactory.getByRequest(
+                  GqlExecutionContext.create(context).getContext(),
+                  ['req'],
+                ),
+                { strict: false },
               );
 
             const joinCol =
@@ -320,10 +325,12 @@ export function defineFieldResolver<Entity extends Record<string, any> = any>(
         defaultValue: resolverInfo.agField?.relation?.defaultValue,
       })(resolver.prototype, resolverInfo.relation.propertyName, 1);
 
+      GetContext()(resolver.prototype, resolverInfo.relation.propertyName, 2);
+
       // without the design:paramtypes metadata
       // it won't work, the following instruction is transpiled and generated
       // when the decorators are defined in their standard way.
-      Reflect.metadata('design:paramtypes', [Object, Object])(
+      Reflect.metadata('design:paramtypes', [Object, Object, Object])(
         resolver.prototype,
         resolverInfo.relation.propertyName,
       );
@@ -342,6 +349,7 @@ export function defineFieldResolver<Entity extends Record<string, any> = any>(
           value: async function (
             parent: Entity,
             findOptions: CrudGenFindManyOptions,
+            context: ExecutionContext,
           ): Promise<Entity | null> {
             const parentRes = parent[resolverInfo.relation.propertyName];
 
@@ -357,7 +365,11 @@ export function defineFieldResolver<Entity extends Record<string, any> = any>(
             const dataLoader: GQLDataLoader<Entity> =
               await this.moduleRef.resolve(
                 getDataloaderToken(relType),
-                this.contextId,
+                ContextIdFactory.getByRequest(
+                  GqlExecutionContext.create(context).getContext(),
+                  ['req'],
+                ),
+                { strict: false },
               );
 
             /* istanbul ignore next */
@@ -401,10 +413,12 @@ export function defineFieldResolver<Entity extends Record<string, any> = any>(
         1,
       );
 
+      GetContext()(resolver.prototype, resolverInfo.relation.propertyName, 2);
+
       // without the design:paramtypes metadata
       // it won't work, the following instruction is transpiled and generated
       // when the decorators are defined in their standard way.
-      Reflect.metadata('design:paramtypes', [Object, Array])(
+      Reflect.metadata('design:paramtypes', [Object, Array, Object])(
         resolver.prototype,
         resolverInfo.relation.propertyName,
       );
@@ -850,8 +864,6 @@ export function resolverFactory<
   abstract class BaseClass {
     [index: string]: any; //index signature to allow dynamic properties
 
-    contextId: ContextId;
-
     constructor(
       @Inject(
         options.service?.serviceToken ?? getServiceToken(options.entityModel),
@@ -864,7 +876,6 @@ export function resolverFactory<
       protected dataLoader: GQLDataLoader<Entity>,
       protected moduleRef: ModuleRef,
     ) {
-      this.contextId = ContextIdFactory.create();
       this.moduleRef;
     }
   }

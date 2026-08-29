@@ -1,12 +1,19 @@
-import { InputType, ObjectType, OmitType, PartialType } from '@nestjs/graphql';
+import {
+  InputType,
+  Int,
+  ObjectType,
+  OmitType,
+  PartialType,
+} from '@nestjs/graphql';
 import {
   ModelField,
   ModelObject,
-} from '@nestjs-yalc/crud-gen/object.decorator';
-import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar';
-import returnValue from '@nestjs-yalc/utils/returnValue';
+} from '@nestjs-yalc/crud-gen/object.decorator.js';
+import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
+import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import {
   IsEnum,
+  IsInt,
   IsObject,
   IsOptional,
   IsString,
@@ -15,10 +22,11 @@ import {
 } from 'class-validator';
 import { GraphQLJSONObject } from 'graphql-type-json';
 import type { Relation } from 'typeorm';
-import { OmniRecordEntity } from './base/omni-record.entity';
-import { OmniRelationEntity } from './base/omni-relation.entity';
-import { OmniRelationType } from './omni-relation.dto';
-import { OmniRecordStatus } from './omni-record-status.enum';
+import { OmniRecordEntity } from './base/omni-record.entity.js';
+import { OmniRelationEntity } from './base/omni-relation.entity.js';
+import { assignOmniPublicDto } from './omni-dto.helpers.js';
+import { OmniRelationType } from './omni-relation.dto.js';
+import { OmniRecordStatus } from './omni-record-status.enum.js';
 
 @ObjectType()
 @ModelObject()
@@ -26,13 +34,17 @@ export class OmniRecordType extends OmniRecordEntity {
   constructor(data?: Partial<OmniRecordType>) {
     super();
     if (data) {
-      Object.assign(this, data);
+      assignOmniPublicDto(this, data);
     }
   }
 
   @ModelField({ gqlType: returnValue(UUIDScalar), isRequired: true })
   @IsUUID()
   guid!: string;
+
+  @ModelField({ gqlType: returnValue(Int) })
+  @IsInt()
+  revision!: number;
 
   @ModelField({
     gqlType: returnValue(String),
@@ -75,6 +87,23 @@ export class OmniRecordType extends OmniRecordEntity {
   payload?: Record<string, unknown> | null;
 
   @ModelField({
+    gqlType: returnValue(String),
+    gqlOptions: { nullable: true },
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(128)
+  payloadSchemaId?: string | null;
+
+  @ModelField({
+    gqlType: returnValue(Int),
+    gqlOptions: { nullable: true },
+  })
+  @IsOptional()
+  @IsInt()
+  payloadSchemaVersion?: number | null;
+
+  @ModelField({
     gqlType: () => [OmniRelationType],
     gqlOptions: { nullable: true },
     relation: {
@@ -103,7 +132,13 @@ export class OmniRecordType extends OmniRecordEntity {
 @ModelObject()
 export class OmniRecordCreateInput extends OmitType(
   OmniRecordType,
-  ['createdAt', 'updatedAt', 'outgoingRelations', 'incomingRelations'] as const,
+  [
+    'createdAt',
+    'updatedAt',
+    'revision',
+    'outgoingRelations',
+    'incomingRelations',
+  ] as const,
   InputType,
 ) {}
 

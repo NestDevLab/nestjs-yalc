@@ -1,10 +1,22 @@
-import type { CrudGenFindManyOptions } from '@nestjs-yalc/crud-gen/api-graphql/crud-gen-gql.interface';
-import { GenericService } from '@nestjs-yalc/crud-gen/typeorm/generic.service';
+import type { CrudGenFindManyOptions } from '@nestjs-yalc/crud-gen/api-graphql/crud-gen-gql.interface.js';
+import type { GenericTypeORMRepository } from '@nestjs-yalc/crud-gen/typeorm/generic.repository.js';
 import type { DeepPartial, FindOptionsWhere } from 'typeorm';
-import { OmniDocumentKind } from './omni-document-kind.enum';
-import { OmniDocumentEntity } from './omni-document.entity';
+import { OmniDocumentKind } from './omni-document-kind.enum.js';
+import { OmniDocumentEntity } from './omni-document.entity.js';
+import type { OmniDeletePolicy, OmniScope } from './omni-scope.js';
+import { OmniScopedService } from './omni-scoped.service.js';
 
-export class OmniDocumentService extends GenericService<OmniDocumentEntity> {
+export class OmniDocumentService extends OmniScopedService<OmniDocumentEntity> {
+  constructor(
+    repository: GenericTypeORMRepository<OmniDocumentEntity>,
+    scopeOrRepositoryWrite?:
+      | OmniScope
+      | GenericTypeORMRepository<OmniDocumentEntity>,
+    deletion: OmniDeletePolicy = 'tombstone',
+  ) {
+    super(repository, scopeOrRepositoryWrite, deletion);
+  }
+
   protected normalizeDocumentInput(
     input: DeepPartial<OmniDocumentEntity>,
   ): DeepPartial<OmniDocumentEntity> {

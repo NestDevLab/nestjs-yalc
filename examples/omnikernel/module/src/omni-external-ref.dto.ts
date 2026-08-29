@@ -1,12 +1,19 @@
-import { InputType, ObjectType, OmitType, PartialType } from '@nestjs/graphql';
+import {
+  InputType,
+  Int,
+  ObjectType,
+  OmitType,
+  PartialType,
+} from '@nestjs/graphql';
 import {
   ModelField,
   ModelObject,
-} from '@nestjs-yalc/crud-gen/object.decorator';
-import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar';
-import returnValue from '@nestjs-yalc/utils/returnValue';
+} from '@nestjs-yalc/crud-gen/object.decorator.js';
+import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
+import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import {
   IsEnum,
+  IsInt,
   IsObject,
   IsOptional,
   IsString,
@@ -14,8 +21,9 @@ import {
   MaxLength,
 } from 'class-validator';
 import { GraphQLJSONObject } from 'graphql-type-json';
-import { OmniExternalRefEntity } from './base/omni-external-ref.entity';
-import { OmniExternalRefInternalType } from './omni-external-ref-internal-type.enum';
+import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
+import { assignOmniPublicDto } from './omni-dto.helpers.js';
+import { OmniExternalRefInternalType } from './omni-external-ref-internal-type.enum.js';
 
 @ObjectType()
 @ModelObject()
@@ -23,13 +31,17 @@ export class OmniExternalRefType extends OmniExternalRefEntity {
   constructor(data?: Partial<OmniExternalRefType>) {
     super();
     if (data) {
-      Object.assign(this, data);
+      assignOmniPublicDto(this, data);
     }
   }
 
   @ModelField({ gqlType: returnValue(UUIDScalar), isRequired: true })
   @IsUUID()
   guid!: string;
+
+  @ModelField({ gqlType: returnValue(Int) })
+  @IsInt()
+  revision!: number;
 
   @ModelField({ gqlType: returnValue(OmniExternalRefInternalType) })
   @IsEnum(OmniExternalRefInternalType)
@@ -74,13 +86,30 @@ export class OmniExternalRefType extends OmniExternalRefEntity {
   @IsOptional()
   @IsObject()
   payload?: Record<string, unknown> | null;
+
+  @ModelField({
+    gqlType: returnValue(String),
+    gqlOptions: { nullable: true },
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(128)
+  payloadSchemaId?: string | null;
+
+  @ModelField({
+    gqlType: returnValue(Int),
+    gqlOptions: { nullable: true },
+  })
+  @IsOptional()
+  @IsInt()
+  payloadSchemaVersion?: number | null;
 }
 
 @InputType()
 @ModelObject()
 export class OmniExternalRefCreateInput extends OmitType(
   OmniExternalRefType,
-  ['createdAt', 'updatedAt'] as const,
+  ['createdAt', 'updatedAt', 'revision'] as const,
   InputType,
 ) {}
 

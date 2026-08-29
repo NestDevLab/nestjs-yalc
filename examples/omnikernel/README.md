@@ -1,19 +1,20 @@
 # OmniKernel Example
 
-Reusable backend/substrate example.
+This example separates the reusable OmniKernel persistence substrate from the
+app-owned REST and GraphQL surface.
 
-- `module` is backend-only and protocol-free.
-- `app` owns the generated REST and GraphQL API surface.
+- [`module`](./module/README.md) is a private, buildable workspace package.
+  It owns scoped entities, services, repositories, dataloaders, indexes, and
+  relation contracts.
+- [`app`](./app/README.md) composes those exports with CrudGen to expose the
+  generated API surface.
 
-Use this example to understand how a reusable persistence backend can stay
-separate from the application-owned API layer. The app intentionally focuses on
-CrudGen API composition over OmniKernel services; the task example is the better
-place to study custom service overrides, `YalcEventService`, and `ApiStrategy`.
+The module uses server-owned scope isolation. Applications must derive scope
+from a trusted request boundary; clients do not choose a `scopeId` in a DTO or
+query. The raw payload contract is portable JSON storage, not a substitute for
+the typed scoped projection contract.
 
-See [`module/README.md`](./module/README.md) for the substrate and
-[`app/README.md`](./app/README.md) for the generated API composition.
-
-Run:
+Run the normal example suite:
 
 ```bash
 npm run test:e2e --prefix examples/omnikernel/app

@@ -1,7 +1,7 @@
 import { ObjectType } from '@nestjs/graphql';
 import { ChildEntity, Column } from 'typeorm';
-import { OmniRecordEntity } from './base/omni-record.entity';
-import { OmniCollectionKind } from './omni-collection-kind.enum';
+import { OmniRecordEntity } from './base/omni-record.entity.js';
+import { OmniCollectionKind } from './omni-collection-kind.enum.js';
 
 @ChildEntity(OmniCollectionKind.Collection)
 @ObjectType({ isAbstract: true })

@@ -1,0 +1,30 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "incremental": false,
+    "rootDir": ".",
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@nestjs-yalc/crud-gen": ["../../../var/dist/crud-gen/src/index.d.ts"],
+      "@nestjs-yalc/crud-gen/*": ["../../../var/dist/crud-gen/src/*"],
+      "@nestjs-yalc/data-loader": ["../../../var/dist/data-loader/src/index.d.ts"],
+      "@nestjs-yalc/data-loader/*": ["../../../var/dist/data-loader/src/*"],
+      "@nestjs-yalc/database": ["../../../var/dist/database/src/index.d.ts"],
+      "@nestjs-yalc/database/*": ["../../../var/dist/database/src/*"],
+      "@nestjs-yalc/event-manager": ["../../../var/dist/event-manager/src/index.d.ts"],
+      "@nestjs-yalc/event-manager/*": ["../../../var/dist/event-manager/src/*"],
+      "@nestjs-yalc/graphql": ["../../../var/dist/graphql/src/index.d.ts"],
+      "@nestjs-yalc/graphql/*": ["../../../var/dist/graphql/src/*"],
+      "@nestjs-yalc/interfaces": ["../../../var/dist/interfaces/src/index.d.ts"],
+      "@nestjs-yalc/interfaces/*": ["../../../var/dist/interfaces/src/*"],
+      "@nestjs-yalc/types": ["../../../types/src/index.d.ts"],
+      "@nestjs-yalc/types/*": ["../../../types/src/*"],
+      "@nestjs-yalc/utils": ["../../../var/dist/utils/src/index.d.ts"],
+      "@nestjs-yalc/utils/*": ["../../../var/dist/utils/src/*"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "src/__tests__", "var"]
+}

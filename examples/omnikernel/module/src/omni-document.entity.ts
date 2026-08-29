@@ -1,7 +1,7 @@
 import { ObjectType } from '@nestjs/graphql';
 import { ChildEntity, Column } from 'typeorm';
-import { OmniRecordEntity } from './base/omni-record.entity';
-import { OmniDocumentKind } from './omni-document-kind.enum';
+import { OmniRecordEntity } from './base/omni-record.entity.js';
+import { OmniDocumentKind } from './omni-document-kind.enum.js';
 
 @ChildEntity(OmniDocumentKind.Document)
 @ObjectType({ isAbstract: true })
@@ -25,6 +25,6 @@ export class OmniDocumentEntity extends OmniRecordEntity {
   @Column({ type: 'varchar', nullable: true, length: 2048 })
   sourceUrl?: string | null;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: Date, nullable: true })
   publishedAt?: Date | null;
 }
