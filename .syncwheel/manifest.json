@@ -15,8 +15,8 @@
   },
   "stacks": [
     {
-      "id": "release-publish-omnikernel",
-      "branch": "pr/release-publish-omnikernel",
+      "id": "release-root-version",
+      "branch": "pr/release-root-version",
       "base": "origin/dev",
       "target_remote": "origin",
       "target_branch": "dev",

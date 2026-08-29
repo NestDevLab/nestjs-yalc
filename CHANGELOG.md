@@ -1,3 +1,12 @@
+Rev: 1.4.0
+=============
+
+## Additions
+
+* Export the public `@nestjs-yalc/omnikernel-module` package from the aggregate framework.
+
+
+
 Rev: 1.2.1
 =============
  
