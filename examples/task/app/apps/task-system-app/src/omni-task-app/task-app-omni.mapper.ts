@@ -17,10 +17,6 @@ import {
   TaskExternalRefCreateInput,
   TaskExternalRefType,
 } from '../sync/task-external-ref.dto';
-import {
-  TaskSyncStateCreateInput,
-  TaskSyncStateType,
-} from '../sync/task-sync-state.dto';
 
 export interface TaskItemOmniWriteInput extends Partial<TaskItemCreateInput> {
   referenceIds?: string[];
@@ -38,7 +34,6 @@ export interface TaskOmniPageQuery {
 export class TaskAppOmniMapper {
   readonly taskKind = 'task';
   readonly eventKind = 'event';
-  readonly syncStateKind = 'sync-state';
 
   extractCrudGenFilterMap(where: unknown): Record<string, unknown> {
     if (!where || typeof where !== 'object' || Array.isArray(where)) {
@@ -169,46 +164,6 @@ export class TaskAppOmniMapper {
       allDay: this.getPayloadBoolean(payload, 'allDay') ?? false,
       projectId: projectId ?? null,
       location: this.getPayloadString(payload, 'location'),
-    });
-  }
-
-  mapSyncStateToOmniRecord(
-    input: Partial<TaskSyncStateCreateInput>,
-  ): Partial<OmniRecordEntity> {
-    const syncStatus = input.status ?? 'active';
-    return {
-      guid: input.guid,
-      title: `Sync state ${input.guid ?? 'unknown'}`,
-      slug: this.slugify(input.guid),
-      kind: this.syncStateKind,
-      status: this.mapDomainStatusToOmniStatus(syncStatus),
-      payload: {
-        externalRefId: input.externalRefId,
-        lastDirection: input.lastDirection ?? null,
-        lastError: input.lastError ?? null,
-        lastSyncedAt: this.normalizeDateInput(input.lastSyncedAt),
-        localVersionHash: input.localVersionHash ?? null,
-        remoteVersion: input.remoteVersion ?? null,
-        syncStatus,
-      },
-    };
-  }
-
-  mapOmniRecordToSyncState(record: OmniRecordEntity): TaskSyncStateType {
-    const payload = this.getPayload(record);
-    return new TaskSyncStateType({
-      createdAt: record.createdAt,
-      updatedAt: record.updatedAt,
-      guid: record.guid,
-      externalRefId: this.getPayloadString(payload, 'externalRefId') ?? '',
-      status:
-        this.getPayloadString(payload, 'syncStatus') ??
-        this.mapOmniStatusToDomainStatus(record.status),
-      lastSyncedAt: this.getPayloadDate(payload, 'lastSyncedAt'),
-      lastDirection: this.getPayloadString(payload, 'lastDirection'),
-      remoteVersion: this.getPayloadString(payload, 'remoteVersion'),
-      localVersionHash: this.getPayloadString(payload, 'localVersionHash'),
-      lastError: this.getPayloadString(payload, 'lastError'),
     });
   }
 

@@ -60,10 +60,10 @@ schema, and persistence field identical.
 
 The scope is supplied by the server through a trusted `ProjectionScope` and is
 never a public create, update, condition, REST, or GraphQL field. The identity
-must be a required, non-null string physical column and is unique inside the
-scope. Every other non-null field must also be required on create because this
-contract has no implicit default-value mechanism. A resource supports hard
-delete only.
+must be a required, non-null `string` or `uuid` physical column and is unique
+inside the scope. Every other non-null field must also be required on create
+because this contract has no implicit default-value mechanism. A resource
+supports hard delete only.
 
 ## Public CRUD semantics
 
@@ -98,8 +98,15 @@ as values but cannot be filtered, sorted, or indexed.
 
 ## Supported fields and queries
 
-`string`, `integer`, and `instant` fields have the same validation and query
-operators on SQLite and PostgreSQL. `integer` is a signed 32-bit value
+`string`, `uuid`, `integer`, and `instant` fields have the same validation and
+query operators on SQLite and PostgreSQL. `uuid` accepts only the canonical
+lowercase, hyphenated UUID text form. Generated GraphQL object, create, patch,
+and condition fields use `UUIDScalar`; REST/service input, filters, and
+identity conditions reject invalid UUIDs before persistence or SQL. UUID values
+are stored and queried as validated text, so equality filters, sorting, and
+expression indexes work for both physical columns and JSON projections exactly
+as they do for strings. UUID range filtering is intentionally not supported.
+`integer` is a signed 32-bit value
 (`-2147483648` through `2147483647`), matching GraphQL `Int` and PostgreSQL
 `integer`. The upper revision value is reserved as the terminal revision so an
 update can never overflow that portable range.

@@ -4,7 +4,12 @@
  * A consumer declares logical fields here. Services and dialects receive field
  * definitions rather than JSON paths or driver-specific SQL.
  */
-export type ProjectionCodec = 'string' | 'instant' | 'integer' | 'json';
+export type ProjectionCodec =
+  | 'string'
+  | 'uuid'
+  | 'instant'
+  | 'integer'
+  | 'json';
 
 /** GraphQL Int and PostgreSQL integer share this portable signed range. */
 export const PROJECTION_INTEGER_MIN = -(2 ** 31);
@@ -20,6 +25,13 @@ export type ProjectionFilterOperator = 'eq' | 'range';
  * path as a SQL literal without dialect-specific escaping rules.
  */
 export const projectionPathSegmentPattern = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+/**
+ * UUIDs use their canonical lowercase, hyphenated text representation. The
+ * projection contract stores the same portable text on SQLite and PostgreSQL.
+ */
+export const projectionCanonicalUuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 export interface ProjectionIndexDefinition {
   name: string;
@@ -141,9 +153,12 @@ function assertFieldQueryCapabilities(field: ProjectionFieldDefinition): void {
     return;
   }
 
-  if (field.codec === 'string' && filters.includes('range')) {
+  if (
+    (field.codec === 'string' || field.codec === 'uuid') &&
+    filters.includes('range')
+  ) {
     throw new TypeError(
-      `Projection string field ${field.name} cannot declare range filtering.`,
+      `Projection ${field.codec} field ${field.name} cannot declare range filtering.`,
     );
   }
 }
@@ -284,7 +299,9 @@ export function assertProjectionResourceDefinition(
         `Projection field ${field.name} has an unsupported storage mode.`,
       );
     }
-    if (!['string', 'instant', 'integer', 'json'].includes(field.codec)) {
+    if (
+      !['string', 'uuid', 'instant', 'integer', 'json'].includes(field.codec)
+    ) {
       throw new TypeError(
         `Projection field ${field.name} has an unsupported codec.`,
       );
@@ -330,12 +347,12 @@ export function assertProjectionResourceDefinition(
     !identityField ||
     identityField.storage !== 'column' ||
     identityField.column !== definition.identity.column ||
-    identityField.codec !== 'string' ||
+    (identityField.codec !== 'string' && identityField.codec !== 'uuid') ||
     identityField.nullable ||
     !identityField.requiredOnCreate
   ) {
     throw new TypeError(
-      `Projection identity ${definition.identity.column} must be a required non-null string column field.`,
+      `Projection identity ${definition.identity.column} must be a required non-null string or UUID column field.`,
     );
   }
 }
@@ -343,6 +360,8 @@ export function assertProjectionResourceDefinition(
 /**
  * Projection codec values have deliberately portable semantics:
  * - string: a JavaScript string; equality and sorting are textual.
+ * - uuid: a canonical lowercase hyphenated UUID string; equality, sorting,
+ *   and indexes compare its validated text representation.
  * - instant: a canonical Date#toISOString UTC timestamp; equality, range,
  *   sorting and indexes compare the canonical text representation.
  * - integer: a signed 32-bit integer; equality, range, sorting and indexes
@@ -365,6 +384,18 @@ export function assertProjectionCodecValue(
     if (typeof value !== 'string') {
       throw new TypeError(
         `Projection string field ${field.name} must be a string.`,
+      );
+    }
+    return;
+  }
+
+  if (field.codec === 'uuid') {
+    if (
+      typeof value !== 'string' ||
+      !projectionCanonicalUuidPattern.test(value)
+    ) {
+      throw new TypeError(
+        `Projection UUID field ${field.name} must be a canonical UUID.`,
       );
     }
     return;

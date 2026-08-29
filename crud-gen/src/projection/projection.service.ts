@@ -498,7 +498,10 @@ export class ProjectionResourceService<Entity extends ObjectLiteral> {
         `Projection resource conditions require only a ${identity}.`,
       );
     }
-    return conditions[identity] as string;
+    return this.normalizeValue(
+      getProjectionField(this.definition, identity),
+      conditions[identity],
+    ) as string;
   }
 
   private rejectUnknownInput(

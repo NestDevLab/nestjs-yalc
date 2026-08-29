@@ -25,6 +25,7 @@ import {
 import { OmniTaskAppModule } from './omni-task-app/omni-task-app.module';
 import { ProjectsModule } from './projects/projects.module';
 import { SyncModule } from './sync/sync.module';
+import { TaskSyncStateProjection } from './sync/task-sync-state.projection';
 import { TasksModule } from './tasks/tasks.module';
 import { TaskAppEventModule } from './task-app-event.module';
 
@@ -50,6 +51,7 @@ import { TaskAppEventModule } from './task-app-event.module';
         OmniCollectionEntity,
         OmniDocumentEntity,
         OmniExternalRefEntity,
+        TaskSyncStateProjection,
       ],
       synchronize: true,
     }),

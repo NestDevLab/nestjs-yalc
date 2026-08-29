@@ -45,7 +45,9 @@ export function createProjectionSchemaOptions(
     columns[field.column ?? field.name] = {
       type: typeForCodec(field.codec),
       nullable: field.nullable,
-      ...(field.codec === 'string' || field.codec === 'instant'
+      ...(field.codec === 'string' ||
+      field.codec === 'uuid' ||
+      field.codec === 'instant'
         ? { length: 255 }
         : {}),
     };

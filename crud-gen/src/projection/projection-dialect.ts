@@ -144,7 +144,7 @@ abstract class BaseProjectionDialect implements ProjectionDialect {
     codec: ProjectionFieldDefinition['codec'],
   ): string {
     if (codec === 'integer') return `CAST(${expression} AS BIGINT)`;
-    if (codec === 'string' || codec === 'instant')
+    if (codec === 'string' || codec === 'uuid' || codec === 'instant')
       return `CAST(${expression} AS TEXT)`;
     throw new TypeError(
       'Projection JSON values cannot be used in SQL queries.',
