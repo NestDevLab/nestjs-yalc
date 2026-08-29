@@ -49,11 +49,11 @@ function isFindOperator(value: unknown): value is FindOperatorLike {
  */
 export class ProjectionResourceService<Entity extends ObjectLiteral> {
   constructor(
-    private readonly repository: Repository<Entity>,
-    private readonly scope: ProjectionScope,
-    private readonly dialect: ProjectionDialect,
-    private readonly events: YalcEventService,
-    private readonly definition: ProjectionResourceDefinition,
+    protected readonly repository: Repository<Entity>,
+    protected readonly scope: ProjectionScope,
+    protected readonly dialect: ProjectionDialect,
+    protected readonly events: YalcEventService,
+    protected readonly definition: ProjectionResourceDefinition,
   ) {
     assertProjectionResourceDefinition(definition);
   }
@@ -234,7 +234,7 @@ export class ProjectionResourceService<Entity extends ObjectLiteral> {
     return true;
   }
 
-  private createPayload(
+  protected createPayload(
     input: Record<string, unknown>,
   ): Record<string, unknown> {
     const initial = input.payload;
@@ -281,7 +281,7 @@ export class ProjectionResourceService<Entity extends ObjectLiteral> {
     return payload;
   }
 
-  private project(record: Entity): Entity {
+  protected project(record: Entity): Entity {
     const projected = {
       ...(record as Record<string, unknown>),
       [this.definition.payload.column]:
@@ -301,7 +301,7 @@ export class ProjectionResourceService<Entity extends ObjectLiteral> {
     return projected as Entity;
   }
 
-  private filtersFromFindOptions(
+  protected filtersFromFindOptions(
     findOptions: CrudGenFindManyOptions<Entity>,
   ): ProjectionFilter[] {
     const where = findOptions.where;
@@ -395,7 +395,7 @@ export class ProjectionResourceService<Entity extends ObjectLiteral> {
     return filters;
   }
 
-  private sortingFromFindOptions(
+  protected sortingFromFindOptions(
     findOptions: CrudGenFindManyOptions<Entity>,
   ): ProjectionSort[] {
     return Object.entries(findOptions.order ?? {}).map(([name, direction]) => {
@@ -409,7 +409,7 @@ export class ProjectionResourceService<Entity extends ObjectLiteral> {
     });
   }
 
-  private pageFromFindOptions(findOptions: CrudGenFindManyOptions<Entity>): {
+  protected pageFromFindOptions(findOptions: CrudGenFindManyOptions<Entity>): {
     skip?: number;
     take?: number;
   } {
@@ -429,7 +429,7 @@ export class ProjectionResourceService<Entity extends ObjectLiteral> {
     return { skip, take };
   }
 
-  private projectionField(
+  protected projectionField(
     name: string,
     purpose: 'filter' | 'sort',
   ): ProjectionResourceDefinition['fields'][number] {
@@ -440,7 +440,7 @@ export class ProjectionResourceService<Entity extends ObjectLiteral> {
     }
   }
 
-  private assertFilterAllowed(
+  protected assertFilterAllowed(
     field: ProjectionResourceDefinition['fields'][number],
     operator: 'eq' | 'range',
   ): void {
@@ -451,7 +451,7 @@ export class ProjectionResourceService<Entity extends ObjectLiteral> {
     }
   }
 
-  private normalizeFilterValues(
+  protected normalizeFilterValues(
     field: ProjectionResourceDefinition['fields'][number],
     values: readonly unknown[],
     expectedLength: number | null = 1,
@@ -472,7 +472,7 @@ export class ProjectionResourceService<Entity extends ObjectLiteral> {
     return values.map((value) => this.normalizeValue(field, value));
   }
 
-  private normalizeValue(
+  protected normalizeValue(
     field: ProjectionResourceDefinition['fields'][number],
     value: unknown,
   ): unknown {
@@ -487,7 +487,7 @@ export class ProjectionResourceService<Entity extends ObjectLiteral> {
     }
   }
 
-  private guidFromConditions(conditions: Record<string, unknown>): string {
+  protected guidFromConditions(conditions: Record<string, unknown>): string {
     const identity = this.definition.identity.column;
     if (
       Reflect.ownKeys(conditions).length !== 1 ||
@@ -504,7 +504,7 @@ export class ProjectionResourceService<Entity extends ObjectLiteral> {
     ) as string;
   }
 
-  private rejectUnknownInput(
+  protected rejectUnknownInput(
     input: Record<string, unknown>,
     creating: boolean,
   ): void {
@@ -525,13 +525,13 @@ export class ProjectionResourceService<Entity extends ObjectLiteral> {
     }
   }
 
-  private invalid(message: string): never {
+  protected invalid(message: string): never {
     throw this.events.errorBadRequest('projection.invalid-request', {
       response: { message },
     });
   }
 
-  private notFound(): never {
+  protected notFound(): never {
     throw this.events.errorNotFound('projection.resource.not-found', {
       response: { message: 'Projection resource not found.' },
     });

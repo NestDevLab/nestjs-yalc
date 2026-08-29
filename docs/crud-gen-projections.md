@@ -98,8 +98,11 @@ as values but cannot be filtered, sorted, or indexed.
 
 ## Supported fields and queries
 
-`string`, `uuid`, `integer`, and `instant` fields have the same validation and
-query operators on SQLite and PostgreSQL. `uuid` accepts only the canonical
+`string`, `uuid`, `integer`, `boolean`, and `instant` fields have the same
+validation and query operators on SQLite and PostgreSQL. `boolean` accepts
+only JavaScript `true` and `false`, is exposed as the GraphQL `Boolean` scalar,
+and uses typed SQLite JSON1 and PostgreSQL `jsonb` expressions for declared
+equality filters, sorting, and indexes. `uuid` accepts only the canonical
 lowercase, hyphenated UUID text form. Generated GraphQL object, create, patch,
 and condition fields use `UUIDScalar`; REST/service input, filters, and
 identity conditions reject invalid UUIDs before persistence or SQL. UUID values

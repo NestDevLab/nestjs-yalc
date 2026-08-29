@@ -1,4 +1,7 @@
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { OmniRecordEntity } from './base/omni-record.entity.js';
 import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
+import { OmniExternalRefBindingValidator } from './omni-external-ref-binding.validator.js';
 import { OmniExternalRefService } from './omni-external-ref.service.js';
 import {
   omniBackendServiceToken,
@@ -11,10 +14,12 @@ export const omniExternalRefBackendProvidersFactory = (dbConnection: string) =>
     dbConnection,
     serviceToken: omniBackendServiceToken(OmniExternalRefService),
     serviceProvider: OmniExternalRefService,
-    createService: (repository, scope, options) =>
+    additionalInject: [getRepositoryToken(OmniRecordEntity, dbConnection)],
+    createService: (repository, scope, options, recordRepository) =>
       new OmniExternalRefService(
         repository,
         scope,
         options.deletion.externalRef,
+        new OmniExternalRefBindingValidator(recordRepository as never, scope),
       ),
   });

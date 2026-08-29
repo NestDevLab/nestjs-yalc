@@ -7,6 +7,10 @@ const { OmniExternalRefEntity } =
 const { OmniExternalRefInternalType } =
   await import("../omni-external-ref-internal-type.enum.js");
 
+const bindingValidator = {
+  assertTarget: jest.fn(async () => ({})),
+};
+
 const createRepositoryPair = () => {
   const readRepository = {
     target: OmniExternalRefEntity,
@@ -28,11 +32,27 @@ const createRepositoryPair = () => {
 };
 
 describe("OmniExternalRefService", () => {
+  it('requires a binding validator instead of silently bypassing target validation', () => {
+    const { readRepository, writeRepository } = createRepositoryPair();
+
+    expect(
+      () =>
+        new OmniExternalRefService(
+          readRepository as never,
+          writeRepository as never,
+          'hard',
+          undefined as never,
+        ),
+    ).toThrow('requires an OmniExternalRefBindingValidator');
+  });
+
   it("looks up references by provider/external identity", async () => {
     const { readRepository, writeRepository } = createRepositoryPair();
     const service = new OmniExternalRefService(
       readRepository as never,
       writeRepository as never,
+      'hard',
+      bindingValidator as never,
     );
 
     await service.findByExternalIdentity({
@@ -58,6 +78,8 @@ describe("OmniExternalRefService", () => {
     const service = new OmniExternalRefService(
       readRepository as never,
       writeRepository as never,
+      'hard',
+      bindingValidator as never,
     );
 
     await service.findForInternalRecord(
@@ -85,6 +107,8 @@ describe("OmniExternalRefService", () => {
     const service = new OmniExternalRefService(
       readRepository as never,
       writeRepository as never,
+      'hard',
+      bindingValidator as never,
     );
     const createSpy = jest
       .spyOn(service, "createEntity")
@@ -106,14 +130,53 @@ describe("OmniExternalRefService", () => {
     expect(result.guid).toBe("created");
   });
 
+  it("validates record bindings without changing legacy non-record bindings", async () => {
+    const { readRepository, writeRepository } = createRepositoryPair();
+    readRepository.findOne.mockResolvedValue(null);
+    const validator = {
+      assertTarget: jest.fn(async () => ({})),
+    };
+    const service = new OmniExternalRefService(
+      readRepository as never,
+      writeRepository as never,
+      "hard",
+      validator as never,
+    );
+
+    await service.createEntity({
+      guid: "eeeeeeee-1111-1111-1111-111111111112",
+      provider: "example",
+      externalId: "record",
+      internalType: OmniExternalRefInternalType.Record,
+      internalId: "aaaaaaaa-1111-1111-1111-111111111111",
+    });
+    expect(validator.assertTarget).toHaveBeenCalledWith({
+      internalType: OmniExternalRefInternalType.Record,
+      internalId: "aaaaaaaa-1111-1111-1111-111111111111",
+    });
+
+    await service.createEntity({
+      guid: "eeeeeeee-1111-1111-1111-111111111113",
+      provider: "example",
+      externalId: "legacy-document",
+      internalType: OmniExternalRefInternalType.Document,
+      internalId: "aaaaaaaa-1111-1111-1111-111111111112",
+    });
+    expect(validator.assertTarget).toHaveBeenCalledTimes(1);
+  });
+
   it("updates an existing external ref when the identity already exists", async () => {
     const { readRepository, writeRepository } = createRepositoryPair();
     readRepository.findOne.mockResolvedValue({
       guid: "existing-guid",
+      internalType: OmniExternalRefInternalType.Document,
+      internalId: "doc-1",
     });
     const service = new OmniExternalRefService(
       readRepository as never,
       writeRepository as never,
+      'hard',
+      bindingValidator as never,
     );
     const updateSpy = jest
       .spyOn(service, "updateEntity")
@@ -130,7 +193,6 @@ describe("OmniExternalRefService", () => {
     expect(updateSpy).toHaveBeenCalledWith(
       { guid: "existing-guid" },
       expect.objectContaining({
-        internalId: "doc-1",
         payload: { synced: true },
       }),
     );
@@ -142,6 +204,8 @@ describe("OmniExternalRefService", () => {
     const service = new OmniExternalRefService(
       readRepository as never,
       writeRepository as never,
+      'hard',
+      bindingValidator as never,
     );
 
     await expect(
@@ -168,6 +232,8 @@ describe("OmniExternalRefService", () => {
     const service = new OmniExternalRefService(
       readRepository as never,
       writeRepository as never,
+      'hard',
+      bindingValidator as never,
     );
     const upsertSpy = jest
       .spyOn(service, "upsertExternalRef")

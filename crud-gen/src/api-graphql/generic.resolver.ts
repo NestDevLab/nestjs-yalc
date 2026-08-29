@@ -22,6 +22,7 @@ import {
   applyDecorators,
   ExecutionContext,
   Inject,
+  type InjectionToken,
   UseInterceptors,
 } from '@nestjs/common';
 import { CrudGenGqlInterceptor } from '@nestjs-yalc/crud-gen/api-graphql/crud-gen-gql.interceptor.js';
@@ -161,6 +162,12 @@ export function hasFilters(findOptions: CrudGenFindManyOptions) {
 
 export interface IGenericResolverOptions<Entity> {
   entityModel: ClassType<Entity>;
+  /**
+   * Optional app-owned ModuleRef injection token. This keeps generated
+   * resolvers usable when a file package and its Nest app resolve distinct
+   * physical copies of @nestjs/core.
+   */
+  moduleRefToken?: InjectionToken;
   dto?: ClassType;
   input?: {
     create?: ClassType;
@@ -874,6 +881,7 @@ export function resolverFactory<
           getDataloaderToken(options.entityModel),
       )
       protected dataLoader: GQLDataLoader<Entity>,
+      @Inject(options.moduleRefToken ?? ModuleRef)
       protected moduleRef: ModuleRef,
     ) {
       this.moduleRef;

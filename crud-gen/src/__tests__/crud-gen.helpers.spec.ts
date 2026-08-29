@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { SELF_DECLARED_DEPS_METADATA } from '@nestjs/common/constants';
 import { importMockedEsm } from '@nestjs-yalc/jest/esm.helper.js';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import type { IFieldMapper } from '@nestjs-yalc/interfaces/maps.interface.js';
@@ -650,6 +651,33 @@ describe('Crud-gen helpers', () => {
       });
 
       expect(graphql.providers.length).toBe(1);
+    });
+
+    it('forwards an app-owned ModuleRef token to the generated resolver', () => {
+      const moduleRefToken = Symbol('consumer-module-ref');
+      const resource = CrudGenResourceFactory<TestEntity>({
+        entityModel: TestEntity,
+        backend: false,
+        graphql: {
+          resolver: {
+            dto: TestEntityDto,
+            moduleRefToken,
+            service: {
+              serviceToken: 'ExistingService',
+              dataLoaderToken: 'ExistingDataLoader',
+            },
+          },
+        },
+      });
+      const resolver = resource.providers[0] as Function;
+      const dependencies = Reflect.getMetadata(
+        SELF_DECLARED_DEPS_METADATA,
+        resolver,
+      ) as Array<{ index: number; param: unknown }>;
+
+      expect(dependencies).toEqual(
+        expect.arrayContaining([{ index: 2, param: moduleRefToken }]),
+      );
     });
 
     it('Should create combined resource providers and controllers', () => {

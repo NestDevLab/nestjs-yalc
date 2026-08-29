@@ -33,8 +33,10 @@ export class OmniKernelModule {
     const { dbConnection } = options;
     const omniNamedProviders =
       omniNamedBackendProvidersFactory(dbConnection).providers;
-    const omniRecordProviders =
-      omniRecordBackendProvidersFactory(dbConnection).providers;
+    const omniRecordProviders = omniRecordBackendProvidersFactory(
+      dbConnection,
+      options.reservedRecordKinds,
+    ).providers;
     const omniRelationProviders =
       omniRelationBackendProvidersFactory(dbConnection).providers;
     const omniCollectionProviders =
@@ -78,6 +80,7 @@ export class OmniKernelModule {
         omniKernelQueryServiceProvider,
       ],
       exports: [
+        OMNI_KERNEL_OPTIONS,
         OmniScopeContext,
         EventEmitter2,
         ...omniNamedProviders,

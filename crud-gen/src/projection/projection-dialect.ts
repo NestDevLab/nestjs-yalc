@@ -35,6 +35,22 @@ export interface ProjectionPatch {
   }>;
 }
 
+/**
+ * Applies projected values when optimistic concurrency is owned by a related
+ * record rather than by the projection table itself. The dialect still owns
+ * every JSON mutation; the caller owns the surrounding transaction and its
+ * revision predicate.
+ */
+export interface ProjectionValuePatch {
+  scopeId: string;
+  guid: string;
+  columnValues: Record<string, unknown>;
+  jsonValues: Array<{
+    field: ProjectionFieldDefinition;
+    value: unknown;
+  }>;
+}
+
 export interface ProjectionDialectEvidence {
   payloadStorage: string;
   indexes: string[];
@@ -68,6 +84,11 @@ export interface ProjectionDialect {
     repository: Repository<Entity>,
     definition: ProjectionResourceDefinition,
     patch: ProjectionPatch,
+  ): Promise<number>;
+  patchValues<Entity extends ObjectLiteral>(
+    repository: Repository<Entity>,
+    definition: ProjectionResourceDefinition,
+    patch: ProjectionValuePatch,
   ): Promise<number>;
   inspect(
     dataSource: DataSource,
@@ -144,12 +165,15 @@ abstract class BaseProjectionDialect implements ProjectionDialect {
     codec: ProjectionFieldDefinition['codec'],
   ): string {
     if (codec === 'integer') return `CAST(${expression} AS BIGINT)`;
+    if (codec === 'boolean') return this.booleanExpression(expression);
     if (codec === 'string' || codec === 'uuid' || codec === 'instant')
       return `CAST(${expression} AS TEXT)`;
     throw new TypeError(
       'Projection JSON values cannot be used in SQL queries.',
     );
   }
+
+  protected abstract booleanExpression(expression: string): string;
 
   protected abstract jsonPatchExpression(
     payloadColumn: string,
@@ -244,7 +268,12 @@ abstract class BaseProjectionDialect implements ProjectionDialect {
     if (page.skip !== undefined) query.skip(page.skip);
     if (page.take !== undefined) query.take(page.take);
 
-    return Promise.all([query.getMany(), query.clone().getCount()]);
+    // PostgreSQL drivers do not permit concurrent operations on the same
+    // query runner connection. Keep the grid and count reads sequential so
+    // this dialect contract is safe inside an ambient transaction as well.
+    const records = await query.getMany();
+    const count = await query.clone().getCount();
+    return [records, count];
   }
 
   async patch<Entity extends ObjectLiteral>(
@@ -253,35 +282,14 @@ abstract class BaseProjectionDialect implements ProjectionDialect {
     patch: ProjectionPatch,
   ): Promise<number> {
     assertProjectionResourceDefinition(definition);
-    const setValues: Record<string, unknown> = { ...patch.columnValues };
+    const setValues = this.patchSetValues(definition, patch);
     const parameters: Record<string, unknown> = {
       projection_scope_id: patch.scopeId,
       projection_guid: patch.guid,
       projection_expected_revision: patch.expectedRevision,
     };
 
-    const jsonValues = patch.jsonValues.map((change) => {
-      const field = getProjectionField(definition, change.field.name);
-      if (field.storage !== 'json') {
-        throw new TypeError(
-          `Projection field ${field.name} cannot be patched as JSON.`,
-        );
-      }
-      return {
-        ...change,
-        field,
-        value: normalizeProjectionCodecValue(field, change.value),
-      };
-    });
-
-    if (jsonValues.length > 0) {
-      const jsonPatch = this.jsonPatchExpression(
-        this.quote(definition.payload.column),
-        jsonValues,
-      );
-      setValues[definition.payload.column] = () => jsonPatch.expression;
-      Object.assign(parameters, jsonPatch.parameters);
-    }
+    Object.assign(parameters, this.patchParameters(definition, patch));
 
     setValues[definition.revision.column] = () =>
       `${this.quote(definition.revision.column)} + 1`;
@@ -301,6 +309,79 @@ abstract class BaseProjectionDialect implements ProjectionDialect {
       .execute();
 
     return result.affected ?? 0;
+  }
+
+  async patchValues<Entity extends ObjectLiteral>(
+    repository: Repository<Entity>,
+    definition: ProjectionResourceDefinition,
+    patch: ProjectionValuePatch,
+  ): Promise<number> {
+    assertProjectionResourceDefinition(definition);
+    const result = await repository
+      .createQueryBuilder()
+      .update()
+      .set(this.patchSetValues(definition, patch) as any)
+      .where(
+        `${this.quote(definition.scope.column)} = :projection_scope_id AND ${this.quote(
+          definition.identity.column,
+        )} = :projection_guid`,
+      )
+      .setParameters({
+        projection_scope_id: patch.scopeId,
+        projection_guid: patch.guid,
+        ...this.patchParameters(definition, patch),
+      })
+      .execute();
+
+    return result.affected ?? 0;
+  }
+
+  private patchSetValues(
+    definition: ProjectionResourceDefinition,
+    patch: Pick<ProjectionValuePatch, 'columnValues' | 'jsonValues'>,
+  ): Record<string, unknown> {
+    const setValues: Record<string, unknown> = { ...patch.columnValues };
+    const jsonValues = this.normalizedJsonValues(definition, patch);
+    if (jsonValues.length > 0) {
+      const jsonPatch = this.jsonPatchExpression(
+        this.quote(definition.payload.column),
+        jsonValues,
+      );
+      setValues[definition.payload.column] = () => jsonPatch.expression;
+    }
+    return setValues;
+  }
+
+  private patchParameters(
+    definition: ProjectionResourceDefinition,
+    patch: Pick<ProjectionValuePatch, 'columnValues' | 'jsonValues'>,
+  ): Record<string, string> {
+    const jsonValues = this.normalizedJsonValues(definition, patch);
+    return jsonValues.length > 0
+      ? this.jsonPatchExpression(
+          this.quote(definition.payload.column),
+          jsonValues,
+        ).parameters
+      : {};
+  }
+
+  private normalizedJsonValues(
+    definition: ProjectionResourceDefinition,
+    patch: Pick<ProjectionValuePatch, 'jsonValues'>,
+  ): ProjectionPatch['jsonValues'] {
+    return patch.jsonValues.map((change) => {
+      const field = getProjectionField(definition, change.field.name);
+      if (field.storage !== 'json') {
+        throw new TypeError(
+          `Projection field ${field.name} cannot be patched as JSON.`,
+        );
+      }
+      return {
+        ...change,
+        field,
+        value: normalizeProjectionCodecValue(field, change.value),
+      };
+    });
   }
 
   async explainIndexedEquality(
@@ -362,6 +443,10 @@ class SqliteProjectionDialect extends BaseProjectionDialect {
     path: readonly string[],
   ): string {
     return `json_extract(${payloadReference}, '${this.jsonPath(path)}')`;
+  }
+
+  protected booleanExpression(expression: string): string {
+    return `CAST(${expression} AS INTEGER)`;
   }
 
   protected jsonPatchExpression(
@@ -450,6 +535,10 @@ class PostgresProjectionDialect extends BaseProjectionDialect {
     path: readonly string[],
   ): string {
     return `(${payloadReference} #>> '${this.postgresPath(path)}')`;
+  }
+
+  protected booleanExpression(expression: string): string {
+    return `CAST(${expression} AS BOOLEAN)`;
   }
 
   protected jsonPatchExpression(

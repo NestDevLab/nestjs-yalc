@@ -2,8 +2,14 @@ import { ConflictException } from '@nestjs/common';
 import type { CrudGenFindManyOptions } from '@nestjs-yalc/crud-gen/api-graphql/crud-gen-gql.interface.js';
 import type { DeepPartial, FindOptionsWhere } from 'typeorm';
 import { OmniExternalRefEntity } from './base/omni-external-ref.entity.js';
+import { OmniExternalRefBindingValidator } from './omni-external-ref-binding.validator.js';
 import { OmniExternalRefInternalType } from './omni-external-ref-internal-type.enum.js';
 import { OmniScopedService } from './omni-scoped.service.js';
+import type { OmniDeletePolicy, OmniScope } from './omni-scope.js';
+
+function hasOwn(input: object, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(input, key);
+}
 
 export interface OmniExternalRefLookup {
   provider: string;
@@ -26,6 +32,20 @@ export type OmniExternalRefUpsertInput = Omit<
   >;
 
 export class OmniExternalRefService extends OmniScopedService<OmniExternalRefEntity> {
+  constructor(
+    repository: any,
+    scopeOrRepositoryWrite: OmniScope | any | undefined,
+    deletion: OmniDeletePolicy,
+    private readonly bindingValidator: OmniExternalRefBindingValidator,
+  ) {
+    if (!bindingValidator) {
+      throw new TypeError(
+        'OmniExternalRefService requires an OmniExternalRefBindingValidator.',
+      );
+    }
+    super(repository, scopeOrRepositoryWrite, deletion);
+  }
+
   async findByExternalIdentity({
     provider,
     externalId,
@@ -80,9 +100,22 @@ export class OmniExternalRefService extends OmniScopedService<OmniExternalRefEnt
     });
 
     if (existing) {
+      if (
+        existing.internalType !== input.internalType ||
+        existing.internalId !== input.internalId
+      ) {
+        throw new ConflictException(
+          'External reference binding is immutable after creation.',
+        );
+      }
+      const {
+        internalType: _internalType,
+        internalId: _internalId,
+        ...update
+      } = this.normalizeExternalIdentity(input);
       return this.updateEntity(
         { guid: existing.guid },
-        this.normalizeExternalIdentity(input),
+        update,
       ) as Promise<OmniExternalRefEntity>;
     }
 
@@ -130,6 +163,7 @@ export class OmniExternalRefService extends OmniScopedService<OmniExternalRefEnt
   ): Promise<OmniExternalRefEntity | boolean> {
     const normalized = this.normalizeExternalIdentity(input);
     this.rejectServerFields(normalized as object);
+    await this.assertBinding(normalized);
     if (
       typeof normalized.provider === 'string' &&
       typeof normalized.externalId === 'string'
@@ -167,12 +201,42 @@ export class OmniExternalRefService extends OmniScopedService<OmniExternalRefEnt
     findOptions?: CrudGenFindManyOptions<OmniExternalRefEntity>,
     returnEntity = true,
   ): Promise<OmniExternalRefEntity | boolean> {
+    const normalized = this.normalizeExternalIdentity(input);
+    this.rejectBindingMutation(normalized as object);
     return super.updateEntity(
       conditions,
-      this.normalizeExternalIdentity(input),
+      normalized,
       findOptions,
       returnEntity,
     );
+  }
+
+  private async assertBinding(
+    input: DeepPartial<OmniExternalRefEntity>,
+  ): Promise<void> {
+    if (
+      typeof input.internalId !== 'string' ||
+      input.internalType === undefined
+    ) {
+      throw new ConflictException(
+        'External reference binding requires internalType and internalId.',
+      );
+    }
+    if (input.internalType !== OmniExternalRefInternalType.Record) {
+      return;
+    }
+    await this.bindingValidator.assertTarget({
+      internalId: input.internalId,
+      internalType: input.internalType,
+    });
+  }
+
+  private rejectBindingMutation(input: object): void {
+    if (hasOwn(input, 'internalType') || hasOwn(input, 'internalId')) {
+      throw new ConflictException(
+        'External reference binding is immutable after creation.',
+      );
+    }
   }
 
   private normalizeExternalIdentity<

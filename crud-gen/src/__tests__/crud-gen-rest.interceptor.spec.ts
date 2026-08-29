@@ -233,8 +233,7 @@ describe('crudRestControllerFactory', () => {
       undefined,
       { failOnNull: true },
     );
-    expect(item).toBeInstanceOf(TestDto);
-    expect(item.name).toBe('entity');
+    expect(item).toEqual({ id: '1', name: 'entity' });
   });
 
   it('should map create, update and delete to GenericService write methods', async () => {

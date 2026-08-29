@@ -74,6 +74,93 @@ Relations preserve the canonical `contains`, `references`, `related_to`, and
 through `relationKinds`; unregistered kinds are rejected. Canonical endpoint
 semantics remain enforced, while extra kinds have no hidden generic policy.
 
+## Omni-owned extension projections
+
+An extension projection adds typed, generated CRUD without making a second
+root identity. Its dynamically generated table has `(scopeId, guid)` and a
+composite foreign key to `omni-record`; the owner remains the only authority
+for scope, identity, revision, timestamps, deletion, kind, and payload-schema
+metadata. The extension owns only its declared promoted columns and `payload`.
+
+Use `createOmniExtensionProjectionEntity` and
+`createOmniExtensionProjectionRegistration` from the package entrypoint. A
+registration returns its TypeORM entity, one generated CrudGen REST controller,
+one generated GraphQL resolver, its request-scoped service and dataloader
+providers, a fixed owner-kind reservation, and a reader registration. Compose
+those returned values into the app module; do not add a hand-written controller
+or resolver for ordinary create/read/grid/update/delete operations.
+
+Register every returned `reservedRecordKinds` value with
+`OmniKernelModule.register`. The generic record service then rejects creating,
+changing into, updating, or deleting an extension-owned record kind. The
+extension service is the sole generic path that can transact the owner and its
+extension row together.
+
+The extension table uses JSON1 text on SQLite and native `jsonb` on PostgreSQL.
+All JSON reads, predicates, mutation expressions, indexes, and inspection stay
+inside `ProjectionDialect`; applications only declare projection metadata.
+Owner revision is the optimistic-concurrency value exposed by both generated
+transports.
+
+### Lifecycle policies and transaction readers
+
+An optional `OmniProjectionLifecycleProvider` accepts a Nest injection token,
+not a prebuilt policy instance. Give the same token to an extension and/or
+relation registration. The factory resolves the request-scoped policy and runs
+`beforeCreate`, `beforeUpdate`, and `beforeDelete` in the store transaction,
+so REST and GraphQL have identical enforcement.
+
+If the application and this file package resolve separate physical copies of
+`@nestjs/core`, pass the application's `ModuleRef` provider token as
+`moduleRefToken` to each registration. CrudGen injects that explicit token into
+the generated resolver; no optional dependency or consumer cast is required.
+
+Build one `createOmniProjectionReaderCatalogProvider` from the `reader` values
+returned by the registrations. Lifecycle contexts receive the active
+`EntityManager` and manager-bound `readers`, rather than repositories. An
+extension reader supports declared equality filters and `take: 1..1000`; a
+relation reader supports scoped source/target filters and the same bounded
+`take`. Readers always enforce their registration's owner or relation metadata.
+Lifecycle-bearing writes use `SERIALIZABLE`; serialization or SQLite busy
+failures are reported as retryable conflicts.
+
+## Relation projections
+
+`createOmniRelationProjectionRegistration` creates one generated REST,
+GraphQL, and dataloader surface over the existing `omni-relation` table. It
+never creates a duplicate relation table. A definition has either legacy fixed
+`kind` or a non-empty unique `allowedKinds` list, fixed source/target record
+kinds, and fixed status/schema metadata. For a multi-kind resource, create
+requires one allowed kind; all reads, grids, updates, and deletes mechanically
+constrain that set and the fixed metadata. Endpoints and kind are immutable;
+payload updates require `expectedRevision` and atomically increment revision.
+
+Definitions may map public `kind`, `source`, `target`, and `payload` aliases to
+the native relation fields, keeping generated transports application-neutral.
+Relations require same-scope endpoints and retain the registered endpoint-kind
+checks. `OmniRelationEntity.payload` remains the existing portable
+`simple-json` column on both drivers; unlike an extension projection it is not
+advertised as PostgreSQL `jsonb`.
+
+## Versioned migration snapshots
+
+`captureOmniMigrationSnapshot` is an authoring-only helper. Capture it while
+reviewing a schema, copy the resulting literal into a versioned migration, and
+pass that literal through `defineOmniMigrationSnapshot` and
+`createOmniMigrationPlan`. A runtime migration never reads current TypeORM
+metadata or runs synchronize. The immutable snapshot includes both table
+options and dialect-compiled expression-index statements.
+
+`plan.create(queryRunner)` creates foreign-key parents before children, then
+creates expression indexes. `plan.drop(queryRunner)` drops the reverse order.
+The accepted argument is the package-owned `OmniMigrationRunner` capability
+contract (`createTable` and `query`), so an app's TypeORM `QueryRunner` works
+without a cast even when package-manager paths duplicate TypeORM. Cross-table
+foreign-key cycles and a missing referenced snapshot table fail clearly during
+migration authoring.
+This keeps app migrations free of repeated projection SQL and supports
+reversible SQLite and PostgreSQL migrations.
+
 ## Payload contract
 
 Raw `payload` accepts a JSON object or `null`. Writes replace the complete
