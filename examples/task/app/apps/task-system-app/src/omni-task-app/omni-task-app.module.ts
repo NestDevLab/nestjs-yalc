@@ -10,7 +10,6 @@ import { TaskAppOmniEventService } from './task-app-omni-event.service';
 import { TaskAppOmniExternalRefService } from './task-app-omni-external-ref.service';
 import { TaskAppOmniMapper } from './task-app-omni.mapper';
 import { TaskAppOmniProjectService } from './task-app-omni-project.service';
-import { TaskAppOmniSyncStateService } from './task-app-omni-sync-state.service';
 import { TaskAppOmniTaskService } from './task-app-omni-task.service';
 
 @Global()
@@ -32,7 +31,6 @@ import { TaskAppOmniTaskService } from './task-app-omni-task.service';
     TaskAppOmniTaskService,
     TaskAppOmniEventService,
     TaskAppOmniExternalRefService,
-    TaskAppOmniSyncStateService,
   ],
   exports: [
     TaskAppOmniMapper,
@@ -40,7 +38,6 @@ import { TaskAppOmniTaskService } from './task-app-omni-task.service';
     TaskAppOmniTaskService,
     TaskAppOmniEventService,
     TaskAppOmniExternalRefService,
-    TaskAppOmniSyncStateService,
   ],
 })
 export class OmniTaskAppModule {}

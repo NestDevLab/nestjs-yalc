@@ -8,7 +8,8 @@ The app is intentionally Omni-only at runtime:
 - projects/containers -> `OmniCollectionEntity`
 - tasks -> `OmniRecordEntity` with `kind = 'task'`
 - events -> `OmniRecordEntity` with `kind = 'event'`
-- sync states -> `OmniRecordEntity` with `kind = 'sync-state'`
+- sync states -> `TaskSyncStateProjection`, a scoped JSON projection over an
+  `OmniRecordEntity` with `kind = 'sync-state'`
 - external refs -> `OmniExternalRefEntity`
 
 Canonical relations used by the app:
@@ -31,7 +32,7 @@ Each resource is composed with `CrudGenResourceFactory`:
 
 - GraphQL is generated in the app.
 - REST is generated in the app.
-- service providers are overridden with Omni-backed services.
+- service providers are overridden only where a domain invariant remains.
 - dataloaders are overridden where Omni service semantics need to stay shared.
 
 Resource composition files:
@@ -47,11 +48,47 @@ Resource composition files:
 Manual code is kept below or outside the generated CRUD surface:
 
 - `apps/task-system-app/src/omni-task-app/*` maps task-domain DTOs to
-  OmniKernel entities and relation semantics.
+  OmniKernel entities and relation semantics for projects, tasks, events, and
+  external references.
+- `apps/task-system-app/src/sync/task-sync-state.projection.ts` declares the
+  sync-state JSON fields, server-owned scope, revision, and query capabilities.
+  CrudGen derives its REST and GraphQL shapes from this one definition.
+- `TaskSyncStateProjectionService` does not implement CRUD or JSON mapping. It
+  only verifies the sync-domain invariant that `externalRefId` exists before
+  the generic projection service creates or updates a state.
 - `apps/task-system-app/src/graphql-relations.resolver.ts` keeps relation fields
   explicit where the example wants to show derived relation composition.
 - logging, errors, domain events, and API strategy examples remain manual
   because they are not CRUD endpoints.
+
+## Sync-State Projection Contract
+
+`sync-states` is the first Task App resource migrated to the merged CrudGen
+JSON projection contract. Generated CRUD owns list/get/create/update/delete,
+REST/GraphQL serialization, JSON extraction, query validation, scoped identity,
+and optimistic revisions. `scopeId` remains server-owned and is not public.
+
+The update input requires `expectedRevision`; a stale write returns `409`.
+Raw payload input is not accepted. The app retains a small compatibility entity
+only to keep Omni's internal discriminator, active record status, and required
+non-public title. This is persistence shape compatibility, not a parallel CRUD
+or mapping path. In the isolated in-memory development/e2e database, bootstrap
+also compiles the three declared SQLite JSON indexes from this contract.
+The generic `uuid` codec preserves the former `UUID` scalar for `guid` and
+`externalRefId` in generated object, create, update, and condition types while
+rejecting non-canonical values before persistence or projection SQL.
+
+The remaining custom services are domain-specific because their behavior is not
+part of the generic projection contract:
+
+- project/task/event services maintain `contains` membership;
+- the task service also maintains `references` and `related_to` graph edges;
+- the external-reference service translates legacy task identities to Omni's
+  canonical record/collection/document identity and verifies the target;
+- the sync-state adapter verifies that its external reference exists.
+
+Those services remain candidates for later, separately scoped migrations; this
+lane does not retain custom CRUD for `sync-states`.
 
 ## Run
 

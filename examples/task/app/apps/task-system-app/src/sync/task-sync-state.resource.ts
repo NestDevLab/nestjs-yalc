@@ -1,57 +1,105 @@
-import { CrudGenResourceFactory } from '@nestjs-yalc/crud-gen';
+import {
+  createProjectionDialect,
+  createProjectionGraphqlTypes,
+  CrudGenResourceFactory,
+} from '@nestjs-yalc/crud-gen';
 import { getServiceToken } from '@nestjs-yalc/crud-gen/typeorm/generic.service';
 import {
   GQLDataLoader,
   getDataloaderToken,
   getFn,
 } from '@nestjs-yalc/data-loader';
-import { TaskSyncState } from '@nestjs-yalc/task-system-module/src/task-sync-state.entity';
 import { bindGeneratedDataloaderEventEmitter } from '../crudgen-provider-compat.js';
-import { TaskAppOmniSyncStateService } from '../omni-task-app/task-app-omni-sync-state.service';
 import {
-  TaskSyncStateCondition,
-  TaskSyncStateCreateInput,
-  TaskSyncStateType,
-  TaskSyncStateUpdateInput,
-} from './task-sync-state.dto';
+  TASK_SYNC_STATE_PROJECTION_DIALECT,
+  TASK_SYNC_STATE_PROJECTION_SCOPE,
+  TaskSyncStateProjectionIndexesBootstrap,
+  TaskSyncStateProjectionService,
+} from './task-sync-state-projection.service';
+import {
+  taskSyncStateProjectionDefinition,
+  taskSyncStateProjectionScope,
+  TaskSyncStateProjectionApi,
+} from './task-sync-state.projection';
 
-export const taskSyncStateResource = CrudGenResourceFactory<TaskSyncState>({
-  entityModel: TaskSyncState,
-  backend: {
-    service: {
-      provider: {
-        provide: getServiceToken(TaskSyncState),
-        useExisting: TaskAppOmniSyncStateService,
-      },
-    },
-    dataloader: {
-      provider: {
-        provide: getDataloaderToken(TaskSyncState),
-        useFactory: (service: TaskAppOmniSyncStateService) =>
-          new GQLDataLoader(getFn(service as any), 'guid'),
-        inject: [getServiceToken(TaskSyncState)],
-      },
-    },
+const taskSyncStateGraphqlTypes = createProjectionGraphqlTypes(
+  taskSyncStateProjectionDefinition,
+  {
+    object: 'TaskSyncStateType',
+    create: 'TaskSyncStateCreateInput',
+    patch: 'TaskSyncStateUpdateInput',
+    conditions: 'TaskSyncStateCondition',
   },
-  graphql: {
-    resolver: {
-      dto: TaskSyncStateType,
-      input: {
-        create: TaskSyncStateCreateInput,
-        update: TaskSyncStateUpdateInput,
-        conditions: TaskSyncStateCondition,
+);
+
+export const taskSyncStateResource =
+  CrudGenResourceFactory<TaskSyncStateProjectionApi>({
+    entityModel: TaskSyncStateProjectionApi,
+    backend: false,
+    graphql: {
+      resolver: {
+        dto: taskSyncStateGraphqlTypes.object,
+        input: {
+          create: taskSyncStateGraphqlTypes.create,
+          update: taskSyncStateGraphqlTypes.patch,
+          conditions: taskSyncStateGraphqlTypes.conditions,
+        },
+        prefix: 'TaskSystem_',
+        queries: {
+          getResource: {
+            idName: 'guid',
+            queryParams: { name: 'TaskSystem_getTaskSyncState' },
+          },
+          getResourceGrid: {
+            queryParams: { name: 'TaskSystem_getTaskSyncStateGrid' },
+          },
+        },
+        mutations: {
+          createResource: {
+            queryParams: { name: 'TaskSystem_createTaskSyncState' },
+          },
+          updateResource: {
+            queryParams: { name: 'TaskSystem_updateTaskSyncState' },
+          },
+          deleteResource: {
+            queryParams: { name: 'TaskSystem_deleteTaskSyncState' },
+          },
+        },
       },
-      prefix: 'TaskSystem_',
+      serviceToken: getServiceToken(TaskSyncStateProjectionApi),
+      dataLoaderToken: getDataloaderToken(TaskSyncStateProjectionApi),
     },
-  },
-  rest: {
-    dto: TaskSyncStateType,
-    path: 'sync-states',
-    idField: 'guid',
-  },
-});
+    rest: {
+      dto: taskSyncStateGraphqlTypes.object,
+      path: 'sync-states',
+      idField: 'guid',
+      serviceToken: getServiceToken(TaskSyncStateProjectionApi),
+    },
+  });
 
 export const SyncStatesController = taskSyncStateResource.controllers[0];
-export const taskSyncStateProviders = bindGeneratedDataloaderEventEmitter(
-  taskSyncStateResource.providers,
-);
+export const taskSyncStateProviders = bindGeneratedDataloaderEventEmitter([
+  {
+    provide: TASK_SYNC_STATE_PROJECTION_SCOPE,
+    useValue: taskSyncStateProjectionScope,
+  },
+  {
+    provide: TASK_SYNC_STATE_PROJECTION_DIALECT,
+    useValue: createProjectionDialect('sqlite'),
+  },
+  TaskSyncStateProjectionIndexesBootstrap,
+  TaskSyncStateProjectionService,
+  {
+    provide: getServiceToken(TaskSyncStateProjectionApi),
+    useExisting: TaskSyncStateProjectionService,
+  },
+  {
+    provide: getDataloaderToken(TaskSyncStateProjectionApi),
+    useFactory: (service: TaskSyncStateProjectionService) =>
+      new GQLDataLoader(getFn(service as any), 'guid', undefined, {
+        cacheKeyFn: (key) => taskSyncStateProjectionScope.cacheKey(key),
+      }),
+    inject: [getServiceToken(TaskSyncStateProjectionApi)],
+  },
+  ...taskSyncStateResource.providers,
+]);

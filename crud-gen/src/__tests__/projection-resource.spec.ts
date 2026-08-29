@@ -1,4 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
+import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
 import { createProjectionDialect } from '../projection/projection-dialect.js';
 import { createProjectionGraphqlTypes } from '../projection/projection-graphql.js';
 import { createProjectionSchemaOptions } from '../projection/projection-schema.js';
@@ -49,6 +50,37 @@ const priorityField: ProjectionFieldDefinition = {
   query: { filter: ['eq', 'range'], sort: true },
   index: { name: 'projection_unit_priority_idx' },
 };
+
+const uuidDefinition = (): ProjectionResourceDefinition => ({
+  id: 'projection.unit.uuid.v1',
+  tableName: 'projection_unit_uuid',
+  identity: { column: 'guid', uniqueWithinScope: true },
+  scope: { column: 'scopeId', serverOwned: true },
+  revision: { column: 'revision' },
+  payload: { column: 'payload', allowCreate: true },
+  deletion: 'hard',
+  fields: [
+    {
+      name: 'guid',
+      storage: 'column',
+      column: 'guid',
+      codec: 'uuid',
+      nullable: false,
+      requiredOnCreate: true,
+      query: { filter: ['eq'], sort: true },
+    },
+    {
+      name: 'externalRefId',
+      storage: 'json',
+      path: ['externalRefId'],
+      codec: 'uuid',
+      nullable: false,
+      requiredOnCreate: true,
+      query: { filter: ['eq'], sort: true },
+      index: { name: 'projection_unit_external_ref_idx' },
+    },
+  ],
+});
 
 describe('projection resource contract', () => {
   it('freezes a valid portable nested path contract', () => {
@@ -120,6 +152,44 @@ describe('projection resource contract', () => {
     expect(sqliteSchema.indices[0]).toMatchObject({
       columns: ['scopeId', 'guid'],
       unique: true,
+    });
+  });
+
+  it('derives UUID GraphQL fields and portable schema from the same contract', () => {
+    const resource = defineProjectionResource(uuidDefinition());
+    const types = createProjectionGraphqlTypes(resource, {
+      object: 'ProjectionUuidRecord',
+      create: 'ProjectionUuidRecordCreate',
+      patch: 'ProjectionUuidRecordPatch',
+      conditions: 'ProjectionUuidRecordCondition',
+    });
+    const sqliteSchema = createProjectionSchemaOptions(
+      resource,
+      createProjectionDialect('sqlite'),
+    );
+    const postgresSchema = createProjectionSchemaOptions(
+      resource,
+      createProjectionDialect('postgres'),
+    );
+    const objectFields = getModelFieldMetadataList(types.object)!;
+    const createFields = getModelFieldMetadataList(types.create)!;
+    const patchFields = getModelFieldMetadataList(types.patch)!;
+    const conditionFields = getModelFieldMetadataList(types.conditions)!;
+
+    expect(objectFields.guid.gqlType!()).toBe(UUIDScalar);
+    expect(objectFields.externalRefId.gqlType!()).toBe(UUIDScalar);
+    expect(createFields.guid.gqlType!()).toBe(UUIDScalar);
+    expect(createFields.externalRefId.gqlType!()).toBe(UUIDScalar);
+    expect(patchFields.guid).toBeUndefined();
+    expect(patchFields.externalRefId.gqlType!()).toBe(UUIDScalar);
+    expect(conditionFields.guid.gqlType!()).toBe(UUIDScalar);
+    expect(sqliteSchema.columns.guid).toMatchObject({
+      type: String,
+      length: 255,
+    });
+    expect(postgresSchema.columns.guid).toMatchObject({
+      type: String,
+      length: 255,
     });
   });
 
@@ -228,7 +298,7 @@ describe('projection resource contract', () => {
       (resource: ProjectionResourceDefinition) => {
         resource.fields = [priorityField];
       },
-      'must be a required non-null string column field',
+      'must be a required non-null string or UUID column field',
     ],
     [
       'a client-visible scope field',
@@ -387,6 +457,38 @@ describe('projection resource contract', () => {
     expect(() =>
       normalizeProjectionCodecValue(instantField, new Date('invalid')),
     ).toThrow('valid Date');
+  });
+
+  it('accepts only canonical UUID values', () => {
+    const uuidField: ProjectionFieldDefinition = {
+      name: 'externalRefId',
+      storage: 'json',
+      path: ['externalRefId'],
+      codec: 'uuid',
+      nullable: false,
+    };
+
+    expect(() =>
+      assertProjectionCodecValue(
+        uuidField,
+        '123e4567-e89b-12d3-a456-426614174000',
+      ),
+    ).not.toThrow();
+    expect(() =>
+      assertProjectionCodecValue(
+        uuidField,
+        '123E4567-E89B-12D3-A456-426614174000',
+      ),
+    ).toThrow('canonical UUID');
+    expect(() =>
+      assertProjectionCodecValue(
+        uuidField,
+        '123e4567-e89b-12d3-a456-not-a-uuid',
+      ),
+    ).toThrow('canonical UUID');
+    expect(() => assertProjectionCodecValue(uuidField, 1)).toThrow(
+      'canonical UUID',
+    );
   });
 
   it('bounds portable integers to the GraphQL and PostgreSQL int32 range', () => {

@@ -75,6 +75,26 @@ const resource = defineProjectionResource({
   ],
 } satisfies ProjectionResourceDefinition);
 
+const uuidResource = defineProjectionResource({
+  ...resource,
+  id: 'unit.projection.uuid-record.v1',
+  tableName: 'unit_projection_uuid_record',
+  fields: [
+    { ...resource.fields[0], codec: 'uuid' },
+    ...resource.fields.slice(1),
+    {
+      name: 'externalRefId',
+      storage: 'json',
+      path: ['externalRefId'],
+      codec: 'uuid',
+      nullable: false,
+      requiredOnCreate: true,
+      query: { filter: ['eq'], sort: true },
+      index: { name: 'unit_projection_uuid_external_ref_idx' },
+    },
+  ],
+} satisfies ProjectionResourceDefinition);
+
 function failureEvents(): YalcEventService {
   const exception = (message: string): Error => new Error(message);
   return {
@@ -100,6 +120,7 @@ function testService(
   options: {
     dialect?: Partial<ProjectionDialect>;
     repository?: Partial<Repository<ProjectionRecord>>;
+    definition?: ProjectionResourceDefinition;
   } = {},
 ) {
   const repository = {
@@ -131,7 +152,7 @@ function testService(
       scope,
       dialect,
       events,
-      resource,
+      options.definition ?? resource,
     ),
   };
 }
@@ -249,6 +270,44 @@ describe('ProjectionResourceService', () => {
       }),
     ).rejects.toThrow('JSON-compatible');
     expect(repository.save).not.toHaveBeenCalled();
+  });
+
+  it('rejects invalid UUID identities and JSON fields before persistence', async () => {
+    const patch = jest.fn(async () => 1);
+    const { dialect, repository, service } = testService({
+      definition: uuidResource,
+      dialect: { patch },
+    });
+    const uuid = '123e4567-e89b-12d3-a456-426614174000';
+
+    await expect(
+      service.createEntity({
+        guid: 'not-a-uuid',
+        title: 'Title',
+        externalRefId: uuid,
+      }),
+    ).rejects.toThrow('canonical UUID');
+    await expect(
+      service.createEntity({
+        guid: uuid,
+        title: 'Title',
+        externalRefId: 'not-a-uuid',
+      }),
+    ).rejects.toThrow('canonical UUID');
+    await expect(service.getEntity({ guid: 'not-a-uuid' })).rejects.toThrow(
+      'canonical UUID',
+    );
+    await expect(
+      service.updateEntity(
+        { guid: uuid },
+        { expectedRevision: 1, externalRefId: 'not-a-uuid' },
+      ),
+    ).rejects.toThrow('canonical UUID');
+
+    expect(repository.create).not.toHaveBeenCalled();
+    expect(repository.save).not.toHaveBeenCalled();
+    expect(repository.findOne).not.toHaveBeenCalled();
+    expect(dialect.patch).not.toHaveBeenCalled();
   });
 
   it('rejects a typed create field that also exists in raw payload', async () => {

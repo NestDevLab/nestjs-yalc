@@ -3,9 +3,10 @@ import { expect, jest } from '@jest/globals';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { HttpService } from '@nestjs/axios';
 import { Test } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { getDataSourceToken, TypeOrmModule } from '@nestjs/typeorm';
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
+import { type DataSource } from 'typeorm';
 import {
   NestHttpCallStrategy,
 } from '@nestjs-yalc/api-strategy/strategies/nest-http-call.strategy.js';
@@ -26,6 +27,7 @@ import { EventsModule } from '../src/events/events.module';
 import { OmniTaskAppModule } from '../src/omni-task-app/omni-task-app.module';
 import { ProjectsModule } from '../src/projects/projects.module';
 import { SyncModule } from '../src/sync/sync.module';
+import { TaskSyncStateProjection } from '../src/sync/task-sync-state.projection';
 import { TaskAppEventModule } from '../src/task-app-event.module';
 import { TasksModule } from '../src/tasks/tasks.module';
 import { AppModule } from '../src/app.module';
@@ -48,6 +50,7 @@ import { AppModule } from '../src/app.module';
         OmniCollectionEntity,
         OmniDocumentEntity,
         OmniExternalRefEntity,
+        TaskSyncStateProjection,
       ],
       synchronize: true,
     }),
@@ -70,6 +73,7 @@ describe('Task System App e2e', () => {
   let createdEventGuid: string;
   let createdExternalRefGuid: string;
   let createdSyncStateGuid: string;
+  let createdSyncStateRevision: number;
   let previousTasksApiStrategy: string | undefined;
   let previousTasksHttpBaseUrl: string | undefined;
 
@@ -349,8 +353,21 @@ describe('Task System App e2e', () => {
       .expect(201);
 
     createdSyncStateGuid = res.body.guid;
+    createdSyncStateRevision = res.body.revision;
     expect(res.body.externalRefId).toBe(createdExternalRefGuid);
     expect(res.body.status).toBe('active');
+    expect(createdSyncStateRevision).toBe(1);
+  });
+
+  it('rejects a sync state for a nonexistent external reference', async () => {
+    await request(app.getHttpServer())
+      .post('/sync-states')
+      .send({
+        guid: randomUUID(),
+        externalRefId: randomUUID(),
+        status: 'active',
+      })
+      .expect(404);
   });
 
   it('lists sync states', async () => {
@@ -358,11 +375,49 @@ describe('Task System App e2e', () => {
     expect(res.body.list.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('updates sync state and last error', async () => {
+  it('creates the declared SQLite projection indexes in the dev database', async () => {
+    const indexes = await app
+      .get<DataSource>(getDataSourceToken())
+      .query("PRAGMA index_list('omni-record')");
+
+    expect(indexes.map((index: { name: string }) => index.name)).toEqual(
+      expect.arrayContaining([
+        'task_sync_state_external_ref_idx',
+        'task_sync_state_status_idx',
+        'task_sync_state_last_synced_at_idx',
+      ]),
+    );
+  });
+
+  it('rejects an unknown external reference without changing sync state', async () => {
     await request(app.getHttpServer())
       .put(`/sync-states/${createdSyncStateGuid}`)
-      .send({ status: 'error', lastError: 'Provider timeout' })
+      .send({
+        expectedRevision: createdSyncStateRevision,
+        externalRefId: randomUUID(),
+      })
+      .expect(404);
+
+    const persisted = await request(app.getHttpServer())
+      .get(`/sync-states/${createdSyncStateGuid}`)
       .expect(200);
+
+    expect(persisted.body.externalRefId).toBe(createdExternalRefGuid);
+    expect(persisted.body.revision).toBe(createdSyncStateRevision);
+  });
+
+  it('updates sync state and last error', async () => {
+    const updateRes = await request(app.getHttpServer())
+      .put(`/sync-states/${createdSyncStateGuid}`)
+      .send({
+        expectedRevision: createdSyncStateRevision,
+        status: 'error',
+        lastError: 'Provider timeout',
+      })
+      .expect(200);
+
+    createdSyncStateRevision = updateRes.body.revision;
+    expect(createdSyncStateRevision).toBe(2);
 
     const res = await request(app.getHttpServer())
       .get(`/sync-states/${createdSyncStateGuid}`)
@@ -370,6 +425,13 @@ describe('Task System App e2e', () => {
 
     expect(res.body.status).toBe('error');
     expect(res.body.lastError).toBe('Provider timeout');
+  });
+
+  it('rejects a stale sync-state projection revision', async () => {
+    await request(app.getHttpServer())
+      .put(`/sync-states/${createdSyncStateGuid}`)
+      .send({ expectedRevision: 1, status: 'active' })
+      .expect(409);
   });
 
   it('returns a 400 error via YalcEventService', async () => {

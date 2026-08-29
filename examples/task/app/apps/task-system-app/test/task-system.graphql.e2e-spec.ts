@@ -13,6 +13,7 @@ describe('Task System App GraphQL e2e', () => {
   let eventGuid: string;
   let externalRefGuid: string;
   let syncStateGuid: string;
+  let syncStateRevision: number;
   let secondaryTaskGuid: string;
 
   beforeAll(async () => {
@@ -196,6 +197,7 @@ describe('Task System App GraphQL e2e', () => {
               guid
               externalRefId
               status
+              revision
             }
           }
         `,
@@ -213,9 +215,61 @@ describe('Task System App GraphQL e2e', () => {
       .expect(200);
 
     expect(res.body.errors).toBeUndefined();
-    expect(res.body.data.TaskSystem_createTaskSyncState.guid).toBe(syncStateGuid);
+    expect(res.body.data.TaskSystem_createTaskSyncState.guid).toBe(
+      syncStateGuid,
+    );
+    syncStateRevision = res.body.data.TaskSystem_createTaskSyncState.revision;
+    expect(syncStateRevision).toBe(1);
   });
 
+  it('generates UUID fields for the sync-state projection GraphQL contract', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: `
+          query SyncStateProjectionUuidSchema {
+            object: __type(name: "TaskSyncStateType") {
+              fields { name type { name ofType { name } } }
+            }
+            create: __type(name: "TaskSyncStateCreateInput") {
+              inputFields { name type { name ofType { name } } }
+            }
+            patch: __type(name: "TaskSyncStateUpdateInput") {
+              inputFields { name type { name ofType { name } } }
+            }
+            conditions: __type(name: "TaskSyncStateCondition") {
+              inputFields { name type { name ofType { name } } }
+            }
+          }
+        `,
+      })
+      .expect(200);
+
+    expect(res.body.errors).toBeUndefined();
+    const typeName = (field: any) =>
+      field.type.name ?? field.type.ofType?.name;
+    const findField = (fields: any[], name: string) =>
+      fields.find((field) => field.name === name);
+
+    expect(typeName(findField(res.body.data.object.fields, 'guid'))).toBe(
+      'UUID',
+    );
+    expect(
+      typeName(findField(res.body.data.object.fields, 'externalRefId')),
+    ).toBe('UUID');
+    expect(typeName(findField(res.body.data.create.inputFields, 'guid'))).toBe(
+      'UUID',
+    );
+    expect(
+      typeName(findField(res.body.data.create.inputFields, 'externalRefId')),
+    ).toBe('UUID');
+    expect(
+      typeName(findField(res.body.data.patch.inputFields, 'externalRefId')),
+    ).toBe('UUID');
+    expect(
+      typeName(findField(res.body.data.conditions.inputFields, 'guid')),
+    ).toBe('UUID');
+  });
   it('returns GraphQL grids for all slices', async () => {
     const res = await request(app.getHttpServer())
       .post('/graphql')
@@ -440,18 +494,26 @@ describe('Task System App GraphQL e2e', () => {
             TaskSystem_updateTaskSyncState(conditions: { guid: $guid }, input: $input) {
               status
               lastError
+              revision
             }
           }
         `,
         variables: {
           guid: syncStateGuid,
-          input: { status: 'error', lastError: 'GraphQL failure test' },
+          input: {
+            expectedRevision: syncStateRevision,
+            status: 'error',
+            lastError: 'GraphQL failure test',
+          },
         },
       })
       .expect(200);
 
     expect(updateRes.body.errors).toBeUndefined();
-    expect(updateRes.body.data.TaskSystem_updateTaskSyncState.status).toBe('error');
+    expect(updateRes.body.data.TaskSystem_updateTaskSyncState.status).toBe(
+      'error',
+    );
+    expect(updateRes.body.data.TaskSystem_updateTaskSyncState.revision).toBe(2);
 
     const deleteRes = await request(app.getHttpServer())
       .post('/graphql')

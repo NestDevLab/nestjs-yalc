@@ -1,6 +1,7 @@
 import { InputType, Int, ObjectType } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
 import { Exclude, Expose } from 'class-transformer';
+import { UUIDScalar } from '@nestjs-yalc/graphql/scalars/uuid.scalar.js';
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import {
   ModelField,
@@ -27,7 +28,13 @@ function namedClass(name: string): ProjectionGraphqlClass {
 }
 
 function typeForCodec(codec: ProjectionCodec) {
-  return codec === 'integer' ? Int : codec === 'json' ? GraphQLJSON : String;
+  return codec === 'integer'
+    ? Int
+    : codec === 'json'
+      ? GraphQLJSON
+      : codec === 'uuid'
+        ? UUIDScalar
+        : String;
 }
 
 function applyField(
@@ -130,11 +137,19 @@ export function createProjectionGraphqlTypes(
   const conditions = namedClass(names.conditions);
   InputType(names.conditions)(conditions);
   ModelObject()(conditions);
+  const identityField = definition.fields.find(
+    (field) => field.name === definition.identity.column,
+  );
+  if (!identityField) {
+    throw new TypeError(
+      `Projection identity ${definition.identity.column} is not declared.`,
+    );
+  }
   applyField(
     conditions,
     {
       name: definition.identity.column,
-      codec: 'string',
+      codec: identityField.codec,
       nullable: false,
     },
     { required: true },

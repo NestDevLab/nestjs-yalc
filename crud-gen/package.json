@@ -10,6 +10,7 @@
     "./*": "./dist/src/*"
   },
   "scripts": {
+    "prepack": "node ../scripts/verify-local-package-dist.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

@@ -8,6 +8,79 @@ Factory-driven CRUD generator for NestJS with TypeORM and GraphQL/REST helpers (
 - Build: `npm run build`
 - Tests/coverage: `npm run test:cov` (uses Jest projects; set `JEST_WORKERS` to limit parallelism)
 
+The canonical build materializes `crud-gen/dist/src` from the compiled
+workspace output. `npm pack ./crud-gen` therefore produces a normal local
+package containing JavaScript and declarations. Packing before a canonical
+build fails with a build-ready error instead of creating a metadata-only
+tarball.
+
+### Local OmniKernel consumers
+
+Build this repository first. Local consumers depend on the built source
+packages, not `var/dist` or a registry CrudGen release. Configure the package
+manager so OmniKernel resolves the same CrudGen artifact as the direct
+dependency.
+
+#### npm consumers
+
+For a non-pnpm sibling application, use npm's root `overrides` field:
+
+```json
+{
+  "dependencies": {
+    "@nestjs-yalc/crud-gen": "file:../nestjs-yalc/crud-gen",
+    "@nestjs-yalc/omnikernel-module": "file:../nestjs-yalc/examples/omnikernel/module"
+  },
+  "overrides": {
+    "@nestjs-yalc/omnikernel-module": {
+      "@nestjs-yalc/crud-gen": "$@nestjs-yalc/crud-gen"
+    }
+  }
+}
+```
+
+Run `npm run build` in this repository before installing those dependencies,
+then run `npm install` in the consumer to record the local package identities.
+
+#### pnpm sibling workspaces
+
+For an unpublished cross-repository build, pin the consumed
+`@nestjs-yalc/*` dependency closure to the materialized local packages in the
+consumer's workspace-root `pnpm-workspace.yaml`. This prevents a transitive
+semver dependency from silently falling back to an older registry artifact.
+Paths are relative to the workspace file:
+
+```yaml
+overrides:
+  '@nestjs-yalc/crud-gen': 'file:../nestjs-yalc/crud-gen'
+  '@nestjs-yalc/data-loader': 'file:../nestjs-yalc/data-loader'
+  '@nestjs-yalc/database': 'file:../nestjs-yalc/database'
+  '@nestjs-yalc/errors': 'file:../nestjs-yalc/errors'
+  '@nestjs-yalc/event-manager': 'file:../nestjs-yalc/event-manager'
+  '@nestjs-yalc/field-middleware': 'file:../nestjs-yalc/field-middleware'
+  '@nestjs-yalc/graphql': 'file:../nestjs-yalc/graphql'
+  '@nestjs-yalc/interfaces': 'file:../nestjs-yalc/interfaces'
+  '@nestjs-yalc/types': 'file:../nestjs-yalc/types'
+  '@nestjs-yalc/utils': 'file:../nestjs-yalc/utils'
+```
+
+Add direct local dependencies with paths relative to the consuming package:
+
+```json
+{
+  "dependencies": {
+    "@nestjs-yalc/crud-gen": "file:../../nestjs-yalc/crud-gen",
+    "@nestjs-yalc/omnikernel-module": "file:../../nestjs-yalc/examples/omnikernel/module"
+  }
+}
+```
+
+After `npm run build` in this repository, run `pnpm install` from the consumer
+workspace root. The direct dependencies and workspace overrides then resolve
+to one compiled local package graph. Add any further `@nestjs-yalc/*` package
+used by the application to the same local override set; do not mix unpublished
+local framework changes with older registry artifacts.
+
 ## Quick start
 
 When the app owns the whole resource surface, use the resource combinator:
@@ -96,6 +169,10 @@ revision-checked generic service. The consuming application provides only a
 trusted scope adapter, repository, and one metadata declaration; it does not
 provide custom standard CRUD methods, duplicate JSON-path logic, or dialect
 SQL.
+
+Use the `uuid` codec for canonical UUID identifiers. It generates `UUIDScalar`
+fields for GraphQL object/create/patch/conditions shapes and validates the same
+canonical value before REST/service persistence or projection SQL.
 
 See [Scoped JSON projections](../docs/crud-gen-projections.md) for the public
 metadata contract, generated read/write semantics, query capabilities,

@@ -258,6 +258,106 @@ describe('projection dialects', () => {
   });
 
   it.each([
+    [
+      'sqlite',
+      'CAST(json_extract("projection"."payload", \'$.externalRefId\') AS TEXT)',
+    ],
+    [
+      'postgres',
+      'CAST(("projection"."payload" #>> \'{externalRefId}\') AS TEXT)',
+    ],
+  ] as const)(
+    'uses validated UUID text expressions for %s filters, sorting, and indexes',
+    async (driver, uuidExpression) => {
+      const uuidResource = defineProjectionResource({
+        ...resource,
+        id: 'unit.projection.uuid-dialect.v1',
+        tableName: 'unit_projection_uuid_dialect',
+        fields: [
+          { ...resource.fields[0], codec: 'uuid' },
+          ...resource.fields.slice(1),
+          {
+            name: 'externalRefId',
+            storage: 'json',
+            path: ['externalRefId'],
+            codec: 'uuid',
+            nullable: false,
+            requiredOnCreate: true,
+            query: { filter: ['eq'], sort: true },
+            index: { name: 'unit_projection_external_ref_idx' },
+          },
+        ],
+      } satisfies ProjectionResourceDefinition);
+      const dialect = createProjectionDialect(driver);
+      const { query, repository } = readRepository();
+      const externalRefId = '123e4567-e89b-12d3-a456-426614174000';
+
+      await dialect.findMany(
+        repository,
+        uuidResource,
+        'space-1',
+        [
+          {
+            field: getProjectionField(uuidResource, 'externalRefId'),
+            operator: 'eq',
+            values: [externalRefId],
+          },
+        ],
+        [
+          {
+            field: getProjectionField(uuidResource, 'externalRefId'),
+            direction: 'ASC',
+          },
+        ],
+        {},
+      );
+
+      expect(query.andWhere).toHaveBeenCalledWith(
+        `${uuidExpression} = :projection_filter_0`,
+        { projection_filter_0: externalRefId },
+      );
+      expect(query.addOrderBy).toHaveBeenCalledWith(uuidExpression, 'ASC');
+      expect(dialect.compileIndexStatements(uuidResource)).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining(
+            uuidExpression.replaceAll('"projection".', ''),
+          ),
+        ]),
+      );
+    },
+  );
+
+  it('rejects invalid UUID filters before compiling a predicate', async () => {
+    const uuidResource = defineProjectionResource({
+      ...resource,
+      id: 'unit.projection.invalid-uuid.v1',
+      tableName: 'unit_projection_invalid_uuid',
+      fields: resource.fields.map((field) =>
+        field.name === 'guid' ? { ...field, codec: 'uuid' } : field,
+      ),
+    } satisfies ProjectionResourceDefinition);
+    const { query, repository } = readRepository();
+
+    await expect(
+      createProjectionDialect('sqlite').findMany(
+        repository,
+        uuidResource,
+        'space-1',
+        [
+          {
+            field: getProjectionField(uuidResource, 'guid'),
+            operator: 'eq',
+            values: ['not-a-uuid'],
+          },
+        ],
+        [],
+        {},
+      ),
+    ).rejects.toThrow('canonical UUID');
+    expect(query.andWhere).not.toHaveBeenCalled();
+  });
+
+  it.each([
     ['sqlite', 'json_set(COALESCE("payload", \'{}\')', "'$.workflow.priority'"],
     [
       'postgres',
