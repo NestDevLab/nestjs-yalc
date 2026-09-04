@@ -55,32 +55,23 @@ describe('MutationJournalCleanupService', () => {
     expect(journalService.getTargets).not.toHaveBeenCalled();
   });
 
-  it('schedules an unrefd cleanup interval and clears it on destruction', async () => {
-    jest.useFakeTimers();
-    const timer = { unref: jest.fn() } as unknown as NodeJS.Timeout;
-    const setIntervalSpy = jest.spyOn(global, 'setInterval').mockReturnValue(timer);
+  it('does not schedule the legacy cleanup interval', async () => {
+    const setIntervalSpy = jest.spyOn(global, 'setInterval');
     const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
     const journalService = createJournalService();
     const cleanupService = new MutationJournalCleanupService(
       journalService,
       options,
     );
-    const runOnce = jest
-      .spyOn(cleanupService, 'runOnce')
-      .mockRejectedValueOnce(new Error('cleanup disabled'))
-      .mockRejectedValueOnce('cleanup disabled');
 
     cleanupService.onApplicationBootstrap();
-    const callback = setIntervalSpy.mock.calls[0][0] as () => void;
-    callback();
-    await Promise.resolve();
-    callback();
-    await Promise.resolve();
     cleanupService.onModuleDestroy();
 
-    expect(timer.unref).toHaveBeenCalledTimes(1);
-    expect(runOnce).toHaveBeenCalledTimes(2);
-    expect(clearIntervalSpy).toHaveBeenCalledWith(timer);
+    expect(setIntervalSpy).not.toHaveBeenCalled();
+    expect(clearIntervalSpy).not.toHaveBeenCalled();
+    await expect(cleanupService.runOnce()).rejects.toThrow(
+      'In-process mutation-journal cleanup is disabled',
+    );
   });
 
   it('does not schedule or clean while disabled or without retention', async () => {

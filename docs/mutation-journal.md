@@ -72,7 +72,7 @@ journal by default; set `MUTATION_JOURNAL_ENABLED=false` to disable it.
 | `targets` | `MutationJournalTargetRef[]` | `[{}]` | Data sources to journal. A target accepts `dataSourceName` or a Nest provider `token`; `token` takes precedence. |
 | `excludedTables` | `string[]` | `[]` | Adds application tables that must not receive triggers. `migrations` and `typeorm_metadata` are always excluded. |
 | `retentionDays` | `number` | None | Legacy compatibility option. In-process cleanup is disabled; use a governed host retention command. |
-| `cleanupIntervalMs` | `number` | None | Legacy compatibility option. Do not configure it; in-process cleanup is disabled. |
+| `cleanupIntervalMs` | `number` | None | Legacy compatibility option. It is ignored; no in-process retention timer is scheduled. |
 | `installOnBootstrap` | `boolean` | `true` | Set to `false` to call `MutationJournalService.install()` or `refresh()` yourself. |
 | `uninstallWhenDisabled` | `boolean` | `false` | When `enabled` is `false`, removes generated journal triggers at bootstrap. The journal table and its rows remain. |
 | `journalTableName` | `string` | `_mutation_journal` | Name of the journal table and generated indexes. The table itself is never journaled. |
@@ -176,17 +176,18 @@ data that is more sensitive than the mutation endpoint itself.
 ## Retention and cleanup
 
 In-process retention is disabled because deleting audit history requires host
-coordination that this library cannot prove. When the module is enabled and
-`retentionDays` is configured, `MutationJournalCleanupService.runOnce()` and
-the SQLite driver's `cleanup()` method reject with an explicit error instead
-of deleting rows. The service remains a no-op while the module is disabled or
-when `retentionDays` is not configured.
+coordination that this library cannot prove. `cleanupIntervalMs` is retained
+only for legacy option parsing and is ignored; it never schedules an
+in-process timer. When the module is enabled and `retentionDays` is configured,
+`MutationJournalCleanupService.runOnce()` and the SQLite driver's `cleanup()`
+method reject with an explicit error instead of deleting rows. The service
+remains a no-op while the module is disabled or when `retentionDays` is not
+configured.
 
 Run retention from the host application's governed operational command. That
 command must coordinate writers, preserve a durable report, account for the
 SQLite database and its WAL/SHM/journal sidecars, and provide failure and
-rollback evidence. Do not configure `cleanupIntervalMs`; it exists only for
-backward-compatible option parsing.
+rollback evidence.
 
 ## SQLite semantics and limits
 
