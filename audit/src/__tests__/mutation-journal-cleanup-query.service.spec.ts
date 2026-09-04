@@ -42,68 +42,17 @@ afterEach(() => {
 });
 
 describe('MutationJournalCleanupService', () => {
-  it('runs cleanup per resolved target and continues after errors', async () => {
-    const dataSource = {} as DataSource;
-    const successfulTarget: ResolvedMutationJournalTarget = {
-      dataSource,
-      target: {},
-      driver: {
-        engine: 'test',
-        supports: jest.fn(),
-        install: jest.fn(),
-        uninstall: jest.fn(),
-        cleanup: jest.fn(async () => 3),
-        read: jest.fn(),
-      },
-    };
-    const failingTarget: ResolvedMutationJournalTarget = {
-      ...successfulTarget,
-      target: { dataSourceName: 'secondary' },
-      driver: {
-        ...successfulTarget.driver,
-        cleanup: jest.fn(async () => {
-          throw new Error('cleanup failed');
-        }),
-      },
-    };
-    const stringFailingTarget: ResolvedMutationJournalTarget = {
-      ...successfulTarget,
-      target: { dataSourceName: 'string-failure' },
-      driver: {
-        ...successfulTarget.driver,
-        cleanup: jest.fn(async () => {
-          throw 'string cleanup failed';
-        }),
-      },
-    };
-    const journalService = createJournalService({
-      getTargets: jest.fn(() => [
-        ...options.targets,
-        { dataSourceName: 'string-failure' },
-      ]),
-      resolveTarget: jest
-        .fn()
-        .mockResolvedValueOnce(successfulTarget)
-        .mockResolvedValueOnce(failingTarget)
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValueOnce(stringFailingTarget),
-    });
-    const now = 9_000_000_000;
-    jest.spyOn(Date, 'now').mockReturnValue(now);
+  it('fails closed when cleanup is explicitly enabled', async () => {
+    const journalService = createJournalService();
     const cleanupService = new MutationJournalCleanupService(
       journalService,
       options,
     );
 
-    await expect(cleanupService.runOnce()).resolves.toBe(3);
-
-    expect(successfulTarget.driver.cleanup).toHaveBeenCalledWith(
-      dataSource,
-      expect.objectContaining({ journalTableName: DEFAULT_JOURNAL_TABLE }),
-      now - 2 * 86_400_000,
+    await expect(cleanupService.runOnce()).rejects.toThrow(
+      'In-process mutation-journal cleanup is disabled',
     );
-    expect(failingTarget.driver.cleanup).toHaveBeenCalledTimes(1);
-    expect(stringFailingTarget.driver.cleanup).toHaveBeenCalledTimes(1);
+    expect(journalService.getTargets).not.toHaveBeenCalled();
   });
 
   it('schedules an unrefd cleanup interval and clears it on destruction', async () => {
@@ -116,7 +65,9 @@ describe('MutationJournalCleanupService', () => {
       journalService,
       options,
     );
-    const runOnce = jest.spyOn(cleanupService, 'runOnce').mockResolvedValue(0);
+    const runOnce = jest
+      .spyOn(cleanupService, 'runOnce')
+      .mockRejectedValue(new Error('cleanup disabled'));
 
     cleanupService.onApplicationBootstrap();
     const callback = setIntervalSpy.mock.calls[0][0] as () => void;
@@ -149,61 +100,30 @@ describe('MutationJournalCleanupService', () => {
     disabledService.onModuleDestroy();
   });
 
-  it('uses the default target name when cleanup fails without a data source name', async () => {
-    const failingTarget: ResolvedMutationJournalTarget = {
-      dataSource: {} as DataSource,
-      target: {},
-      driver: {
-        engine: 'test',
-        supports: jest.fn(),
-        install: jest.fn(),
-        uninstall: jest.fn(),
-        cleanup: jest.fn(async () => {
-          throw new Error('default cleanup failed');
-        }),
-        read: jest.fn(),
-      },
-    };
-    const journalService = createJournalService({
-      getTargets: jest.fn(() => [{}]),
-      resolveTarget: jest.fn(async () => failingTarget),
-    });
+  it('fails closed before resolving a target', async () => {
+    const journalService = createJournalService();
     const cleanupService = new MutationJournalCleanupService(
       journalService,
       options,
     );
 
-    await expect(cleanupService.runOnce()).resolves.toBe(0);
+    await expect(cleanupService.runOnce()).rejects.toThrow(
+      'In-process mutation-journal cleanup is disabled',
+    );
+    expect(journalService.resolveTarget).not.toHaveBeenCalled();
   });
 
-  it('contains target-resolution errors and continues with later targets', async () => {
-    const dataSource = {} as DataSource;
-    const resolvedTarget: ResolvedMutationJournalTarget = {
-      dataSource,
-      target: { dataSourceName: 'secondary' },
-      driver: {
-        engine: 'test',
-        supports: jest.fn(),
-        install: jest.fn(),
-        uninstall: jest.fn(),
-        cleanup: jest.fn(async () => 2),
-        read: jest.fn(),
-      },
-    };
-    const journalService = createJournalService({
-      getTargets: jest.fn(() => [{}, { dataSourceName: 'secondary' }]),
-      resolveTarget: jest
-        .fn()
-        .mockRejectedValueOnce(new Error('resolution failed'))
-        .mockResolvedValueOnce(resolvedTarget),
-    });
+  it('fails closed without resolving any target', async () => {
+    const journalService = createJournalService();
     const cleanupService = new MutationJournalCleanupService(
       journalService,
       options,
     );
 
-    await expect(cleanupService.runOnce()).resolves.toBe(2);
-    expect(resolvedTarget.driver.cleanup).toHaveBeenCalledTimes(1);
+    await expect(cleanupService.runOnce()).rejects.toThrow(
+      'In-process mutation-journal cleanup is disabled',
+    );
+    expect(journalService.getTargets).not.toHaveBeenCalled();
   });
 });
 
