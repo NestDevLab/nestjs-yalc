@@ -32,6 +32,8 @@ peer packages required by the specific YALC modules they use.
 
 ## Documentation
 
+- Development quality and review policy:
+  [docs/development-quality.md](docs/development-quality.md)
 - Documentation index:
   https://github.com/NestDevLab/nestjs-yalc/blob/dev/docs/documentation.md
 - Getting started:

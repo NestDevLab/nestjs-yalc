@@ -13,24 +13,18 @@
     "strategy": "cherry-pick",
     "stacks": []
   },
-  "stacks": [
-    {
-      "id": "release-root-version",
-      "branch": "pr/release-root-version",
-      "base": "origin/dev",
-      "target_remote": "origin",
-      "target_branch": "dev",
-      "integration_branch": "dev-integration",
-      "commits": [],
-      "state": "published",
-      "publication": {
-        "enabled": true
-      },
-      "meta": {}
-    }
-  ],
+  "stacks": [],
   "syncwheel_worktree_root": "var/syncwheel",
   "syncwheel_tracking": "git-tracked",
   "repository_mode": "delivery",
-  "channels": []
+  "channels": [],
+  "authority": {
+    "mode": "ai-managed",
+    "allow": [
+      "source_change"
+    ],
+    "deny": [
+      "destructive_rewrite"
+    ]
+  }
 }

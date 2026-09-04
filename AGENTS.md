@@ -22,6 +22,17 @@
 - During iteration you may run individually: `npm run lint:no-fix`, `npm run build`, `npm run test:cov`. Use `JEST_WORKERS` to cap workers; coverage reports land in `var/coverage/` (`test:cov:serve` serves them).
 - Jest defaults to 100% coverage (branches/functions/lines/statements) with overrides for `@nestjs-yalc/app`, `@nestjs-yalc/logger`, and `@nestjs-yalc/utils`; skipped projects by default: types, graphql, crud-gen, kafka, jest. `injectGlobals` is false.
 
+## Mandatory delivery quality
+
+- Use Syncwheel for every source change. Work in an isolated stack lane and never push a managed branch directly.
+- Keep each pull request focused on one intent. Before creating a stack, inspect open stacks and pull requests and extend an existing one when it already owns that intent.
+- A pull request is not ready to merge until the full `npm run ci:checks` suite and every relevant focused test pass on its current head.
+- Every pull request requires an independent approving review after the latest push. The author and the person who made the latest push cannot satisfy that review.
+- Review the actual diff and affected contracts, not only the pull request description. At minimum assess correctness, failure and concurrency paths, public API compatibility, security and data handling, test strength, documentation, and migration or rollout impact.
+- Resolve every blocking finding and every review conversation, then repeat the review against the updated head. A checklist-only or summary-only review is insufficient.
+- Merge only through the protected `dev` branch after GitHub reports all required checks, approval, and conversation-resolution gates satisfied.
+- Record validation and review evidence in the pull request using the repository template.
+
 ## Lint/format/build
 - ESLint + Prettier (single quotes, trailing commas). `no-console` is an error, `eqeqeq` enabled, `no-floating-promises` warns. Ignores `**/*spec.ts`, `__tests__`, `__mocks__`, `var`, `jest.config.ts`.
 - TypeScript build emits declarations to `var/dist`; strict mode on, paths from `tsconfig.json`.
