@@ -46,8 +46,6 @@ import { MutationJournalModule } from '@nestjs-yalc/audit';
     }),
     MutationJournalModule.forRoot({
       enabled: true,
-      retentionDays: 30,
-      cleanupIntervalMs: 3_600_000,
     }),
   ],
 })
@@ -62,8 +60,7 @@ bootstrap. Reports are available from `MutationJournalService.getReports()`.
 
 The [task example app module](../examples/task/app/apps/task-system-app/src/app.module.ts)
 uses the module immediately after `TypeOrmModule.forRoot()`. It enables the
-journal by default; set `MUTATION_JOURNAL_ENABLED=false` to disable it, or set
-`MUTATION_JOURNAL_RETENTION_DAYS` to change its 30-day retention period.
+journal by default; set `MUTATION_JOURNAL_ENABLED=false` to disable it.
 
 ## Configuration
 
@@ -71,11 +68,11 @@ journal by default; set `MUTATION_JOURNAL_ENABLED=false` to disable it, or set
 
 | Option | Type | Default | Purpose |
 | --- | --- | --- | --- |
-| `enabled` | `boolean` | Required | Enables trigger installation and journal cleanup. |
+| `enabled` | `boolean` | Required | Enables trigger installation and journal reads. |
 | `targets` | `MutationJournalTargetRef[]` | `[{}]` | Data sources to journal. A target accepts `dataSourceName` or a Nest provider `token`; `token` takes precedence. |
 | `excludedTables` | `string[]` | `[]` | Adds application tables that must not receive triggers. `migrations` and `typeorm_metadata` are always excluded. |
-| `retentionDays` | `number` | None | Enables retention when `runOnce()` is called. Rows older than this number of days are deleted. |
-| `cleanupIntervalMs` | `number` | None | Runs retention cleanup on this interval. It requires `retentionDays`; otherwise module creation throws. |
+| `retentionDays` | `number` | None | Legacy compatibility option. In-process cleanup is disabled; use a governed host retention command. |
+| `cleanupIntervalMs` | `number` | None | Legacy compatibility option. Do not configure it; in-process cleanup is disabled. |
 | `installOnBootstrap` | `boolean` | `true` | Set to `false` to call `MutationJournalService.install()` or `refresh()` yourself. |
 | `uninstallWhenDisabled` | `boolean` | `false` | When `enabled` is `false`, removes generated journal triggers at bootstrap. The journal table and its rows remain. |
 | `journalTableName` | `string` | `_mutation_journal` | Name of the journal table and generated indexes. The table itself is never journaled. |
@@ -178,27 +175,18 @@ data that is more sensitive than the mutation endpoint itself.
 
 ## Retention and cleanup
 
-Set `retentionDays` to allow cleanup. With `cleanupIntervalMs`, the module
-starts an unreferenced interval after bootstrap; it does not keep a Node.js
-process alive by itself:
+In-process retention is disabled because deleting audit history requires host
+coordination that this library cannot prove. When the module is enabled and
+`retentionDays` is configured, `MutationJournalCleanupService.runOnce()` and
+the SQLite driver's `cleanup()` method reject with an explicit error instead
+of deleting rows. The service remains a no-op while the module is disabled or
+when `retentionDays` is not configured.
 
-```ts
-MutationJournalModule.forRoot({
-  enabled: true,
-  retentionDays: 90,
-  cleanupIntervalMs: 6 * 60 * 60 * 1000,
-});
-```
-
-For a scheduler or operational cron, omit `cleanupIntervalMs` and call the
-service explicitly:
-
-```ts
-await mutationJournalCleanupService.runOnce();
-```
-
-`runOnce()` returns the number of deleted rows. It is a no-op while the module
-is disabled or when `retentionDays` is not configured.
+Run retention from the host application's governed operational command. That
+command must coordinate writers, preserve a durable report, account for the
+SQLite database and its WAL/SHM/journal sidecars, and provide failure and
+rollback evidence. Do not configure `cleanupIntervalMs`; it exists only for
+backward-compatible option parsing.
 
 ## SQLite semantics and limits
 
