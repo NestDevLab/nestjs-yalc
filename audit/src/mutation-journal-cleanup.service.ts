@@ -16,7 +16,8 @@ import {
   type ResolvedMutationJournalTarget,
 } from './mutation-journal.service.js';
 
-const MILLISECONDS_PER_DAY = 86_400_000;
+export const MUTATION_JOURNAL_CLEANUP_DISABLED_MESSAGE =
+  "In-process mutation-journal cleanup is disabled; use the host application's governed retention command.";
 
 interface MutationJournalCleanupPort {
   getDriverOptions(): MutationJournalDriverInstallOptions;
@@ -35,7 +36,7 @@ export class MutationJournalCleanupService
 
   public constructor(
     @Inject(MutationJournalService)
-    private readonly mutationJournalService: MutationJournalCleanupPort,
+    _mutationJournalService: MutationJournalCleanupPort,
     @Inject(MUTATION_JOURNAL_OPTIONS)
     private readonly options: ResolvedMutationJournalOptions,
   ) {}
@@ -50,7 +51,11 @@ export class MutationJournalCleanupService
     }
 
     this.timer = setInterval(() => {
-      void this.runOnce();
+      void this.runOnce().catch((error: unknown) => {
+        this.logger.error(
+          error instanceof Error ? error.message : String(error),
+        );
+      });
     }, this.options.cleanupIntervalMs);
     this.timer.unref();
   }
@@ -66,31 +71,6 @@ export class MutationJournalCleanupService
     if (!this.options.enabled || this.options.retentionDays === undefined) {
       return 0;
     }
-
-    const olderThanMs =
-      Date.now() - this.options.retentionDays * MILLISECONDS_PER_DAY;
-    let deletedRows = 0;
-
-    for (const target of this.mutationJournalService.getTargets()) {
-      try {
-        const resolvedTarget =
-          await this.mutationJournalService.resolveTarget(target);
-        if (!resolvedTarget) {
-          continue;
-        }
-
-        deletedRows += await resolvedTarget.driver.cleanup(
-          resolvedTarget.dataSource,
-          this.mutationJournalService.getDriverOptions(),
-          olderThanMs,
-        );
-      } catch (error) {
-        this.logger.warn(
-          `Unable to clean mutation journal for ${target.dataSourceName ?? 'default'}: ${error instanceof Error ? error.message : String(error)}`,
-        );
-      }
-    }
-
-    return deletedRows;
+    throw new Error(MUTATION_JOURNAL_CLEANUP_DISABLED_MESSAGE);
   }
 }
