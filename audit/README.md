@@ -25,7 +25,6 @@ import { MutationJournalModule } from '@nestjs-yalc/audit';
     TypeOrmModule.forRoot({ type: 'sqlite', database: 'app.sqlite' }),
     MutationJournalModule.forRoot({
       enabled: true,
-      retentionDays: 30,
     }),
   ],
 })
@@ -33,4 +32,7 @@ export class AppModule {}
 ```
 
 See the [mutation journal guide](../docs/mutation-journal.md) for target
-selection, querying, cleanup, SQLite limits, and operational guidance.
+selection, querying, governed host retention, SQLite limits, and operational
+guidance. The library exposes no cleanup API because it cannot coordinate
+application writers or persist host-level backup and rollback evidence. Use a
+governed host retention command instead.
