@@ -1,7 +1,6 @@
 import {
   Inject,
   Injectable,
-  Logger,
   OnApplicationBootstrap,
   OnModuleDestroy,
 } from '@nestjs/common';
@@ -16,7 +15,8 @@ import {
   type ResolvedMutationJournalTarget,
 } from './mutation-journal.service.js';
 
-const MILLISECONDS_PER_DAY = 86_400_000;
+export const MUTATION_JOURNAL_CLEANUP_DISABLED_MESSAGE =
+  "In-process mutation-journal cleanup is disabled; use the host application's governed retention command.";
 
 interface MutationJournalCleanupPort {
   getDriverOptions(): MutationJournalDriverInstallOptions;
@@ -30,67 +30,26 @@ interface MutationJournalCleanupPort {
 export class MutationJournalCleanupService
   implements OnApplicationBootstrap, OnModuleDestroy
 {
-  private readonly logger = new Logger(MutationJournalCleanupService.name);
-  private timer?: NodeJS.Timeout;
-
   public constructor(
     @Inject(MutationJournalService)
-    private readonly mutationJournalService: MutationJournalCleanupPort,
+    _mutationJournalService: MutationJournalCleanupPort,
     @Inject(MUTATION_JOURNAL_OPTIONS)
     private readonly options: ResolvedMutationJournalOptions,
   ) {}
 
   public onApplicationBootstrap(): void {
-    if (
-      !this.options.enabled ||
-      this.options.retentionDays === undefined ||
-      this.options.cleanupIntervalMs === undefined
-    ) {
-      return;
-    }
-
-    this.timer = setInterval(() => {
-      void this.runOnce();
-    }, this.options.cleanupIntervalMs);
-    this.timer.unref();
+    // In-process retention is disabled. Legacy cleanupIntervalMs is ignored so
+    // an unsupported cleanup cannot run repeatedly or spam application logs.
   }
 
   public onModuleDestroy(): void {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = undefined;
-    }
+    // No in-process retention resources are allocated.
   }
 
   public async runOnce(): Promise<number> {
     if (!this.options.enabled || this.options.retentionDays === undefined) {
       return 0;
     }
-
-    const olderThanMs =
-      Date.now() - this.options.retentionDays * MILLISECONDS_PER_DAY;
-    let deletedRows = 0;
-
-    for (const target of this.mutationJournalService.getTargets()) {
-      try {
-        const resolvedTarget =
-          await this.mutationJournalService.resolveTarget(target);
-        if (!resolvedTarget) {
-          continue;
-        }
-
-        deletedRows += await resolvedTarget.driver.cleanup(
-          resolvedTarget.dataSource,
-          this.mutationJournalService.getDriverOptions(),
-          olderThanMs,
-        );
-      } catch (error) {
-        this.logger.warn(
-          `Unable to clean mutation journal for ${target.dataSourceName ?? 'default'}: ${error instanceof Error ? error.message : String(error)}`,
-        );
-      }
-    }
-
-    return deletedRows;
+    throw new Error(MUTATION_JOURNAL_CLEANUP_DISABLED_MESSAGE);
   }
 }

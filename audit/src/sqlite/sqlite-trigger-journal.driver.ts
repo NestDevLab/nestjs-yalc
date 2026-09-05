@@ -30,10 +30,6 @@ interface SqliteTrigger {
   name: string;
 }
 
-interface SqliteChangesRow {
-  changes: number;
-}
-
 export class SqliteTriggerJournalDriver implements IMutationJournalDriver {
   public readonly engine = 'sqlite';
 
@@ -126,26 +122,13 @@ export class SqliteTriggerJournalDriver implements IMutationJournalDriver {
   }
 
   public async cleanup(
-    dataSource: DataSource,
-    options: MutationJournalDriverInstallOptions,
-    olderThanMs: number,
-  ): Promise<number> {
-    const queryRunner = dataSource.createQueryRunner();
-
-    try {
-      await queryRunner.connect();
-      await queryRunner.query(
-        `DELETE FROM ${quoteSqliteIdentifier(options.journalTableName)} WHERE ${quoteSqliteIdentifier('occurredAt')} < ?`,
-        [olderThanMs],
-      );
-      const rows = (await queryRunner.query(
-        'SELECT changes() AS changes',
-      )) as SqliteChangesRow[];
-
-      return rows[0]?.changes ?? 0;
-    } finally {
-      await queryRunner.release();
-    }
+    _dataSource: DataSource,
+    _options: MutationJournalDriverInstallOptions,
+    _olderThanMs: number,
+  ): Promise<never> {
+    throw new Error(
+      "In-process mutation-journal cleanup is disabled; use the host application's governed retention command.",
+    );
   }
 
   public async read(
