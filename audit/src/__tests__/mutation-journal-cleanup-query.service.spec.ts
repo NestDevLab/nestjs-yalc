@@ -67,16 +67,19 @@ describe('MutationJournalCleanupService', () => {
     );
     const runOnce = jest
       .spyOn(cleanupService, 'runOnce')
-      .mockRejectedValue(new Error('cleanup disabled'));
+      .mockRejectedValueOnce(new Error('cleanup disabled'))
+      .mockRejectedValueOnce('cleanup disabled');
 
     cleanupService.onApplicationBootstrap();
     const callback = setIntervalSpy.mock.calls[0][0] as () => void;
     callback();
     await Promise.resolve();
+    callback();
+    await Promise.resolve();
     cleanupService.onModuleDestroy();
 
     expect(timer.unref).toHaveBeenCalledTimes(1);
-    expect(runOnce).toHaveBeenCalledTimes(1);
+    expect(runOnce).toHaveBeenCalledTimes(2);
     expect(clearIntervalSpy).toHaveBeenCalledWith(timer);
   });
 
