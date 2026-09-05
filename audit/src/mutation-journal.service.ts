@@ -27,6 +27,8 @@ export interface ResolvedMutationJournalTarget {
 
 interface MutationJournalModuleRef {
   get<TResult>(
+    // Nest accepts class constructor tokens through the framework-level Function type.
+    // eslint-disable-next-line @typescript-eslint/ban-types
     token: string | symbol | Function,
     options: { strict: boolean },
   ): TResult | undefined;
@@ -86,7 +88,9 @@ export class MutationJournalService implements OnApplicationBootstrap {
           );
         } catch (error) {
           this.logger.warn(
-            `Unable to uninstall mutation journal for ${this.getTargetName(target)}: ${this.getErrorMessage(error)}`,
+            `Unable to uninstall mutation journal for ${this.getTargetName(
+              target,
+            )}: ${this.getErrorMessage(error)}`,
           );
         }
       }),
@@ -119,7 +123,9 @@ export class MutationJournalService implements OnApplicationBootstrap {
       dataSource = this.moduleRef.get<DataSource>(token, { strict: false });
       if (!dataSource) {
         this.logger.warn(
-          `Unable to resolve mutation journal target ${this.getTargetName(target)}.`,
+          `Unable to resolve mutation journal target ${this.getTargetName(
+            target,
+          )}.`,
         );
         return undefined;
       }
@@ -138,7 +144,9 @@ export class MutationJournalService implements OnApplicationBootstrap {
       return { dataSource: resolvedDataSource, driver, target };
     } catch (error) {
       this.logger.warn(
-        `Unable to resolve mutation journal target ${this.getTargetName(target)}: ${this.getErrorMessage(error)}`,
+        `Unable to resolve mutation journal target ${this.getTargetName(
+          target,
+        )}: ${this.getErrorMessage(error)}`,
       );
       return undefined;
     }
@@ -163,12 +171,16 @@ export class MutationJournalService implements OnApplicationBootstrap {
         this.getDriverOptions(),
       );
       this.logger.log(
-        `Installed mutation journal for ${this.getTargetName(target)} (${report.journaledTables.length} tables).`,
+        `Installed mutation journal for ${this.getTargetName(target)} (${
+          report.journaledTables.length
+        } tables).`,
       );
       return report;
     } catch (error) {
       this.logger.warn(
-        `Unable to install mutation journal for ${this.getTargetName(target)}: ${this.getErrorMessage(error)}`,
+        `Unable to install mutation journal for ${this.getTargetName(
+          target,
+        )}: ${this.getErrorMessage(error)}`,
       );
       return {
         dataSourceName: this.getTargetName(target),

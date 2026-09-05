@@ -167,7 +167,17 @@ export class SqliteTriggerJournalDriver implements IMutationJournalDriver {
         predicates.length > 0 ? ` WHERE ${predicates.join(' AND ')}` : '';
 
       return (await queryRunner.query(
-        `SELECT ${quoteSqliteIdentifier('id')}, ${quoteSqliteIdentifier('occurredAt')}, ${quoteSqliteIdentifier('tableName')}, ${quoteSqliteIdentifier('action')}, ${quoteSqliteIdentifier('oldRow')}, ${quoteSqliteIdentifier('newRow')}, ${quoteSqliteIdentifier('actor')} FROM ${quoteSqliteIdentifier(options.journalTableName)}${whereClause} ORDER BY ${quoteSqliteIdentifier('id')} DESC LIMIT ? OFFSET ?`,
+        `SELECT ${quoteSqliteIdentifier('id')}, ${quoteSqliteIdentifier(
+          'occurredAt',
+        )}, ${quoteSqliteIdentifier('tableName')}, ${quoteSqliteIdentifier(
+          'action',
+        )}, ${quoteSqliteIdentifier('oldRow')}, ${quoteSqliteIdentifier(
+          'newRow',
+        )}, ${quoteSqliteIdentifier('actor')} FROM ${quoteSqliteIdentifier(
+          options.journalTableName,
+        )}${whereClause} ORDER BY ${quoteSqliteIdentifier(
+          'id',
+        )} DESC LIMIT ? OFFSET ?`,
         parameters,
       )) as MutationJournalRow[];
     } finally {
@@ -230,13 +240,25 @@ export class SqliteTriggerJournalDriver implements IMutationJournalDriver {
     const column = (name: string) => quoteSqliteIdentifier(name);
 
     await queryRunner.query(
-      `CREATE TABLE IF NOT EXISTS ${table} (${column('id')} INTEGER PRIMARY KEY AUTOINCREMENT, ${column('occurredAt')} INTEGER NOT NULL, ${column('tableName')} TEXT NOT NULL, ${column('action')} TEXT NOT NULL, ${column('oldRow')} TEXT, ${column('newRow')} TEXT, ${column('actor')} TEXT)`,
+      `CREATE TABLE IF NOT EXISTS ${table} (${column(
+        'id',
+      )} INTEGER PRIMARY KEY AUTOINCREMENT, ${column(
+        'occurredAt',
+      )} INTEGER NOT NULL, ${column('tableName')} TEXT NOT NULL, ${column(
+        'action',
+      )} TEXT NOT NULL, ${column('oldRow')} TEXT, ${column(
+        'newRow',
+      )} TEXT, ${column('actor')} TEXT)`,
     );
     await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS ${quoteSqliteIdentifier(`idx_${journalTableName}_occurredAt`)} ON ${table} (${column('occurredAt')})`,
+      `CREATE INDEX IF NOT EXISTS ${quoteSqliteIdentifier(
+        `idx_${journalTableName}_occurredAt`,
+      )} ON ${table} (${column('occurredAt')})`,
     );
     await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS ${quoteSqliteIdentifier(`idx_${journalTableName}_table`)} ON ${table} (${column('tableName')}, ${column('occurredAt')})`,
+      `CREATE INDEX IF NOT EXISTS ${quoteSqliteIdentifier(
+        `idx_${journalTableName}_table`,
+      )} ON ${table} (${column('tableName')}, ${column('occurredAt')})`,
     );
   }
 
@@ -261,7 +283,23 @@ export class SqliteTriggerJournalDriver implements IMutationJournalDriver {
       );
 
       await queryRunner.query(
-        `CREATE TRIGGER ${quoteSqliteIdentifier(triggerName)} AFTER ${action.toUpperCase()} ON ${quoteSqliteIdentifier(tableName)} BEGIN INSERT INTO ${quoteSqliteIdentifier(journalTableName)} (${quoteSqliteIdentifier('occurredAt')}, ${quoteSqliteIdentifier('tableName')}, ${quoteSqliteIdentifier('action')}, ${quoteSqliteIdentifier('oldRow')}, ${quoteSqliteIdentifier('newRow')}, ${quoteSqliteIdentifier('actor')}) VALUES (${SQLITE_OCCURRED_AT_EXPRESSION}, ${quoteSqliteStringLiteral(tableName)}, ${quoteSqliteStringLiteral(action)}, ${oldRow}, ${newRow}, NULL); END`,
+        `CREATE TRIGGER ${quoteSqliteIdentifier(
+          triggerName,
+        )} AFTER ${action.toUpperCase()} ON ${quoteSqliteIdentifier(
+          tableName,
+        )} BEGIN INSERT INTO ${quoteSqliteIdentifier(
+          journalTableName,
+        )} (${quoteSqliteIdentifier('occurredAt')}, ${quoteSqliteIdentifier(
+          'tableName',
+        )}, ${quoteSqliteIdentifier('action')}, ${quoteSqliteIdentifier(
+          'oldRow',
+        )}, ${quoteSqliteIdentifier('newRow')}, ${quoteSqliteIdentifier(
+          'actor',
+        )}) VALUES (${SQLITE_OCCURRED_AT_EXPRESSION}, ${quoteSqliteStringLiteral(
+          tableName,
+        )}, ${quoteSqliteStringLiteral(
+          action,
+        )}, ${oldRow}, ${newRow}, NULL); END`,
       );
     }
   }

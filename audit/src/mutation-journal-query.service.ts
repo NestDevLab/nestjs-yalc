@@ -43,8 +43,9 @@ export class MutationJournalQueryService {
     target: MutationJournalTargetRef | undefined,
     filter: MutationJournalReadFilter,
   ): Promise<MutationJournalRow[]> {
-    const resolvedTarget =
-      await this.mutationJournalService.resolveTarget(target);
+    const resolvedTarget = await this.mutationJournalService.resolveTarget(
+      target,
+    );
     if (!resolvedTarget) {
       return [];
     }
