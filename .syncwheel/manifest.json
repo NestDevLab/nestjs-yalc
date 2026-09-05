@@ -21,7 +21,9 @@
       "target_remote": "origin",
       "target_branch": "dev",
       "integration_branch": "dev-integration",
-      "commits": [],
+      "commits": [
+        "b581d2843d09f5470c4e744a58254d5a5c4cd5ce"
+      ],
       "state": "published",
       "publication": {
         "enabled": true
