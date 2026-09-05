@@ -1,7 +1,6 @@
 import {
   Inject,
   Injectable,
-  Logger,
   OnApplicationBootstrap,
   OnModuleDestroy,
 } from '@nestjs/common';
@@ -31,9 +30,6 @@ interface MutationJournalCleanupPort {
 export class MutationJournalCleanupService
   implements OnApplicationBootstrap, OnModuleDestroy
 {
-  private readonly logger = new Logger(MutationJournalCleanupService.name);
-  private timer?: NodeJS.Timeout;
-
   public constructor(
     @Inject(MutationJournalService)
     _mutationJournalService: MutationJournalCleanupPort,
@@ -42,29 +38,12 @@ export class MutationJournalCleanupService
   ) {}
 
   public onApplicationBootstrap(): void {
-    if (
-      !this.options.enabled ||
-      this.options.retentionDays === undefined ||
-      this.options.cleanupIntervalMs === undefined
-    ) {
-      return;
-    }
-
-    this.timer = setInterval(() => {
-      void this.runOnce().catch((error: unknown) => {
-        this.logger.error(
-          error instanceof Error ? error.message : String(error),
-        );
-      });
-    }, this.options.cleanupIntervalMs);
-    this.timer.unref();
+    // In-process retention is disabled. Legacy cleanupIntervalMs is ignored so
+    // an unsupported cleanup cannot run repeatedly or spam application logs.
   }
 
   public onModuleDestroy(): void {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = undefined;
-    }
+    // No in-process retention resources are allocated.
   }
 
   public async runOnce(): Promise<number> {

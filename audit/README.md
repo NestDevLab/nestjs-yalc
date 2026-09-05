@@ -25,7 +25,6 @@ import { MutationJournalModule } from '@nestjs-yalc/audit';
     TypeOrmModule.forRoot({ type: 'sqlite', database: 'app.sqlite' }),
     MutationJournalModule.forRoot({
       enabled: true,
-      retentionDays: 30,
     }),
   ],
 })
@@ -33,4 +32,8 @@ export class AppModule {}
 ```
 
 See the [mutation journal guide](../docs/mutation-journal.md) for target
-selection, querying, cleanup, SQLite limits, and operational guidance.
+selection, querying, governed host retention, SQLite limits, and operational
+guidance. In-process cleanup is intentionally disabled because the library
+cannot coordinate application writers or persist host-level rollback evidence.
+The legacy `cleanupIntervalMs` option is ignored and does not start an
+in-process timer; use a governed host retention command instead.
