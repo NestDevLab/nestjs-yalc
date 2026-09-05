@@ -43,8 +43,6 @@ bootstrap. Reports are available from `MutationJournalService.getReports()`.
 | `enabled` | Required | Enables trigger installation and journal reads. |
 | `targets` | `[{}]` | Selects default, named, or token-provided data sources. |
 | `excludedTables` | `[]` | Adds application tables that must not receive triggers. |
-| `retentionDays` | None | Legacy option; it never deletes rows in-process. |
-| `cleanupIntervalMs` | None | Legacy option; it is ignored and schedules no timer. |
 | `installOnBootstrap` | `true` | Controls automatic trigger installation. |
 | `uninstallWhenDisabled` | `false` | Removes generated triggers, but never journal rows. |
 | `journalTableName` | `_mutation_journal` | Configures the journal table and index names. |
@@ -70,20 +68,11 @@ more sensitive than the mutation endpoint itself.
 
 ## Retention and cleanup
 
-In-process retention is disabled because deleting audit history requires host
-coordination that this library cannot prove. `cleanupIntervalMs` is retained
-only for legacy option parsing and is ignored. It never schedules an
-in-process timer.
-
-When the module is enabled and `retentionDays` is configured,
-`MutationJournalCleanupService.runOnce()` and the SQLite driver's `cleanup()`
-reject with an explicit error instead of deleting rows. The service remains a
-no-op while the module is disabled or when `retentionDays` is not configured.
-
+The audit package deliberately exposes no cleanup or retention API. Deleting
+audit history requires host coordination that a library driver cannot prove.
 Retention belongs to the host application's governed operational command. That
-command must coordinate writers, preserve a durable report, include the SQLite
-database and WAL/SHM/journal sidecars in verified backups, and provide failure
-and rollback evidence.
+command must coordinate writers, preserve a durable report, create and verify
+SQLite backups, and provide failure and rollback evidence.
 
 ## SQLite operations
 

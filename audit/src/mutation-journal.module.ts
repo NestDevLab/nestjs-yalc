@@ -15,7 +15,6 @@ import type {
   MutationJournalOptions,
   MutationJournalTargetRef,
 } from './mutation-journal.interface.js';
-import { MutationJournalCleanupService } from './mutation-journal-cleanup.service.js';
 import { MutationJournalQueryService } from './mutation-journal-query.service.js';
 import { MutationJournalService } from './mutation-journal.service.js';
 import { SqliteTriggerJournalDriver } from './sqlite/sqlite-trigger-journal.driver.js';
@@ -70,7 +69,6 @@ export class MutationJournalModule {
         inject: [MUTATION_JOURNAL_OPTIONS],
       },
       MutationJournalService,
-      MutationJournalCleanupService,
       MutationJournalQueryService,
     ];
 
@@ -82,7 +80,6 @@ export class MutationJournalModule {
         MUTATION_JOURNAL_OPTIONS,
         MUTATION_JOURNAL_DRIVERS,
         MutationJournalService,
-        MutationJournalCleanupService,
         MutationJournalQueryService,
       ],
     };
@@ -91,13 +88,6 @@ export class MutationJournalModule {
   private static normalizeOptions(
     options: MutationJournalOptions,
   ): ResolvedMutationJournalOptions {
-    if (
-      options.cleanupIntervalMs !== undefined &&
-      options.retentionDays === undefined
-    ) {
-      throw new Error('cleanupIntervalMs requires retentionDays.');
-    }
-
     return {
       ...options,
       targets: options.targets ?? [{}],

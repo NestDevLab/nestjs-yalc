@@ -33,7 +33,6 @@ export class AppModule {}
 
 See the [mutation journal guide](../docs/mutation-journal.md) for target
 selection, querying, governed host retention, SQLite limits, and operational
-guidance. In-process cleanup is intentionally disabled because the library
-cannot coordinate application writers or persist host-level rollback evidence.
-The legacy `cleanupIntervalMs` option is ignored and does not start an
-in-process timer; use a governed host retention command instead.
+guidance. The library exposes no cleanup API because it cannot coordinate
+application writers or persist host-level backup and rollback evidence. Use a
+governed host retention command instead.

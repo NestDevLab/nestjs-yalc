@@ -56,11 +56,6 @@ export interface IMutationJournalDriver {
     dataSource: DataSource,
     options: MutationJournalDriverInstallOptions,
   ): Promise<void>;
-  cleanup(
-    dataSource: DataSource,
-    options: MutationJournalDriverInstallOptions,
-    olderThanMs: number,
-  ): Promise<number>;
   read(
     dataSource: DataSource,
     options: MutationJournalDriverInstallOptions,
@@ -77,8 +72,6 @@ export interface MutationJournalOptions {
   enabled: boolean;
   targets?: MutationJournalTargetRef[];
   excludedTables?: string[];
-  retentionDays?: number;
-  cleanupIntervalMs?: number;
   installOnBootstrap?: boolean;
   uninstallWhenDisabled?: boolean;
   journalTableName?: string;

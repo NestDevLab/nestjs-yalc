@@ -273,9 +273,6 @@ describe('SqliteTriggerJournalDriver', () => {
       [10, 'manual', 'insert', 20, 'manual', 'update', 30, 'manual', 'delete'],
     );
 
-    await expect(driver.cleanup(dataSource, journalOptions, 20)).rejects.toThrow(
-      'In-process mutation-journal cleanup is disabled',
-    );
     const filteredRows = await driver.read(dataSource, journalOptions, {
       tableName: 'manual',
       action: 'update',
@@ -351,10 +348,6 @@ describe('SqliteTriggerJournalDriver', () => {
     await expect(driver.install(dataSource, journalOptions)).rejects.toThrow(
       'connection failed',
     );
-    await expect(driver.cleanup(dataSource, journalOptions, 1)).rejects.toThrow(
-      'In-process mutation-journal cleanup is disabled',
-    );
-
     expect(releasedQueryRunner.release).not.toHaveBeenCalled();
   });
 

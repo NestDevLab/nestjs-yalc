@@ -2,4 +2,4 @@
 '@nestjs-yalc/audit': major
 ---
 
-Remove in-process mutation-journal retention cleanup and scheduling. Retention must run through a governed host command with coordination and durable failure evidence.
+Remove the mutation-journal cleanup API and in-process scheduling. Retention must run through a governed host command with coordination, verified backups, and durable failure evidence.

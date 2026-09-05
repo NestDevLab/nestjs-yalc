@@ -121,16 +121,6 @@ export class SqliteTriggerJournalDriver implements IMutationJournalDriver {
     }
   }
 
-  public async cleanup(
-    _dataSource: DataSource,
-    _options: MutationJournalDriverInstallOptions,
-    _olderThanMs: number,
-  ): Promise<never> {
-    throw new Error(
-      "In-process mutation-journal cleanup is disabled; use the host application's governed retention command.",
-    );
-  }
-
   public async read(
     dataSource: DataSource,
     options: MutationJournalDriverInstallOptions,

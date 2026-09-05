@@ -1,9 +1,8 @@
-import { afterEach, describe, expect, it, jest } from '@jest/globals';
+import { describe, expect, it, jest } from '@jest/globals';
 import type { DataSource } from 'typeorm';
 import { DEFAULT_JOURNAL_TABLE } from '../mutation-journal.def.js';
 import type { MutationJournalRow } from '../mutation-journal.interface.js';
 import type { ResolvedMutationJournalOptions } from '../mutation-journal.module.js';
-import { MutationJournalCleanupService } from '../mutation-journal-cleanup.service.js';
 import {
   MutationJournalQueryService,
   parseMutationJournalRow,
@@ -18,8 +17,6 @@ const options: ResolvedMutationJournalOptions = {
   targets: [{}, { dataSourceName: 'secondary' }, { dataSourceName: 'missing' }],
   excludedTables: [],
   journalTableName: DEFAULT_JOURNAL_TABLE,
-  retentionDays: 2,
-  cleanupIntervalMs: 100,
 };
 
 function createJournalService(
@@ -35,90 +32,6 @@ function createJournalService(
     ...overrides,
   } as unknown as MutationJournalService;
 }
-
-afterEach(() => {
-  jest.useRealTimers();
-  jest.restoreAllMocks();
-});
-
-describe('MutationJournalCleanupService', () => {
-  it('fails closed when cleanup is explicitly enabled', async () => {
-    const journalService = createJournalService();
-    const cleanupService = new MutationJournalCleanupService(
-      journalService,
-      options,
-    );
-
-    await expect(cleanupService.runOnce()).rejects.toThrow(
-      'In-process mutation-journal cleanup is disabled',
-    );
-    expect(journalService.getTargets).not.toHaveBeenCalled();
-  });
-
-  it('does not schedule the legacy cleanup interval', async () => {
-    const setIntervalSpy = jest.spyOn(global, 'setInterval');
-    const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
-    const journalService = createJournalService();
-    const cleanupService = new MutationJournalCleanupService(
-      journalService,
-      options,
-    );
-    cleanupService.onApplicationBootstrap();
-    cleanupService.onModuleDestroy();
-
-    expect(setIntervalSpy).not.toHaveBeenCalled();
-    expect(clearIntervalSpy).not.toHaveBeenCalled();
-    await expect(cleanupService.runOnce()).rejects.toThrow(
-      'In-process mutation-journal cleanup is disabled',
-    );
-  });
-
-  it('does not schedule or clean while disabled or without retention', async () => {
-    const journalService = createJournalService();
-    const disabledService = new MutationJournalCleanupService(journalService, {
-      ...options,
-      enabled: false,
-    });
-    const noRetentionService = new MutationJournalCleanupService(journalService, {
-      ...options,
-      retentionDays: undefined,
-    });
-
-    disabledService.onApplicationBootstrap();
-    noRetentionService.onApplicationBootstrap();
-
-    await expect(disabledService.runOnce()).resolves.toBe(0);
-    await expect(noRetentionService.runOnce()).resolves.toBe(0);
-    expect(journalService.getTargets).not.toHaveBeenCalled();
-    disabledService.onModuleDestroy();
-  });
-
-  it('fails closed before resolving a target', async () => {
-    const journalService = createJournalService();
-    const cleanupService = new MutationJournalCleanupService(
-      journalService,
-      options,
-    );
-
-    await expect(cleanupService.runOnce()).rejects.toThrow(
-      'In-process mutation-journal cleanup is disabled',
-    );
-    expect(journalService.resolveTarget).not.toHaveBeenCalled();
-  });
-
-  it('fails closed without resolving any target', async () => {
-    const journalService = createJournalService();
-    const cleanupService = new MutationJournalCleanupService(
-      journalService,
-      options,
-    );
-
-    await expect(cleanupService.runOnce()).rejects.toThrow(
-      'In-process mutation-journal cleanup is disabled',
-    );
-    expect(journalService.getTargets).not.toHaveBeenCalled();
-  });
-});
 
 describe('MutationJournalQueryService', () => {
   it('delegates reads through a resolved target and returns no rows when absent', async () => {
@@ -142,7 +55,6 @@ describe('MutationJournalQueryService', () => {
         supports: jest.fn(),
         install: jest.fn(),
         uninstall: jest.fn(),
-        cleanup: jest.fn(),
         read: jest.fn(async () => rows),
       },
     };

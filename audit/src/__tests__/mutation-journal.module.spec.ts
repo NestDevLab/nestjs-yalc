@@ -29,7 +29,7 @@ afterEach(async () => {
 });
 
 describe('MutationJournalModule', () => {
-  it('normalizes options and rejects an invalid cleanup configuration', () => {
+  it('normalizes options', () => {
     const dynamicModule = MutationJournalModule.forRoot({
       enabled: true,
       excludedTables: ['custom_table', 'migrations'],
@@ -48,12 +48,6 @@ describe('MutationJournalModule', () => {
       expect.arrayContaining([...BUILTIN_EXCLUDED_TABLES, 'custom_table']),
     );
     expect(optionsProvider.useValue.excludedTables).toHaveLength(3);
-    expect(() =>
-      MutationJournalModule.forRoot({
-        enabled: true,
-        cleanupIntervalMs: 1,
-      }),
-    ).toThrow('cleanupIntervalMs requires retentionDays.');
   });
 
   it('installs journals for default and named TypeORM data sources', async () => {
@@ -255,7 +249,6 @@ describe('MutationJournalModule', () => {
       supports: jest.fn(() => true),
       install: jest.fn(async () => report),
       uninstall: jest.fn(async () => undefined),
-      cleanup: jest.fn(async () => 0),
       read: jest.fn(async () => []),
     };
     const moduleRef = await Test.createTestingModule({

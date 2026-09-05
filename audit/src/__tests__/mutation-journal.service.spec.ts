@@ -36,7 +36,6 @@ function createDriver(
     supports: jest.fn(() => true),
     install: jest.fn(async () => report),
     uninstall: jest.fn(async () => undefined),
-    cleanup: jest.fn(async () => 0),
     read: jest.fn(async () => []),
     ...overrides,
   };
