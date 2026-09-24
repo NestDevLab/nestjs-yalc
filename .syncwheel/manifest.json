@@ -39,7 +39,8 @@
       "integration_branch": "dev-integration",
       "commits": [
         "83156a690ee757a57158b9306aa0e2bfc25df7d5",
-        "854971be9bad4f4ce2414f4b45060e4ea1585852"
+        "854971be9bad4f4ce2414f4b45060e4ea1585852",
+        "3520c7e7b0202ada10d3b56e9ea871c3226c86b0"
       ],
       "state": "published",
       "publication": {
