@@ -22,11 +22,32 @@
   "integration": {
     "base": "origin/dev",
     "branch": "integration/mgt0458-health-forward",
-    "stacks": [],
+    "stacks": [
+      "mgt0458-health-forward"
+    ],
     "strategy": "cherry-pick"
   },
   "repository_mode": "delivery",
-  "stacks": [],
+  "stacks": [
+    {
+      "base": "origin/dev",
+      "branch": "syncwheel/draft/mgt0458-health-forward",
+      "commits": [
+        "9b8b489eabda096c3c970ec1546ade5cffec9e48"
+      ],
+      "id": "mgt0458-health-forward",
+      "integration_branch": "integration/mgt0458-health-forward",
+      "meta": {
+        "purpose": "Generic health monitoring forward-port"
+      },
+      "publication": {
+        "enabled": false
+      },
+      "state": "draft",
+      "target_branch": "dev",
+      "target_remote": "origin"
+    }
+  ],
   "syncwheel_tracking": "git-tracked",
   "syncwheel_worktree_root": "var/syncwheel",
   "version": 2
