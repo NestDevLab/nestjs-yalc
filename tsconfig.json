@@ -55,6 +55,12 @@
       "@nestjs-yalc/audit/*": [
         "./audit/src/*"
       ],
+      "@nestjs-yalc/change-requests": [
+        "./change-requests/src/index.ts"
+      ],
+      "@nestjs-yalc/change-requests/*": [
+        "./change-requests/src/*"
+      ],
       "@nestjs-yalc/crud-gen": [
         "./crud-gen/src/index.ts"
       ],

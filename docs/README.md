@@ -13,7 +13,9 @@ layout: landing
     <p class="ny-lead">
       Define resources once. NestJS-YALC generates CRUD APIs, protects service
       boundaries with API Strategy, and standardizes events, errors, and
-      observability with EventManager.
+      observability with EventManager. The
+      <code>@nestjs-yalc/change-requests</code> stores
+      proposed entity edits for review through host supplied adapters.
     </p>
     <div class="ny-hero-install" aria-label="Install NestJS-YALC">
       <p class="ny-install-label">Install the full framework</p>

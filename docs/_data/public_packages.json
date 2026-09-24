@@ -12,6 +12,12 @@
     "description": "Engine-level database mutation journal utilities for NestJS applications"
   },
   {
+    "name": "@nestjs-yalc/change-requests",
+    "shortName": "change-requests",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/change-requests",
+    "description": "Generic review and publication of proposed entity changes"
+  },
+  {
     "name": "@nestjs-yalc/crud-gen",
     "shortName": "crud-gen",
     "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/crud-gen",
