@@ -93,4 +93,28 @@ describe('AppBootstrap.applyBootstrapGlobals', () => {
     expect(setDescriptionMock).toHaveBeenCalled();
     expect(setupSwaggerMock).toHaveBeenCalled();
   });
+
+  it('should forward swagger document options to createDocument', async () => {
+    const bootstrap = new AppBootstrap(
+      'app',
+      class Dummy {},
+      { skipMultiServerCheck: true } as any,
+    );
+
+    bootstrap['app'] = fakeApp as any;
+    bootstrap['loggerService'] = logger as any;
+    bootstrap.getConf = jest.fn().mockReturnValue({ apiPrefix: 'api' }) as any;
+    bootstrap.getModule = jest.fn().mockReturnValue({}) as any;
+
+    await bootstrap.applyBootstrapGlobals({
+      enableSwagger: true,
+      swaggerDocumentOptions: { autoTagControllers: false },
+    });
+
+    expect(createDocumentMock).toHaveBeenLastCalledWith(
+      fakeApp,
+      expect.anything(),
+      { autoTagControllers: false },
+    );
+  });
 });

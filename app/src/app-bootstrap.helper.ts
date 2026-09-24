@@ -13,7 +13,11 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import fastifyCookie from '@fastify/cookie';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import {
+  SwaggerModule,
+  DocumentBuilder,
+  type SwaggerDocumentOptions,
+} from '@nestjs/swagger';
 import { fastify, FastifyInstance } from 'fastify';
 import { envIsTrue } from '@nestjs-yalc/utils/env.helper.js';
 import { useContainer } from 'class-validator';
@@ -32,6 +36,11 @@ export interface ICreateOptions {
    * Defaults to "api".
    */
   swaggerPath?: string;
+  /**
+   * Passed to `SwaggerModule.createDocument`, e.g. `{ autoTagControllers: false }`
+   * to keep untagged controllers out of the generated tags.
+   */
+  swaggerDocumentOptions?: SwaggerDocumentOptions;
   filters?: ExceptionFilter[];
   validationPipeOptions?: ValidationPipeOptions;
   /**
@@ -188,6 +197,7 @@ export class AppBootstrap<
       const document = SwaggerModule.createDocument(
         this.getApp(),
         this.buildSwaggerConfig().build(),
+        options.swaggerDocumentOptions,
       );
       SwaggerModule.setup(swaggerPath, this.getApp(), document, {
         jsonDocumentUrl: `/${swaggerPath}/json`,
