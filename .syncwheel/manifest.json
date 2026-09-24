@@ -38,8 +38,8 @@
       "target_branch": "dev",
       "integration_branch": "dev-integration",
       "commits": [
-        "36024fa330540ce027939b7d997f163d6a1a759d",
-        "9a37fe8123f0d99c5f5239bf544cc6005d362c01"
+        "92d614ebfac4bbf86e018f40673b74480bf47614",
+        "cd8cd88796b57103c757b82f66175e8a73336ad5"
       ],
       "state": "published",
       "publication": {
