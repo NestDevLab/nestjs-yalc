@@ -34,7 +34,8 @@
       "base": "origin/maintenance/nest9-typescript59-audit",
       "branch": "pr/mgt0458-health-core",
       "commits": [
-        "942a8581305cafcb1bd60e3a8aa5399714b66a76"
+        "942a8581305cafcb1bd60e3a8aa5399714b66a76",
+        "d1b33e81e2f8736012a4f7edc0e7006bc65f7fee"
       ],
       "id": "mgt0458-health-core",
       "integration_branch": "dev-integration",
