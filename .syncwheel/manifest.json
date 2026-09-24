@@ -1,30 +1,33 @@
 {
-  "version": 1,
+  "channels": [],
+  "coordination": {
+    "claims": "advisory",
+    "gc": {
+      "backup_keep": 2,
+      "backup_retention_days": 30,
+      "worktree_grace_days": 7
+    },
+    "id": "mgt0458-health-forward",
+    "mode": "active-active",
+    "remote": "origin",
+    "state_branch": "syncwheel/state/mgt0458-health-forward"
+  },
   "defaults": {
-    "canonical_remote": "origin",
-    "publication_remote": "origin",
     "base_branch": "dev",
     "base_ref": "origin/dev",
-    "integration_membership": "legacy"
+    "canonical_remote": "origin",
+    "integration_membership": "required",
+    "publication_remote": "origin"
   },
   "integration": {
-    "branch": "dev-integration",
     "base": "origin/dev",
-    "strategy": "cherry-pick",
-    "stacks": []
+    "branch": "integration/mgt0458-health-forward",
+    "stacks": [],
+    "strategy": "cherry-pick"
   },
-  "stacks": [],
-  "syncwheel_worktree_root": "var/syncwheel",
-  "syncwheel_tracking": "git-tracked",
   "repository_mode": "delivery",
-  "channels": [],
-  "authority": {
-    "mode": "ai-managed",
-    "allow": [
-      "source_change"
-    ],
-    "deny": [
-      "destructive_rewrite"
-    ]
-  }
+  "stacks": [],
+  "syncwheel_tracking": "git-tracked",
+  "syncwheel_worktree_root": "var/syncwheel",
+  "version": 2
 }
