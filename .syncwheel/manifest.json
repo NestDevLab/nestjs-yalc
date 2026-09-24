@@ -29,6 +29,22 @@
         "enabled": true
       },
       "meta": {}
+    },
+    {
+      "id": "embedded-omnikernel-build",
+      "branch": "fix/embedded-omnikernel-build",
+      "base": "origin/dev",
+      "target_remote": "origin",
+      "target_branch": "dev",
+      "integration_branch": "dev-integration",
+      "commits": [],
+      "state": "published",
+      "publication": {
+        "enabled": true
+      },
+      "meta": {
+        "purpose": "Build omnikernel example via --prefix so yalc builds when embedded as a consumer workspace"
+      }
     }
   ],
   "syncwheel_worktree_root": "var/syncwheel",
