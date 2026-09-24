@@ -23,7 +23,8 @@
     "base": "origin/maintenance/nest9-typescript59-audit",
     "branch": "dev-integration",
     "stacks": [
-      "mgt0458-health-core"
+      "mgt0458-health-core",
+      "mgt0458-health-dev"
     ],
     "strategy": "cherry-pick"
   },
@@ -31,7 +32,7 @@
   "stacks": [
     {
       "base": "origin/maintenance/nest9-typescript59-audit",
-      "branch": "syncwheel/draft/mgt0458-health-core",
+      "branch": "pr/mgt0458-health-core",
       "commits": [
         "942a8581305cafcb1bd60e3a8aa5399714b66a76"
       ],
@@ -41,10 +42,28 @@
         "purpose": "Generic health monitoring core"
       },
       "publication": {
+        "enabled": true
+      },
+      "state": "published",
+      "target_branch": "maintenance/nest9-typescript59-audit",
+      "target_remote": "origin"
+    },
+    {
+      "base": "origin/dev",
+      "branch": "syncwheel/draft/mgt0458-health-dev",
+      "commits": [
+        "9b8b489eabda096c3c970ec1546ade5cffec9e48"
+      ],
+      "id": "mgt0458-health-dev",
+      "integration_branch": "dev-integration",
+      "meta": {
+        "purpose": "Forward-port generic health monitoring core"
+      },
+      "publication": {
         "enabled": false
       },
       "state": "draft",
-      "target_branch": "maintenance/nest9-typescript59-audit",
+      "target_branch": "dev",
       "target_remote": "origin"
     }
   ],
