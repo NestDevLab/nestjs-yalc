@@ -9,7 +9,11 @@ import {
   jest,
 } from "@jest/globals";
 import { DataSource } from "typeorm";
-import type { YalcEventService } from "@nestjs-yalc/event-manager";
+import { QueryFailedError } from 'typeorm';
+import { Module } from '@nestjs/common';
+import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import { Test } from '@nestjs/testing';
+import { YalcEventService } from '@nestjs-yalc/event-manager';
 import { ChangeRequestEntity, ChangeRequestItemEntity } from "../entities.js";
 import {
   CHANGE_REQUEST_ADAPTERS,
@@ -44,10 +48,13 @@ describe("change requests", () => {
   const live = new Map<string, unknown>();
   const events = {
     emitAsync: jest.fn(async () => undefined),
+    logAsync: jest.fn(async () => undefined),
     errorBadRequest: (name: string) => new Error(name),
     errorNotFound: (name: string) => new Error(name),
+    errorConflict: jest.fn((name: string) => new Error(name)),
   } as unknown as YalcEventService;
   let failApply = false;
+  const applyCause = new Error('private adapter failure');
   const key = (fieldKey: string, variant = "") => `${fieldKey}:${variant}`;
   const adapter: ChangeRequestAdapter = {
     entityType: "article",
@@ -61,7 +68,7 @@ describe("change requests", () => {
       })),
     validate: async () => undefined,
     apply: async (_entityId, items) => {
-      if (failApply) throw new Error("private adapter failure");
+      if (failApply) throw applyCause;
       for (const item of items)
         live.set(key(item.fieldKey, item.variant), item.value);
     },
@@ -93,6 +100,8 @@ describe("change requests", () => {
     live.clear();
     failApply = false;
     jest.mocked(events.emitAsync).mockClear();
+    jest.mocked(events.logAsync).mockClear();
+    jest.mocked(events.errorConflict).mockClear();
   });
 
   it("creates, describes, filters and replaces an open field", async () => {
@@ -186,6 +195,11 @@ describe("change requests", () => {
     );
     const failed = (await service.get(request.id)).request.items[0];
     expect(failed.publishError).toBe("Publication failed");
+    expect(events.logAsync).toHaveBeenCalledWith('change-request.publish-cause', {
+      data: { requestId: request.id, itemId: failed.id, cause: applyCause },
+      logger: { level: 'error' },
+      event: false,
+    });
     failApply = false;
     expect(
       (await service.retryPublish(request.id, [failed.id], actor))[0].status,
@@ -262,6 +276,63 @@ describe("change requests", () => {
     expect((await service.list({ entityType: 'wrong' })).openItemCount).toBe(0);
   });
 
+  it('paginates distinct requests with several items in one state', async () => {
+    const first = await service.create(input([{ fieldKey: 'one', proposedValue: 'A' }, { fieldKey: 'two', proposedValue: 'B' }]));
+    const second = await service.create(input([{ fieldKey: 'three', proposedValue: 'C' }]));
+    live.set('one:', 'outside');
+    live.set('two:', 'outside');
+    live.set('three:', 'outside');
+    await service.approve(first.id, 'all', actor);
+    await service.approve(second.id, 'all', actor);
+    await db.getRepository(ChangeRequestEntity).update(first.id, { createdAt: new Date('2026-01-01') });
+    const firstPage = await service.list({ state: 'stale', limit: 1 });
+    const secondPage = await service.list({ state: 'stale', offset: 1, limit: 1 });
+    const thirdPage = await service.list({ state: 'stale', offset: 2, limit: 1 });
+    expect(firstPage.total).toBe(2);
+    expect(firstPage.requests).toHaveLength(1);
+    expect(secondPage.requests).toHaveLength(1);
+    expect(firstPage.requests[0].id).not.toBe(secondPage.requests[0].id);
+    expect(thirdPage.requests).toHaveLength(0);
+  });
+
+  it('hashes nested object keys canonically', async () => {
+    live.set('name:', { outer: { a: 1, b: 2 }, list: [{ x: 1, y: 2 }] });
+    const request = await service.create(input([{ fieldKey: 'name', proposedValue: 'New' }]));
+    live.set('name:', { list: [{ y: 2, x: 1 }], outer: { b: 2, a: 1 } });
+    expect((await service.approve(request.id, 'all', actor))[0].status).toBe('published');
+    const again = await service.create(input([{ fieldKey: 'name', proposedValue: { outer: { a: 1, b: 2 } } }]));
+    live.set('name:', { outer: { b: 2, a: 1 } });
+    failApply = true;
+    expect((await service.approve(again.id, 'all', actor))[0].status).toBe('published');
+  });
+
+  it('maps an open-field unique collision to a typed conflict', async () => {
+    const cause = new QueryFailedError('INSERT', [], Object.assign(new Error('UNIQUE constraint failed: change_request_items.entity_type'), { code: 'SQLITE_CONSTRAINT_UNIQUE' }));
+    const transaction = jest.spyOn(db.manager, 'transaction').mockRejectedValueOnce(cause);
+    await expect(service.create(input([{ fieldKey: 'name', proposedValue: 'X' }]))).rejects.toThrow('change-request.open-field-conflict');
+    expect(events.errorConflict).toHaveBeenCalledWith('change-request.open-field-conflict', {
+      response: { message: 'An open change already exists for this field' },
+    });
+    transaction.mockRestore();
+  });
+
+  it('handles Postgres unique violations and preserves other errors', async () => {
+    const cases: { cause: Error; conflict: boolean }[] = [
+      { cause: new QueryFailedError('INSERT', [], Object.assign(new Error('duplicate'), { code: '23505', constraint: 'uq_change_request_open_field' })), conflict: true },
+      { cause: new QueryFailedError('INSERT', [], Object.assign(new Error('duplicate'), { code: '23505', constraint: 'other_unique' })), conflict: false },
+      { cause: new Error('connection lost'), conflict: false },
+    ];
+    for (const { cause, conflict } of cases) {
+      const transaction = jest.spyOn(db.manager, 'transaction').mockRejectedValueOnce(cause);
+      try {
+        if (conflict) await expect(service.create(input([{ fieldKey: 'name', proposedValue: 'X' }]))).rejects.toThrow('change-request.open-field-conflict');
+        else await expect(service.create(input([{ fieldKey: 'name', proposedValue: 'X' }]))).rejects.toBe(cause);
+      } finally {
+        transaction.mockRestore();
+      }
+    }
+  });
+
   it('reports missing items and invalid retry states', async () => {
     const request = await service.create(input([{ fieldKey: 'name', proposedValue: 'New' }]));
     await expect(service.update(request.id, [{ itemId: 'missing', proposedValue: 'X' }], actor)).rejects.toThrow('change-request.item-not-found');
@@ -286,9 +357,36 @@ describe("change requests", () => {
   it('exposes sync and async module registration', async () => {
     const direct = ChangeRequestModule.forRoot([adapter]);
     expect(direct.providers).toContain(ChangeRequestService);
+    expect(ChangeRequestModule.forRoot({ dataSource: 'settings' }).providers?.[0]).toEqual({ provide: CHANGE_REQUEST_ADAPTERS, useValue: [] });
     const asynchronous = ChangeRequestModule.forRootAsync({ useFactory: async () => [adapter] });
     const optionProvider = asynchronous.providers?.[0] as { useFactory: () => Promise<ChangeRequestAdapter[]> };
     expect(await optionProvider.useFactory()).toEqual([adapter]);
+  });
+
+  it('injects repositories from the default and named DataSources', async () => {
+    @Module({ providers: [{ provide: YalcEventService, useValue: events }], exports: [YalcEventService] })
+    class TestEventModule {}
+    for (const mode of ['default', 'named-sync', 'named-async'] as const) {
+      const dataSource = mode === 'default' ? undefined : 'settings';
+      const feature = mode === 'default'
+        ? ChangeRequestModule.forRoot([adapter], [TestEventModule])
+        : mode === 'named-sync'
+          ? ChangeRequestModule.forRoot({ adapters: [adapter], imports: [TestEventModule], dataSource })
+          : ChangeRequestModule.forRootAsync({ imports: [TestEventModule], dataSource, useFactory: async () => [adapter] });
+      const module = await Test.createTestingModule({ imports: [
+        TypeOrmModule.forRoot({ type: 'sqlite', database: ':memory:', name: dataSource, entities: [ChangeRequestEntity, ChangeRequestItemEntity], synchronize: true }),
+        feature,
+      ] }).compile();
+      try {
+        const injected = module.get(ChangeRequestService);
+        const created = await injected.create(input([{ fieldKey: 'name', proposedValue: mode }]));
+        const repository = module.get(getRepositoryToken(ChangeRequestEntity, dataSource));
+        expect(await repository.count()).toBe(1);
+        expect(created.items[0].proposedValue).toBe(mode);
+      } finally {
+        await module.close();
+      }
+    }
   });
 
   it('reverses and reapplies the migration', async () => {

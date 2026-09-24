@@ -1,10 +1,13 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { YalcEventService } from '@nestjs-yalc/event-manager';
-import { In, Repository } from 'typeorm';
+import { In, QueryFailedError, Repository } from 'typeorm';
 import { ChangeRequestEntity, ChangeRequestItemEntity } from './entities.js';
 import { ChangeRequestAdapterRegistry } from './registry.js';
+import {
+  CHANGE_REQUEST_ITEM_REPOSITORY,
+  CHANGE_REQUEST_REPOSITORY,
+} from './tokens.js';
 import type {
   ChangeRequestActor,
   ChangeRequestItemInput,
@@ -13,10 +16,39 @@ import type {
   CreateChangeRequest,
 } from './types.js';
 
+const canonicalStringify = (value: unknown): string =>
+  JSON.stringify(value ?? null, (_key, current: unknown) => {
+    if (
+      current === null ||
+      typeof current !== 'object' ||
+      Array.isArray(current)
+    )
+      return current;
+    return Object.fromEntries(
+      Object.keys(current)
+        .sort()
+        .map((key) => [key, (current as Record<string, unknown>)[key]]),
+    );
+  });
 const hash = (value: unknown): string =>
-  createHash('sha256')
-    .update(JSON.stringify(value ?? null))
-    .digest('hex');
+  createHash('sha256').update(canonicalStringify(value)).digest('hex');
+
+const isOpenFieldConflict = (error: unknown): boolean => {
+  if (!(error instanceof QueryFailedError)) return false;
+  const driverError = error.driverError as {
+    code?: string;
+    constraint?: string;
+    message?: string;
+  };
+  if (driverError.code === '23505')
+    return driverError.constraint === 'uq_change_request_open_field';
+  return Boolean(
+    driverError.code?.startsWith('SQLITE_CONSTRAINT') &&
+    driverError.message?.includes(
+      'UNIQUE constraint failed: change_request_items.',
+    ),
+  );
+};
 const normalize = (
   item: ChangeRequestItemInput,
 ): ChangeRequestItemInput & { variant: string } => ({
@@ -27,9 +59,9 @@ const normalize = (
 @Injectable()
 export class ChangeRequestService {
   constructor(
-    @InjectRepository(ChangeRequestEntity)
+    @Inject(CHANGE_REQUEST_REPOSITORY)
     private readonly requests: Repository<ChangeRequestEntity>,
-    @InjectRepository(ChangeRequestItemEntity)
+    @Inject(CHANGE_REQUEST_ITEM_REPOSITORY)
     private readonly items: Repository<ChangeRequestItemEntity>,
     @Inject(ChangeRequestAdapterRegistry)
     private readonly adapters: ChangeRequestAdapterRegistry,
@@ -53,58 +85,72 @@ export class ChangeRequestService {
     await adapter.validate(input.entityId, changes);
     const live = await adapter.read(input.entityId, changes);
     const base = changes.map((item) => this.liveValue(live, item));
-    const request = await this.requests.manager.transaction(async (manager) => {
-      for (const item of changes) {
-        const existing = await manager.findOne(ChangeRequestItemEntity, {
-          where: {
-            entityType: input.entityType,
-            target: input.target,
-            entityId: input.entityId,
-            fieldKey: item.fieldKey,
-            variant: item.variant,
-          },
-        });
-        if (existing) {
-          await manager.remove(existing);
-          await this.dropEmpty(existing.changeRequestId, manager);
+    const request = await this.requests.manager
+      .transaction(async (manager) => {
+        for (const item of changes) {
+          const existing = await manager.findOne(ChangeRequestItemEntity, {
+            where: {
+              entityType: input.entityType,
+              target: input.target,
+              entityId: input.entityId,
+              fieldKey: item.fieldKey,
+              variant: item.variant,
+            },
+          });
+          if (existing) {
+            await manager.remove(existing);
+            await this.dropEmpty(existing.changeRequestId, manager);
+          }
         }
-      }
-      const created = await manager.save(
-        ChangeRequestEntity,
-        manager.create(ChangeRequestEntity, {
-          id: randomUUID(),
-          entityType: input.entityType,
-          target: input.target,
-          entityId: input.entityId,
-          title: input.title ?? null,
-          proposerKind: input.proposer.kind,
-          proposerId: input.proposer.id ?? null,
-          proposerLabel: input.proposer.label,
-          source: input.source ?? null,
-          note: input.note ?? null,
-        }),
-      );
-      await manager.save(
-        ChangeRequestItemEntity,
-        changes.map((item, index) =>
-          manager.create(ChangeRequestItemEntity, {
+        const created = await manager.save(
+          ChangeRequestEntity,
+          manager.create(ChangeRequestEntity, {
             id: randomUUID(),
-            changeRequestId: created.id,
             entityType: input.entityType,
             target: input.target,
             entityId: input.entityId,
-            fieldKey: item.fieldKey,
-            variant: item.variant,
-            baseValue: base[index] ?? null,
-            baseHash: hash(base[index]),
-            proposedValue: item.proposedValue ?? null,
-            state: 'proposed',
-            publishError: null,
+            title: input.title ?? null,
+            proposerKind: input.proposer.kind,
+            proposerId: input.proposer.id ?? null,
+            proposerLabel: input.proposer.label,
+            source: input.source ?? null,
+            note: input.note ?? null,
           }),
-        ),
-      );
-      return created;
-    });
+        );
+        await manager.save(
+          ChangeRequestItemEntity,
+          changes.map((item, index) =>
+            manager.create(ChangeRequestItemEntity, {
+              id: randomUUID(),
+              changeRequestId: created.id,
+              entityType: input.entityType,
+              target: input.target,
+              entityId: input.entityId,
+              fieldKey: item.fieldKey,
+              variant: item.variant,
+              baseValue: base[index] ?? null,
+              baseHash: hash(base[index]),
+              proposedValue: item.proposedValue ?? null,
+              state: 'proposed',
+              publishError: null,
+            }),
+          ),
+        );
+        return created;
+      })
+      .catch((error: unknown) => {
+        if (isOpenFieldConflict(error)) {
+          throw this.events.errorConflict(
+            'change-request.open-field-conflict',
+            {
+              response: {
+                message: 'An open change already exists for this field',
+              },
+            },
+          );
+        }
+        throw error;
+      });
     await this.emit('created', request.id, changes.length);
     return this.load(request.id);
   }
@@ -141,7 +187,10 @@ export class ChangeRequestService {
       await qb
         .clone()
         .select('request.id', 'id')
+        .addSelect('request.createdAt', 'createdAt')
+        .distinct(true)
         .orderBy('request.createdAt', 'DESC')
+        .addOrderBy('request.id', 'DESC')
         .offset(filter.offset ?? 0)
         .limit(filter.limit ?? 50)
         .getRawMany<{ id: string }>()
@@ -262,7 +311,12 @@ export class ChangeRequestService {
           );
           await this.items.remove(item);
           results.push({ itemId, status: 'published' });
-        } catch {
+        } catch (cause) {
+          await this.events.logAsync('change-request.publish-cause', {
+            data: { requestId: id, itemId, cause },
+            logger: { level: 'error' },
+            event: false,
+          });
           item.state = 'publish_failed';
           item.publishError = 'Publication failed';
           await this.items.save(item);
