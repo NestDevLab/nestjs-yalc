@@ -4,6 +4,7 @@ import { SYSTEM_LOGGER_SERVICE } from '../def.const.js';
 import { UnwrapResultInterceptor } from '../unwrap-result.interceptor.js';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestFactory } from '@nestjs/core';
+import { fastify } from 'fastify';
 
 jest.mock('class-validator', () => ({
   useContainer: jest.fn(),
@@ -135,6 +136,23 @@ describe('AppBootstrap.applyBootstrapGlobals', () => {
     expect(
       bootstrap.getFastifyInstance()?.initialConfig.routerOptions,
     ).toBeDefined();
+    createSpy.mockRestore();
+  });
+
+  it('should keep a caller-provided fastify instance', async () => {
+    const createSpy = jest
+      .spyOn(NestFactory, 'create')
+      .mockResolvedValue({ ...fakeApp, close: jest.fn(), init: jest.fn() } as any);
+    const bootstrap = new AppBootstrap(
+      'app',
+      class Dummy {},
+      { skipMultiServerCheck: true } as any,
+    );
+    const instance = fastify({ routerOptions: {} });
+
+    await bootstrap.createApp({ fastifyInstance: instance });
+
+    expect(bootstrap.getFastifyInstance()).toBe(instance);
     createSpy.mockRestore();
   });
 });
