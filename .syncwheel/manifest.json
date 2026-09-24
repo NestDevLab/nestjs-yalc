@@ -31,27 +31,6 @@
       "meta": {}
     },
     {
-      "id": "embedded-omnikernel-build",
-      "branch": "fix/embedded-omnikernel-build",
-      "base": "origin/dev",
-      "target_remote": "origin",
-      "target_branch": "dev",
-      "integration_branch": "dev-integration",
-      "commits": [
-        "83156a690ee757a57158b9306aa0e2bfc25df7d5",
-        "854971be9bad4f4ce2414f4b45060e4ea1585852",
-        "3520c7e7b0202ada10d3b56e9ea871c3226c86b0",
-        "4c8e7927d28bfaef839bf67c59dd03d2d5db84fc"
-      ],
-      "state": "published",
-      "publication": {
-        "enabled": true
-      },
-      "meta": {
-        "purpose": "Build omnikernel example via --prefix so yalc builds when embedded as a consumer workspace"
-      }
-    },
-    {
       "id": "change-requests",
       "branch": "pr/change-requests",
       "base": "origin/dev",
