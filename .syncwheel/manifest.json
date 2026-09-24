@@ -1,57 +1,52 @@
 {
-  "version": 1,
+  "channels": [],
+  "coordination": {
+    "claims": "advisory",
+    "gc": {
+      "backup_keep": 2,
+      "backup_retention_days": 30,
+      "worktree_grace_days": 7
+    },
+    "id": "mgt0458-health",
+    "mode": "active-active",
+    "remote": "origin",
+    "state_branch": "syncwheel/state/mgt0458-health"
+  },
   "defaults": {
+    "base_branch": "maintenance/nest9-typescript59-audit",
+    "base_ref": "origin/maintenance/nest9-typescript59-audit",
     "canonical_remote": "origin",
-    "publication_remote": "origin",
-    "base_branch": "dev",
-    "base_ref": "origin/dev",
-    "integration_membership": "legacy"
+    "integration_membership": "required",
+    "publication_remote": "origin"
   },
   "integration": {
+    "base": "origin/maintenance/nest9-typescript59-audit",
     "branch": "dev-integration",
-    "base": "origin/dev",
-    "strategy": "cherry-pick",
-    "stacks": []
+    "stacks": [
+      "mgt0458-health-core"
+    ],
+    "strategy": "cherry-pick"
   },
+  "repository_mode": "delivery",
   "stacks": [
     {
-      "id": "release-root-version",
-      "branch": "pr/release-root-version",
-      "base": "origin/dev",
-      "target_remote": "origin",
-      "target_branch": "dev",
+      "base": "origin/maintenance/nest9-typescript59-audit",
+      "branch": "syncwheel/draft/mgt0458-health-core",
+      "commits": [],
+      "id": "mgt0458-health-core",
       "integration_branch": "dev-integration",
-      "commits": [
-        "b581d2843d09f5470c4e744a58254d5a5c4cd5ce"
-      ],
-      "state": "published",
-      "publication": {
-        "enabled": true
-      },
-      "meta": {}
-    },
-    {
-      "id": "change-requests",
-      "branch": "pr/change-requests",
-      "base": "origin/dev",
-      "target_remote": "origin",
-      "target_branch": "dev",
-      "integration_branch": "dev-integration",
-      "commits": [
-        "92d614ebfac4bbf86e018f40673b74480bf47614",
-        "cd8cd88796b57103c757b82f66175e8a73336ad5"
-      ],
-      "state": "published",
-      "publication": {
-        "enabled": true
-      },
       "meta": {
-        "purpose": "@nestjs-yalc/change-requests: generic change proposals with approval (first consumer tirrenia-platform drafts)"
-      }
+        "purpose": "Generic health monitoring core"
+      },
+      "publication": {
+        "enabled": false
+      },
+      "state": "draft",
+      "target_branch": "maintenance/nest9-typescript59-audit",
+      "target_remote": "origin"
     }
   ],
-  "syncwheel_worktree_root": "var/syncwheel",
   "syncwheel_tracking": "git-tracked",
-  "repository_mode": "delivery",
-  "channels": []
+  "syncwheel_worktree_root": "var/syncwheel",
+  "version": 2
 }
