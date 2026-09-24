@@ -50,6 +50,22 @@
       "meta": {
         "purpose": "Build omnikernel example via --prefix so yalc builds when embedded as a consumer workspace"
       }
+    },
+    {
+      "id": "change-requests",
+      "branch": "pr/change-requests",
+      "base": "origin/dev",
+      "target_remote": "origin",
+      "target_branch": "dev",
+      "integration_branch": "dev-integration",
+      "commits": [],
+      "state": "published",
+      "publication": {
+        "enabled": true
+      },
+      "meta": {
+        "purpose": "@nestjs-yalc/change-requests: generic change proposals with approval (first consumer tirrenia-platform drafts)"
+      }
     }
   ],
   "syncwheel_worktree_root": "var/syncwheel",
