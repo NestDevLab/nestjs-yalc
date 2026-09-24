@@ -3,6 +3,7 @@ import { AppBootstrap } from '../app-bootstrap.helper.js';
 import { SYSTEM_LOGGER_SERVICE } from '../def.const.js';
 import { UnwrapResultInterceptor } from '../unwrap-result.interceptor.js';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { NestFactory } from '@nestjs/core';
 
 jest.mock('class-validator', () => ({
   useContainer: jest.fn(),
@@ -116,5 +117,24 @@ describe('AppBootstrap.applyBootstrapGlobals', () => {
       expect.anything(),
       { autoTagControllers: false },
     );
+  });
+
+  it('should create a default fastify instance that exposes router options', async () => {
+    const createSpy = jest
+      .spyOn(NestFactory, 'create')
+      .mockResolvedValue({ ...fakeApp, close: jest.fn(), init: jest.fn() } as any);
+    const bootstrap = new AppBootstrap(
+      'app',
+      class Dummy {},
+      { skipMultiServerCheck: true } as any,
+    );
+
+    await bootstrap.createApp();
+
+    expect(createSpy).toHaveBeenCalled();
+    expect(
+      bootstrap.getFastifyInstance()?.initialConfig.routerOptions,
+    ).toBeDefined();
+    createSpy.mockRestore();
   });
 });

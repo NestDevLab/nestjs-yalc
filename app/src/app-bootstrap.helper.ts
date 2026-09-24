@@ -18,7 +18,7 @@ import {
   DocumentBuilder,
   type SwaggerDocumentOptions,
 } from '@nestjs/swagger';
-import { fastify, FastifyInstance } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { envIsTrue } from '@nestjs-yalc/utils/env.helper.js';
 import { useContainer } from 'class-validator';
 import clc from 'cli-color';
@@ -122,13 +122,18 @@ export class AppBootstrap<
     createOptions?: INestCreateOptions;
     fastifyInstance?: FastifyInstance;
   }) {
-    this.fastifyInstance = options?.fastifyInstance ?? fastify();
+    // let the adapter build the default instance: Nest 11 reads
+    // initialConfig.routerOptions, which a bare fastify() doesn't expose
+    const adapter = options?.fastifyInstance
+      ? new FastifyAdapter(options.fastifyInstance as any)
+      : new FastifyAdapter();
+    this.fastifyInstance = adapter.getInstance() as unknown as FastifyInstance;
 
     let app;
     try {
       app = await NestFactory.create<NestFastifyApplication>(
         this.module,
-        new FastifyAdapter(this.fastifyInstance as any),
+        adapter,
         {
           bufferLogs: false,
           abortOnError: options?.createOptions?.abortOnError ?? false,
