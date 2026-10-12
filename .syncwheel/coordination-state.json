@@ -1,16 +1,18 @@
 {
   "changed_refs": {
-    "refs/heads/syncwheel/draft/mgt0458-health-core": "942a8581305cafcb1bd60e3a8aa5399714b66a76"
+    "refs/heads/pr/mgt0458-health-core": "942a8581305cafcb1bd60e3a8aa5399714b66a76"
   },
   "claims": {
     "refs/heads/dev-integration": "b091e82c8763aa6c95e92904630835b09a416905",
-    "refs/heads/syncwheel/draft/mgt0458-health-core": "c802867d659c23f863724e9787d4a82ea57fdb42"
+    "refs/heads/pr/mgt0458-health-core": "dda7a4f868287e6e5dea867b424415ba53e13990",
+    "refs/heads/syncwheel/draft/mgt0458-health-core": "ddd6e06de452a500ba00312867d8553bba5cad16"
   },
   "coordination_id": "mgt0458-health",
-  "created_at": "2026-10-12T21:52:59+00:00",
+  "created_at": "2026-10-12T21:53:29+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
     "refs/heads/dev-integration": "6bc653dd588a621efeaf4905420740df77a96a1a",
+    "refs/heads/pr/mgt0458-health-core": "942a8581305cafcb1bd60e3a8aa5399714b66a76",
     "refs/heads/syncwheel/draft/mgt0458-health-core": "942a8581305cafcb1bd60e3a8aa5399714b66a76"
   },
   "manifest": {
@@ -51,25 +53,33 @@
           "ref": "refs/heads/maintenance/nest9-typescript59-audit",
           "role": "canonical"
         },
-        "branch": "syncwheel/draft/mgt0458-health-core",
+        "branch": "pr/mgt0458-health-core",
         "commits": [
           "942a8581305cafcb1bd60e3a8aa5399714b66a76"
         ],
         "id": "mgt0458-health-core",
         "integration_branch": "dev-integration",
-        "state": "draft",
         "target_branch": "maintenance/nest9-typescript59-audit"
       }
     ],
     "version": 2
   },
   "manifest_digest": "a9ae02620f40887bb3c666f84ea35125f82a893b56467018da3365e228c5c590",
-  "operation_token": "df6182c1-fd54-41e3-9f0b-6ac9c1a5e015",
-  "parent_state": "7316e11ef85ce59ef8612475e87cbf041c8589c3",
+  "operation_token": "d6cccb94-c2fc-4a8d-addb-d9dfda1efdbe",
+  "parent_state": "7214f70da5a7727ab21d12e347cc51e598f310d6",
   "projection_status": "partial",
-  "publication_id": "b3b8fdab-ea15-4487-9743-75d917e1267e",
-  "publication_scope": "stack:mgt0458-health-core",
+  "publication_id": "095f3218-d349-4cee-8465-7e3ddc56e228",
+  "publication_scope": "promote:mgt0458-health-core",
   "schema_version": 2,
   "syncwheel_version": "0.45.5",
-  "tombstones": []
+  "tombstones": [
+    {
+      "branch": "syncwheel/draft/mgt0458-health-core",
+      "closed_at": "2026-10-12T21:53:17+00:00",
+      "reason": "promoted",
+      "ref": "refs/heads/syncwheel/draft/mgt0458-health-core",
+      "remote_tip": "942a8581305cafcb1bd60e3a8aa5399714b66a76",
+      "stack": "mgt0458-health-core"
+    }
+  ]
 }
