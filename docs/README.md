@@ -24,6 +24,7 @@ Nest-yalc stands for Nestjs - Yet Another Library Collection
 - [Task-system app composition guide](./task-system-app-composition.md)
 - [API Strategy + EventManager integration patterns](./api-strategy-event-manager-patterns.md)
 - [Observability and OpenTelemetry integration](./observability.md)
+- [Health monitoring primitives](../health/README.md)
 
 - [Examples overview](../examples/README.md) — the architectural map for the skeleton, OmniKernel, and task examples.
 - [Skeleton App](../examples/skeleton/app/README.md) — the minimal all-in-one `CrudGenResourceFactory` path with a small module API-client example.

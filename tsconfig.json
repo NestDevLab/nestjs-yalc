@@ -100,6 +100,8 @@
       "@nestjs-yalc/graphql/*": [
         "./graphql/src/*"
       ],
+      "@nestjs-yalc/health": ["./health/src/index.ts"],
+      "@nestjs-yalc/health/*": ["./health/src/*"],
       "@nestjs-yalc/interfaces": [
         "./interfaces/src/index.ts"
       ],
