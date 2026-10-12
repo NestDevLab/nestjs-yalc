@@ -1,18 +1,18 @@
 {
   "changed_refs": {
-    "refs/heads/pr/mgt0458-health-dev": "d238c48458ac3ffb325812358f1ac373c588aceb"
+    "refs/heads/pr/mgt0458-health-dev": "163d01b252092755627e179c05e0a5b1dd250180"
   },
   "claims": {
     "refs/heads/integration/mgt0458-health-forward": "8300923746989c722bad36586809fc85159dc9ba",
-    "refs/heads/pr/mgt0458-health-dev": "dc60afe1b6315d529f02fe43ab77556650c522a9",
+    "refs/heads/pr/mgt0458-health-dev": "a18bd7715bcee648394f6b51ecc2d906f25fae3c",
     "refs/heads/syncwheel/draft/mgt0458-health-forward": "9102f3f3987d4d7e4afed48975d2ae5b4d66b6a8"
   },
   "coordination_id": "mgt0458-health-forward",
-  "created_at": "2026-10-12T22:29:10+00:00",
+  "created_at": "2026-10-12T22:47:38+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
     "refs/heads/integration/mgt0458-health-forward": "57e7e6b6660444557b95c835ea528030d0c5da8b",
-    "refs/heads/pr/mgt0458-health-dev": "d238c48458ac3ffb325812358f1ac373c588aceb",
+    "refs/heads/pr/mgt0458-health-dev": "163d01b252092755627e179c05e0a5b1dd250180",
     "refs/heads/syncwheel/draft/mgt0458-health-forward": "9b8b489eabda096c3c970ec1546ade5cffec9e48"
   },
   "manifest": {
@@ -57,7 +57,8 @@
         "commits": [
           "9b8b489eabda096c3c970ec1546ade5cffec9e48",
           "e8f50cfa8653467f42f37d3bd21cb8ba05386ae0",
-          "d238c48458ac3ffb325812358f1ac373c588aceb"
+          "d238c48458ac3ffb325812358f1ac373c588aceb",
+          "163d01b252092755627e179c05e0a5b1dd250180"
         ],
         "id": "mgt0458-health-forward",
         "integration_branch": "integration/mgt0458-health-forward",
@@ -67,10 +68,10 @@
     "version": 2
   },
   "manifest_digest": "9d3835ca562dedae505d334df3acafbc4712aa9c3beb0bf550718189921e7097",
-  "operation_token": "becf6eff-268c-4090-971a-b926260e8118",
-  "parent_state": "2e744a75052f270547b50ebec9d3cbac9ba71264",
+  "operation_token": "7778c1fa-e460-4a52-9224-a7e0898ac83c",
+  "parent_state": "c5a95d41b5a83a42ead20dc1f6c461ea3048a914",
   "projection_status": "partial",
-  "publication_id": "a7b941fd-aa53-4ed8-9fb7-1d1657f5b5a1",
+  "publication_id": "9c804a1d-f931-42dd-a0ef-bdbd86d5e5d4",
   "publication_scope": "stack:mgt0458-health-forward",
   "schema_version": 2,
   "syncwheel_version": "0.45.5",
