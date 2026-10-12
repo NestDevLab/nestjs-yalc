@@ -1,0 +1,12 @@
+{
+  "changed_refs": [
+    "refs/heads/dev-integration",
+    "refs/heads/syncwheel/draft/mgt0458-health-core"
+  ],
+  "claimed_at": "2026-10-12T21:40:08+00:00",
+  "coordination_id": "mgt0458-health",
+  "operation_token": "3eb3ee58-cf1a-4352-b880-fee7009f01b7",
+  "publication_scope": "create:mgt0458-health-core",
+  "source_ref": "refs/heads/syncwheel/draft/mgt0458-health-core",
+  "syncwheel_version": "0.45.5"
+}
