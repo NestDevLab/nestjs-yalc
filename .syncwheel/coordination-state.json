@@ -1,0 +1,76 @@
+{
+  "changed_refs": {
+    "refs/heads/integration/mgt0458-health-forward": "57e7e6b6660444557b95c835ea528030d0c5da8b",
+    "refs/heads/syncwheel/draft/mgt0458-health-forward": "9b8b489eabda096c3c970ec1546ade5cffec9e48"
+  },
+  "claims": {
+    "refs/heads/integration/mgt0458-health-forward": "8300923746989c722bad36586809fc85159dc9ba",
+    "refs/heads/syncwheel/draft/mgt0458-health-forward": "a1a81f9b37a3b1fccec9067b4254012800fb5c0b"
+  },
+  "coordination_id": "mgt0458-health-forward",
+  "created_at": "2026-10-12T22:04:14+00:00",
+  "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
+  "managed_refs": {
+    "refs/heads/integration/mgt0458-health-forward": "57e7e6b6660444557b95c835ea528030d0c5da8b",
+    "refs/heads/syncwheel/draft/mgt0458-health-forward": "9b8b489eabda096c3c970ec1546ade5cffec9e48"
+  },
+  "manifest": {
+    "coordination": {
+      "gc": {
+        "backup_keep": 2,
+        "backup_retention_days": 30,
+        "worktree_grace_days": 7
+      },
+      "id": "mgt0458-health-forward",
+      "mode": "active-active",
+      "state_branch": "syncwheel/state/mgt0458-health-forward"
+    },
+    "defaults": {
+      "base_branch": "dev",
+      "base_ref": {
+        "kind": "remote-ref",
+        "ref": "refs/heads/dev",
+        "role": "canonical"
+      }
+    },
+    "integration": {
+      "base": {
+        "kind": "remote-ref",
+        "ref": "refs/heads/dev",
+        "role": "canonical"
+      },
+      "branch": "integration/mgt0458-health-forward",
+      "stacks": [
+        "mgt0458-health-forward"
+      ],
+      "strategy": "cherry-pick"
+    },
+    "stacks": [
+      {
+        "base": {
+          "kind": "remote-ref",
+          "ref": "refs/heads/dev",
+          "role": "canonical"
+        },
+        "branch": "syncwheel/draft/mgt0458-health-forward",
+        "commits": [
+          "9b8b489eabda096c3c970ec1546ade5cffec9e48"
+        ],
+        "id": "mgt0458-health-forward",
+        "integration_branch": "integration/mgt0458-health-forward",
+        "state": "draft",
+        "target_branch": "dev"
+      }
+    ],
+    "version": 2
+  },
+  "manifest_digest": "9d3835ca562dedae505d334df3acafbc4712aa9c3beb0bf550718189921e7097",
+  "operation_token": "4443834c-24d2-4a70-877b-f7f6184616fc",
+  "parent_state": null,
+  "projection_status": "partial",
+  "publication_id": "73792719-d57a-41b2-96d2-e02a506ef475",
+  "publication_scope": "create:mgt0458-health-forward",
+  "schema_version": 2,
+  "syncwheel_version": "0.45.5",
+  "tombstones": []
+}
