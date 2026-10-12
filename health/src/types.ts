@@ -29,6 +29,7 @@ export interface CheckDefinition {
   dependsOn?: string[];
   enabled?: boolean;
   disabledReason?: string;
+  credentialRef?: string;
 }
 
 export interface ProbeResult {
@@ -71,6 +72,16 @@ export interface TransitionInput {
 export interface TransitionOutput {
   state: CheckState;
   event: IncidentEvent;
+  recoveredIncidentId?: string;
+}
+
+export interface ProbeCredential {
+  header: string;
+  value: string;
+}
+
+export interface CredentialResolver {
+  resolve(reference: string): Promise<ProbeCredential>;
 }
 
 export interface Probe {
@@ -85,5 +96,8 @@ export interface Notification {
 }
 
 export interface Notifier {
-  enqueue(notification: Notification): Promise<void>;
+  enqueue(
+    notification: Notification,
+    manager?: import('typeorm').EntityManager,
+  ): Promise<void>;
 }

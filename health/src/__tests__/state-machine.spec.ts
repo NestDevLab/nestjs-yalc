@@ -31,6 +31,7 @@ describe("health state machine", () => {
     expect(output.state.status).toBe("fail");
     output = transitionCheck({ state: output.state, result: ok, now: 4 });
     expect(output.event).toBe("recover");
+    expect(output.recoveredIncidentId).toBe("i1");
     expect(output.state.status).toBe("ok");
     expect(output.state.openIncidentId).toBeUndefined();
   });
@@ -108,5 +109,27 @@ describe("health state machine", () => {
       failThreshold: 1,
     });
     expect(output.state.openIncidentId).toBe("42");
+  });
+
+  it("reports a flapping recovery and retains the resolved incident id", () => {
+    let state = initialCheckState(0);
+    for (const [index, result] of [fail, ok, fail].entries()) {
+      state = transitionCheck({
+        state,
+        result,
+        now: index + 1,
+        failThreshold: 1,
+        recoverThreshold: 1,
+      }).state;
+    }
+    const output = transitionCheck({
+      state,
+      result: ok,
+      now: 4,
+      recoverThreshold: 1,
+    });
+    expect(output.event).toBe("flapping");
+    expect(output.recoveredIncidentId).toBe("3");
+    expect(output.state.openIncidentId).toBeUndefined();
   });
 });
