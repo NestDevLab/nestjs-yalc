@@ -2,10 +2,10 @@
   "changed_refs": [
     "refs/heads/pr/mgt0458-health-dev"
   ],
-  "claimed_at": "2026-10-12T22:04:42+00:00",
+  "claimed_at": "2026-10-12T22:29:10+00:00",
   "coordination_id": "mgt0458-health-forward",
-  "operation_token": "a1527267-8493-4670-869c-0d67a4b6963c",
-  "publication_scope": "promote:mgt0458-health-forward",
+  "operation_token": "becf6eff-268c-4090-971a-b926260e8118",
+  "publication_scope": "stack:mgt0458-health-forward",
   "source_ref": "refs/heads/pr/mgt0458-health-dev",
   "syncwheel_version": "0.45.5"
 }
