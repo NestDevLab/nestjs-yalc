@@ -1,0 +1,12 @@
+{
+  "changed_refs": [
+    "refs/heads/integration/mgt0458-health-forward",
+    "refs/heads/syncwheel/draft/mgt0458-health-forward"
+  ],
+  "claimed_at": "2026-10-12T22:04:14+00:00",
+  "coordination_id": "mgt0458-health-forward",
+  "operation_token": "4443834c-24d2-4a70-877b-f7f6184616fc",
+  "publication_scope": "create:mgt0458-health-forward",
+  "source_ref": "refs/heads/integration/mgt0458-health-forward",
+  "syncwheel_version": "0.45.5"
+}
