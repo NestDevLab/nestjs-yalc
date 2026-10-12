@@ -415,7 +415,11 @@ describe("read-only HTTP and MCP probes", () => {
     expect((await runGenericProbe(mcp, resolver)).status).toBe("ok");
     expect(seen.every((value) => value === `Bearer ${token}`)).toBe(true);
     expect(JSON.stringify(http) + JSON.stringify(mcp)).not.toContain(token);
-    expect((await runGenericProbe(http)).status).toBe("unknown");
+    expect(await runGenericProbe(http)).toMatchObject({
+      status: "fail",
+      errorClass: "auth",
+      summary: "Credential reference unavailable",
+    });
     const source = new DataSource({
       type: "sqlite",
       database: ":memory:",
@@ -473,6 +477,16 @@ describe("read-only HTTP and MCP probes", () => {
         })
       )
     ).rejects.toThrow();
+    await expect(
+      repo.save(
+        repo.create({
+          ...http,
+          key: "bad-array",
+          target: { url, extra: [[{ authorization: token }]] },
+        })
+      )
+    ).rejects.toThrow();
+    expect(await repo.count()).toBe(1);
     await expect(
       repo.save(
         repo.create({

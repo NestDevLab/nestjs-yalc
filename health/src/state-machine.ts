@@ -82,6 +82,7 @@ export function transitionCheck(input: TransitionInput): TransitionOutput {
     now - state.stableSince >= STABLE
   ) {
     state.flapping = false;
+    state.transitions = [];
   } else if (state.flapping) {
     event = null;
   }

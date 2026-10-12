@@ -22,6 +22,14 @@ export function validateCredentialRef(
 }
 
 export function validateProbeTarget(target: Target): Target {
+  function validateNested(value: unknown): void {
+    if (Array.isArray(value)) {
+      value.forEach(validateNested);
+    } else if (value && typeof value === 'object') {
+      validateProbeTarget(value as Target);
+    }
+  }
+
   for (const [key, value] of Object.entries(target)) {
     if (
       /^(authorization|x-api-key|api-key|token|access_token|secret)$/i.test(key)
@@ -42,9 +50,7 @@ export function validateProbeTarget(target: Target): Target {
         throw new Error('Credential query parameters are forbidden');
       }
     }
-    if (value && typeof value === 'object' && !Array.isArray(value)) {
-      validateProbeTarget(value as Target);
-    }
+    validateNested(value);
   }
   return target;
 }
@@ -476,8 +482,9 @@ export async function runGenericProbe(
         : undefined;
       if (reference && !credential) {
         return {
-          status: 'unknown',
+          status: 'fail',
           summary: 'Credential reference unavailable',
+          errorClass: 'auth',
         };
       }
       switch (definition.kind) {
