@@ -84,6 +84,14 @@ describe("health state machine", () => {
       now: 30 * 60 * 1000 + 6,
     });
     expect(stable.state.flapping).toBe(false);
+    expect(stable.state.transitions).toEqual([]);
+    const next = transitionCheck({
+      state: stable.state,
+      result: ok,
+      now: 30 * 60 * 1000 + 7,
+    });
+    expect(next.state.flapping).toBe(false);
+    expect(next.event).toBeNull();
   });
 
   it("keeps disabled and unknown explicit", () => {
