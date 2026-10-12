@@ -22,6 +22,7 @@ export function transitionCheck(input: TransitionInput): TransitionOutput {
   };
   const previous = state.status;
   let event: TransitionOutput['event'] = null;
+  let recoveredIncidentId: string | undefined;
 
   if (result.status === 'disabled') {
     state.status = 'disabled';
@@ -44,6 +45,7 @@ export function transitionCheck(input: TransitionInput): TransitionOutput {
       state.consecutiveOk >= (input.recoverThreshold ?? 2)
     ) {
       state.status = 'ok';
+      recoveredIncidentId = state.openIncidentId;
       state.openIncidentId = undefined;
       event = 'recover';
     } else if (!state.openIncidentId) {
@@ -83,5 +85,5 @@ export function transitionCheck(input: TransitionInput): TransitionOutput {
   } else if (state.flapping) {
     event = null;
   }
-  return { state, event };
+  return { state, event, recoveredIncidentId };
 }

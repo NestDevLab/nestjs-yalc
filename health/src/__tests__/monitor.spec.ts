@@ -95,15 +95,13 @@ describe("persistent health monitor", () => {
 
   it("suppresses an active silence and prunes expired rows", async () => {
     const now = Date.now();
-    await source
-      .getRepository(SilenceEntity)
-      .save({
-        matcher: "service.*",
-        startsAt: new Date(now - 1000),
-        endsAt: new Date(now + 100000),
-        reason: "maintenance",
-        createdBy: "operator",
-      });
+    await source.getRepository(SilenceEntity).save({
+      matcher: "service.*",
+      startsAt: new Date(now - 1000),
+      endsAt: new Date(now + 100000),
+      reason: "maintenance",
+      createdBy: "operator",
+    });
     expect(
       await monitor.isSilenced(definition.key, definition.group, now)
     ).toBe(true);
@@ -127,5 +125,71 @@ describe("persistent health monitor", () => {
 
   it("uses the current time when pruning without an argument", async () => {
     await monitor.prune();
+  });
+
+  it("resolves the incident on a flapping recovery and clears flapping after a database reload", async () => {
+    const rapid = { ...definition, failThreshold: 1, recoverThreshold: 1 };
+    const base = 1_700_000_000_000;
+    for (const [index, status] of ["fail", "ok", "fail", "ok"].entries()) {
+      await monitor.record(
+        rapid,
+        { status: status as "fail" | "ok", summary: status },
+        new Date(base + index),
+        0
+      );
+    }
+    expect(await monitor.openIncidents()).toHaveLength(0);
+    const persisted = await source
+      .getRepository(CheckStateEntity)
+      .findOneByOrFail({ checkKey: rapid.key });
+    expect(persisted.flapping).toBe(true);
+    expect(persisted.stableSince).toBe(base + 3);
+    const reloaded = new HealthMonitorService(
+      source.getRepository(CheckStateEntity),
+      source.getRepository(CheckResultEntity),
+      source.getRepository(IncidentEntity),
+      source.getRepository(SilenceEntity),
+      notifier
+    );
+    const stable = await reloaded.record(
+      rapid,
+      { status: "ok", summary: "stable" },
+      new Date(base + 30 * 60 * 1000 + 4),
+      0
+    );
+    expect(stable.flapping).toBe(false);
+    expect(
+      (
+        await source
+          .getRepository(CheckStateEntity)
+          .findOneByOrFail({ checkKey: rapid.key })
+      ).flapping
+    ).toBe(false);
+  });
+
+  it("rolls back state, incident, result, and outbox when enqueue fails", async () => {
+    const broken = new HealthMonitorService(
+      source.getRepository(CheckStateEntity),
+      source.getRepository(CheckResultEntity),
+      source.getRepository(IncidentEntity),
+      source.getRepository(SilenceEntity),
+      {
+        enqueue: async () => {
+          throw new Error("injected outbox failure");
+        },
+      }
+    );
+    await expect(
+      broken.record(
+        { ...definition, failThreshold: 1 },
+        { status: "fail", summary: "down" },
+        new Date(),
+        0
+      )
+    ).rejects.toThrow("injected outbox failure");
+    expect(await source.getRepository(CheckStateEntity).count()).toBe(0);
+    expect(await source.getRepository(CheckResultEntity).count()).toBe(0);
+    expect(await source.getRepository(IncidentEntity).count()).toBe(0);
+    expect(await source.getRepository(AlertOutboxEntity).count()).toBe(0);
   });
 });

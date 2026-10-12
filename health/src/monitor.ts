@@ -1,4 +1,4 @@
-import { IsNull, LessThan, MoreThan, Repository } from 'typeorm';
+import { EntityManager, IsNull, LessThan, MoreThan, Repository } from 'typeorm';
 import {
   AlertOutboxEntity,
   CheckResultEntity,
@@ -19,13 +19,17 @@ import type {
 export class OutboxNotifier implements Notifier {
   constructor(private readonly outbox: Repository<AlertOutboxEntity>) {}
 
-  async enqueue(notification: Notification): Promise<void> {
-    const existing = await this.outbox.findOneBy({
+  async enqueue(
+    notification: Notification,
+    manager?: EntityManager,
+  ): Promise<void> {
+    const outbox = manager?.getRepository(AlertOutboxEntity) ?? this.outbox;
+    const existing = await outbox.findOneBy({
       dedupKey: notification.dedupKey,
     });
     if (existing) return;
-    await this.outbox.save(
-      this.outbox.create({
+    await outbox.save(
+      outbox.create({
         ...notification,
         text: redactHealthText(notification.text),
         createdAt: new Date(),
@@ -56,93 +60,110 @@ export class HealthMonitorService {
     graceUntil?: number,
   ): Promise<CheckState> {
     const now = startedAt.getTime() + durationMs;
-    const previous = await this.states.findOneBy({ checkKey: definition.key });
-    const state: CheckState = previous
-      ? {
-          status: previous.status as CheckState['status'],
-          since: previous.since,
-          consecutiveFail: previous.consecutiveFail,
-          consecutiveOk: previous.consecutiveOk,
-          lastOkAt: previous.lastOkAt ?? undefined,
-          transitions: previous.transitions,
-          flapping: previous.flapping,
-          openIncidentId: previous.openIncidentId ?? undefined,
-        }
-      : initialCheckState(now);
-    const incidentId = `${definition.key}:${now}`;
-    const change = transitionCheck({
-      state,
-      result,
-      now,
-      failThreshold: definition.failThreshold,
-      recoverThreshold: definition.recoverThreshold,
-      parentFailing,
-      graceUntil,
-      incidentId,
-    });
-    await this.results.save(
-      this.results.create({
-        checkKey: definition.key,
-        startedAt,
-        durationMs,
-        status: result.status,
-        summary: redactHealthText(result.summary),
-        metrics: result.metrics ?? null,
-        errorClass: result.errorClass ?? null,
-      }),
-    );
-    await this.states.save(
-      this.states.create({
-        checkKey: definition.key,
-        ...change.state,
-        lastOkAt: change.state.lastOkAt ?? null,
-        openIncidentId: change.state.openIncidentId ?? null,
-      }),
-    );
-    if (change.event === 'open') {
-      await this.incidents.save(
-        this.incidents.create({
-          id: incidentId,
+    return this.states.manager.transaction(async (manager) => {
+      const states = manager.getRepository(CheckStateEntity);
+      const results = manager.getRepository(CheckResultEntity);
+      const incidents = manager.getRepository(IncidentEntity);
+      const previous = await states.findOneBy({ checkKey: definition.key });
+      const state: CheckState = previous
+        ? {
+            status: previous.status as CheckState['status'],
+            since: previous.since,
+            consecutiveFail: previous.consecutiveFail,
+            consecutiveOk: previous.consecutiveOk,
+            lastOkAt: previous.lastOkAt ?? undefined,
+            transitions: previous.transitions,
+            flapping: previous.flapping,
+            stableSince: previous.stableSince ?? undefined,
+            openIncidentId: previous.openIncidentId ?? undefined,
+          }
+        : initialCheckState(now);
+      const incidentId = `${definition.key}:${now}`;
+      const change = transitionCheck({
+        state,
+        result,
+        now,
+        failThreshold: definition.failThreshold,
+        recoverThreshold: definition.recoverThreshold,
+        parentFailing,
+        graceUntil,
+        incidentId,
+      });
+      await results.save(
+        results.create({
           checkKey: definition.key,
-          rootKey: definition.key,
-          severity: definition.severity,
-          openedAt: new Date(now),
-          resolvedAt: null,
-          firstSummary: redactHealthText(result.summary),
-          lastSummary: redactHealthText(result.summary),
-          notifyCount: 0,
-          lastNotifiedAt: null,
-          ackBy: null,
-          ackAt: null,
-          ackNote: null,
+          startedAt,
+          durationMs,
+          status: result.status,
+          summary: redactHealthText(result.summary),
+          metrics: result.metrics ?? null,
+          errorClass: result.errorClass ?? null,
         }),
       );
-    }
-    if (change.event === 'recover' && state.openIncidentId) {
-      await this.incidents.update(state.openIncidentId, {
-        resolvedAt: new Date(now),
-        lastSummary: redactHealthText(result.summary),
-      });
-    }
-    if (
-      change.event &&
-      definition.severity === 'critical' &&
-      !(await this.isSilenced(definition.key, definition.group, now))
-    ) {
-      await this.notifier.enqueue({
-        dedupKey: `incident:${
-          state.openIncidentId ?? change.state.openIncidentId
-        }:${change.event}:0`,
-        kind: change.event,
-        target: 'default',
-        text: `${definition.title}: ${redactHealthText(result.summary)}`,
-      });
-    }
-    return change.state;
+      await states.save(
+        states.create({
+          checkKey: definition.key,
+          ...change.state,
+          lastOkAt: change.state.lastOkAt ?? null,
+          stableSince: change.state.stableSince ?? null,
+          openIncidentId: change.state.openIncidentId ?? null,
+        }),
+      );
+      if (change.event === 'open') {
+        await incidents.save(
+          incidents.create({
+            id: incidentId,
+            checkKey: definition.key,
+            rootKey: definition.key,
+            severity: definition.severity,
+            openedAt: new Date(now),
+            resolvedAt: null,
+            firstSummary: redactHealthText(result.summary),
+            lastSummary: redactHealthText(result.summary),
+            notifyCount: 0,
+            lastNotifiedAt: null,
+            ackBy: null,
+            ackAt: null,
+            ackNote: null,
+          }),
+        );
+      }
+      if (change.recoveredIncidentId) {
+        await incidents.update(change.recoveredIncidentId, {
+          resolvedAt: new Date(now),
+          lastSummary: redactHealthText(result.summary),
+        });
+      }
+      if (
+        change.event &&
+        definition.severity === 'critical' &&
+        !(await this.isSilenced(definition.key, definition.group, now, manager))
+      ) {
+        await this.notifier.enqueue(
+          {
+            dedupKey: `incident:${
+              state.openIncidentId ?? change.state.openIncidentId
+            }:${change.event}:0`,
+            kind: change.event,
+            target: 'default',
+            text: `${definition.title}: ${redactHealthText(result.summary)}`,
+          },
+          manager,
+        );
+      }
+      return change.state;
+    });
   }
 
-  async isSilenced(key: string, group: string, now: number): Promise<boolean> {
-    const active = await this.silences.find({
+  async isSilenced(
+    key: string,
+    group: string,
+    now: number,
+    manager?: EntityManager,
+  ): Promise<boolean> {
+    const active = await (
+      manager?.getRepository(SilenceEntity) ?? this.silences
+    ).find({
       where: {
         startsAt: LessThan(new Date(now)),
         endsAt: MoreThan(new Date(now)),

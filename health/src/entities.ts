@@ -6,6 +6,7 @@ import {
   PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { validateCredentialRef, validateProbeTarget } from './probes.js';
 
 @Entity('check_definitions')
 export class CheckDefinitionEntity {
@@ -13,7 +14,21 @@ export class CheckDefinitionEntity {
   @Column('text') group!: string;
   @Column('text') title!: string;
   @Column('text') kind!: string;
-  @Column('simple-json') target!: Record<string, unknown>;
+  @Column('simple-json', {
+    transformer: {
+      to: (target: Record<string, unknown>) => validateProbeTarget(target),
+      from: (target: Record<string, unknown>) => target,
+    },
+  })
+  target!: Record<string, unknown>;
+  @Column('text', {
+    nullable: true,
+    transformer: {
+      to: (reference: string | null) => validateCredentialRef(reference),
+      from: (reference: string | null) => reference,
+    },
+  })
+  credentialRef!: string | null;
   @Column('integer') intervalSeconds!: number;
   @Column('integer') timeoutMs!: number;
   @Column('text') severity!: string;
@@ -49,6 +64,7 @@ export class CheckStateEntity {
   @Column('integer', { nullable: true }) lastOkAt!: number | null;
   @Column('simple-json') transitions!: number[];
   @Column('boolean') flapping!: boolean;
+  @Column('integer', { nullable: true }) stableSince!: number | null;
   @Column('text', { nullable: true }) openIncidentId!: string | null;
 }
 
