@@ -66,6 +66,12 @@
     "description": ""
   },
   {
+    "name": "@nestjs-yalc/health",
+    "shortName": "health",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/health",
+    "description": "Read-only health probes and incident state for NestJS services"
+  },
+  {
     "name": "@nestjs-yalc/interfaces",
     "shortName": "interfaces",
     "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/interfaces",

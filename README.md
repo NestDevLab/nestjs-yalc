@@ -29,6 +29,7 @@ peer packages required by the specific YALC modules they use.
 - `@nestjs-yalc/errors`: typed error classes and Result helpers.
 - `@nestjs-yalc/logger`: Nest, console, Pino, and TypeORM logger helpers.
 - `@nestjs-yalc/observability`: OpenTelemetry integration for YALC event flows.
+- `@nestjs-yalc/health`: read-only probes, incident state, and outbox primitives.
 
 ## Documentation
 
