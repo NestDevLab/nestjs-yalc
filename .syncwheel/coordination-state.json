@@ -1,0 +1,74 @@
+{
+  "changed_refs": {
+    "refs/heads/dev-integration": "6bc653dd588a621efeaf4905420740df77a96a1a",
+    "refs/heads/syncwheel/draft/mgt0458-health-core": "78bfe87914351fae86b2a56e04944768e928478d"
+  },
+  "claims": {
+    "refs/heads/dev-integration": "b091e82c8763aa6c95e92904630835b09a416905",
+    "refs/heads/syncwheel/draft/mgt0458-health-core": "90cb05466a8a122e2fe16b5e28da288343dc7cb5"
+  },
+  "coordination_id": "mgt0458-health",
+  "created_at": "2026-10-12T21:40:08+00:00",
+  "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
+  "managed_refs": {
+    "refs/heads/dev-integration": "6bc653dd588a621efeaf4905420740df77a96a1a",
+    "refs/heads/syncwheel/draft/mgt0458-health-core": "78bfe87914351fae86b2a56e04944768e928478d"
+  },
+  "manifest": {
+    "coordination": {
+      "gc": {
+        "backup_keep": 2,
+        "backup_retention_days": 30,
+        "worktree_grace_days": 7
+      },
+      "id": "mgt0458-health",
+      "mode": "active-active",
+      "state_branch": "syncwheel/state/mgt0458-health"
+    },
+    "defaults": {
+      "base_branch": "maintenance/nest9-typescript59-audit",
+      "base_ref": {
+        "kind": "remote-ref",
+        "ref": "refs/heads/maintenance/nest9-typescript59-audit",
+        "role": "canonical"
+      }
+    },
+    "integration": {
+      "base": {
+        "kind": "remote-ref",
+        "ref": "refs/heads/maintenance/nest9-typescript59-audit",
+        "role": "canonical"
+      },
+      "branch": "dev-integration",
+      "stacks": [
+        "mgt0458-health-core"
+      ],
+      "strategy": "cherry-pick"
+    },
+    "stacks": [
+      {
+        "base": {
+          "kind": "remote-ref",
+          "ref": "refs/heads/maintenance/nest9-typescript59-audit",
+          "role": "canonical"
+        },
+        "branch": "syncwheel/draft/mgt0458-health-core",
+        "commits": [],
+        "id": "mgt0458-health-core",
+        "integration_branch": "dev-integration",
+        "state": "draft",
+        "target_branch": "maintenance/nest9-typescript59-audit"
+      }
+    ],
+    "version": 2
+  },
+  "manifest_digest": "a9ae02620f40887bb3c666f84ea35125f82a893b56467018da3365e228c5c590",
+  "operation_token": "3eb3ee58-cf1a-4352-b880-fee7009f01b7",
+  "parent_state": null,
+  "projection_status": "partial",
+  "publication_id": "ed8ee81a-fd1f-4c8c-96a1-1af6008c96b2",
+  "publication_scope": "create:mgt0458-health-core",
+  "schema_version": 2,
+  "syncwheel_version": "0.45.5",
+  "tombstones": []
+}
