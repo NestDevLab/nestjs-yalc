@@ -1,18 +1,18 @@
 {
   "changed_refs": {
-    "refs/heads/pr/mgt0458-health-dev": "9b8b489eabda096c3c970ec1546ade5cffec9e48"
+    "refs/heads/pr/mgt0458-health-dev": "d238c48458ac3ffb325812358f1ac373c588aceb"
   },
   "claims": {
     "refs/heads/integration/mgt0458-health-forward": "8300923746989c722bad36586809fc85159dc9ba",
-    "refs/heads/pr/mgt0458-health-dev": "e1424ea28cb56330e84eb1baf77b65148d73795c",
+    "refs/heads/pr/mgt0458-health-dev": "dc60afe1b6315d529f02fe43ab77556650c522a9",
     "refs/heads/syncwheel/draft/mgt0458-health-forward": "9102f3f3987d4d7e4afed48975d2ae5b4d66b6a8"
   },
   "coordination_id": "mgt0458-health-forward",
-  "created_at": "2026-10-12T22:04:42+00:00",
+  "created_at": "2026-10-12T22:29:10+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
     "refs/heads/integration/mgt0458-health-forward": "57e7e6b6660444557b95c835ea528030d0c5da8b",
-    "refs/heads/pr/mgt0458-health-dev": "9b8b489eabda096c3c970ec1546ade5cffec9e48",
+    "refs/heads/pr/mgt0458-health-dev": "d238c48458ac3ffb325812358f1ac373c588aceb",
     "refs/heads/syncwheel/draft/mgt0458-health-forward": "9b8b489eabda096c3c970ec1546ade5cffec9e48"
   },
   "manifest": {
@@ -55,7 +55,9 @@
         },
         "branch": "pr/mgt0458-health-dev",
         "commits": [
-          "9b8b489eabda096c3c970ec1546ade5cffec9e48"
+          "9b8b489eabda096c3c970ec1546ade5cffec9e48",
+          "e8f50cfa8653467f42f37d3bd21cb8ba05386ae0",
+          "d238c48458ac3ffb325812358f1ac373c588aceb"
         ],
         "id": "mgt0458-health-forward",
         "integration_branch": "integration/mgt0458-health-forward",
@@ -65,11 +67,11 @@
     "version": 2
   },
   "manifest_digest": "9d3835ca562dedae505d334df3acafbc4712aa9c3beb0bf550718189921e7097",
-  "operation_token": "a1527267-8493-4670-869c-0d67a4b6963c",
-  "parent_state": "10c7f95f12f9001f2651756ce79824ba88416113",
+  "operation_token": "becf6eff-268c-4090-971a-b926260e8118",
+  "parent_state": "2e744a75052f270547b50ebec9d3cbac9ba71264",
   "projection_status": "partial",
-  "publication_id": "e12a62a0-d3e0-43d3-af45-53179ac21e9e",
-  "publication_scope": "promote:mgt0458-health-forward",
+  "publication_id": "a7b941fd-aa53-4ed8-9fb7-1d1657f5b5a1",
+  "publication_scope": "stack:mgt0458-health-forward",
   "schema_version": 2,
   "syncwheel_version": "0.45.5",
   "tombstones": [
