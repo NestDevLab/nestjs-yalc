@@ -1,19 +1,21 @@
 {
   "changed_refs": {
-    "refs/heads/pr/mgt0458-health-core": "942a8581305cafcb1bd60e3a8aa5399714b66a76"
+    "refs/heads/syncwheel/draft/mgt0458-health-dev": "fe6019446ad2a298d79eadfe6291176355abaa9c"
   },
   "claims": {
     "refs/heads/dev-integration": "b091e82c8763aa6c95e92904630835b09a416905",
     "refs/heads/pr/mgt0458-health-core": "dda7a4f868287e6e5dea867b424415ba53e13990",
-    "refs/heads/syncwheel/draft/mgt0458-health-core": "ddd6e06de452a500ba00312867d8553bba5cad16"
+    "refs/heads/syncwheel/draft/mgt0458-health-core": "ddd6e06de452a500ba00312867d8553bba5cad16",
+    "refs/heads/syncwheel/draft/mgt0458-health-dev": "38fcb90c3ac0a6fffbb388be702327bc6e4a822c"
   },
   "coordination_id": "mgt0458-health",
-  "created_at": "2026-10-12T21:53:29+00:00",
+  "created_at": "2026-10-12T21:54:31+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
     "refs/heads/dev-integration": "6bc653dd588a621efeaf4905420740df77a96a1a",
     "refs/heads/pr/mgt0458-health-core": "942a8581305cafcb1bd60e3a8aa5399714b66a76",
-    "refs/heads/syncwheel/draft/mgt0458-health-core": "942a8581305cafcb1bd60e3a8aa5399714b66a76"
+    "refs/heads/syncwheel/draft/mgt0458-health-core": "942a8581305cafcb1bd60e3a8aa5399714b66a76",
+    "refs/heads/syncwheel/draft/mgt0458-health-dev": "fe6019446ad2a298d79eadfe6291176355abaa9c"
   },
   "manifest": {
     "coordination": {
@@ -42,7 +44,8 @@
       },
       "branch": "dev-integration",
       "stacks": [
-        "mgt0458-health-core"
+        "mgt0458-health-core",
+        "mgt0458-health-dev"
       ],
       "strategy": "cherry-pick"
     },
@@ -60,16 +63,29 @@
         "id": "mgt0458-health-core",
         "integration_branch": "dev-integration",
         "target_branch": "maintenance/nest9-typescript59-audit"
+      },
+      {
+        "base": {
+          "kind": "remote-ref",
+          "ref": "refs/heads/dev",
+          "role": "canonical"
+        },
+        "branch": "syncwheel/draft/mgt0458-health-dev",
+        "commits": [],
+        "id": "mgt0458-health-dev",
+        "integration_branch": "dev-integration",
+        "state": "draft",
+        "target_branch": "dev"
       }
     ],
     "version": 2
   },
   "manifest_digest": "a9ae02620f40887bb3c666f84ea35125f82a893b56467018da3365e228c5c590",
-  "operation_token": "d6cccb94-c2fc-4a8d-addb-d9dfda1efdbe",
-  "parent_state": "7214f70da5a7727ab21d12e347cc51e598f310d6",
+  "operation_token": "6e81da1c-56a5-4dd3-b0aa-cc035c354128",
+  "parent_state": "051cfef63cab3a15f2709f041d2c7816a4d922cc",
   "projection_status": "partial",
-  "publication_id": "095f3218-d349-4cee-8465-7e3ddc56e228",
-  "publication_scope": "promote:mgt0458-health-core",
+  "publication_id": "507e4a9b-a050-464b-824a-51c000a58f89",
+  "publication_scope": "create:mgt0458-health-dev",
   "schema_version": 2,
   "syncwheel_version": "0.45.5",
   "tombstones": [
