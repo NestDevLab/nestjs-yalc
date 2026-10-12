@@ -84,16 +84,16 @@ function failure(error: unknown): ProbeResult {
     typed.name === 'AbortError'
       ? 'timeout'
       : code === 'ENOTFOUND' || code === 'EAI_AGAIN'
-      ? 'dns'
-      : 'missing';
+        ? 'dns'
+        : 'missing';
   return {
     status: 'fail',
     summary:
       errorClass === 'dns'
         ? 'DNS resolution failed'
         : errorClass === 'timeout'
-        ? 'Probe deadline exceeded'
-        : 'Probe failed',
+          ? 'Probe deadline exceeded'
+          : 'Probe failed',
     errorClass,
   };
 }
@@ -120,8 +120,8 @@ export async function httpProbe(
           response.status === 401 || response.status === 403
             ? 'auth'
             : response.status >= 500
-            ? 'http5xx'
-            : 'protocol',
+              ? 'http5xx'
+              : 'protocol',
       };
 }
 
