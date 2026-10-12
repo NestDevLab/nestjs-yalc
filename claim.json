@@ -2,10 +2,10 @@
   "changed_refs": [
     "refs/heads/pr/mgt0458-health-core"
   ],
-  "claimed_at": "2026-10-12T21:53:29+00:00",
+  "claimed_at": "2026-10-12T22:25:16+00:00",
   "coordination_id": "mgt0458-health",
-  "operation_token": "d6cccb94-c2fc-4a8d-addb-d9dfda1efdbe",
-  "publication_scope": "promote:mgt0458-health-core",
+  "operation_token": "c30a346a-9246-4f88-82f0-6eb7fa416e80",
+  "publication_scope": "stack:mgt0458-health-core",
   "source_ref": "refs/heads/pr/mgt0458-health-core",
   "syncwheel_version": "0.45.5"
 }
