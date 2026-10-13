@@ -59,6 +59,7 @@ runtime libraries, examples, and repository maintenance notes.
 - [DefaultError library](./errors.md)
 - [Logger library](./logger.md)
 - [Observability and OpenTelemetry integration](./observability.md)
+- [Health monitoring primitives](../health/README.md)
 
 ## Examples
 
