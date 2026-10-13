@@ -65,6 +65,7 @@
     "event-manager",
     "field-middleware",
     "graphql",
+    "health",
     "interfaces",
     "jest",
     "jest/src/config",
