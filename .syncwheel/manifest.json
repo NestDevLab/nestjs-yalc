@@ -22,11 +22,30 @@
   "integration": {
     "base": "origin/dev",
     "branch": "dev-integration",
-    "stacks": [],
+    "stacks": [
+      "b9-auth-directory-core"
+    ],
     "strategy": "cherry-pick"
   },
   "repository_mode": "delivery",
-  "stacks": [],
+  "stacks": [
+    {
+      "id": "b9-auth-directory-core",
+      "branch": "pr/b9-auth-directory-core",
+      "base": "origin/dev",
+      "target_remote": "origin",
+      "target_branch": "dev",
+      "integration_branch": "dev-integration",
+      "commits": [],
+      "state": "published",
+      "publication": {
+        "enabled": true
+      },
+      "meta": {
+        "purpose": "Implement frozen seven-method identity directory after canonical pre-code receipt"
+      }
+    }
+  ],
   "syncwheel_tracking": "git-tracked",
   "syncwheel_worktree_root": "var/syncwheel",
   "version": 2
