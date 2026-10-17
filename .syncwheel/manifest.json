@@ -1,16 +1,16 @@
 {
   "channels": [],
   "coordination": {
-    "claims": "advisory",
-    "gc": {
-      "backup_keep": 2,
-      "backup_retention_days": 30,
-      "worktree_grace_days": 7
-    },
-    "id": "mgt0458-health",
     "mode": "active-active",
+    "id": "mgt0458-health",
     "remote": "origin",
-    "state_branch": "syncwheel/state/mgt0458-health"
+    "state_branch": "syncwheel/state/mgt0458-health",
+    "gc": {
+      "worktree_grace_days": 7,
+      "backup_retention_days": 30,
+      "backup_keep": 2
+    },
+    "claims": "advisory"
   },
   "defaults": {
     "base_branch": "dev",
@@ -33,7 +33,8 @@
       "base": "origin/dev",
       "branch": "pr/public-smoke-sqlite-fix",
       "commits": [
-        "7620e780ecbbde240959e4ec8bb6b00909e46e41"
+        "7620e780ecbbde240959e4ec8bb6b00909e46e41",
+        "73d645d09258b1d96c4cacb841a1502727b3b33a"
       ],
       "id": "public-smoke-sqlite-fix",
       "integration_branch": "dev-integration",
