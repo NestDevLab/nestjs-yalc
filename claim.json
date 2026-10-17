@@ -1,0 +1,13 @@
+{
+  "changed_refs": [
+    "refs/heads/dev-integration",
+    "refs/heads/pr/b9-auth-directory-core",
+    "refs/heads/pr/b9-auth-directory-harness"
+  ],
+  "claimed_at": "2026-10-17T12:08:40+00:00",
+  "coordination_id": "mgt0458-health",
+  "operation_token": "d3ae040b-b216-4be8-b9a1-8e599155b878",
+  "publication_scope": "partial",
+  "source_ref": "refs/heads/pr/b9-auth-directory-core",
+  "syncwheel_version": "0.45.6"
+}
