@@ -1,0 +1,11 @@
+{
+  "changed_refs": [
+    "refs/heads/pr/b9-auth-session-spec"
+  ],
+  "claimed_at": "2026-10-17T07:23:21+00:00",
+  "coordination_id": "mgt0458-health",
+  "operation_token": "25d09094-9f7e-4d00-b627-6999edcaedd2",
+  "publication_scope": "stack:b9-auth-session-spec",
+  "source_ref": "refs/heads/pr/b9-auth-session-spec",
+  "syncwheel_version": "0.45.6"
+}
