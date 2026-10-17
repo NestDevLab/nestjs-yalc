@@ -1,0 +1,12 @@
+{
+  "changed_refs": [
+    "refs/heads/dev-integration",
+    "refs/heads/pr/public-smoke-sqlite-fix"
+  ],
+  "claimed_at": "2026-10-17T07:49:36+00:00",
+  "coordination_id": "mgt0458-health",
+  "operation_token": "6773ba96-b71b-4217-bd3f-daabbb6f1f81",
+  "publication_scope": "full",
+  "source_ref": "refs/heads/pr/public-smoke-sqlite-fix",
+  "syncwheel_version": "0.45.6"
+}
