@@ -12,6 +12,12 @@
     "description": "Engine-level database mutation journal utilities for NestJS applications"
   },
   {
+    "name": "@nestjs-yalc/auth",
+    "shortName": "auth",
+    "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/auth",
+    "description": "Provider-independent opaque authentication session core"
+  },
+  {
     "name": "@nestjs-yalc/crud-gen",
     "shortName": "crud-gen",
     "npmUrl": "https://www.npmjs.com/package/@nestjs-yalc/crud-gen",

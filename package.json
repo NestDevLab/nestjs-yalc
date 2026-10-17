@@ -59,6 +59,7 @@
   "workspaces": [
     "app",
     "audit",
+    "auth",
     "crud-gen",
     "api-strategy",
     "aws-helpers",
