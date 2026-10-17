@@ -73,6 +73,7 @@ try {
     ],
     frameworkConsumerDir,
   );
+  run('npm', ['rebuild', 'sqlite3', '--no-audit', '--no-fund'], frameworkConsumerDir);
 
   run(
     'node',
