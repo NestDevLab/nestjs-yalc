@@ -23,7 +23,8 @@
     "base": "origin/dev",
     "branch": "dev-integration",
     "stacks": [
-      "b9-auth-session-core"
+      "b9-auth-session-core",
+      "b9-auth-registration-receipt"
     ],
     "strategy": "cherry-pick"
   },
@@ -43,6 +44,24 @@
       },
       "meta": {
         "purpose": "Implement reusable framework-neutral auth sessions after canonical freeze registration"
+      }
+    },
+    {
+      "id": "b9-auth-registration-receipt",
+      "branch": "pr/b9-auth-registration-receipt",
+      "base": "origin/dev",
+      "target_remote": "origin",
+      "target_branch": "dev",
+      "integration_branch": "dev-integration",
+      "commits": [
+        "d4f9c94a233013afe9bb0f3b2f43ffe6435aad21"
+      ],
+      "state": "published",
+      "publication": {
+        "enabled": true
+      },
+      "meta": {
+        "purpose": "Bind the frozen session-core source to its verified registration receipt"
       }
     }
   ],
