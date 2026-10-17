@@ -1,0 +1,37 @@
+# Reusable auth SQLite store — pre-code case matrix v1
+
+Status: public pre-code case matrix adjacent to executable acceptance tests. No adapter, registered RED, source freeze, formal GS or host integration is admitted. All `DS-T` cases require a fresh disposable **real SQLite file** and a qualified installed `sqlite3` driver; tests clean only their own files/processes. Callback mocks alone cannot qualify durability. A future source freeze must bind exact tests and driver/runtime inputs before implementation.
+
+| ID | Clauses | Required control and discriminating observation |
+| --- | --- | --- |
+| DS-T01 | C01 | `create` on absent private path establishes complete versioned namespace/limits; fresh-process `open` reads it. Create-over-existing and open-of-missing refuse without reset. |
+| DS-T02 | C01 | Open wrong namespace/limit/schema, truncated/corrupt DB or hostile file type refuses before either callback; original bytes and file mode remain unchanged. |
+| DS-T03 | C03 | Two OS processes contend on the same DB. Process A holds `BEGIN IMMEDIATE`; B's callback and first authoritative read cannot start before A commits or rolls back. No same-process JS queue substitutes for this proof. |
+| DS-T04 | C02,C03 | Session insert persists token, session and one stable-ID event in one COMMIT; fresh process reads all three. Duplicate token/session/event key refuses and preserves prior rows. |
+| DS-T05 | C02,C03 | Refresh-reuse outcome commits family revocation and its event before the public denial; distinct concurrent refresh processes cannot leave two current token branches. |
+| DS-T06 | C02,C03 | Callback throws a unique object after an earlier write: acknowledged ROLLBACK leaves no row/event and rethrows that **same object**. A caught failed SQL operation still makes callback success uncommittable. Driver text/path never reaches a public error. |
+| DS-T07 | C02,C03 | Two processes race for one directory issuer/subject or linkId: exactly one insert wins; conflicting account/revision/generation CAS cannot alter the winner or produce a receipt/event. |
+| DS-T08 | C02,C03 | Directory commit writes identity, revision, command, consumed consent and pending event atomically; `countRows` includes all five classes and acknowledged events, while `countPendingEvents` counts only pending ones. Fresh process sees the same counts. |
+| DS-T09 | C02 | Read and write results are detached; mutating an input after awaiting, or a returned row, cannot change persisted data. Foreign namespace arguments/rows deny without disclosure. |
+| DS-T10 | C02 | Directory callback returns `undefined`; confirmed COMMIT returns exact own `{status:'committed',value:undefined}` with a **present** value key. No extra/accessor field is emitted. |
+| DS-T11 | C02,C03 | Callback abort or false insert followed by acknowledged ROLLBACK returns exact `{status:'confirmed_abort'}`; all prior changes and outbox inserts are absent. A rollback error/timeout never returns confirmed_abort. |
+| DS-T12 | C01,C02,C03 | Submit real COMMIT, then with private test instrumentation suppress its sqlite3 acknowledgement callback **after actual SQL execution**; adapter returns directory `unknown`, session safe failure, poisons handle, and never reruns callback. Independent fresh process observes the exact durable databaseId/namespace/generation/transactionId fence and committed row/event, but ordinary `open` refuses before any callback. Test receipt names the intercepted phase. |
+| DS-T13 | C01,C02,C03 | Lose COMMIT or ROLLBACK acknowledgement before its outcome is established; ordinary fresh-process `open` is fenced even after the original handle/process disappears. An error code, deadline or empty later lookup cannot clear the persisted fence or prove abort. Mismatched database/generation/transaction recovery receipt also refuses unchanged. |
+| DS-T14 | C01,C02 | Kill a separate process after write but before COMMIT: fresh process observes old data plus unresolved pending fence and cannot resume automatically. Kill after a **confirmed** COMMIT and acknowledged fence clear: new state survives and ordinary open resumes. Preserve process/phase evidence for both. |
+| DS-T15 | C01,C02,C05 | A trusted host recovery result with exact database/generation/transaction/write-set binding and matching durable receipt/event may CAS-clear only its current fence after dependent-effect reconciliation. Missing/mismatched receipt or host `hold` leaves it fenced; confirmed abort needs affirmative rollback evidence, not absence. Old-generation or released-reservation replay cannot reopen growth. |
+| DS-T16 | C04 | Saturate finite queue and lock deadline using distinct callers; overflow refuses without unbounded pending work. Expired callback cannot issue later SQL or COMMIT; queue is released as safe only after acknowledged ROLLBACK, otherwise handle stays poisoned/unknown. |
+| DS-T17 | C04 | Fill configured row, per-row byte, aggregate logical-byte and pending-event limits independently. Each over-limit write aborts without pruning receipts/events or extending expiry. Malformed/overflowed count fails closed, never becomes zero. |
+| DS-T18 | C03,C05 | Stable session and directory event IDs survive restart; duplicate sink attempt uses same ID. Directory pending count falls only after a qualified acknowledgement and transactionally durable `acknowledgeEvent`; no dequeue-as-delete. Session sink acknowledgement remains a separate host gate. |
+| DS-T19 | C01,C03,C04 | One database admits only its configured namespace. Same-namespace distinct accounts serialize and retain independent identity/account rows; a foreign namespace argument/row refuses without creating a second tenant. A separately created database may use another namespace, with no cross-file lookup or implicit admission. |
+| DS-T20 | C01,C04 | Close racing a callback or submitted COMMIT gives a bounded terminal result; close cannot claim rollback without its receipt, resurrect an expired callback, or leave a worker/connection able to commit later. Repeated close is idempotent. |
+| DS-T21 | C01 | Build/import and a real-file smoke run on the repository's declared Node 20 target use the locked `sqlite3` driver without `node:sqlite`; Node 24 local success alone is insufficient. |
+
+Separate host acceptance remains required:
+
+| Gate | Owner and evidence still missing |
+| --- | --- |
+| DS-I01 | Qualified host recovery port must independently prove exact database/generation/transaction outcome and dependent external-effect reconciliation before clearing a persisted fence; unresolved pending or missing receipt remains held. Also prove stable-ID session/directory sink delivery and dedupe, durable acknowledgement, pending count transition and backup/restore replay. A local object/duplicate-call fixture is not authority or sink proof. |
+| DS-I02 | Trusted monotonic time, expired command/consent/acknowledged-event compaction only after terminal reservation evidence, and restore fence. Expiry or a missing receipt never proves abort or releases funding. |
+| DS-I03 | Measured SQLite database, indexes, rollback journal/WAL, replicas/backups and restore headroom under a real physical quota and finite funded retention. Logical caps alone do not admit h24 operation. |
+
+Directory policy remains governed by its existing 44-case oracle and amendments; this matrix qualifies only the durable port translation and named host integration observations. The acceptance authors do not implement the directory facade.
