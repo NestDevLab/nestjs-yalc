@@ -1,11 +1,11 @@
 {
-  "changed_refs": [
-    "refs/heads/pr/b9-auth-session-spec"
-  ],
-  "claimed_at": "2026-10-17T07:23:21+00:00",
+  "changed_refs": [],
+  "claimed_at": "2026-10-17T07:30:21+00:00",
+  "closed": true,
   "coordination_id": "mgt0458-health",
-  "operation_token": "25d09094-9f7e-4d00-b627-6999edcaedd2",
-  "publication_scope": "stack:b9-auth-session-spec",
+  "operation_token": "ec2e340f-42e0-4b08-b43c-f5bd32312742",
+  "publication_scope": "close:b9-auth-session-spec",
+  "reason": "absorbed",
   "source_ref": "refs/heads/pr/b9-auth-session-spec",
   "syncwheel_version": "0.45.6"
 }
