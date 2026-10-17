@@ -1,11 +1,11 @@
 {
-  "changed_refs": [
-    "refs/heads/pr/mgt0458-health-core"
-  ],
-  "claimed_at": "2026-10-12T22:42:20+00:00",
+  "changed_refs": [],
+  "claimed_at": "2026-10-17T07:12:41+00:00",
+  "closed": true,
   "coordination_id": "mgt0458-health",
-  "operation_token": "4bf32805-2808-4cfe-b380-4bf661446098",
-  "publication_scope": "partial",
+  "operation_token": "a6d555c3-a5e0-4ba8-9ad4-ba79a2d227b8",
+  "publication_scope": "close:mgt0458-health-core",
+  "reason": "absorbed",
   "source_ref": "refs/heads/pr/mgt0458-health-core",
-  "syncwheel_version": "0.45.5"
+  "syncwheel_version": "0.45.6"
 }
