@@ -1,16 +1,16 @@
 {
   "channels": [],
   "coordination": {
-    "claims": "advisory",
-    "gc": {
-      "backup_keep": 2,
-      "backup_retention_days": 30,
-      "worktree_grace_days": 7
-    },
-    "id": "mgt0458-health",
     "mode": "active-active",
+    "id": "mgt0458-health",
     "remote": "origin",
-    "state_branch": "syncwheel/state/mgt0458-health"
+    "state_branch": "syncwheel/state/mgt0458-health",
+    "gc": {
+      "worktree_grace_days": 7,
+      "backup_retention_days": 30,
+      "backup_keep": 2
+    },
+    "claims": "advisory"
   },
   "defaults": {
     "base_branch": "maintenance/nest9-typescript59-audit",
@@ -34,7 +34,8 @@
       "branch": "pr/mgt0458-health-core",
       "commits": [
         "942a8581305cafcb1bd60e3a8aa5399714b66a76",
-        "d1b33e81e2f8736012a4f7edc0e7006bc65f7fee"
+        "d1b33e81e2f8736012a4f7edc0e7006bc65f7fee",
+        "f578bb982acbab4e922f9b3944d8e8baef0bade5"
       ],
       "id": "mgt0458-health-core",
       "integration_branch": "dev-integration",
