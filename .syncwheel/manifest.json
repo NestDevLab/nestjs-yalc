@@ -1,16 +1,16 @@
 {
   "channels": [],
   "coordination": {
-    "claims": "advisory",
-    "gc": {
-      "backup_keep": 2,
-      "backup_retention_days": 30,
-      "worktree_grace_days": 7
-    },
-    "id": "mgt0458-health",
     "mode": "active-active",
+    "id": "mgt0458-health",
     "remote": "origin",
-    "state_branch": "syncwheel/state/mgt0458-health"
+    "state_branch": "syncwheel/state/mgt0458-health",
+    "gc": {
+      "worktree_grace_days": 7,
+      "backup_retention_days": 30,
+      "backup_keep": 2
+    },
+    "claims": "advisory"
   },
   "defaults": {
     "base_branch": "dev",
@@ -33,7 +33,9 @@
     {
       "base": "origin/dev",
       "branch": "pr/b9-auth-directory-core",
-      "commits": [],
+      "commits": [
+        "739f30f2a0c6ca9f63946e6dc6e94336a0d8295c"
+      ],
       "id": "b9-auth-directory-core",
       "integration_branch": "dev-integration",
       "meta": {
