@@ -1,16 +1,16 @@
 {
   "channels": [],
   "coordination": {
-    "claims": "advisory",
-    "gc": {
-      "backup_keep": 2,
-      "backup_retention_days": 30,
-      "worktree_grace_days": 7
-    },
-    "id": "mgt0458-health",
     "mode": "active-active",
+    "id": "mgt0458-health",
     "remote": "origin",
-    "state_branch": "syncwheel/state/mgt0458-health"
+    "state_branch": "syncwheel/state/mgt0458-health",
+    "gc": {
+      "worktree_grace_days": 7,
+      "backup_retention_days": 30,
+      "backup_keep": 2
+    },
+    "claims": "advisory"
   },
   "defaults": {
     "base_branch": "dev",
@@ -23,7 +23,8 @@
     "base": "origin/dev",
     "branch": "dev-integration",
     "stacks": [
-      "b9-auth-directory-core"
+      "b9-auth-directory-core",
+      "b9-auth-directory-harness"
     ],
     "strategy": "cherry-pick"
   },
@@ -44,6 +45,22 @@
       "state": "published",
       "target_branch": "dev",
       "target_remote": "origin"
+    },
+    {
+      "id": "b9-auth-directory-harness",
+      "branch": "pr/b9-auth-directory-harness",
+      "base": "origin/dev",
+      "target_remote": "origin",
+      "target_branch": "dev",
+      "integration_branch": "dev-integration",
+      "commits": [],
+      "state": "published",
+      "publication": {
+        "enabled": true
+      },
+      "meta": {
+        "purpose": "Qualify versioned mutation-phase directory fault fixtures while preserving original freeze"
+      }
     }
   ],
   "syncwheel_tracking": "git-tracked",
