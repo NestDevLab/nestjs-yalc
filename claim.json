@@ -1,12 +1,12 @@
 {
   "changed_refs": [
     "refs/heads/dev-integration",
-    "refs/heads/syncwheel/draft/mgt0458-health-core"
+    "refs/heads/pr/public-smoke-sqlite-fix"
   ],
-  "claimed_at": "2026-10-12T21:40:08+00:00",
+  "claimed_at": "2026-10-17T07:49:36+00:00",
   "coordination_id": "mgt0458-health",
-  "operation_token": "3eb3ee58-cf1a-4352-b880-fee7009f01b7",
-  "publication_scope": "create:mgt0458-health-core",
+  "operation_token": "6773ba96-b71b-4217-bd3f-daabbb6f1f81",
+  "publication_scope": "full",
   "source_ref": "refs/heads/dev-integration",
-  "syncwheel_version": "0.45.5"
+  "syncwheel_version": "0.45.6"
 }
