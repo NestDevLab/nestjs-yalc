@@ -22,34 +22,11 @@
   "integration": {
     "base": "origin/maintenance/nest9-typescript59-audit",
     "branch": "dev-integration",
-    "stacks": [
-      "mgt0458-health-core"
-    ],
+    "stacks": [],
     "strategy": "cherry-pick"
   },
   "repository_mode": "delivery",
-  "stacks": [
-    {
-      "base": "origin/maintenance/nest9-typescript59-audit",
-      "branch": "pr/mgt0458-health-core",
-      "commits": [
-        "942a8581305cafcb1bd60e3a8aa5399714b66a76",
-        "d1b33e81e2f8736012a4f7edc0e7006bc65f7fee",
-        "f578bb982acbab4e922f9b3944d8e8baef0bade5"
-      ],
-      "id": "mgt0458-health-core",
-      "integration_branch": "dev-integration",
-      "meta": {
-        "purpose": "Generic health monitoring core"
-      },
-      "publication": {
-        "enabled": true
-      },
-      "state": "published",
-      "target_branch": "maintenance/nest9-typescript59-audit",
-      "target_remote": "origin"
-    }
-  ],
+  "stacks": [],
   "syncwheel_tracking": "git-tracked",
   "syncwheel_worktree_root": "var/syncwheel",
   "version": 2
