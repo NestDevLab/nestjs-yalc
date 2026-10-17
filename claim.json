@@ -1,0 +1,13 @@
+{
+  "changed_refs": [
+    "refs/heads/dev-integration",
+    "refs/heads/pr/b9-auth-registration-receipt",
+    "refs/heads/pr/b9-auth-session-core"
+  ],
+  "claimed_at": "2026-10-17T08:21:51+00:00",
+  "coordination_id": "mgt0458-health",
+  "operation_token": "dd92314c-ae34-49fd-a8c2-22bdf5724cdd",
+  "publication_scope": "full",
+  "source_ref": "refs/heads/pr/b9-auth-session-core",
+  "syncwheel_version": "0.45.6"
+}
