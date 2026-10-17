@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-yalc/health",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "type": "module",
   "description": "Read-only health probes and incident state for NestJS services",
   "main": "./dist/src/index.js",
