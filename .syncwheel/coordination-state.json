@@ -1,9 +1,9 @@
 {
   "changed_refs": {
-    "refs/heads/dev-integration": "f2a351e59798fa462e9174207a135af9eb5644c4"
+    "refs/heads/dev-integration": "49c78892075eddbbfb62de3e09d7c6312ff2f1f5"
   },
   "claims": {
-    "refs/heads/dev-integration": "d55488f6ae8244b801adb15cef0ddf8ad2247100",
+    "refs/heads/dev-integration": "a663b9769a3748a22d911d9410b5ad191af9e38c",
     "refs/heads/pr/b9-auth-registration-receipt": "e681ec2d753dc698d2e9062a75798a226c0440ff",
     "refs/heads/pr/b9-auth-session-core": "2746c5392e902bbffca0312edd6ef1e40ae8b510",
     "refs/heads/pr/b9-auth-session-spec": "8184285a58fc052fe606e9f56cefb4190b439f8f",
@@ -14,10 +14,10 @@
     "refs/heads/syncwheel/draft/mgt0458-health-dev": "a08d9386d8d03623d564018572fdc3d3906b07ad"
   },
   "coordination_id": "mgt0458-health",
-  "created_at": "2026-10-17T08:39:47+00:00",
+  "created_at": "2026-10-17T10:45:35+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
-    "refs/heads/dev-integration": "f2a351e59798fa462e9174207a135af9eb5644c4",
+    "refs/heads/dev-integration": "49c78892075eddbbfb62de3e09d7c6312ff2f1f5",
     "refs/heads/pr/b9-auth-registration-receipt": "d4f9c94a233013afe9bb0f3b2f43ffe6435aad21",
     "refs/heads/pr/b9-auth-session-core": "d41b195351f19efe7ecbfd73a672c3b149765254",
     "refs/heads/pr/b9-auth-session-spec": "90a7042a750362a841d8933fe30d880deadae8ef",
@@ -60,10 +60,10 @@
     "version": 2
   },
   "manifest_digest": "6f37a5705607adc9ca7b9c49c19704751bf74efd6abb40c1e275ee43ae497d74",
-  "operation_token": "1e52f73f-1a21-47c2-a3e1-6ad399d29f76",
-  "parent_state": "8a05a039d2a41f9e967e272184c810bd0bf7e94d",
+  "operation_token": "e2dbf119-4152-49aa-a6ba-81038b39c7f5",
+  "parent_state": "d4e8f7e4da9921cfd68ae40e1f60e55cb847e2f8",
   "projection_status": "partial",
-  "publication_id": "d32d753a-fbb5-4abc-8fa4-35d0e610f3cb",
+  "publication_id": "da8d287a-51b2-491b-a83b-690ed9a777a0",
   "publication_scope": "integration",
   "schema_version": 2,
   "syncwheel_version": "0.45.6",
