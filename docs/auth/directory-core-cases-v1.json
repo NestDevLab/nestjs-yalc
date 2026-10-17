@@ -1,0 +1,370 @@
+{
+  "schema": "yalc.auth-directory-design-cases.v3",
+  "status": "design-only-unimplemented",
+  "source": "docs/auth/directory-core-v1.md",
+  "clauseIds": [
+    "DIR-C01",
+    "DIR-C02",
+    "DIR-C03",
+    "DIR-C04",
+    "DIR-C05",
+    "DIR-C06",
+    "DIR-C07",
+    "DIR-C08",
+    "DIR-C09",
+    "DIR-C10",
+    "DIR-C11",
+    "DIR-C12"
+  ],
+  "cases": [
+    {
+      "id": "DIR-T01",
+      "clauses": [
+        "DIR-C01"
+      ],
+      "name": "missing port or unsafe limit fails construction"
+    },
+    {
+      "id": "DIR-T02",
+      "clauses": [
+        "DIR-C01"
+      ],
+      "name": "oversize proof and malformed plain-data input or accessor field fail before getter/storage"
+    },
+    {
+      "id": "DIR-T03",
+      "clauses": [
+        "DIR-C02"
+      ],
+      "name": "exact same issuer+subject on canonical route resolves one account"
+    },
+    {
+      "id": "DIR-T04",
+      "clauses": [
+        "DIR-C02"
+      ],
+      "name": "different issuer or case/path yields distinct identity"
+    },
+    {
+      "id": "DIR-T05",
+      "clauses": [
+        "DIR-C02",
+        "DIR-C08"
+      ],
+      "name": "absent unlinked disabled or unknown identity resolves null without side effects"
+    },
+    {
+      "id": "DIR-T06",
+      "clauses": [
+        "DIR-C02"
+      ],
+      "name": "email display or role hint never links or resolves"
+    },
+    {
+      "id": "DIR-T07",
+      "clauses": [
+        "DIR-C03"
+      ],
+      "name": "no explicit provisioning approval denies without mapping"
+    },
+    {
+      "id": "DIR-T08",
+      "clauses": [
+        "DIR-C03",
+        "DIR-C10"
+      ],
+      "name": "approved pre-existing account provisions one link receipt revision and event"
+    },
+    {
+      "id": "DIR-T09",
+      "clauses": [
+        "DIR-C03"
+      ],
+      "name": "competing or replayed approval cannot provision another account"
+    },
+    {
+      "id": "DIR-T10",
+      "clauses": [
+        "DIR-C04",
+        "DIR-C11"
+      ],
+      "name": "missing revoked session or denied current grant blocks all protected facade calls"
+    },
+    {
+      "id": "DIR-T11",
+      "clauses": [
+        "DIR-C04"
+      ],
+      "name": "fresh current proof matches enabled canonical actor binding"
+    },
+    {
+      "id": "DIR-T12",
+      "clauses": [
+        "DIR-C04"
+      ],
+      "name": "stale future malformed or disabled proof cannot mutate"
+    },
+    {
+      "id": "DIR-T13",
+      "clauses": [
+        "DIR-C05",
+        "DIR-C10"
+      ],
+      "name": "wrong missing expired or consumed consent refuses atomically"
+    },
+    {
+      "id": "DIR-T14",
+      "clauses": [
+        "DIR-C06",
+        "DIR-C10"
+      ],
+      "name": "valid link commits one active identity revision receipt and event"
+    },
+    {
+      "id": "DIR-T15",
+      "clauses": [
+        "DIR-C06"
+      ],
+      "name": "concurrent distinct accounts race for identity with one winner"
+    },
+    {
+      "id": "DIR-T16",
+      "clauses": [
+        "DIR-C06"
+      ],
+      "name": "exact command replay adds no state event or reservation"
+    },
+    {
+      "id": "DIR-T17",
+      "clauses": [
+        "DIR-C06"
+      ],
+      "name": "changed digest under command ID conflicts without cross-account disclosure"
+    },
+    {
+      "id": "DIR-T18",
+      "clauses": [
+        "DIR-C07"
+      ],
+      "name": "unlink tombstones identity and prevents later resolution or automatic transfer"
+    },
+    {
+      "id": "DIR-T19",
+      "clauses": [
+        "DIR-C07"
+      ],
+      "name": "last enabled canonical method refuses unlink but alternate permits it"
+    },
+    {
+      "id": "DIR-T20",
+      "clauses": [
+        "DIR-C08"
+      ],
+      "name": "disabled provider cannot create or authorize link while enabled alternate can unlink old target"
+    },
+    {
+      "id": "DIR-T21",
+      "clauses": [
+        "DIR-C09"
+      ],
+      "name": "bounded account-only list omits subject email proof token role"
+    },
+    {
+      "id": "DIR-T22",
+      "clauses": [
+        "DIR-C09"
+      ],
+      "name": "mutated result and list snapshots cannot alter store or later reads"
+    },
+    {
+      "id": "DIR-T23",
+      "clauses": [
+        "DIR-C10"
+      ],
+      "name": "consent or event insert failure rolls back all directory writes"
+    },
+    {
+      "id": "DIR-T24",
+      "clauses": [
+        "DIR-C09",
+        "DIR-C10"
+      ],
+      "name": "unknown commit fences writes and fresh scoped reconcile finds committed receipt only"
+    },
+    {
+      "id": "DIR-T25",
+      "clauses": [
+        "DIR-C11"
+      ],
+      "name": "revocation seen at last precommit check denies mutation"
+    },
+    {
+      "id": "DIR-T26",
+      "clauses": [
+        "DIR-C11"
+      ],
+      "name": "revocation after check may race but later guarded call denies"
+    },
+    {
+      "id": "DIR-T27",
+      "clauses": [
+        "DIR-C12"
+      ],
+      "name": "unknown or refused quote/reservation denies with no directory state"
+    },
+    {
+      "id": "DIR-T28",
+      "clauses": [
+        "DIR-C12"
+      ],
+      "name": "row receipt or outbox pressure refuses without unsafe pruning"
+    },
+    {
+      "id": "DIR-T29",
+      "clauses": [
+        "DIR-C02",
+        "DIR-C08"
+      ],
+      "name": "stored route differing from canonical route denies directory resolution and mutation; no absent incoming-route assertion"
+    },
+    {
+      "id": "DIR-T30",
+      "clauses": [
+        "DIR-C02",
+        "DIR-C08"
+      ],
+      "name": "disable canonical A causes null resolution and blocked session use; B alias does not become fallback"
+    },
+    {
+      "id": "DIR-T31",
+      "clauses": [
+        "DIR-C11"
+      ],
+      "name": "already-issued token from unlinked generation fails protected dispatch before event delivery"
+    },
+    {
+      "id": "DIR-T32",
+      "clauses": [
+        "DIR-C11"
+      ],
+      "name": "post-unlink refresh/use denied and same-identity relink does not revive old session binding"
+    },
+    {
+      "id": "DIR-T33",
+      "clauses": [
+        "DIR-C06"
+      ],
+      "name": "linkId collision and stale identity generation or account revision roll back entire write"
+    },
+    {
+      "id": "DIR-T34",
+      "clauses": [
+        "DIR-C09"
+      ],
+      "name": "extra accessor malformed or oversized returns from every trusted port and store read fail before getter and yield no grant"
+    },
+    {
+      "id": "DIR-T35",
+      "clauses": [
+        "DIR-C03",
+        "DIR-C09"
+      ],
+      "name": "provision unknown commit reconciles only after fresh proof and repeatable current approval derives same account; revoked approval denies"
+    },
+    {
+      "id": "DIR-T36",
+      "clauses": [
+        "DIR-C12"
+      ],
+      "name": "quote checks exact logical vector, overflow, record byte cap, replay horizon and physical-cost refusal"
+    },
+    {
+      "id": "DIR-T37",
+      "clauses": [
+        "DIR-C10",
+        "DIR-C12"
+      ],
+      "name": "confirmed abort releases held reservation; repeated failures do not retain holds; committed receipt settles exactly once"
+    },
+    {
+      "id": "DIR-T38",
+      "clauses": [
+        "DIR-C10",
+        "DIR-C12"
+      ],
+      "name": "injected unknown store outcome fences writes and retains hold; fresh fixture receipt permits committed reconciliation, while missing receipt never proves abort; actual durable outcome witness is DIR-I03"
+    },
+    {
+      "id": "DIR-T39",
+      "clauses": [
+        "DIR-C10",
+        "DIR-C12"
+      ],
+      "name": "directory admission refuses fixture pending count at cap and admits after a modeled acknowledged transition lowers that count; real sink acknowledgement and dedupe are DIR-I03"
+    },
+    {
+      "id": "DIR-T40",
+      "clauses": [
+        "DIR-C06",
+        "DIR-C10",
+        "DIR-C12"
+      ],
+      "name": "after the neutral fixture models qualified expired resolved-row compaction, old time-bearing commands still return command_expired before any lookup; this does not prove host compaction"
+    },
+    {
+      "id": "DIR-T41",
+      "clauses": [
+        "DIR-C01",
+        "DIR-C12"
+      ],
+      "name": "time-bearing command syntax, future/expired/overflow and exact immutable replay-window boundary reject before storage or reservation"
+    },
+    {
+      "id": "DIR-T42",
+      "clauses": [
+        "DIR-C03",
+        "DIR-C05",
+        "DIR-C12"
+      ],
+      "name": "approval and consent bind exact command ID, issuedAt and deadline; changing timestamp cannot reuse old receipt"
+    },
+    {
+      "id": "DIR-T43",
+      "clauses": [
+        "DIR-C01",
+        "DIR-C10",
+        "DIR-C12"
+      ],
+      "name": "five-row R-byte footprint and namespace total row/byte cap are exact, count includes acknowledged events, overflow and malformed quote refuse"
+    },
+    {
+      "id": "DIR-T44",
+      "clauses": [
+        "DIR-C10",
+        "DIR-C12"
+      ],
+      "name": "local backward or unknown clock fails closed; pending event and unknown commit retain bounded holds; actual restart/restore witness is DIR-I02"
+    }
+  ],
+  "limits": [
+    "Design briefs have an executable missing-behavior oracle; no implementation or GS",
+    "Host wrapper/session binding, economic quote, lifecycle/clock/restore and persistent storage acceptance remain mandatory; integrationCases are excluded from directory oracle count"
+  ],
+  "integrationCases": [
+    {
+      "id": "DIR-I01",
+      "owner": "real host verifier/session adapter",
+      "name": "configured alias route is rejected before unchanged four-field resolver; canonical issued session remains usable"
+    },
+    {
+      "id": "DIR-I02",
+      "owner": "real host session/lifecycle/storage adapters",
+      "name": "session issuance/binding/refresh and guards deny unlinked generations before event delivery; trusted time and restore cannot reopen expired commands"
+    },
+    {
+      "id": "DIR-I03",
+      "owner": "real persistent store/outbox/lifecycle adapters",
+      "name": "fresh-process durable COMMIT or confirmed rollback evidence reconciles exact reservation; actual stable-ID sink acknowledgement/dedupe and transactional count transition survive crash/restore"
+    }
+  ]
+}
