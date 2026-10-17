@@ -1,7 +1,9 @@
 {
-  "changed_refs": {},
+  "changed_refs": {
+    "refs/heads/dev-integration": "3346bbe10dbd4fbf868c7f345fd145519eb7f141"
+  },
   "claims": {
-    "refs/heads/dev-integration": "6f7713477ad06f2c5ffc4aa5cbfa1010263eccdf",
+    "refs/heads/dev-integration": "ad61011051e026a51bc4f8b00141b7fd616f177f",
     "refs/heads/pr/b9-auth-session-spec": "8184285a58fc052fe606e9f56cefb4190b439f8f",
     "refs/heads/pr/mgt0458-health-core": "7fde204e58e5ae46e728798282fd347c0a3ee943",
     "refs/heads/pr/public-smoke-sqlite": "5999481d2661f3bbd5fcbc637a8afdfdb5b8917f",
@@ -10,10 +12,10 @@
     "refs/heads/syncwheel/draft/mgt0458-health-dev": "a08d9386d8d03623d564018572fdc3d3906b07ad"
   },
   "coordination_id": "mgt0458-health",
-  "created_at": "2026-10-17T07:52:55+00:00",
+  "created_at": "2026-10-17T07:55:15+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
-    "refs/heads/dev-integration": "50dd54fcfe2dd7a25100b9bcda5808e15555d4b3",
+    "refs/heads/dev-integration": "3346bbe10dbd4fbf868c7f345fd145519eb7f141",
     "refs/heads/pr/b9-auth-session-spec": "90a7042a750362a841d8933fe30d880deadae8ef",
     "refs/heads/pr/mgt0458-health-core": "f578bb982acbab4e922f9b3944d8e8baef0bade5",
     "refs/heads/pr/public-smoke-sqlite": null,
@@ -53,12 +55,12 @@
     "stacks": [],
     "version": 2
   },
-  "manifest_digest": "4b4c8f69345d2b219ae0ba9637a6e42d542b37a7c17262643d505348998ce257",
-  "operation_token": "b69b6c15-7914-41a4-99e9-7c86fa7c727d",
-  "parent_state": "512f49c9b99383aa240161f61d36aaa1d5344344",
+  "manifest_digest": "6f37a5705607adc9ca7b9c49c19704751bf74efd6abb40c1e275ee43ae497d74",
+  "operation_token": "45c0443f-5c1c-4544-9f33-e9375f532a6b",
+  "parent_state": "59877e52e2fdc3038a9d14ed1237bed245ca8240",
   "projection_status": "partial",
-  "publication_id": "519e1ea8-fbbc-49d6-b0ce-a722efb763f1",
-  "publication_scope": "close:public-smoke-sqlite-fix",
+  "publication_id": "516fb6ed-c3de-420e-9b04-3e7b973a779c",
+  "publication_scope": "integration",
   "schema_version": 2,
   "syncwheel_version": "0.45.6",
   "tombstones": [
