@@ -1,11 +1,12 @@
 {
   "changed_refs": [
-    "refs/heads/dev-integration"
+    "refs/heads/dev-integration",
+    "refs/heads/pr/b9-auth-directory-freeze"
   ],
-  "claimed_at": "2026-10-17T10:45:35+00:00",
+  "claimed_at": "2026-10-17T11:12:35+00:00",
   "coordination_id": "mgt0458-health",
-  "operation_token": "e2dbf119-4152-49aa-a6ba-81038b39c7f5",
-  "publication_scope": "integration",
+  "operation_token": "0ae1eb7b-c719-4b71-baa2-efddc7856abe",
+  "publication_scope": "stack:b9-auth-directory-freeze",
   "source_ref": "refs/heads/dev-integration",
   "syncwheel_version": "0.45.6"
 }
