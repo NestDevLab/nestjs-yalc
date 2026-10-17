@@ -33,7 +33,7 @@
       "base": "origin/dev",
       "branch": "pr/public-smoke-sqlite-fix",
       "commits": [
-        "2eba622265d76d3603b10074d280d91870678bad"
+        "7620e780ecbbde240959e4ec8bb6b00909e46e41"
       ],
       "id": "public-smoke-sqlite-fix",
       "integration_branch": "dev-integration",
