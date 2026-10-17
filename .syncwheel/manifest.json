@@ -1,26 +1,26 @@
 {
   "channels": [],
   "coordination": {
-    "mode": "active-active",
-    "id": "mgt0458-health",
-    "remote": "origin",
-    "state_branch": "syncwheel/state/mgt0458-health",
+    "claims": "advisory",
     "gc": {
-      "worktree_grace_days": 7,
+      "backup_keep": 2,
       "backup_retention_days": 30,
-      "backup_keep": 2
+      "worktree_grace_days": 7
     },
-    "claims": "advisory"
+    "id": "mgt0458-health",
+    "mode": "active-active",
+    "remote": "origin",
+    "state_branch": "syncwheel/state/mgt0458-health"
   },
   "defaults": {
-    "base_branch": "maintenance/nest9-typescript59-audit",
-    "base_ref": "origin/maintenance/nest9-typescript59-audit",
+    "base_branch": "dev",
+    "base_ref": "origin/dev",
     "canonical_remote": "origin",
     "integration_membership": "required",
     "publication_remote": "origin"
   },
   "integration": {
-    "base": "origin/maintenance/nest9-typescript59-audit",
+    "base": "origin/dev",
     "branch": "dev-integration",
     "stacks": [
       "public-smoke-sqlite-fix"

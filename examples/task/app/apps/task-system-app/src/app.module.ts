@@ -57,7 +57,6 @@ import { TaskAppEventModule } from './task-app-event.module';
     }),
     MutationJournalModule.forRoot({
       enabled: process.env.MUTATION_JOURNAL_ENABLED !== 'false',
-      retentionDays: Number(process.env.MUTATION_JOURNAL_RETENTION_DAYS ?? 30),
     }),
     OmniTaskAppModule,
     TasksModule,

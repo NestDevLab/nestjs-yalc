@@ -1,6 +1,6 @@
 {
   "name": "@nestjs-yalc/errors",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "type": "module",
   "description": "",
   "main": "./dist/src/index.js",
@@ -19,10 +19,10 @@
     "dist"
   ],
   "dependencies": {
-    "@nestjs-yalc/crud-gen": "^1.4.0",
-    "@nestjs-yalc/event-manager": "^1.3.3",
-    "@nestjs-yalc/logger": "^1.3.3",
-    "@nestjs-yalc/utils": "^1.3.3",
+    "@nestjs-yalc/crud-gen": "^1.5.0",
+    "@nestjs-yalc/event-manager": "^1.3.4",
+    "@nestjs-yalc/logger": "^1.3.4",
+    "@nestjs-yalc/utils": "^1.3.4",
     "axios": "^1.15.0",
     "neverthrow": "^8.2.0",
     "tslib": "^2.6.3"

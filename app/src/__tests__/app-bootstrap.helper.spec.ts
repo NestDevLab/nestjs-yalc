@@ -3,6 +3,8 @@ import { AppBootstrap } from '../app-bootstrap.helper.js';
 import { SYSTEM_LOGGER_SERVICE } from '../def.const.js';
 import { UnwrapResultInterceptor } from '../unwrap-result.interceptor.js';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { NestFactory } from '@nestjs/core';
+import { fastify } from 'fastify';
 
 jest.mock('class-validator', () => ({
   useContainer: jest.fn(),
@@ -92,5 +94,65 @@ describe('AppBootstrap.applyBootstrapGlobals', () => {
     expect(setTitleMock).toHaveBeenCalled();
     expect(setDescriptionMock).toHaveBeenCalled();
     expect(setupSwaggerMock).toHaveBeenCalled();
+  });
+
+  it('should forward swagger document options to createDocument', async () => {
+    const bootstrap = new AppBootstrap(
+      'app',
+      class Dummy {},
+      { skipMultiServerCheck: true } as any,
+    );
+
+    bootstrap['app'] = fakeApp as any;
+    bootstrap['loggerService'] = logger as any;
+    bootstrap.getConf = jest.fn().mockReturnValue({ apiPrefix: 'api' }) as any;
+    bootstrap.getModule = jest.fn().mockReturnValue({}) as any;
+
+    await bootstrap.applyBootstrapGlobals({
+      enableSwagger: true,
+      swaggerDocumentOptions: { autoTagControllers: false },
+    });
+
+    expect(createDocumentMock).toHaveBeenLastCalledWith(
+      fakeApp,
+      expect.anything(),
+      { autoTagControllers: false },
+    );
+  });
+
+  it('should create a default fastify instance that exposes router options', async () => {
+    const createSpy = jest
+      .spyOn(NestFactory, 'create')
+      .mockResolvedValue({ ...fakeApp, close: jest.fn(), init: jest.fn() } as any);
+    const bootstrap = new AppBootstrap(
+      'app',
+      class Dummy {},
+      { skipMultiServerCheck: true } as any,
+    );
+
+    await bootstrap.createApp();
+
+    expect(createSpy).toHaveBeenCalled();
+    expect(
+      bootstrap.getFastifyInstance()?.initialConfig.routerOptions,
+    ).toBeDefined();
+    createSpy.mockRestore();
+  });
+
+  it('should keep a caller-provided fastify instance', async () => {
+    const createSpy = jest
+      .spyOn(NestFactory, 'create')
+      .mockResolvedValue({ ...fakeApp, close: jest.fn(), init: jest.fn() } as any);
+    const bootstrap = new AppBootstrap(
+      'app',
+      class Dummy {},
+      { skipMultiServerCheck: true } as any,
+    );
+    const instance = fastify({ routerOptions: {} });
+
+    await bootstrap.createApp({ fastifyInstance: instance });
+
+    expect(bootstrap.getFastifyInstance()).toBe(instance);
+    createSpy.mockRestore();
   });
 });

@@ -259,7 +259,7 @@ describe('SqliteTriggerJournalDriver', () => {
     expect(wideRow.column40).toBeNull();
   });
 
-  it('uninstalls only journal triggers and supports cleanup and filtered reads', async () => {
+  it('uninstalls only journal triggers and supports filtered reads', async () => {
     const dataSource = await createDataSource();
     await dataSource.query('CREATE TABLE events (id INTEGER PRIMARY KEY, name TEXT)');
     await driver.install(dataSource, journalOptions);
@@ -273,7 +273,9 @@ describe('SqliteTriggerJournalDriver', () => {
       [10, 'manual', 'insert', 20, 'manual', 'update', 30, 'manual', 'delete'],
     );
 
-    expect(await driver.cleanup(dataSource, journalOptions, 20)).toBe(1);
+    await expect(driver.cleanup(dataSource, journalOptions, 20)).rejects.toThrow(
+      'In-process mutation-journal cleanup is disabled',
+    );
     const filteredRows = await driver.read(dataSource, journalOptions, {
       tableName: 'manual',
       action: 'update',
@@ -333,7 +335,7 @@ describe('SqliteTriggerJournalDriver', () => {
     expect(queryRunner.release).toHaveBeenCalledTimes(1);
   });
 
-  it('does not release already released runners and returns zero when cleanup has no change row', async () => {
+  it('does not release already released runners', async () => {
     const releasedQueryRunner = {
       connect: jest.fn(async () => {
         throw new Error('connection failed');
@@ -342,25 +344,18 @@ describe('SqliteTriggerJournalDriver', () => {
       isReleased: true,
       release: jest.fn(async () => undefined),
     };
-    const cleanupQueryRunner = {
-      connect: jest.fn(async () => undefined),
-      query: jest.fn(async () => []),
-      release: jest.fn(async () => undefined),
-    };
     const dataSource = {
-      createQueryRunner: jest
-        .fn()
-        .mockReturnValueOnce(releasedQueryRunner)
-        .mockReturnValueOnce(cleanupQueryRunner),
+      createQueryRunner: jest.fn(() => releasedQueryRunner),
     } as unknown as DataSource;
 
     await expect(driver.install(dataSource, journalOptions)).rejects.toThrow(
       'connection failed',
     );
-    await expect(driver.cleanup(dataSource, journalOptions, 1)).resolves.toBe(0);
+    await expect(driver.cleanup(dataSource, journalOptions, 1)).rejects.toThrow(
+      'In-process mutation-journal cleanup is disabled',
+    );
 
     expect(releasedQueryRunner.release).not.toHaveBeenCalled();
-    expect(cleanupQueryRunner.release).toHaveBeenCalledTimes(1);
   });
 
   it('treats a table with an unavailable SQL definition as a non-virtual table', async () => {

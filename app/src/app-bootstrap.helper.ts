@@ -13,8 +13,12 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import fastifyCookie from '@fastify/cookie';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { fastify, FastifyInstance } from 'fastify';
+import {
+  SwaggerModule,
+  DocumentBuilder,
+  type SwaggerDocumentOptions,
+} from '@nestjs/swagger';
+import type { FastifyInstance } from 'fastify';
 import { envIsTrue } from '@nestjs-yalc/utils/env.helper.js';
 import { useContainer } from 'class-validator';
 import clc from 'cli-color';
@@ -32,6 +36,11 @@ export interface ICreateOptions {
    * Defaults to "api".
    */
   swaggerPath?: string;
+  /**
+   * Passed to `SwaggerModule.createDocument`, e.g. `{ autoTagControllers: false }`
+   * to keep untagged controllers out of the generated tags.
+   */
+  swaggerDocumentOptions?: SwaggerDocumentOptions;
   filters?: ExceptionFilter[];
   validationPipeOptions?: ValidationPipeOptions;
   /**
@@ -113,13 +122,18 @@ export class AppBootstrap<
     createOptions?: INestCreateOptions;
     fastifyInstance?: FastifyInstance;
   }) {
-    this.fastifyInstance = options?.fastifyInstance ?? fastify();
+    // let the adapter build the default instance: Nest 11 reads
+    // initialConfig.routerOptions, which a bare fastify() doesn't expose
+    const adapter = options?.fastifyInstance
+      ? new FastifyAdapter(options.fastifyInstance as any)
+      : new FastifyAdapter();
+    this.fastifyInstance = adapter.getInstance() as unknown as FastifyInstance;
 
     let app;
     try {
       app = await NestFactory.create<NestFastifyApplication>(
         this.module,
-        new FastifyAdapter(this.fastifyInstance as any),
+        adapter,
         {
           bufferLogs: false,
           abortOnError: options?.createOptions?.abortOnError ?? false,
@@ -188,6 +202,7 @@ export class AppBootstrap<
       const document = SwaggerModule.createDocument(
         this.getApp(),
         this.buildSwaggerConfig().build(),
+        options.swaggerDocumentOptions,
       );
       SwaggerModule.setup(swaggerPath, this.getApp(), document, {
         jsonDocumentUrl: `/${swaggerPath}/json`,

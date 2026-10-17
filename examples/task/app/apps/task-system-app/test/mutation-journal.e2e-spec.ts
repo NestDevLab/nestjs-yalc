@@ -3,7 +3,6 @@ import { expect } from '@jest/globals';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
 import {
-  MutationJournalCleanupService,
   MutationJournalQueryService,
   MutationJournalService,
   type MutationJournalRow,
@@ -14,13 +13,10 @@ import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
 
 const TASK_TABLE = 'omni-record';
-const RETENTION_DAYS = 30;
-const MILLISECONDS_PER_DAY = 86_400_000;
 
 describe('Mutation journal e2e', () => {
   let app: INestApplication;
   let dataSource: DataSource;
-  let cleanupService: MutationJournalCleanupService;
   let journalService: MutationJournalService;
   let queryService: MutationJournalQueryService;
   let taskMutations: MutationJournalRow[];
@@ -34,7 +30,6 @@ describe('Mutation journal e2e', () => {
     await app.listen(0);
 
     dataSource = app.get(DataSource);
-    cleanupService = app.get(MutationJournalCleanupService);
     journalService = app.get(MutationJournalService);
     queryService = app.get(MutationJournalQueryService);
   });
@@ -132,15 +127,12 @@ describe('Mutation journal e2e', () => {
     });
   });
 
-  it('removes expired rows while preserving fresh task mutations', async () => {
-    const oldOccurredAt =
-      Date.now() - (RETENTION_DAYS + 1) * MILLISECONDS_PER_DAY;
+  it('preserves history for governed host retention', async () => {
+    const oldOccurredAt = Date.now() - 31 * 86_400_000;
     await dataSource.query(
       'INSERT INTO "_mutation_journal" ("occurredAt", "tableName", "action", "oldRow", "newRow", "actor") VALUES (?, ?, ?, ?, ?, ?)',
       [oldOccurredAt, 'expired-row', 'insert', null, '{}', null],
     );
-
-    expect(await cleanupService.runOnce()).toBe(1);
 
     const expiredRows = await queryService.find(undefined, {
       tableName: 'expired-row',
@@ -150,7 +142,7 @@ describe('Mutation journal e2e', () => {
       tableName: TASK_TABLE,
     });
 
-    expect(expiredRows).toEqual([]);
+    expect(expiredRows).toHaveLength(1);
     expect(remainingTaskRows.map((row) => row.id)).toEqual(
       expect.arrayContaining(taskMutations.map((row) => row.id)),
     );

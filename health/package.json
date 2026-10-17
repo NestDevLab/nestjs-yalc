@@ -1,0 +1,22 @@
+{
+  "name": "@nestjs-yalc/health",
+  "version": "1.4.0",
+  "type": "module",
+  "description": "Read-only health probes and incident state for NestJS services",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": "./dist/src/index.js",
+    "./*.js": "./dist/src/*.js",
+    "./*": "./dist/src/*"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "tslib": "^2.6.3",
+    "typeorm": "^0.3.28",
+    "sqlite3": "5.1.7"
+  }
+}

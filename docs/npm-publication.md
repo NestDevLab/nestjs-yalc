@@ -94,6 +94,8 @@ overrides let npm resolve transitive Yalc dependencies without adding them as
 top-level consumer dependencies. The smoke also rejects undeclared runtime
 imports anywhere in CrudGen's reachable package graph. Use the tarball smoke
 before publication and the registry smoke immediately after publication.
+The framework consumer installs with lifecycle scripts disabled, then rebuilds
+only `sqlite3` so its native binding is available for the runtime check.
 
 ## GitHub Actions publication
 
