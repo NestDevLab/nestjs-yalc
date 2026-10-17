@@ -1,21 +1,26 @@
 {
-  "changed_refs": {},
+  "changed_refs": {
+    "refs/heads/dev-integration": "50dd54fcfe2dd7a25100b9bcda5808e15555d4b3",
+    "refs/heads/pr/public-smoke-sqlite-fix": "73d645d09258b1d96c4cacb841a1502727b3b33a"
+  },
   "claims": {
-    "refs/heads/dev-integration": "b091e82c8763aa6c95e92904630835b09a416905",
+    "refs/heads/dev-integration": "6f7713477ad06f2c5ffc4aa5cbfa1010263eccdf",
     "refs/heads/pr/b9-auth-session-spec": "8184285a58fc052fe606e9f56cefb4190b439f8f",
     "refs/heads/pr/mgt0458-health-core": "7fde204e58e5ae46e728798282fd347c0a3ee943",
     "refs/heads/pr/public-smoke-sqlite": "5999481d2661f3bbd5fcbc637a8afdfdb5b8917f",
+    "refs/heads/pr/public-smoke-sqlite-fix": "9d60da04d7854a24f2639885adc0b56cf4cea89e",
     "refs/heads/syncwheel/draft/mgt0458-health-core": "ddd6e06de452a500ba00312867d8553bba5cad16",
     "refs/heads/syncwheel/draft/mgt0458-health-dev": "a08d9386d8d03623d564018572fdc3d3906b07ad"
   },
   "coordination_id": "mgt0458-health",
-  "created_at": "2026-10-17T07:30:21+00:00",
+  "created_at": "2026-10-17T07:49:36+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
-    "refs/heads/dev-integration": "6bc653dd588a621efeaf4905420740df77a96a1a",
+    "refs/heads/dev-integration": "50dd54fcfe2dd7a25100b9bcda5808e15555d4b3",
     "refs/heads/pr/b9-auth-session-spec": "90a7042a750362a841d8933fe30d880deadae8ef",
     "refs/heads/pr/mgt0458-health-core": "f578bb982acbab4e922f9b3944d8e8baef0bade5",
     "refs/heads/pr/public-smoke-sqlite": null,
+    "refs/heads/pr/public-smoke-sqlite-fix": "73d645d09258b1d96c4cacb841a1502727b3b33a",
     "refs/heads/syncwheel/draft/mgt0458-health-core": "942a8581305cafcb1bd60e3a8aa5399714b66a76",
     "refs/heads/syncwheel/draft/mgt0458-health-dev": "fe6019446ad2a298d79eadfe6291176355abaa9c"
   },
@@ -31,32 +36,50 @@
       "state_branch": "syncwheel/state/mgt0458-health"
     },
     "defaults": {
-      "base_branch": "maintenance/nest9-typescript59-audit",
+      "base_branch": "dev",
       "base_ref": {
         "kind": "remote-ref",
-        "ref": "refs/heads/maintenance/nest9-typescript59-audit",
+        "ref": "refs/heads/dev",
         "role": "canonical"
       }
     },
     "integration": {
       "base": {
         "kind": "remote-ref",
-        "ref": "refs/heads/maintenance/nest9-typescript59-audit",
+        "ref": "refs/heads/dev",
         "role": "canonical"
       },
       "branch": "dev-integration",
-      "stacks": [],
+      "stacks": [
+        "public-smoke-sqlite-fix"
+      ],
       "strategy": "cherry-pick"
     },
-    "stacks": [],
+    "stacks": [
+      {
+        "base": {
+          "kind": "remote-ref",
+          "ref": "refs/heads/dev",
+          "role": "canonical"
+        },
+        "branch": "pr/public-smoke-sqlite-fix",
+        "commits": [
+          "7620e780ecbbde240959e4ec8bb6b00909e46e41",
+          "73d645d09258b1d96c4cacb841a1502727b3b33a"
+        ],
+        "id": "public-smoke-sqlite-fix",
+        "integration_branch": "dev-integration",
+        "target_branch": "dev"
+      }
+    ],
     "version": 2
   },
-  "manifest_digest": "a9ae02620f40887bb3c666f84ea35125f82a893b56467018da3365e228c5c590",
-  "operation_token": "ec2e340f-42e0-4b08-b43c-f5bd32312742",
-  "parent_state": "144efd003c6eb5a5498ed504aeb5aedc71bc29ed",
-  "projection_status": "partial",
-  "publication_id": "ffd980c6-0cdf-4db2-83d6-4c4ee750679f",
-  "publication_scope": "close:b9-auth-session-spec",
+  "manifest_digest": "4b4c8f69345d2b219ae0ba9637a6e42d542b37a7c17262643d505348998ce257",
+  "operation_token": "6773ba96-b71b-4217-bd3f-daabbb6f1f81",
+  "parent_state": "46031f189be1e76a5b21e62bdaaf05f071ceb2ac",
+  "projection_status": "convergent",
+  "publication_id": "3cc4b85d-6696-4a90-a158-7944e052b407",
+  "publication_scope": "full",
   "schema_version": 2,
   "syncwheel_version": "0.45.6",
   "tombstones": [
