@@ -1,11 +1,8 @@
 {
-  "changed_refs": {
-    "refs/heads/dev-integration": "ff23aa8555e0879d2cb6614669c4429a82e57694",
-    "refs/heads/pr/b9-auth-directory-freeze": "4e114dce9795dea504257822ceaccfb3edafcaff"
-  },
+  "changed_refs": {},
   "claims": {
     "refs/heads/dev-integration": "42ef90585a3ba6ab7b1719531cddcf53bfc537f5",
-    "refs/heads/pr/b9-auth-directory-freeze": "8bb117381ce6181199f1b673626c67e9e1641efa",
+    "refs/heads/pr/b9-auth-directory-freeze": "dabc6697e3742b5d1fd9c21fe556a2ff016d18d4",
     "refs/heads/pr/b9-auth-registration-receipt": "e681ec2d753dc698d2e9062a75798a226c0440ff",
     "refs/heads/pr/b9-auth-session-core": "2746c5392e902bbffca0312edd6ef1e40ae8b510",
     "refs/heads/pr/b9-auth-session-spec": "8184285a58fc052fe606e9f56cefb4190b439f8f",
@@ -16,7 +13,7 @@
     "refs/heads/syncwheel/draft/mgt0458-health-dev": "a08d9386d8d03623d564018572fdc3d3906b07ad"
   },
   "coordination_id": "mgt0458-health",
-  "created_at": "2026-10-17T11:12:35+00:00",
+  "created_at": "2026-10-17T11:15:12+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
     "refs/heads/dev-integration": "ff23aa8555e0879d2cb6614669c4429a82e57694",
@@ -56,35 +53,18 @@
         "role": "canonical"
       },
       "branch": "dev-integration",
-      "stacks": [
-        "b9-auth-directory-freeze"
-      ],
+      "stacks": [],
       "strategy": "cherry-pick"
     },
-    "stacks": [
-      {
-        "base": {
-          "kind": "remote-ref",
-          "ref": "refs/heads/dev",
-          "role": "canonical"
-        },
-        "branch": "pr/b9-auth-directory-freeze",
-        "commits": [
-          "e32f91987fc3e89d24338210c6964179efef35c9"
-        ],
-        "id": "b9-auth-directory-freeze",
-        "integration_branch": "dev-integration",
-        "target_branch": "dev"
-      }
-    ],
+    "stacks": [],
     "version": 2
   },
   "manifest_digest": "4b23d9ad62fdaa2414fed8b9d48c0c54962d3cfb60e6e95b978b9588740b0b44",
-  "operation_token": "0ae1eb7b-c719-4b71-baa2-efddc7856abe",
-  "parent_state": "f42e0e11bd1223f362bd59238410150b7efc2a46",
+  "operation_token": "8333e245-332d-4570-ae9f-f166d1cf7c27",
+  "parent_state": "61a50eea633c29656743329c7eeb309f1b248ce2",
   "projection_status": "partial",
-  "publication_id": "f7f2d68e-29c9-47f9-8c9c-2fd109977e1d",
-  "publication_scope": "stack:b9-auth-directory-freeze",
+  "publication_id": "4e4589a5-d4a0-43a0-9d14-a1c68e5ba402",
+  "publication_scope": "close:b9-auth-directory-freeze",
   "schema_version": 2,
   "syncwheel_version": "0.45.6",
   "tombstones": [
@@ -151,6 +131,14 @@
       "ref": "refs/heads/pr/b9-auth-session-core",
       "remote_tip": null,
       "stack": "b9-auth-session-core"
+    },
+    {
+      "branch": "pr/b9-auth-directory-freeze",
+      "closed_at": "2026-10-17T11:15:01+00:00",
+      "reason": "absorbed",
+      "ref": "refs/heads/pr/b9-auth-directory-freeze",
+      "remote_tip": null,
+      "stack": "b9-auth-directory-freeze"
     }
   ]
 }
