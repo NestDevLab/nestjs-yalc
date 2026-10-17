@@ -1,12 +1,11 @@
 {
-  "changed_refs": [
-    "refs/heads/dev-integration",
-    "refs/heads/pr/b9-auth-directory-receipt"
-  ],
-  "claimed_at": "2026-10-17T11:37:36+00:00",
+  "changed_refs": [],
+  "claimed_at": "2026-10-17T11:40:09+00:00",
+  "closed": true,
   "coordination_id": "mgt0458-health",
-  "operation_token": "cab7f26e-8bee-4a53-b677-cfe8cd607b0b",
-  "publication_scope": "stack:b9-auth-directory-receipt",
+  "operation_token": "e7d75fba-3a92-4cd8-bd90-e7605db8c0f1",
+  "publication_scope": "close:b9-auth-directory-receipt",
+  "reason": "absorbed",
   "source_ref": "refs/heads/pr/b9-auth-directory-receipt",
   "syncwheel_version": "0.45.6"
 }
