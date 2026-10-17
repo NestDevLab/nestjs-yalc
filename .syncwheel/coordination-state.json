@@ -1,7 +1,9 @@
 {
-  "changed_refs": {},
+  "changed_refs": {
+    "refs/heads/dev-integration": "738df3fc00c790a5efc9dea4ed7304fa454a70d0"
+  },
   "claims": {
-    "refs/heads/dev-integration": "68d75f2fbf0a730ab7833feb453e8d1fde63a857",
+    "refs/heads/dev-integration": "0574a91e7b86eb982b604fa5ffc28919e92eb410",
     "refs/heads/pr/b9-auth-directory-core": "96d10aaa13ecc8511863c7ec1089031a46227ae7",
     "refs/heads/pr/b9-auth-directory-freeze": "dabc6697e3742b5d1fd9c21fe556a2ff016d18d4",
     "refs/heads/pr/b9-auth-directory-harness": "92d3915fa58989ff695f07da280a9036a734f4de",
@@ -17,10 +19,10 @@
     "refs/heads/syncwheel/draft/mgt0458-health-dev": "a08d9386d8d03623d564018572fdc3d3906b07ad"
   },
   "coordination_id": "mgt0458-health",
-  "created_at": "2026-10-17T12:49:22+00:00",
+  "created_at": "2026-10-17T12:52:03+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
-    "refs/heads/dev-integration": "cff1a0c9609d3762d840749f1f87193e0b301654",
+    "refs/heads/dev-integration": "738df3fc00c790a5efc9dea4ed7304fa454a70d0",
     "refs/heads/pr/b9-auth-directory-core": "a5e423365ddd1ee9101a366ab0fe784657d104b1",
     "refs/heads/pr/b9-auth-directory-freeze": "4e114dce9795dea504257822ceaccfb3edafcaff",
     "refs/heads/pr/b9-auth-directory-harness": "0f97bf761645f25a8e6acdefd7754e89efa669d4",
@@ -67,12 +69,12 @@
     "stacks": [],
     "version": 2
   },
-  "manifest_digest": "6703de225a963b898043f3af37834f280bea1cd5349f19244e847f02191c0df8",
-  "operation_token": "1b1e1bbe-3c7e-451f-a90f-9840318fb178",
-  "parent_state": "e3ff21adeb328aa90a4cf487540bf6ac17f56361",
+  "manifest_digest": "6f37a5705607adc9ca7b9c49c19704751bf74efd6abb40c1e275ee43ae497d74",
+  "operation_token": "6f95b009-0785-4ad3-a679-cdc3207cec45",
+  "parent_state": "366534a1577fd83287b83dab30f274bc21d418ea",
   "projection_status": "partial",
-  "publication_id": "dbd66477-76f6-4bea-b96a-7bba69b80d10",
-  "publication_scope": "close:b9-auth-sqlite-freeze",
+  "publication_id": "f15749a2-0863-4883-b82b-b0d102320e42",
+  "publication_scope": "integration",
   "schema_version": 2,
   "syncwheel_version": "0.45.6",
   "tombstones": [
