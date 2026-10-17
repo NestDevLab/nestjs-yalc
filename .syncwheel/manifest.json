@@ -1,16 +1,16 @@
 {
   "channels": [],
   "coordination": {
-    "mode": "active-active",
-    "id": "mgt0458-health",
-    "remote": "origin",
-    "state_branch": "syncwheel/state/mgt0458-health",
+    "claims": "advisory",
     "gc": {
-      "worktree_grace_days": 7,
+      "backup_keep": 2,
       "backup_retention_days": 30,
-      "backup_keep": 2
+      "worktree_grace_days": 7
     },
-    "claims": "advisory"
+    "id": "mgt0458-health",
+    "mode": "active-active",
+    "remote": "origin",
+    "state_branch": "syncwheel/state/mgt0458-health"
   },
   "defaults": {
     "base_branch": "dev",
@@ -30,22 +30,22 @@
   "repository_mode": "delivery",
   "stacks": [
     {
-      "id": "b9-auth-sqlite-freeze",
-      "branch": "pr/b9-auth-sqlite-freeze",
       "base": "origin/dev",
-      "target_remote": "origin",
-      "target_branch": "dev",
-      "integration_branch": "dev-integration",
+      "branch": "pr/b9-auth-sqlite-freeze",
       "commits": [
         "6471b027b36ea134f248e41adf40f9b27674e2e8"
       ],
-      "state": "published",
+      "id": "b9-auth-sqlite-freeze",
+      "integration_branch": "dev-integration",
+      "meta": {
+        "purpose": "Freeze independently reviewed real SQLite session and directory store acceptance before implementation"
+      },
       "publication": {
         "enabled": true
       },
-      "meta": {
-        "purpose": "Freeze independently reviewed real SQLite session and directory store acceptance before implementation"
-      }
+      "state": "published",
+      "target_branch": "dev",
+      "target_remote": "origin"
     }
   ],
   "syncwheel_tracking": "git-tracked",
