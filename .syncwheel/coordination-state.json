@@ -1,8 +1,5 @@
 {
-  "changed_refs": {
-    "refs/heads/dev-integration": "cff1a0c9609d3762d840749f1f87193e0b301654",
-    "refs/heads/pr/b9-auth-sqlite-freeze": "6471b027b36ea134f248e41adf40f9b27674e2e8"
-  },
+  "changed_refs": {},
   "claims": {
     "refs/heads/dev-integration": "68d75f2fbf0a730ab7833feb453e8d1fde63a857",
     "refs/heads/pr/b9-auth-directory-core": "96d10aaa13ecc8511863c7ec1089031a46227ae7",
@@ -12,7 +9,7 @@
     "refs/heads/pr/b9-auth-registration-receipt": "e681ec2d753dc698d2e9062a75798a226c0440ff",
     "refs/heads/pr/b9-auth-session-core": "2746c5392e902bbffca0312edd6ef1e40ae8b510",
     "refs/heads/pr/b9-auth-session-spec": "8184285a58fc052fe606e9f56cefb4190b439f8f",
-    "refs/heads/pr/b9-auth-sqlite-freeze": "4dc7fdef1f762bff2faf5ca829ba5cb456bd617d",
+    "refs/heads/pr/b9-auth-sqlite-freeze": "86e3c8c50f67dc7971d92181d7418aa7214e5fec",
     "refs/heads/pr/mgt0458-health-core": "7fde204e58e5ae46e728798282fd347c0a3ee943",
     "refs/heads/pr/public-smoke-sqlite": "5999481d2661f3bbd5fcbc637a8afdfdb5b8917f",
     "refs/heads/pr/public-smoke-sqlite-fix": "31683b82fc489c2b29b18ca7801e266bdcb736d8",
@@ -20,7 +17,7 @@
     "refs/heads/syncwheel/draft/mgt0458-health-dev": "a08d9386d8d03623d564018572fdc3d3906b07ad"
   },
   "coordination_id": "mgt0458-health",
-  "created_at": "2026-10-17T12:45:10+00:00",
+  "created_at": "2026-10-17T12:49:22+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
     "refs/heads/dev-integration": "cff1a0c9609d3762d840749f1f87193e0b301654",
@@ -64,35 +61,18 @@
         "role": "canonical"
       },
       "branch": "dev-integration",
-      "stacks": [
-        "b9-auth-sqlite-freeze"
-      ],
+      "stacks": [],
       "strategy": "cherry-pick"
     },
-    "stacks": [
-      {
-        "base": {
-          "kind": "remote-ref",
-          "ref": "refs/heads/dev",
-          "role": "canonical"
-        },
-        "branch": "pr/b9-auth-sqlite-freeze",
-        "commits": [
-          "6471b027b36ea134f248e41adf40f9b27674e2e8"
-        ],
-        "id": "b9-auth-sqlite-freeze",
-        "integration_branch": "dev-integration",
-        "target_branch": "dev"
-      }
-    ],
+    "stacks": [],
     "version": 2
   },
   "manifest_digest": "6703de225a963b898043f3af37834f280bea1cd5349f19244e847f02191c0df8",
-  "operation_token": "7047d436-4625-4de9-979d-845240901492",
-  "parent_state": "9cb5f842a933d0d65e1dfd8458c37ced036ef65e",
+  "operation_token": "1b1e1bbe-3c7e-451f-a90f-9840318fb178",
+  "parent_state": "e3ff21adeb328aa90a4cf487540bf6ac17f56361",
   "projection_status": "partial",
-  "publication_id": "563c887f-21e1-42a4-b8df-aaf4476c3aff",
-  "publication_scope": "stack:b9-auth-sqlite-freeze",
+  "publication_id": "dbd66477-76f6-4bea-b96a-7bba69b80d10",
+  "publication_scope": "close:b9-auth-sqlite-freeze",
   "schema_version": 2,
   "syncwheel_version": "0.45.6",
   "tombstones": [
@@ -191,6 +171,14 @@
       "ref": "refs/heads/pr/b9-auth-directory-core",
       "remote_tip": null,
       "stack": "b9-auth-directory-core"
+    },
+    {
+      "branch": "pr/b9-auth-sqlite-freeze",
+      "closed_at": "2026-10-17T12:49:11+00:00",
+      "reason": "absorbed",
+      "ref": "refs/heads/pr/b9-auth-sqlite-freeze",
+      "remote_tip": null,
+      "stack": "b9-auth-sqlite-freeze"
     }
   ]
 }
