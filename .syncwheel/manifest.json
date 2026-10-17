@@ -32,7 +32,9 @@
     {
       "base": "origin/dev",
       "branch": "pr/b9-auth-session-core",
-      "commits": [],
+      "commits": [
+        "50679bb0f0a2cb424a6ef2aefe8a9e89cb6fbcf1"
+      ],
       "id": "b9-auth-session-core",
       "integration_branch": "dev-integration",
       "meta": {
