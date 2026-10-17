@@ -1,0 +1,12 @@
+{
+  "changed_refs": [
+    "refs/heads/dev-integration",
+    "refs/heads/pr/b9-auth-sqlite-freeze"
+  ],
+  "claimed_at": "2026-10-17T12:45:10+00:00",
+  "coordination_id": "mgt0458-health",
+  "operation_token": "7047d436-4625-4de9-979d-845240901492",
+  "publication_scope": "stack:b9-auth-sqlite-freeze",
+  "source_ref": "refs/heads/pr/b9-auth-sqlite-freeze",
+  "syncwheel_version": "0.45.6"
+}
