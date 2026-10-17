@@ -23,8 +23,7 @@
     "base": "origin/maintenance/nest9-typescript59-audit",
     "branch": "dev-integration",
     "stacks": [
-      "b9-auth-session-spec",
-      "public-smoke-sqlite"
+      "b9-auth-session-spec"
     ],
     "strategy": "cherry-pick"
   },
@@ -46,22 +45,6 @@
       },
       "meta": {
         "purpose": "Portable auth session-core contract and frozen acceptance before implementation"
-      }
-    },
-    {
-      "id": "public-smoke-sqlite",
-      "branch": "pr/public-smoke-sqlite",
-      "base": "origin/dev",
-      "target_remote": "origin",
-      "target_branch": "dev",
-      "integration_branch": "dev-integration",
-      "commits": [],
-      "state": "published",
-      "publication": {
-        "enabled": true
-      },
-      "meta": {
-        "purpose": "Initialize explicit SQLite native dependency in public tarball smoke consumer"
       }
     }
   ],
