@@ -1,9 +1,10 @@
 {
   "changed_refs": {
-    "refs/heads/dev-integration": "db76770969aff3f353c3361da34ecdaccc95276b"
+    "refs/heads/dev-integration": "cff1a0c9609d3762d840749f1f87193e0b301654",
+    "refs/heads/pr/b9-auth-sqlite-freeze": "6471b027b36ea134f248e41adf40f9b27674e2e8"
   },
   "claims": {
-    "refs/heads/dev-integration": "68cf70a4a4c7e9a54721089934d4e30da3299c85",
+    "refs/heads/dev-integration": "68d75f2fbf0a730ab7833feb453e8d1fde63a857",
     "refs/heads/pr/b9-auth-directory-core": "96d10aaa13ecc8511863c7ec1089031a46227ae7",
     "refs/heads/pr/b9-auth-directory-freeze": "dabc6697e3742b5d1fd9c21fe556a2ff016d18d4",
     "refs/heads/pr/b9-auth-directory-harness": "92d3915fa58989ff695f07da280a9036a734f4de",
@@ -11,6 +12,7 @@
     "refs/heads/pr/b9-auth-registration-receipt": "e681ec2d753dc698d2e9062a75798a226c0440ff",
     "refs/heads/pr/b9-auth-session-core": "2746c5392e902bbffca0312edd6ef1e40ae8b510",
     "refs/heads/pr/b9-auth-session-spec": "8184285a58fc052fe606e9f56cefb4190b439f8f",
+    "refs/heads/pr/b9-auth-sqlite-freeze": "4dc7fdef1f762bff2faf5ca829ba5cb456bd617d",
     "refs/heads/pr/mgt0458-health-core": "7fde204e58e5ae46e728798282fd347c0a3ee943",
     "refs/heads/pr/public-smoke-sqlite": "5999481d2661f3bbd5fcbc637a8afdfdb5b8917f",
     "refs/heads/pr/public-smoke-sqlite-fix": "31683b82fc489c2b29b18ca7801e266bdcb736d8",
@@ -18,10 +20,10 @@
     "refs/heads/syncwheel/draft/mgt0458-health-dev": "a08d9386d8d03623d564018572fdc3d3906b07ad"
   },
   "coordination_id": "mgt0458-health",
-  "created_at": "2026-10-17T12:32:33+00:00",
+  "created_at": "2026-10-17T12:45:10+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
-    "refs/heads/dev-integration": "db76770969aff3f353c3361da34ecdaccc95276b",
+    "refs/heads/dev-integration": "cff1a0c9609d3762d840749f1f87193e0b301654",
     "refs/heads/pr/b9-auth-directory-core": "a5e423365ddd1ee9101a366ab0fe784657d104b1",
     "refs/heads/pr/b9-auth-directory-freeze": "4e114dce9795dea504257822ceaccfb3edafcaff",
     "refs/heads/pr/b9-auth-directory-harness": "0f97bf761645f25a8e6acdefd7754e89efa669d4",
@@ -29,6 +31,7 @@
     "refs/heads/pr/b9-auth-registration-receipt": "d4f9c94a233013afe9bb0f3b2f43ffe6435aad21",
     "refs/heads/pr/b9-auth-session-core": "d41b195351f19efe7ecbfd73a672c3b149765254",
     "refs/heads/pr/b9-auth-session-spec": "90a7042a750362a841d8933fe30d880deadae8ef",
+    "refs/heads/pr/b9-auth-sqlite-freeze": "6471b027b36ea134f248e41adf40f9b27674e2e8",
     "refs/heads/pr/mgt0458-health-core": "f578bb982acbab4e922f9b3944d8e8baef0bade5",
     "refs/heads/pr/public-smoke-sqlite": null,
     "refs/heads/pr/public-smoke-sqlite-fix": "73d645d09258b1d96c4cacb841a1502727b3b33a",
@@ -61,18 +64,35 @@
         "role": "canonical"
       },
       "branch": "dev-integration",
-      "stacks": [],
+      "stacks": [
+        "b9-auth-sqlite-freeze"
+      ],
       "strategy": "cherry-pick"
     },
-    "stacks": [],
+    "stacks": [
+      {
+        "base": {
+          "kind": "remote-ref",
+          "ref": "refs/heads/dev",
+          "role": "canonical"
+        },
+        "branch": "pr/b9-auth-sqlite-freeze",
+        "commits": [
+          "6471b027b36ea134f248e41adf40f9b27674e2e8"
+        ],
+        "id": "b9-auth-sqlite-freeze",
+        "integration_branch": "dev-integration",
+        "target_branch": "dev"
+      }
+    ],
     "version": 2
   },
-  "manifest_digest": "6f37a5705607adc9ca7b9c49c19704751bf74efd6abb40c1e275ee43ae497d74",
-  "operation_token": "52afecf0-2c7f-4df8-b64b-613f861bcd14",
-  "parent_state": "090efb5658ca5db35a9719a44e7cb68095159e75",
+  "manifest_digest": "6703de225a963b898043f3af37834f280bea1cd5349f19244e847f02191c0df8",
+  "operation_token": "7047d436-4625-4de9-979d-845240901492",
+  "parent_state": "9cb5f842a933d0d65e1dfd8458c37ced036ef65e",
   "projection_status": "partial",
-  "publication_id": "4eb9a906-4904-4f4c-8c4b-81ab610b03db",
-  "publication_scope": "integration",
+  "publication_id": "563c887f-21e1-42a4-b8df-aaf4476c3aff",
+  "publication_scope": "stack:b9-auth-sqlite-freeze",
   "schema_version": 2,
   "syncwheel_version": "0.45.6",
   "tombstones": [
