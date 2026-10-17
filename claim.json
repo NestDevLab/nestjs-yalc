@@ -1,12 +1,11 @@
 {
-  "changed_refs": [
-    "refs/heads/dev-integration",
-    "refs/heads/pr/b9-auth-sqlite-freeze"
-  ],
-  "claimed_at": "2026-10-17T12:45:10+00:00",
+  "changed_refs": [],
+  "claimed_at": "2026-10-17T12:49:22+00:00",
+  "closed": true,
   "coordination_id": "mgt0458-health",
-  "operation_token": "7047d436-4625-4de9-979d-845240901492",
-  "publication_scope": "stack:b9-auth-sqlite-freeze",
+  "operation_token": "1b1e1bbe-3c7e-451f-a90f-9840318fb178",
+  "publication_scope": "close:b9-auth-sqlite-freeze",
+  "reason": "absorbed",
   "source_ref": "refs/heads/pr/b9-auth-sqlite-freeze",
   "syncwheel_version": "0.45.6"
 }
