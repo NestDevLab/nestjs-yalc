@@ -1,8 +1,14 @@
 {
-  "changed_refs": {},
+  "changed_refs": {
+    "refs/heads/dev-integration": "60d4930e8186146be991fdbb81766a6b565e7593",
+    "refs/heads/pr/b9-auth-directory-core": "739f30f2a0c6ca9f63946e6dc6e94336a0d8295c",
+    "refs/heads/pr/b9-auth-directory-harness": "0f97bf761645f25a8e6acdefd7754e89efa669d4"
+  },
   "claims": {
-    "refs/heads/dev-integration": "0a517e970bf4ce5009d2d5fb96ef59965761fbc3",
+    "refs/heads/dev-integration": "0079ccd787a048a9af7d2c02fcf39dc1a28c430c",
+    "refs/heads/pr/b9-auth-directory-core": "79129fa9d17093d2a7101299149c0b67edbd073c",
     "refs/heads/pr/b9-auth-directory-freeze": "dabc6697e3742b5d1fd9c21fe556a2ff016d18d4",
+    "refs/heads/pr/b9-auth-directory-harness": "063ff5b40288c5874ebe0661f71fbc31c6cad2ad",
     "refs/heads/pr/b9-auth-directory-receipt": "8cbf3574290ddc4b645d764b50de54e195c535eb",
     "refs/heads/pr/b9-auth-registration-receipt": "e681ec2d753dc698d2e9062a75798a226c0440ff",
     "refs/heads/pr/b9-auth-session-core": "2746c5392e902bbffca0312edd6ef1e40ae8b510",
@@ -14,11 +20,13 @@
     "refs/heads/syncwheel/draft/mgt0458-health-dev": "a08d9386d8d03623d564018572fdc3d3906b07ad"
   },
   "coordination_id": "mgt0458-health",
-  "created_at": "2026-10-17T11:40:09+00:00",
+  "created_at": "2026-10-17T12:08:41+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
-    "refs/heads/dev-integration": "4676b9def83101509b293bd237bfb346faa4951a",
+    "refs/heads/dev-integration": "60d4930e8186146be991fdbb81766a6b565e7593",
+    "refs/heads/pr/b9-auth-directory-core": "739f30f2a0c6ca9f63946e6dc6e94336a0d8295c",
     "refs/heads/pr/b9-auth-directory-freeze": "4e114dce9795dea504257822ceaccfb3edafcaff",
+    "refs/heads/pr/b9-auth-directory-harness": "0f97bf761645f25a8e6acdefd7754e89efa669d4",
     "refs/heads/pr/b9-auth-directory-receipt": "e614743109ae6afb1144b520b52719217c5aec1a",
     "refs/heads/pr/b9-auth-registration-receipt": "d4f9c94a233013afe9bb0f3b2f43ffe6435aad21",
     "refs/heads/pr/b9-auth-session-core": "d41b195351f19efe7ecbfd73a672c3b149765254",
@@ -55,18 +63,50 @@
         "role": "canonical"
       },
       "branch": "dev-integration",
-      "stacks": [],
+      "stacks": [
+        "b9-auth-directory-core",
+        "b9-auth-directory-harness"
+      ],
       "strategy": "cherry-pick"
     },
-    "stacks": [],
+    "stacks": [
+      {
+        "base": {
+          "kind": "remote-ref",
+          "ref": "refs/heads/dev",
+          "role": "canonical"
+        },
+        "branch": "pr/b9-auth-directory-core",
+        "commits": [
+          "739f30f2a0c6ca9f63946e6dc6e94336a0d8295c"
+        ],
+        "id": "b9-auth-directory-core",
+        "integration_branch": "dev-integration",
+        "target_branch": "dev"
+      },
+      {
+        "base": {
+          "kind": "remote-ref",
+          "ref": "refs/heads/dev",
+          "role": "canonical"
+        },
+        "branch": "pr/b9-auth-directory-harness",
+        "commits": [
+          "0f97bf761645f25a8e6acdefd7754e89efa669d4"
+        ],
+        "id": "b9-auth-directory-harness",
+        "integration_branch": "dev-integration",
+        "target_branch": "dev"
+      }
+    ],
     "version": 2
   },
-  "manifest_digest": "5d59b795ecd7096e59240ecdfc8ec12633e81bec67aadef6ea96a18e3461267c",
-  "operation_token": "e7d75fba-3a92-4cd8-bd90-e7605db8c0f1",
-  "parent_state": "70a7d133351cf23d4898226dc46bf6c644d96fce",
+  "manifest_digest": "409d2f21f1660ac229546710577e231174a1138dc81a53e18275df5009dc1875",
+  "operation_token": "d3ae040b-b216-4be8-b9a1-8e599155b878",
+  "parent_state": "8b657420b3e34e406d17a7fcc9a9de3f239431aa",
   "projection_status": "partial",
-  "publication_id": "de1b90df-c3d9-4e0f-9fc6-0b1d81aa744d",
-  "publication_scope": "close:b9-auth-directory-receipt",
+  "publication_id": "d8f30a2f-d29a-4fa7-a1a4-009e880b3ec6",
+  "publication_scope": "partial",
   "schema_version": 2,
   "syncwheel_version": "0.45.6",
   "tombstones": [
