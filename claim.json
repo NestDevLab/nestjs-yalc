@@ -1,0 +1,11 @@
+{
+  "changed_refs": [],
+  "claimed_at": "2026-10-17T07:22:11+00:00",
+  "closed": true,
+  "coordination_id": "mgt0458-health",
+  "operation_token": "d7aeaba0-4570-4f2e-a9b3-49870033a0f9",
+  "publication_scope": "close:public-smoke-sqlite",
+  "reason": "Serialize unpublished empty declaration; tested source 2eba622 retained for subsequent owning stack",
+  "source_ref": "refs/heads/pr/public-smoke-sqlite",
+  "syncwheel_version": "0.45.6"
+}
