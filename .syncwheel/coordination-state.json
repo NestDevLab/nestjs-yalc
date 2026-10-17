@@ -3,15 +3,17 @@
   "claims": {
     "refs/heads/dev-integration": "b091e82c8763aa6c95e92904630835b09a416905",
     "refs/heads/pr/mgt0458-health-core": "7fde204e58e5ae46e728798282fd347c0a3ee943",
+    "refs/heads/pr/public-smoke-sqlite": "5999481d2661f3bbd5fcbc637a8afdfdb5b8917f",
     "refs/heads/syncwheel/draft/mgt0458-health-core": "ddd6e06de452a500ba00312867d8553bba5cad16",
     "refs/heads/syncwheel/draft/mgt0458-health-dev": "a08d9386d8d03623d564018572fdc3d3906b07ad"
   },
   "coordination_id": "mgt0458-health",
-  "created_at": "2026-10-17T07:12:42+00:00",
+  "created_at": "2026-10-17T07:22:11+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
     "refs/heads/dev-integration": "6bc653dd588a621efeaf4905420740df77a96a1a",
     "refs/heads/pr/mgt0458-health-core": "f578bb982acbab4e922f9b3944d8e8baef0bade5",
+    "refs/heads/pr/public-smoke-sqlite": null,
     "refs/heads/syncwheel/draft/mgt0458-health-core": "942a8581305cafcb1bd60e3a8aa5399714b66a76",
     "refs/heads/syncwheel/draft/mgt0458-health-dev": "fe6019446ad2a298d79eadfe6291176355abaa9c"
   },
@@ -48,11 +50,11 @@
     "version": 2
   },
   "manifest_digest": "a9ae02620f40887bb3c666f84ea35125f82a893b56467018da3365e228c5c590",
-  "operation_token": "a6d555c3-a5e0-4ba8-9ad4-ba79a2d227b8",
-  "parent_state": "634e32f54ebd570965c121720a7aa22da7a5dc04",
+  "operation_token": "d7aeaba0-4570-4f2e-a9b3-49870033a0f9",
+  "parent_state": "dbc4dcc3e44b352a9c6234341ffcbc3f0da5b711",
   "projection_status": "partial",
-  "publication_id": "dcdce3d2-3e9a-47af-8670-e6b58c097534",
-  "publication_scope": "close:mgt0458-health-core",
+  "publication_id": "24eb9562-b6fd-4445-a1a1-9fae02a7a966",
+  "publication_scope": "close:public-smoke-sqlite",
   "schema_version": 2,
   "syncwheel_version": "0.45.6",
   "tombstones": [
@@ -79,6 +81,14 @@
       "ref": "refs/heads/pr/mgt0458-health-core",
       "remote_tip": null,
       "stack": "mgt0458-health-core"
+    },
+    {
+      "branch": "pr/public-smoke-sqlite",
+      "closed_at": "2026-10-17T07:22:02+00:00",
+      "reason": "Serialize unpublished empty declaration; tested source 2eba622 retained for subsequent owning stack",
+      "ref": "refs/heads/pr/public-smoke-sqlite",
+      "remote_tip": null,
+      "stack": "public-smoke-sqlite"
     }
   ]
 }
