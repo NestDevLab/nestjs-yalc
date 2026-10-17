@@ -1,13 +1,11 @@
 {
-  "changed_refs": [
-    "refs/heads/dev-integration",
-    "refs/heads/pr/b9-auth-registration-receipt",
-    "refs/heads/pr/b9-auth-session-core"
-  ],
-  "claimed_at": "2026-10-17T08:21:51+00:00",
+  "changed_refs": [],
+  "claimed_at": "2026-10-17T08:27:10+00:00",
+  "closed": true,
   "coordination_id": "mgt0458-health",
-  "operation_token": "dd92314c-ae34-49fd-a8c2-22bdf5724cdd",
-  "publication_scope": "full",
+  "operation_token": "c5d77a37-5266-4789-b27d-a9612c81023e",
+  "publication_scope": "close:b9-auth-registration-receipt",
+  "reason": "absorbed",
   "source_ref": "refs/heads/pr/b9-auth-registration-receipt",
   "syncwheel_version": "0.45.6"
 }
