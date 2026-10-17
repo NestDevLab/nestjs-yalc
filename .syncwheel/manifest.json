@@ -1,16 +1,16 @@
 {
   "channels": [],
   "coordination": {
-    "claims": "advisory",
-    "gc": {
-      "backup_keep": 2,
-      "backup_retention_days": 30,
-      "worktree_grace_days": 7
-    },
-    "id": "mgt0458-health",
     "mode": "active-active",
+    "id": "mgt0458-health",
     "remote": "origin",
-    "state_branch": "syncwheel/state/mgt0458-health"
+    "state_branch": "syncwheel/state/mgt0458-health",
+    "gc": {
+      "worktree_grace_days": 7,
+      "backup_retention_days": 30,
+      "backup_keep": 2
+    },
+    "claims": "advisory"
   },
   "defaults": {
     "base_branch": "dev",
@@ -23,8 +23,7 @@
     "base": "origin/dev",
     "branch": "dev-integration",
     "stacks": [
-      "b9-auth-directory-core",
-      "b9-auth-directory-harness"
+      "b9-auth-directory-core"
     ],
     "strategy": "cherry-pick"
   },
@@ -40,24 +39,6 @@
       "integration_branch": "dev-integration",
       "meta": {
         "purpose": "Implement frozen seven-method identity directory after canonical pre-code receipt"
-      },
-      "publication": {
-        "enabled": true
-      },
-      "state": "published",
-      "target_branch": "dev",
-      "target_remote": "origin"
-    },
-    {
-      "base": "origin/dev",
-      "branch": "pr/b9-auth-directory-harness",
-      "commits": [
-        "0f97bf761645f25a8e6acdefd7754e89efa669d4"
-      ],
-      "id": "b9-auth-directory-harness",
-      "integration_branch": "dev-integration",
-      "meta": {
-        "purpose": "Qualify versioned mutation-phase directory fault fixtures while preserving original freeze"
       },
       "publication": {
         "enabled": true
