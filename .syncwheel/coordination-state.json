@@ -1,12 +1,9 @@
 {
-  "changed_refs": {
-    "refs/heads/dev-integration": "01ff97d2c5eb1b2c01abab428f9b9b7027461723",
-    "refs/heads/pr/b9-auth-session-core": "d41b195351f19efe7ecbfd73a672c3b149765254"
-  },
+  "changed_refs": {},
   "claims": {
     "refs/heads/dev-integration": "b39605df6c68860ea2515d8232ef7f7d9a06e9d2",
     "refs/heads/pr/b9-auth-registration-receipt": "e681ec2d753dc698d2e9062a75798a226c0440ff",
-    "refs/heads/pr/b9-auth-session-core": "c72a8243f41a6644075a8148039f086915702fb4",
+    "refs/heads/pr/b9-auth-session-core": "2746c5392e902bbffca0312edd6ef1e40ae8b510",
     "refs/heads/pr/b9-auth-session-spec": "8184285a58fc052fe606e9f56cefb4190b439f8f",
     "refs/heads/pr/mgt0458-health-core": "7fde204e58e5ae46e728798282fd347c0a3ee943",
     "refs/heads/pr/public-smoke-sqlite": "5999481d2661f3bbd5fcbc637a8afdfdb5b8917f",
@@ -15,7 +12,7 @@
     "refs/heads/syncwheel/draft/mgt0458-health-dev": "a08d9386d8d03623d564018572fdc3d3906b07ad"
   },
   "coordination_id": "mgt0458-health",
-  "created_at": "2026-10-17T08:32:07+00:00",
+  "created_at": "2026-10-17T08:37:15+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
     "refs/heads/dev-integration": "01ff97d2c5eb1b2c01abab428f9b9b7027461723",
@@ -54,35 +51,18 @@
         "role": "canonical"
       },
       "branch": "dev-integration",
-      "stacks": [
-        "b9-auth-session-core"
-      ],
+      "stacks": [],
       "strategy": "cherry-pick"
     },
-    "stacks": [
-      {
-        "base": {
-          "kind": "remote-ref",
-          "ref": "refs/heads/dev",
-          "role": "canonical"
-        },
-        "branch": "pr/b9-auth-session-core",
-        "commits": [
-          "50679bb0f0a2cb424a6ef2aefe8a9e89cb6fbcf1"
-        ],
-        "id": "b9-auth-session-core",
-        "integration_branch": "dev-integration",
-        "target_branch": "dev"
-      }
-    ],
+    "stacks": [],
     "version": 2
   },
   "manifest_digest": "97263bbb0c6c47cba7c0c6a5ec19115715e4d1a92f22de1b16e1226c07c236b2",
-  "operation_token": "b4a3c33e-6b01-4ec8-9490-8c56703f3796",
-  "parent_state": "f020994bc9518f32e04b9fcc1b17d1aa503e02a5",
+  "operation_token": "6eb2f9e0-7791-4dd8-96ea-22b1fe4cbb86",
+  "parent_state": "3ae727f8f54915cb1b110076e16b9218bf332397",
   "projection_status": "partial",
-  "publication_id": "9594fda5-6fca-471b-aa12-5e11fef08737",
-  "publication_scope": "stack:b9-auth-session-core",
+  "publication_id": "9eeb2a2b-d861-4c91-8128-23972957a96a",
+  "publication_scope": "close:b9-auth-session-core",
   "schema_version": 2,
   "syncwheel_version": "0.45.6",
   "tombstones": [
@@ -141,6 +121,14 @@
       "ref": "refs/heads/pr/b9-auth-registration-receipt",
       "remote_tip": null,
       "stack": "b9-auth-registration-receipt"
+    },
+    {
+      "branch": "pr/b9-auth-session-core",
+      "closed_at": "2026-10-17T08:37:04+00:00",
+      "reason": "absorbed",
+      "ref": "refs/heads/pr/b9-auth-session-core",
+      "remote_tip": null,
+      "stack": "b9-auth-session-core"
     }
   ]
 }
