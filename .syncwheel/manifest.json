@@ -1,16 +1,16 @@
 {
   "channels": [],
   "coordination": {
-    "claims": "advisory",
-    "gc": {
-      "backup_keep": 2,
-      "backup_retention_days": 30,
-      "worktree_grace_days": 7
-    },
-    "id": "mgt0458-health",
     "mode": "active-active",
+    "id": "mgt0458-health",
     "remote": "origin",
-    "state_branch": "syncwheel/state/mgt0458-health"
+    "state_branch": "syncwheel/state/mgt0458-health",
+    "gc": {
+      "worktree_grace_days": 7,
+      "backup_retention_days": 30,
+      "backup_keep": 2
+    },
+    "claims": "advisory"
   },
   "defaults": {
     "base_branch": "maintenance/nest9-typescript59-audit",
@@ -23,7 +23,8 @@
     "base": "origin/maintenance/nest9-typescript59-audit",
     "branch": "dev-integration",
     "stacks": [
-      "b9-auth-session-spec"
+      "b9-auth-session-spec",
+      "public-smoke-sqlite-fix"
     ],
     "strategy": "cherry-pick"
   },
@@ -46,6 +47,24 @@
       "state": "published",
       "target_branch": "dev",
       "target_remote": "origin"
+    },
+    {
+      "id": "public-smoke-sqlite-fix",
+      "branch": "pr/public-smoke-sqlite-fix",
+      "base": "origin/dev",
+      "target_remote": "origin",
+      "target_branch": "dev",
+      "integration_branch": "dev-integration",
+      "commits": [
+        "2eba622265d76d3603b10074d280d91870678bad"
+      ],
+      "state": "published",
+      "publication": {
+        "enabled": true
+      },
+      "meta": {
+        "purpose": "Initialize sqlite3 native binding before public tarball consumer smoke"
+      }
     }
   ],
   "syncwheel_tracking": "git-tracked",
