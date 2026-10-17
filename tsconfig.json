@@ -170,6 +170,12 @@
       ],
       "@nestjs-yalc/omnikernel-module/*": [
         "./examples/omnikernel/module/src/*"
+      ],
+      "@nestjs-yalc/auth": [
+        "./auth/src/index.ts"
+      ],
+      "@nestjs-yalc/auth/*": [
+        "./auth/src/*"
       ]
     },
     "types": [
