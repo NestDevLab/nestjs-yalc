@@ -1,6 +1,8 @@
 import { HttpAdapterHost } from '@nestjs/core';
 import {
   HttpAbstractStrategy,
+  applyStatusPolicy,
+  awaitLocalResponse,
   HttpOptions,
   IHttpCallStrategyOptions,
   IHttpCallStrategyResponse,
@@ -45,6 +47,7 @@ export class NestLocalCallStrategy extends HttpAbstractStrategy {
     path: string,
     options?: HttpOptions<TOptData, TParams>,
   ): Promise<IHttpCallStrategyResponse<TResData>> {
+    options?.signal?.throwIfAborted();
     const instance: FastifyAdapter = this.adapterHost.httpAdapter.getInstance();
     const clsHeaders = filterHeaders(
       this.clsService.get('headers'),
@@ -72,8 +75,6 @@ export class NestLocalCallStrategy extends HttpAbstractStrategy {
       | InjectOptions = {
       headers,
       method: options?.method,
-      /**@todo investigate where to set thi */
-      // signal: options?.signal,
       payload: options?.data, // map data to payload
     };
 
@@ -86,7 +87,10 @@ export class NestLocalCallStrategy extends HttpAbstractStrategy {
       args.query = Object.fromEntries(new URLSearchParams(options.parameters));
     }
 
-    const result = await instance.inject(args);
+    const result = await awaitLocalResponse(
+      () => instance.inject(args),
+      options?.signal,
+    );
 
     let data;
     try {
@@ -104,20 +108,22 @@ export class NestLocalCallStrategy extends HttpAbstractStrategy {
       data = result.body;
     }
 
-    return {
-      data,
-      headers: result.headers,
-      status: result.statusCode,
-      statusText: result.statusMessage,
-      request: result.payload, // TODO: double check if it's the correct value
-    };
+    return applyStatusPolicy(
+      {
+        data,
+        headers: result.headers,
+        status: result.statusCode,
+        statusText: result.statusMessage,
+        request: result.payload, // TODO: double check if it's the correct value
+      },
+      options?.validateStatus ?? this.options.validateStatus,
+    );
   }
 }
 
-export interface NestLocalCallStrategyProviderOptions {
+export interface NestLocalCallStrategyProviderOptions extends IHttpCallStrategyOptions {
   baseUrl?: string;
   NestLocalStrategy?: ClassType<NestLocalCallStrategy>;
-  headersWhitelist?: string[];
   internalRequestHeader?: string;
   internalRequestToken?: string;
 }

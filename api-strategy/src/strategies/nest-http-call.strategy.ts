@@ -2,6 +2,7 @@ import { ClassType } from '@nestjs-yalc/types/globals.d.js';
 import { HttpService } from '@nestjs/axios';
 import {
   HttpAbstractStrategy,
+  applyStatusPolicy,
   IHttpCallStrategyResponse,
   HttpOptions,
   IHttpCallStrategyOptions,
@@ -70,6 +71,8 @@ export class NestHttpCallStrategy extends HttpAbstractStrategy {
       _options.params = new URLSearchParams(options.parameters);
     }
 
+    const validateStatus =
+      options?.validateStatus ?? this.options.validateStatus;
     const { data, ...res } = await this.httpService.axiosRef.request({
       headers: _options?.headers as any,
       method: _options?.method,
@@ -77,20 +80,23 @@ export class NestHttpCallStrategy extends HttpAbstractStrategy {
       data: _options?.data,
       params: _options?.params,
       url: `${this.baseUrl}${path}`,
+      ...(validateStatus ? { validateStatus: () => true } : {}),
     });
 
-    return {
-      ...res,
-      headers: res.headers as OutgoingHttpHeaders,
-      data,
-    };
+    return applyStatusPolicy(
+      {
+        ...res,
+        headers: res.headers as OutgoingHttpHeaders,
+        data,
+      },
+      validateStatus,
+    );
   }
 }
 
-export interface NestHttpCallStrategyProviderOptions {
+export interface NestHttpCallStrategyProviderOptions extends IHttpCallStrategyOptions {
   baseUrl?: string;
   NestHttpStrategy?: ClassType<NestHttpCallStrategy>;
-  headersWhitelist?: string[];
   internalRequestHeader?: string;
   internalRequestToken?: string;
 }

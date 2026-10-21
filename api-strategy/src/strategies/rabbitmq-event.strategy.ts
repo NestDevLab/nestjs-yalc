@@ -8,6 +8,13 @@ interface RabbitConnectionResource {
   heartbeater?: { clear: () => void };
 }
 
+interface RabbitSession {
+  connection?: ChannelModel;
+  channel?: Channel;
+  invalid: boolean;
+  disposal?: Promise<void>;
+}
+
 export interface RabbitMqEventStrategyOptions<P = any> {
   url: string;
   exchange: string;
@@ -17,18 +24,29 @@ export interface RabbitMqEventStrategyOptions<P = any> {
   contentType?: string;
   publishOptions?: Options.Publish;
   serialize?: (payload: P) => Buffer | string;
+  /** Observes background emit failures; diagnostics must not affect delivery. */
+  onBackgroundError?: (error: unknown) => void | Promise<void>;
 }
 
 export class RabbitMqEventStrategy<P = any, O = any>
   implements IEventStrategy<P, boolean, O>, OnModuleDestroy
 {
-  private connection?: ChannelModel;
-  private channel?: Channel;
+  private resource?: RabbitSession;
+  private initialization?: Promise<Channel>;
+  private cleanup: Promise<void> = Promise.resolve();
+  private stopped = false;
+  private destruction?: Promise<void>;
 
   constructor(private readonly options: RabbitMqEventStrategyOptions<P>) {}
 
   emit(path: string, payload: P): boolean {
-    void this.publish(path, payload).catch(() => undefined);
+    void this.publish(path, payload).catch(async (error: unknown) => {
+      try {
+        await this.options.onBackgroundError?.(error);
+      } catch {
+        // Diagnostics cannot turn fire-and-forget emission into an unhandled rejection.
+      }
+    });
     return true;
   }
 
@@ -36,15 +54,27 @@ export class RabbitMqEventStrategy<P = any, O = any>
     return this.publish(path, payload);
   }
 
-  async onModuleDestroy() {
-    await closeRabbitResource(this.channel);
-    await closeRabbitResource(this.connection);
-    this.channel = undefined;
-    this.connection = undefined;
+  onModuleDestroy(): Promise<void> {
+    this.destruction ??= this.destroy();
+    return this.destruction;
+  }
+
+  private async destroy() {
+    this.stopped = true;
+    await this.initialization?.catch(() => undefined);
+    const resource = this.resource;
+    this.resource = undefined;
+    if (resource) {
+      await this.dispose(resource);
+    }
+    await this.cleanup;
   }
 
   private async publish(path: string, payload: P) {
     const channel = await this.getChannel();
+    if (this.stopped || this.resource?.channel !== channel) {
+      throw new Error('RabbitMQ channel is no longer available.');
+    }
     const body = this.serialize(payload);
 
     return channel.publish(this.options.exchange, path, body, {
@@ -64,22 +94,75 @@ export class RabbitMqEventStrategy<P = any, O = any>
     return Buffer.from(serialized ?? JSON.stringify(payload));
   }
 
-  private async getChannel() {
-    if (this.channel) {
-      return this.channel;
+  private async getChannel(): Promise<Channel> {
+    if (this.stopped) {
+      throw new Error('RabbitMqEventStrategy is shut down.');
     }
+    if (this.initialization) {
+      return this.initialization;
+    }
+    if (this.resource?.channel) {
+      return this.resource.channel;
+    }
+    this.initialization = this.initialize();
+    try {
+      return await this.initialization;
+    } finally {
+      this.initialization = undefined;
+    }
+  }
 
-    this.connection = await amqp.connect(this.options.url);
-    this.channel = await this.connection.createChannel();
-    await this.channel.assertExchange(
-      this.options.exchange,
-      this.options.exchangeType ?? 'topic',
-      {
-        durable: this.options.durable ?? true,
-      },
-    );
+  private async initialize(): Promise<Channel> {
+    await this.cleanup;
+    const resource: RabbitSession = { invalid: false };
+    try {
+      if (this.stopped) {
+        throw new Error('RabbitMqEventStrategy is shut down.');
+      }
+      resource.connection = await amqp.connect(this.options.url);
+      const invalidate = () => {
+        resource.invalid = true;
+        if (this.resource === resource) {
+          this.resource = undefined;
+          // No automatic reconnect or replay. The next explicit emit may reconnect.
+          this.cleanup = this.dispose(resource).catch(() => undefined);
+        }
+      };
+      resource.connection.on('error', invalidate);
+      resource.connection.on('close', invalidate);
+      resource.channel = await resource.connection.createChannel();
+      resource.channel.on('error', invalidate);
+      resource.channel.on('close', invalidate);
+      await resource.channel.assertExchange(
+        this.options.exchange,
+        this.options.exchangeType ?? 'topic',
+        { durable: this.options.durable ?? true },
+      );
+      if (resource.invalid || this.stopped) {
+        throw new Error('RabbitMQ initialization interrupted.');
+      }
+      this.resource = resource;
+      return resource.channel;
+    } catch (error) {
+      await this.dispose(resource).catch(() => undefined);
+      throw error;
+    }
+  }
 
-    return this.channel;
+  private dispose(resource: RabbitSession): Promise<void> {
+    resource.invalid = true;
+    resource.disposal ??= (async () => {
+      const results = await Promise.allSettled([
+        closeRabbitResource(resource.channel),
+        closeRabbitResource(resource.connection),
+      ]);
+      for (const result of results) {
+        if (result.status === 'rejected') {
+          throw result.reason;
+        }
+      }
+    })();
+    return resource.disposal;
   }
 }
 
