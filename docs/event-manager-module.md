@@ -15,14 +15,28 @@ EventModule.forRootAsync(options?: IEventModuleOptions, optionProvider?: Provide
 - `loggerProvider`: one of:
   - an `ImprovedLoggerService` instance
   - a Nest provider object
-  - a token (`string`) to resolve elsewhere
+  - a legacy token (`string`) under which a new local default logger is registered; it does **not** reuse an imported logger with that token
   - a config object `{ context, loggerLevels?, loggerType?, options? }` passed to `AppLoggerFactory`
   - if omitted, a logger is created via `AppLoggerFactory('default')`.
-- `eventEmitter`: optional provider for `EventEmitter2`; if omitted, the module expects an `EventEmitter2` provider to be available (e.g., from `@nestjs/event-emitter`).
+- `eventEmitter`: explicit Nest provider for `EventEmitter2`. Otherwise use `optionProvider.emitter`, then an imported `EventEmitter2` (e.g., `EventEmitterModule.forRoot()`). Startup fails with a configuration error if none is available.
 - `imports`: extra modules needed by your providers (e.g., `EventEmitterModule.forRoot()`).
-- `overrideLoggerLevels`: optional `LogLevel[]` (currently not applied by the module).
+- `overrideLoggerLevels`: **deprecated no-op**, retained for compatibility. Set `loggerProvider.loggerLevels` for factory-created loggers, or configure your external logger directly. The module does not mutate a shared logger.
 
-`optionProvider` is an optional provider for `IProviderOptions` (`{ logger: ImprovedLoggerService | ILoggerProviderOptionsObject; emitter: EventEmitter2 }`) so you can inject logger/emitter instances created elsewhere.
+`optionProvider` must register the exported `OPTION_PROVIDER` token. Its value is
+`{ logger?: ImprovedLoggerService | ILoggerProviderOptionsObject; emitter?: EventEmitter2 }`.
+A factory may inject dependencies exported by `options.imports`.
+
+Precedence is explicit:
+
+| Dependency | Highest priority                      | Next                      | Fallback                                           |
+| ---------- | ------------------------------------- | ------------------------- | -------------------------------------------------- |
+| Logger     | Explicit Nest `loggerProvider` object | `OPTION_PROVIDER.logger`  | Logger instance/config/string/default in `options` |
+| Emitter    | Explicit Nest `eventEmitter` provider | `OPTION_PROVIDER.emitter` | Imported `EventEmitter2`                           |
+
+Use a Nest `{ provide: EVENT_LOGGER, useExisting: EXTERNAL_LOGGER }` provider to
+reuse an external logger by identity. The external token must be exported from a
+module in `options.imports`. The same rule applies to emitter aliases. Missing
+`useExisting` dependencies produce Nest's normal dependency-resolution error.
 
 Exports: the resolved logger provider token and the `eventServiceToken`.
 
@@ -78,38 +92,66 @@ import { EventModule } from "@nestjs-yalc/event-manager";
 export class AppModule {}
 ```
 
-Custom emitter provider and service token:
+Reuse external instances and export a custom service token:
 
 ```ts
+import { Module } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
-import { EventModule, YalcEventService } from "@nestjs-yalc/event-manager";
+import { ImprovedNestLogger } from "@nestjs-yalc/logger";
+import {
+  EventModule,
+  EVENT_LOGGER,
+  YalcEventService,
+} from "@nestjs-yalc/event-manager";
+
+@Module({
+  providers: [
+    {
+      provide: "APP_LOGGER",
+      useValue: new ImprovedNestLogger("AppEvents", {}),
+    },
+    { provide: "APP_EMITTER", useValue: new EventEmitter2() },
+  ],
+  exports: ["APP_LOGGER", "APP_EMITTER"],
+})
+class SharedEventsModule {}
 
 class MyEventService extends YalcEventService {}
 
 @Module({
   imports: [
-    EventModule.forRootAsync(
-      {
-        eventEmitter: {
-          provide: EventEmitter2,
-          useFactory: () =>
-            new EventEmitter2({ wildcard: true, maxListeners: 200 }),
-        },
-        eventService: (logger, emitter, options) =>
-          new MyEventService(logger, emitter, options),
-        eventServiceToken: MyEventService,
-        loggerProvider: { context: "CustomEvents" },
-      },
-      {
-        provide: "EVENT_OPTIONS",
-        useValue: {
-          logger: { context: "CustomEvents" },
-        },
-      }
-    ),
+    EventModule.forRootAsync({
+      imports: [SharedEventsModule],
+      loggerProvider: { provide: EVENT_LOGGER, useExisting: "APP_LOGGER" },
+      eventEmitter: { provide: "EVENT_BUS", useExisting: "APP_EMITTER" },
+      eventService: (logger, emitter, options) =>
+        new MyEventService(logger, emitter, options),
+      eventServiceToken: "MY_EVENTS",
+    }),
   ],
-  providers: [MyEventService],
-  exports: [MyEventService],
 })
-export class EventsModule {}
+export class AppModule {}
 ```
+
+Providers in `AppModule` can inject `EVENT_LOGGER` and `'MY_EVENTS'`. The
+logger and the service's emitter are the exact shared instances. Do not
+register `MyEventService` a second time in `providers`; that would bypass the
+configured factory.
+
+Options-provider wiring without a separate `EventEmitterModule`:
+
+```ts
+EventModule.forRootAsync(
+  {},
+  {
+    provide: OPTION_PROVIDER,
+    useFactory: () => ({
+      logger: { context: "AppEvents", loggerLevels: ["error", "warn"] },
+      emitter: new EventEmitter2(),
+    }),
+  },
+);
+```
+
+Import `OPTION_PROVIDER` from `@nestjs-yalc/event-manager`. A provider registered
+under another token is not used as options.
