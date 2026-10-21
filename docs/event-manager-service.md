@@ -61,7 +61,8 @@ HTTP helpers select the matching error class and apply the status-derived log le
 (500+ → error, 429 → warn, otherwise → log), including when a logger level is
 supplied; `logger: false` still disables logging. `errorForward` instead preserves
 an explicit logger option and otherwise derives the level from the forwarded
-status. Forwarding retains the existing error instance and merges `data` and
+status. Forwarding preserves an existing `DefaultError` instance; ordinary
+`Error` instances are normalized to a new `DefaultError`. It merges `data` and
 `response` with call-level fields taking precedence. Keep private diagnostics in
 `data` and client-safe content in `response`.
 
