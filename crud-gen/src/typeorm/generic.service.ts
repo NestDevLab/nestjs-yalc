@@ -26,7 +26,6 @@ import { FindManyOptions, FindOptionsWhere as FindConditions } from 'typeorm';
 import {
   type CrudGenRepositoryCapabilities,
   type GenericTypeORMRepository,
-  PLAIN_CRUD_GEN_REPOSITORY_CAPABILITIES,
 } from '@nestjs-yalc/crud-gen/typeorm/generic.repository.js';
 import {
   CrudGenFindManyOptions,
@@ -45,6 +44,7 @@ import {
   mapSortingParamsToTypeORM,
 } from './crud-gen-args.helpers.js';
 import { Operators } from '../crud-gen.enum.js';
+import { resolveCrudGenRepositoryCapabilities } from '../crud-gen-capabilities.js';
 
 function hasObjectKeys(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && Object.keys(value).length > 0;
@@ -685,29 +685,7 @@ export class GenericService<
   }
 
   getCrudGenRepositoryCapabilities(): CrudGenRepositoryCapabilities {
-    const repo: any = this.repository as any;
-
-    if (typeof repo.getCrudGenCapabilities === 'function') {
-      const explicitCapabilities = repo.getCrudGenCapabilities();
-
-      if (explicitCapabilities && typeof explicitCapabilities === 'object') {
-        return {
-          ...PLAIN_CRUD_GEN_REPOSITORY_CAPABILITIES,
-          ...explicitCapabilities,
-        };
-      }
-    }
-
-    const legacyExtendedSupport =
-      typeof repo.supportsExtendedRepository === 'function'
-        ? !!repo.supportsExtendedRepository()
-        : typeof repo.getManyAndCountExtended === 'function' &&
-          typeof repo.getManyExtended === 'function';
-
-    return {
-      extendedQueries: legacyExtendedSupport,
-      structuredGraphqlFilters: legacyExtendedSupport,
-    };
+    return resolveCrudGenRepositoryCapabilities(this.repository);
   }
 
   supportsExtendedRepository(): boolean {

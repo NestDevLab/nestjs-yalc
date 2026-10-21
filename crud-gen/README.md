@@ -193,3 +193,5 @@ limitations, and runnable verification.
   https://github.com/NestDevLab/nestjs-yalc/blob/dev/docs/crud-gen-factory.md
 - REST usage:
   https://github.com/NestDevLab/nestjs-yalc/blob/dev/docs/crud-gen-rest.md
+- Repository and service capability contracts, legacy compatibility, and migration:
+  [CrudGen capabilities](../docs/crud-gen-capabilities.md)
