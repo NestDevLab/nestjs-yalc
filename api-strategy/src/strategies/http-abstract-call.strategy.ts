@@ -274,7 +274,12 @@ export async function awaitLocalResponse<T>(
     signal.addEventListener('abort', abort, { once: true });
   });
   try {
-    return await Promise.race([dispatch(), cancelled]);
+    const response = Promise.resolve().then(() => {
+      // Attach both race handlers before user dispatch can abort or throw.
+      signal.throwIfAborted();
+      return dispatch();
+    });
+    return await Promise.race([response, cancelled]);
   } finally {
     signal.removeEventListener('abort', abort);
   }

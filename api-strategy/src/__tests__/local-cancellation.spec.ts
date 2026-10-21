@@ -35,10 +35,46 @@ describe('local caller cancellation lifecycle', () => {
     const pending = new Promise<never>((_yes, no) => {
       reject = no;
     });
-    const execution = awaitLocalResponse(() => pending, controller.signal);
+    let entered!: () => void;
+    const started = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const execution = awaitLocalResponse(() => {
+      entered();
+      return pending;
+    }, controller.signal);
+    await started;
     controller.abort(reason);
     await expect(execution).rejects.toBe(reason);
     reject(new Error('late dispatch failure'));
     await new Promise((resolve) => setImmediate(resolve));
+  });
+  it('contains cancellation and a synchronous dispatch throw in the same turn', async () => {
+    const controller = new AbortController();
+    const reason = new Error('cancel during dispatch');
+    const unhandled = jest.fn();
+    const remove = jest.spyOn(controller.signal, 'removeEventListener');
+    process.on('unhandledRejection', unhandled);
+    try {
+      const execution = awaitLocalResponse(() => {
+        controller.abort(reason);
+        throw new Error('dispatch failed after abort');
+      }, controller.signal);
+      await expect(execution).rejects.toBe(reason);
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(unhandled).not.toHaveBeenCalled();
+      expect(remove).toHaveBeenCalledWith('abort', expect.any(Function));
+    } finally {
+      process.removeListener('unhandledRejection', unhandled);
+    }
+  });
+  it('does not dispatch if cancellation arrives before the dispatch microtask', async () => {
+    const controller = new AbortController();
+    const reason = new Error('cancel before dispatch');
+    const dispatch = jest.fn(async () => 1);
+    const execution = awaitLocalResponse(dispatch, controller.signal);
+    controller.abort(reason);
+    await expect(execution).rejects.toBe(reason);
+    expect(dispatch).not.toHaveBeenCalled();
   });
 });
