@@ -160,6 +160,25 @@ export interface FilterInput {
   childExpressions?: FilterInput[];
 }
 
+/** Entity keys are a compile-time upper bound; decorators determine schema membership. */
+export type EntityFilterInput<Entity> = {
+  operator?: Operators;
+  expressions?: {
+    [Kind in keyof IFilterExpressionsProperty]?: IFilterExpressionsProperty[Kind] extends infer Model
+      ? Model extends IBaseFilterModel
+        ? Omit<Model, 'field'> & { field: Extract<keyof Entity, string> }
+        : never
+      : never;
+  }[];
+  childExpressions?: EntityFilterInput<Entity>[];
+};
+
+export interface EntityCrudGenParams<
+  Entity,
+> extends ICrudGenBaseParams<Entity> {
+  filters?: EntityFilterInput<Entity>;
+}
+
 export interface ICrudGenFindExtraOptions {
   /** It apply limit and offset at the same level of the join instead of
    * wrapping the join with another query by applying the limit later

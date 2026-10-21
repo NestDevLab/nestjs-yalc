@@ -808,3 +808,12 @@ export const skeletonUserProvidersFactory = (dbConnection: string) =>
 ```
 
 As you've noticed, the `CrudGenDependencyFactory` is very extensible and allows you to fulfill any needs.
+
+## GraphQL input migration and errors
+
+Use entity-aware inputs for custom GraphQL endpoints. Deprecated `SortModel`
+and model-less argument factories remain compatibility APIs; their generic
+filter scalar does not validate entity field enums. See
+[GraphQL input compatibility](graphql-input-compatibility.md) for consumer
+inventory, wire-format migration examples, TypeScript/schema boundaries and
+separate request-coercion versus resolver-error contracts.

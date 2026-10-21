@@ -8,9 +8,21 @@ import { FilterScalar } from './filter.scalar.js';
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import { ClassType } from '@nestjs-yalc/types/globals.d.js';
 import { RowDefaultValues } from './crud-gen.enum.js';
-import { ICrudGenBaseParams } from './api-graphql/crud-gen-gql.interface.js';
+import {
+  EntityCrudGenParams,
+  ICrudGenBaseParams,
+} from './api-graphql/crud-gen-gql.interface.js';
 
 export const typeMap = new WeakMap();
+/** Supply an entity for enum-backed inputs; the model-less overload is compatibility-only. */
+export function crudGenParamsFactory<Entity>(
+  defaultValues: ICrudGenBaseParams | undefined,
+  entityModel: ClassType<Entity>,
+): { new (): EntityCrudGenParams<Entity> };
+export function crudGenParamsFactory(
+  defaultValues?: ICrudGenBaseParams,
+  entityModel?: ClassType,
+): { new (): ICrudGenBaseParams };
 export function crudGenParamsFactory(
   defaultValues?: ICrudGenBaseParams,
   entityModel?: ClassType,
@@ -37,18 +49,27 @@ export function crudGenParamsFactory(
       nullable: true,
       defaultValue: defaultValues?.sorting,
     })
-    sorting?: typeof SortType;
+    sorting?: ICrudGenBaseParams['sorting'];
     @Field(returnValue(FilterType), {
       nullable: true,
       defaultValue: defaultValues?.filters,
     })
-    filters?: typeof FilterType;
+    filters?: ICrudGenBaseParams['filters'];
   }
 
   typeMap.set(CrudGenParams, CrudGenParams);
   return typeMap.get(CrudGenParams);
 }
 
+/** Supply an entity for enum-backed inputs; the model-less overload is compatibility-only. */
+export function crudGenParamsNoPaginationFactory<Entity>(
+  defaultValues: ICrudGenBaseParams | undefined,
+  entityModel: ClassType<Entity>,
+): { new (): EntityCrudGenParams<Entity> };
+export function crudGenParamsNoPaginationFactory(
+  defaultValues?: ICrudGenBaseParams,
+  entityModel?: ClassType,
+): { new (): ICrudGenBaseParams };
 export function crudGenParamsNoPaginationFactory(
   defaultValues?: ICrudGenBaseParams,
   entityModel?: ClassType,
@@ -64,12 +85,12 @@ export function crudGenParamsNoPaginationFactory(
       nullable: true,
       defaultValue: defaultValues?.sorting,
     })
-    sorting?: typeof SortType;
+    sorting?: ICrudGenBaseParams['sorting'];
     @Field(returnValue(FilterType), {
       nullable: true,
       defaultValue: defaultValues?.filters,
     })
-    filters?: typeof FilterType;
+    filters?: ICrudGenBaseParams['filters'];
   }
 
   typeMap.set(CrudGenParams, CrudGenParams);
