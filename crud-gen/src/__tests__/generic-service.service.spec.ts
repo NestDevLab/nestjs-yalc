@@ -512,6 +512,10 @@ describe('GenericService', () => {
     );
   });
   it('test getEntityListCrudGen', async () => {
+    baseEntityRepository.getCrudGenCapabilities.mockReturnValue({
+      extendedQueries: false,
+      structuredGraphqlFilters: false,
+    });
     const mockedList: BaseEntity[] = [new BaseEntity()];
     baseEntityRepository.find.mockResolvedValue(mockedList);
     const entityListCrudGen = await service.getEntityListExtended({});

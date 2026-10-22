@@ -52,6 +52,7 @@ import {
 } from '../crud-gen.helpers.js';
 import { getModelFieldMetadataList } from '../object.decorator.js';
 import { CrudGenError } from '../crud-gen.error.js';
+import { supportsCrudGenStructuredGraphqlFilters } from '../crud-gen-capabilities.js';
 import { ExtraArgsStrategy } from '../crud-gen.enum.js';
 import { ICrudGenParams } from '../crud-gen.args.js';
 import { InputArgs } from '@nestjs-yalc/crud-gen/api-graphql/gqlmapper.decorator.js';
@@ -545,9 +546,7 @@ export function defineGetGridResource<Entity>(
           'childExpressions' in where);
 
       const supportsStructuredGraphqlFilters =
-        typeof (service as any).supportsStructuredGraphqlFilters === 'function'
-          ? !!(service as any).supportsStructuredGraphqlFilters()
-          : !!service.supportsExtendedRepository();
+        supportsCrudGenStructuredGraphqlFilters(service);
 
       if (hasStructuredFilters && !supportsStructuredGraphqlFilters) {
         throw new CrudGenError(
