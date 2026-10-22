@@ -41,7 +41,7 @@ export class CompositeEventStrategy<P = any, R = any, O = any>
 
   async emitAsync(path: string, payload: P, options?: O): Promise<R[]> {
     const settled = await Promise.allSettled(
-      this.strategies.map((strategy) =>
+      this.strategies.map(async (strategy) =>
         strategy.emitAsync(path, payload, options),
       ),
     );

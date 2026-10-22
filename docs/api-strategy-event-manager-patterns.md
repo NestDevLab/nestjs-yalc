@@ -177,3 +177,19 @@ If the behavior is:
 
 If all three are mixed into one controller/resolver method, the layering is
 usually wrong.
+
+## Reliability ownership
+
+Keep retry decisions in the application client/workflow layer. Neither a local
+handler failure nor an HTTP transport error proves that a write was not applied.
+Use server-enforced idempotency before retrying, falling back, or shadowing writes.
+Local calls retain their legacy behavior of resolving error status responses;
+HTTP retains Axios status validation. Configure the same explicit
+`validateStatus` policy when workflows need transport-independent status errors.
+
+For local plus broker composites, a successful local branch is not rolled back
+when broker publishing fails. Ordinary RabbitMQ publish booleans describe buffer
+backpressure, not broker confirmation. Use awaited emission to observe failures,
+or configure `onBackgroundError` for synchronous background emission diagnostics.
+See [failure and delivery contracts](api-strategy.md#failure-cancellation-and-delivery-contracts)
+for cancellation, lifecycle recovery, shutdown, and acknowledgement boundaries.
