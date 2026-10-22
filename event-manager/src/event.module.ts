@@ -48,14 +48,15 @@ export interface IEventModuleOptions<
   ) => YalcEventService;
   eventServiceToken?: string;
   imports?: any[];
+  /** @deprecated No-op retained for compatibility. Configure loggerProvider.loggerLevels instead. */
   overrideLoggerLevels?: LogLevel[];
 }
 
 export const OPTION_PROVIDER = 'OPTION_PROVIDER';
 
 export interface IProviderOptions {
-  logger: ImprovedLoggerService | ILoggerProviderOptionsObject;
-  emitter: EventEmitter2;
+  logger?: ImprovedLoggerService | ILoggerProviderOptionsObject;
+  emitter?: EventEmitter2;
 }
 
 @Module({})
@@ -75,7 +76,7 @@ export class EventModule {
     const emitterProviderName =
       options && isProviderObject(options.eventEmitter)
         ? (options.eventEmitter as any).provide
-        : EventEmitter2;
+        : (options?.eventEmitter ?? EVENT_EMITTER);
 
     const eventProviderName = options?.eventServiceToken ?? YalcEventService;
 
@@ -125,6 +126,26 @@ export class EventModule {
 
     if (options?.eventEmitter) {
       providers.push(options.eventEmitter);
+    } else {
+      providers.push({
+        provide: EVENT_EMITTER,
+        useFactory: (
+          providedOptions?: IProviderOptions,
+          importedEmitter?: EventEmitter2,
+        ) => {
+          const emitter = providedOptions?.emitter ?? importedEmitter;
+          if (!emitter) {
+            throw new Error(
+              'EventModule requires an emitter: configure eventEmitter, OPTION_PROVIDER.emitter, or import EventEmitterModule.forRoot().',
+            );
+          }
+          return emitter;
+        },
+        inject: [
+          { token: OPTION_PROVIDER, optional: true },
+          { token: EventEmitter2, optional: true },
+        ],
+      });
     }
 
     if (optionProvider) {
