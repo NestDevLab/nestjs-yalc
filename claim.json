@@ -1,0 +1,15 @@
+{
+  "changed_refs": [
+    "refs/heads/pr/b9-auth-sqlite-receipt",
+    "refs/heads/pr/issue122-api-strategy",
+    "refs/heads/pr/issue122-capabilities",
+    "refs/heads/pr/issue122-event-manager",
+    "refs/heads/pr/issue122-graphql"
+  ],
+  "claimed_at": "2026-10-22T06:18:50+00:00",
+  "coordination_id": "mgt0458-health",
+  "operation_token": "d7e90cf7-3f38-41ba-99a7-072af3adce53",
+  "publication_scope": "partial",
+  "source_ref": "refs/heads/pr/issue122-event-manager",
+  "syncwheel_version": "0.46.8"
+}
