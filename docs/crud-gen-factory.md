@@ -166,3 +166,11 @@ A reusable backend/substrate (for example OmniKernel) should aim to be:
 - **not** a reason to duplicate CRUD GraphQL/REST layers manually
 
 The more the backend supports relation metadata, derived fields, JSON-backed properties, and predictable repository behavior, the more consumers can stay CrudGen-first.
+
+## GraphQL input compatibility
+
+Generated resolvers pass the selected entity/API model to the args factories,
+which generate field-enum inputs. Custom args should also provide `entityType`
+or the second factory parameter. Model-less overloads and deprecated `SortModel`
+remain available. See [GraphQL input compatibility](graphql-input-compatibility.md)
+for migration, compile-time limits and the driver-specific rejection policy.

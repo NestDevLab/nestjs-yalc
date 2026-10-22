@@ -17,6 +17,7 @@ import {
 import { getEntityRelations } from '../crud-gen.helpers.js';
 import {
   DateFilterModel,
+  EntityFilterInput,
   FilterInput,
   ICrudGenBaseParams,
   IFilterExpressionsProperty,
@@ -48,18 +49,20 @@ export class SortModel<T = any> implements ISortModel<T> {
 }
 
 const sortModelCacheMap = new WeakMap();
-export function sortModelFactory<Entity>(entityModel: ClassType<Entity>) {
+export function sortModelFactory<Entity>(
+  entityModel: ClassType<Entity>,
+): ClassType<ISortModelStrict<Entity>> {
   const cached = sortModelCacheMap.get(entityModel);
   if (cached) return cached;
 
   const fieldsEnum = entityFieldsEnumGqlFactory(entityModel);
   @InputType(`${entityModel.name}SortModel`)
-  class SortModel implements ISortModelStrict<typeof fieldsEnum> {
+  class SortModel implements ISortModelStrict<Entity> {
     @Field(
       /* istanbul ignore next */
       () => fieldsEnum,
     )
-    colId!: keyof typeof fieldsEnum;
+    colId!: keyof Entity;
     @Field(
       /* istanbul ignore next */
       () => SortDirection,
@@ -92,7 +95,7 @@ export class RowGroup {
 const filterExpressionInputCache = new WeakMap();
 export function filterExpressionInputFactory<Entity>(
   entityModel: ClassType<Entity>,
-) {
+): ClassType<EntityFilterInput<Entity>> {
   let cached;
   if ((cached = filterExpressionInputCache.get(entityModel))) return cached;
 
@@ -118,7 +121,7 @@ export function filterExpressionInputFactory<Entity>(
       /* istanbul ignore next */
       () => fieldsEnum,
     )
-    field!: string;
+    field!: Extract<keyof Entity, string>;
 
     @Field(
       /* istanbul ignore next */
@@ -148,7 +151,7 @@ export function filterExpressionInputFactory<Entity>(
       /* istanbul ignore next */
       () => fieldsEnum,
     )
-    field!: string;
+    field!: Extract<keyof Entity, string>;
 
     @Field(
       /* istanbul ignore next */
@@ -185,7 +188,7 @@ export function filterExpressionInputFactory<Entity>(
       /* istanbul ignore next */
       () => fieldsEnum,
     )
-    field!: string;
+    field!: Extract<keyof Entity, string>;
 
     @Field(
       /* istanbul ignore next */
@@ -222,7 +225,7 @@ export function filterExpressionInputFactory<Entity>(
       /* istanbul ignore next */
       () => fieldsEnum,
     )
-    field!: string;
+    field!: Extract<keyof Entity, string>;
   }
 
   /**
@@ -276,7 +279,7 @@ export function filterExpressionInputFactory<Entity>(
       () => [FilterExpression],
       { nullable: true },
     )
-    childExpressions?: FilterInput[];
+    childExpressions?: FilterExpression[];
   }
 
   filterExpressionInputCache.set(entityModel, FilterExpression);
