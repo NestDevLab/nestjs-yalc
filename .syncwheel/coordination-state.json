@@ -1,6 +1,10 @@
 {
   "changed_refs": {
-    "refs/heads/dev-integration": "738df3fc00c790a5efc9dea4ed7304fa454a70d0"
+    "refs/heads/pr/b9-auth-sqlite-receipt": "0a63c3c356c73e42fc0f40c03fd592cefe9ef725",
+    "refs/heads/pr/issue122-api-strategy": "3d5bfc8e3428d538c30e13c7d30049c25f4690c4",
+    "refs/heads/pr/issue122-capabilities": "1d1774a02384012fa97181831c10754561819da3",
+    "refs/heads/pr/issue122-event-manager": "3992421b8b470e2dc1cb447fb233b0cbc5f395e2",
+    "refs/heads/pr/issue122-graphql": "fba674cb267421933eb4c0c61b4b40ec481c0cf2"
   },
   "claims": {
     "refs/heads/dev-integration": "0574a91e7b86eb982b604fa5ffc28919e92eb410",
@@ -12,6 +16,11 @@
     "refs/heads/pr/b9-auth-session-core": "2746c5392e902bbffca0312edd6ef1e40ae8b510",
     "refs/heads/pr/b9-auth-session-spec": "8184285a58fc052fe606e9f56cefb4190b439f8f",
     "refs/heads/pr/b9-auth-sqlite-freeze": "86e3c8c50f67dc7971d92181d7418aa7214e5fec",
+    "refs/heads/pr/b9-auth-sqlite-receipt": "e1aba93d353faa18c1c61aaa961b1e27d676e9e2",
+    "refs/heads/pr/issue122-api-strategy": "6f99cf99c08347896a48bba18a0cfd60f9fdbc09",
+    "refs/heads/pr/issue122-capabilities": "c311b6ce6dd1ab6f64e8659a8df4b35723dfd0fe",
+    "refs/heads/pr/issue122-event-manager": "0bb30294a051d238465661ebdaffd8a8febfa18f",
+    "refs/heads/pr/issue122-graphql": "3c2ba98448cdaf55a947cab50842b8ba510c5479",
     "refs/heads/pr/mgt0458-health-core": "7fde204e58e5ae46e728798282fd347c0a3ee943",
     "refs/heads/pr/public-smoke-sqlite": "5999481d2661f3bbd5fcbc637a8afdfdb5b8917f",
     "refs/heads/pr/public-smoke-sqlite-fix": "31683b82fc489c2b29b18ca7801e266bdcb736d8",
@@ -19,7 +28,7 @@
     "refs/heads/syncwheel/draft/mgt0458-health-dev": "a08d9386d8d03623d564018572fdc3d3906b07ad"
   },
   "coordination_id": "mgt0458-health",
-  "created_at": "2026-10-17T12:52:03+00:00",
+  "created_at": "2026-10-22T06:18:50+00:00",
   "installation_id": "e83434d1-e09b-4dd1-8bdf-a5f7970573c6",
   "managed_refs": {
     "refs/heads/dev-integration": "738df3fc00c790a5efc9dea4ed7304fa454a70d0",
@@ -31,6 +40,11 @@
     "refs/heads/pr/b9-auth-session-core": "d41b195351f19efe7ecbfd73a672c3b149765254",
     "refs/heads/pr/b9-auth-session-spec": "90a7042a750362a841d8933fe30d880deadae8ef",
     "refs/heads/pr/b9-auth-sqlite-freeze": "6471b027b36ea134f248e41adf40f9b27674e2e8",
+    "refs/heads/pr/b9-auth-sqlite-receipt": "0a63c3c356c73e42fc0f40c03fd592cefe9ef725",
+    "refs/heads/pr/issue122-api-strategy": "3d5bfc8e3428d538c30e13c7d30049c25f4690c4",
+    "refs/heads/pr/issue122-capabilities": "1d1774a02384012fa97181831c10754561819da3",
+    "refs/heads/pr/issue122-event-manager": "3992421b8b470e2dc1cb447fb233b0cbc5f395e2",
+    "refs/heads/pr/issue122-graphql": "fba674cb267421933eb4c0c61b4b40ec481c0cf2",
     "refs/heads/pr/mgt0458-health-core": "f578bb982acbab4e922f9b3944d8e8baef0bade5",
     "refs/heads/pr/public-smoke-sqlite": null,
     "refs/heads/pr/public-smoke-sqlite-fix": "73d645d09258b1d96c4cacb841a1502727b3b33a",
@@ -63,20 +77,99 @@
         "role": "canonical"
       },
       "branch": "dev-integration",
-      "stacks": [],
+      "stacks": [
+        "b9-auth-sqlite-receipt",
+        "issue122-event-manager",
+        "issue122-api-strategy",
+        "issue122-capabilities",
+        "issue122-graphql"
+      ],
       "strategy": "cherry-pick"
     },
-    "stacks": [],
+    "stacks": [
+      {
+        "base": {
+          "kind": "remote-ref",
+          "ref": "refs/heads/dev",
+          "role": "canonical"
+        },
+        "branch": "pr/b9-auth-sqlite-receipt",
+        "commits": [
+          "0a63c3c356c73e42fc0f40c03fd592cefe9ef725"
+        ],
+        "id": "b9-auth-sqlite-receipt",
+        "integration_branch": "dev-integration",
+        "target_branch": "dev"
+      },
+      {
+        "base": {
+          "kind": "remote-ref",
+          "ref": "refs/heads/dev",
+          "role": "canonical"
+        },
+        "branch": "pr/issue122-event-manager",
+        "commits": [
+          "b667d62bf39683a196ed5f4ea87e2ac950fd566a",
+          "3992421b8b470e2dc1cb447fb233b0cbc5f395e2"
+        ],
+        "id": "issue122-event-manager",
+        "integration_branch": "dev-integration",
+        "target_branch": "dev"
+      },
+      {
+        "base": {
+          "kind": "remote-ref",
+          "ref": "refs/heads/dev",
+          "role": "canonical"
+        },
+        "branch": "pr/issue122-api-strategy",
+        "commits": [
+          "89a6a616f70276c04bcb9dea79ef02b9d35cccfb",
+          "3d5bfc8e3428d538c30e13c7d30049c25f4690c4"
+        ],
+        "id": "issue122-api-strategy",
+        "integration_branch": "dev-integration",
+        "target_branch": "dev"
+      },
+      {
+        "base": {
+          "kind": "remote-ref",
+          "ref": "refs/heads/dev",
+          "role": "canonical"
+        },
+        "branch": "pr/issue122-capabilities",
+        "commits": [
+          "1d1774a02384012fa97181831c10754561819da3"
+        ],
+        "id": "issue122-capabilities",
+        "integration_branch": "dev-integration",
+        "target_branch": "dev"
+      },
+      {
+        "base": {
+          "kind": "remote-ref",
+          "ref": "refs/heads/dev",
+          "role": "canonical"
+        },
+        "branch": "pr/issue122-graphql",
+        "commits": [
+          "fba674cb267421933eb4c0c61b4b40ec481c0cf2"
+        ],
+        "id": "issue122-graphql",
+        "integration_branch": "dev-integration",
+        "target_branch": "dev"
+      }
+    ],
     "version": 2
   },
   "manifest_digest": "6f37a5705607adc9ca7b9c49c19704751bf74efd6abb40c1e275ee43ae497d74",
-  "operation_token": "6f95b009-0785-4ad3-a679-cdc3207cec45",
-  "parent_state": "366534a1577fd83287b83dab30f274bc21d418ea",
+  "operation_token": "d7e90cf7-3f38-41ba-99a7-072af3adce53",
+  "parent_state": "be9ed7067b83c78144b475458074ef4dbdcbafbc",
   "projection_status": "partial",
-  "publication_id": "f15749a2-0863-4883-b82b-b0d102320e42",
-  "publication_scope": "integration",
+  "publication_id": "2a753737-044b-4df9-a00f-07a17a7cd969",
+  "publication_scope": "partial",
   "schema_version": 2,
-  "syncwheel_version": "0.45.6",
+  "syncwheel_version": "0.46.8",
   "tombstones": [
     {
       "branch": "syncwheel/draft/mgt0458-health-core",
