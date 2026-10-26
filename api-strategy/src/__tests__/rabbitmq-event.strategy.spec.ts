@@ -36,11 +36,13 @@ describe("RabbitMqEventStrategy", () => {
     channelClose.mockResolvedValue(undefined as never);
     connectionClose.mockResolvedValue(undefined as never);
     createChannel.mockResolvedValue({
+      on: jest.fn(),
       assertExchange,
       publish,
       close: channelClose,
     } as never);
     connect.mockResolvedValue({
+      on: jest.fn(),
       createChannel,
       close: connectionClose,
     } as never);

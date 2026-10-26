@@ -6,6 +6,8 @@ import { IApiCallStrategy } from '../context-call.interface.js';
  * Configuration options for HTTP call strategies
  */
 export interface IHttpCallStrategyOptions {
+  /** Explicit response acceptance policy, shared by local and HTTP transports. */
+  validateStatus?: (status: number) => boolean;
   /**
    * List of header names that should be forwarded from the original request context.
    * Only headers matching these names will be included in outgoing requests.
@@ -41,6 +43,8 @@ export interface HttpOptions<
   TData = string | object | Buffer | NodeJS.ReadableStream,
   TParams extends Record<string, any> = Record<string, any>,
 > {
+  /** Overrides the strategy response acceptance policy. */
+  validateStatus?: (status: number) => boolean;
   /** HTTP headers to include in the request */
   headers?: IncomingHttpHeaders | Record<string, string>;
   /** HTTP method (GET, POST, PUT, DELETE, etc.) */
@@ -234,5 +238,49 @@ export abstract class HttpAbstractStrategy implements IHttpCallStrategy {
       ...options,
       method: 'POST',
     });
+  }
+}
+
+/** Transport-independent status rejection when an explicit policy is configured. */
+export class HttpStatusPolicyError<T = unknown> extends Error {
+  constructor(public readonly response: IHttpCallStrategyResponse<T>) {
+    super(`Request failed with status code ${response.status}`);
+    this.name = 'HttpStatusPolicyError';
+  }
+}
+
+export function applyStatusPolicy<T>(
+  response: IHttpCallStrategyResponse<T>,
+  validateStatus?: (status: number) => boolean,
+): IHttpCallStrategyResponse<T> {
+  if (validateStatus && !validateStatus(response.status)) {
+    throw new HttpStatusPolicyError(response);
+  }
+  return response;
+}
+
+/** Stops waiting only; dispatch that has started may still have side effects. */
+export async function awaitLocalResponse<T>(
+  dispatch: () => PromiseLike<T>,
+  signal?: AbortSignal,
+): Promise<T> {
+  signal?.throwIfAborted();
+  if (!signal) {
+    return await dispatch();
+  }
+  let abort!: () => void;
+  const cancelled = new Promise<never>((_resolve, reject) => {
+    abort = () => reject(signal.reason);
+    signal.addEventListener('abort', abort, { once: true });
+  });
+  try {
+    const response = Promise.resolve().then(() => {
+      // Attach both race handlers before user dispatch can abort or throw.
+      signal.throwIfAborted();
+      return dispatch();
+    });
+    return await Promise.race([response, cancelled]);
+  } finally {
+    signal.removeEventListener('abort', abort);
   }
 }

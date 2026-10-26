@@ -69,7 +69,7 @@ export class ShadowCallStrategy implements IApiCallStrategy {
   ) {
     const primaryResult = await primaryCall(this.primary);
     const shadowExecution = Promise.all(
-      this.shadows.map((strategy) => shadowCall(strategy)),
+      this.shadows.map(async (strategy) => shadowCall(strategy)),
     );
 
     if (this.awaitShadows) {

@@ -380,3 +380,96 @@ export class UserService {
   Kafka, SNS, or other transports.
 - Use context services only for explicit runtime mutation by application code.
 - Prototype service-to-service communication before introducing full API gateways/brokers.
+
+## Failure, cancellation, and delivery contracts
+
+Local Fastify injection and remote HTTP retain their legacy defaults: local
+calls resolve responses including 4xx/5xx, while HTTP uses the configured Axios
+instance's status policy (Axios defaults reject responses outside 2xx). Switching
+transport alone therefore does not guarantee identical fallback behavior.
+
+To opt into the same acceptance policy, set `validateStatus` on both provider
+options, strategy constructor options, or individual `HttpOptions` requests:
+
+```ts
+const validateStatus = (status: number) => status >= 200 && status < 300;
+NestLocalCallStrategyProvider('LOCAL', { validateStatus });
+NestHttpCallStrategyProvider('HTTP', { validateStatus });
+```
+
+An explicit policy replaces Axios status validation for that request. Both
+strategies then reject unacceptable responses with `HttpStatusPolicyError`,
+whose `response` contains `status`, `headers`, and parsed `data`. A request's
+policy overrides the strategy policy; `() => true` accepts all statuses.
+Transport failures and cancellation retain their native error types. Review
+Axios response interceptors separately: they can reject or transform responses
+before this strategy evaluates its policy.
+
+Both transports reject an already-aborted `signal` before dispatch. Local
+injection also stops waiting when an in-flight signal aborts and removes its
+abort listener when the call settles. It does not abort the server handler.
+Remote cancellation stops the HTTP caller, but cannot guarantee that the server
+stopped. In either case a write may have succeeded even when the caller sees
+cancellation, a timeout, a disconnected connection, or a lost response. A custom
+local abort reason is preserved as the rejection reason.
+
+`FallbackCallStrategy` is an explicitly ordered chain, not a safe automatic
+retry engine. Its default advances on any rejection; use `shouldFallback` to
+restrict eligible errors. It only sees resolved HTTP failures as failures when
+the configured status policy rejects them. The application owns retry budgets,
+backoff, idempotency keys, deduplication and reconciliation of uncertain writes.
+Do not fall back or shadow a write unless duplicate execution is acceptable or
+the server enforces idempotency. `ShadowCallStrategy` starts shadows only after
+a successful primary response. Synchronous shadow throws and rejected promises
+follow the same error policy, and do not prevent other shadow branches starting.
+With `awaitShadows: false`, failures are contained even if `shadowErrorMode` is
+`throw`; use awaited shadows to propagate failures. A propagated shadow failure
+cannot undo a successful primary write.
+
+### RabbitMQ lifecycle and acknowledgement boundary
+
+`RabbitMqEventStrategy` shares one cold initialization across concurrent calls.
+It caches a channel only after exchange assertion succeeds. Failed setup closes
+partial resources; all callers of that initialization observe its failure.
+Channel or connection `error`/`close` events invalidate the resource pair, and
+cleanup completes before a later explicit emit may initialize again. Late events
+from an old pair do not invalidate a replacement. Recovery is bounded to one
+setup attempt per explicit call (shared by concurrent cold callers): no timer
+reconnect loop, automatic message replay, or publish retry is performed.
+
+`emitAsync` resolves to the boolean returned by amqplib's ordinary
+`channel.publish`: `false` indicates buffer backpressure, and `true` indicates
+buffer acceptance. Neither is a broker confirmation, consumer acknowledgement,
+or proof of durable delivery. Applications needing broker confirmations or
+transactional outbox semantics must supply an appropriate strategy/protocol.
+`emit` immediately returns `true` after scheduling background work; it reports
+neither publication success nor backpressure. Prefer `emitAsync` where the
+caller needs failures. For fire-and-forget observability configure:
+
+```ts
+new RabbitMqEventStrategy({
+  url: brokerUrl,
+  exchange: 'app.events',
+  onBackgroundError: (error) => diagnostics.record(error),
+});
+```
+
+The optional diagnostics callback receives background publish/setup failures;
+its own synchronous throws or rejected promises are contained. The default
+remains non-blocking and silent. This callback is not a retry hook and does not
+report every idle connection lifecycle event.
+
+Concurrent and repeated shutdown calls share one teardown result. Shutdown
+permanently refuses new emissions and waits for in-flight setup to
+finish so late resources cannot resurrect the strategy. It attempts channel and
+connection cleanup even if either close fails, clears cached state, and reports
+unexpected cleanup failures. Each close waits at most one second before the
+existing socket/heartbeat cleanup fallback. Connection establishment and
+exchange assertion still depend on amqplib/network settlement: configure broker
+connection timeouts at the transport boundary; shutdown does not impose an
+additional setup timeout. Create a new strategy instance after shutdown.
+
+`CompositeEventStrategy.emitAsync` starts every branch and waits for all to
+settle. Both synchronous method throws and rejected promises follow `errorMode`:
+`ignore` returns successful branch results; `throw` rejects with the first failed
+branch in configured order. Successful branches are not rolled back.
