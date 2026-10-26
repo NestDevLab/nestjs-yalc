@@ -28,7 +28,7 @@ The recommended entry point is `YalcEventService` from `@nestjs-yalc/event-manag
   - `event*` functions build a unified options object that can:
     - log via an `ImprovedLoggerService`,
     - emit via `EventEmitter2`,
-    - optionally create and throw/return a `DefaultError` (or subclass).
+    - optionally create and return a `DefaultError` (or subclass).
   - `getLogLevelByStatus` and `getLogLevelByError` map HTTP status codes (or error classes) to a log level:
     - `>= 500` → `error`
     - `429` → `warn`
@@ -38,7 +38,7 @@ The recommended entry point is `YalcEventService` from `@nestjs-yalc/event-manag
   - Injectable Nest service that:
     - receives an `ImprovedLoggerService` and an `EventEmitter2`,
     - exposes levelled logging methods (`log`, `warn`, `debug`, `verbose` and async variants),
-    - exposes error helpers that log, emit and throw a typed `DefaultError` (or subclass),
+    - exposes error helpers that log, emit and return a typed `DefaultError` (or subclass),
     - offers `neverthrow`-style helpers for functional error handling (`*Result`, `*FromFn`).
 
 ## Recommended usage in application code
@@ -48,8 +48,8 @@ The recommended entry point is `YalcEventService` from `@nestjs-yalc/event-manag
 Wire `EventModule` in your Nest app and inject `YalcEventService` where you need logging + error handling:
 
 ```ts
-import { Injectable } from '@nestjs/common';
-import { YalcEventService } from '@nestjs-yalc/event-manager';
+import { Injectable } from "@nestjs/common";
+import { YalcEventService } from "@nestjs-yalc/event-manager";
 
 @Injectable()
 export class UserService {
@@ -109,9 +109,9 @@ When this error reaches the HTTP layer:
 When you only have an HTTP code (possibly not covered by a dedicated helper), use `errorHttp`:
 
 ```ts
-throw this.events.errorHttp('user.update.failed', 409, {
+throw this.events.errorHttp("user.update.failed", 409, {
   data: { userId: id },
-  response: { message: 'User is in a conflicting state' },
+  response: { message: "User is in a conflicting state" },
 });
 ```
 
@@ -119,7 +119,7 @@ This will:
 
 - map `409` to `ConflictError` via `httpStatusCodeToErrors`,
 - log at a level derived from the status code,
-- throw the resulting `DefaultError` subclass with the right HTTP code.
+- return the resulting `DefaultError` subclass with the right HTTP code; the surrounding `throw` sends it to Nest.
 
 ### 4. Use `*Result` / `*FromFn` helpers for functional flows
 
@@ -175,7 +175,7 @@ When building error options:
 
 Filters in `@nestjs-yalc/errors/filters` use the same utilities as `YalcEventService` to decide log levels (`getLogLevelByStatus`) and to normalize errors:
 
-- if you throw `DefaultError` (or subclasses) via `YalcEventService`, logging and event emission usually happen inside the error itself;
+- when you construct an error via `YalcEventService`, the event helper performs logging and emission; the error constructor has its own logging/emission disabled to avoid duplicates;
 - filters avoid double-logging these errors and focus on translating non-default errors into HTTP-friendly ones.
 
 In a typical REST setup:
@@ -185,3 +185,12 @@ In a typical REST setup:
 - the client receives a response consistent with the chosen HTTP status and the `response` you provided,
 - observability (logs + events) stays consistent because both the `errors` and `event-manager` libraries share the same conventions and helpers.
 
+## Waiting for error listeners
+
+`throw events.error(...)` and `events.errorResult(...)` remain synchronous.
+For completion-sensitive work, use `const error = await events.errorAsync(...)`
+and then `throw error` if desired. This waits for the primary event and awaited
+aliases, and rejects with a listener failure if any awaited listener fails.
+Explicit `event.await: false` opts out; object aliases select their own `await`.
+`*FromFn` methods wait for their callback, not for error event listeners.
+See [Event helper return values](./event-manager-event.md#return-values).

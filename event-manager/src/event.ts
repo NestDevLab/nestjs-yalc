@@ -114,8 +114,8 @@ export function applyAwaitOption<
     IEventOptions<TFormatter>,
 >(options?: TOpts): TOpts {
   let event = options?.event;
-  if (event !== false && event !== undefined) {
-    event = { ...event, await: event.await ?? true };
+  if (event !== false) {
+    event = { ...event, await: event?.await ?? true };
   }
   return { ...options, event } as TOpts;
 }
@@ -173,6 +173,18 @@ export function event<
   eventName: Parameters<TFormatter> | string,
   options?: TOption,
 ): Promise<ReturnType<TOption>> | ReturnType<TOption> {
+  return executeEvent(eventName, options);
+}
+
+function executeEvent<
+  TFormatter extends EventNameFormatter = EventNameFormatter,
+  TOption extends IEventOptions<TFormatter> | IErrorEventOptions<TFormatter> =
+    IEventOptions<TFormatter>,
+>(
+  eventName: Parameters<TFormatter> | string,
+  options?: TOption,
+  awaitError = false,
+): Promise<ReturnType<TOption>> | ReturnType<TOption> {
   const { data: _data, event, logger, mask, stack, config } = options ?? {};
   let receivedData = _data;
 
@@ -195,7 +207,7 @@ export function event<
    * ERROR
    *
    */
-  let errorInstance;
+  let errorInstance: ReturnType<TOption> | undefined;
   let errorPayload: ILogErrorPayload | null = null;
   if (isErrorOptions(options)) {
     const { errorClass: _class, logger, ...rest } = options;
@@ -353,15 +365,19 @@ export function event<
     }
   }
 
-  const promise = (async () => {
-    await Promise.all(toAwait);
-    return result as Promise<ReturnType<TOption>>;
-  })();
+  // Observe primary and alias failures immediately, even if another listener
+  // is still pending. Async error helpers resolve only after these emissions.
+  const promise = Promise.all([result, ...toAwait]).then(
+    ([emitted]) =>
+      (awaitError
+        ? (errorInstance ?? emitted)
+        : emitted) as ReturnType<TOption>,
+  );
 
   globalPromiseTracker.add(promise);
 
   const returnedError = errorInstance;
-  return returnedError ?? promise;
+  return awaitError ? promise : (returnedError ?? promise);
 }
 
 export function getLoggerOption(level: LogLevel, options?: IEventOptions) {
@@ -417,9 +433,14 @@ export async function eventErrorAsync<
   options?: TOption,
 ): eventErrorReturnTypeAsync<TFormatter, TOption> {
   const _options = applyAwaitOption<TFormatter, TOption>(options);
-  return eventError<TFormatter, TOption>(
+  return executeEvent<TFormatter>(
     eventName,
-    _options,
+    {
+      ..._options,
+      logger: getLoggerOption(LogLevelEnum.ERROR, _options),
+      errorClass: _options.errorClass ?? true,
+    },
+    true,
   ) as unknown as eventErrorReturnTypeAsync<TFormatter, TOption>;
 }
 

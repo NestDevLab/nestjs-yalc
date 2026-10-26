@@ -46,7 +46,7 @@ These simply delegate to the corresponding `event*` helpers, applying the inject
 
 General helpers:
 
-- `error` / `errorAsync`: raise/log using `DefaultError` by default. Decorated with `InjectTrace` to populate `stack` if none is provided.
+- `error` / `errorAsync`: return/log using `DefaultError` by default. Decorated with `InjectTrace` to populate `stack` if none is provided.
 - `errorResult`: wraps `error` in a `neverthrow.Err`.
 - `errorFromFn`: executes a callback, returning `ok(result)` or `Err(DefaultError)` on failure.
 - `errorForward`: forward/normalize an existing error (instance or class) into a `DefaultError`, preserving/merging payloads. Logger level is inferred from the status code unless explicitly set.
@@ -54,16 +54,32 @@ General helpers:
 
 HTTP-specific helpers:
 
-- `errorHttp(code, options?)`: map an HTTP status to a corresponding error class (fallback `InternalServerError`) and apply the appropriate logger level.
+- `errorHttp(eventName, code, options?)`: map an HTTP status to a corresponding error class (fallback `InternalServerError`) and apply the appropriate logger level.
 - Dedicated methods for common statuses (each with `*Result` and `*FromFn` variants): `errorBadRequest`, `errorUnauthorized`, `errorPaymentRequired`, `errorForbidden`, `errorNotFound`, `errorMethodNotAllowed`, `errorNotAcceptable`, `errorConflict`, `errorGone`, `errorUnsupportedMediaType`, `errorUnprocessableEntity`, `errorTooManyRequests`, `errorInternalServerError`, `errorNotImplemented`, `errorBadGateway`, `errorServiceUnavailable`, `errorGatewayTimeout`.
 
-Each helper deep-merges the provided options with the constructor defaults, sets `errorClass` to the matching error type, and derives the logger level from the status (500+ → error, 429 → warn, 4xx → log) unless you override it.
+HTTP helpers select the matching error class and apply the status-derived log level
+(500+ → error, 429 → warn, otherwise → log), including when a logger level is
+supplied; `logger: false` still disables logging. `errorForward` instead preserves
+an explicit logger option and otherwise derives the level from the forwarded
+status. Forwarding preserves an existing `DefaultError` instance; ordinary
+`Error` instances are normalized to a new `DefaultError`. It merges `data` and
+`response` with call-level fields taking precedence. Keep private diagnostics in
+`data` and client-safe content in `response`.
+
+`error` returns an error synchronously; `errorResult` returns an `Err`
+synchronously. Throw the error explicitly when desired. `errorAsync` resolves
+with that error after awaited primary/alias emissions complete, or rejects with
+an awaited listener's failure. It defaults to `event.await: true`; explicit
+`false` opts out of listener completion. String aliases inherit this setting;
+object aliases choose their own `await`. `*FromFn` awaits the callback but uses
+synchronous error/Result helpers, so it does not wait for emission completion.
+See [helper completion and rejection semantics](./event-manager-event.md#return-values).
 
 ## Option handling and defaults
 
 - `buildOptions` merges call-level options with the injected emitter/formatter and logger instance. If an error instance or `cause` is provided, it ensures a `stack` is present.
 - `buildErrorOptions` guarantees an `errorClass` (default `true` → `DefaultError`).
-- `applyLoggerLevel`/`applyLoggerLevelByStatus`/`applyLoggerLevelByError` set `logger.level` automatically when not explicitly provided.
+- `applyLoggerLevel`/`applyLoggerLevelByStatus`/`applyLoggerLevelByError` set `logger.level`; callers decide whether to preserve an explicit level.
 - `applyCause` attaches the original error as `cause`, enriching the payload when forwarded.
 - Pending promises triggered by event emission are registered with the global promise tracker.
 
