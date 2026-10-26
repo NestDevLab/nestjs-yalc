@@ -21,6 +21,7 @@ import {
 } from '../api-graphql/generic.resolver.js';
 import returnValue from '@nestjs-yalc/utils/returnValue.js';
 import { GenericService } from '../typeorm/generic.service.js';
+import { ProjectionResourceService } from '../projection/projection.service.js';
 import {
   TestEntityRelation,
   TestEntityRelation2,
@@ -380,6 +381,76 @@ describe('defineGetGridResource', () => {
     await expect(resolver[queryName]({ where: { foo: 'bar' } })).resolves.toEqual(
       expected,
     );
+  });
+});
+
+describe('grid service capability compatibility', () => {
+  const structuredOptions = { where: { operator: 'AND', expressions: [] } };
+  const resolverFor = (service: object) => {
+    class CapabilityGridResolver {
+      service: any;
+    }
+    defineGetGridResource(
+      'capabilityGrid',
+      TestEntityRelation,
+      CapabilityGridResolver as any,
+      {},
+    );
+    const resolver = new CapabilityGridResolver();
+    resolver.service = service;
+    return resolver as any;
+  };
+
+  it('retains legacy service support without an independent filter method', async () => {
+    const getEntityListExtended = jest.fn().mockResolvedValue([[], 0]);
+    const resolver = resolverFor({
+      supportsExtendedRepository: () => true,
+      getEntityListExtended,
+    });
+    await expect(resolver.capabilityGrid(structuredOptions)).resolves.toEqual([
+      [],
+      0,
+    ]);
+    expect(getEntityListExtended).toHaveBeenCalledWith(structuredOptions, true);
+  });
+
+  it('honors independent false even when the service advertises extended support', async () => {
+    const getEntityListExtended = jest.fn();
+    const resolver = resolverFor({
+      supportsExtendedRepository: () => true,
+      supportsStructuredGraphqlFilters: () => false,
+      getEntityListExtended,
+    });
+    await expect(resolver.capabilityGrid(structuredOptions)).rejects.toThrow(
+      'Structured GraphQL filters require',
+    );
+    expect(getEntityListExtended).not.toHaveBeenCalled();
+  });
+
+  it('accepts the projection service contract without GenericService inheritance', async () => {
+    const service = Object.create(ProjectionResourceService.prototype);
+    service.getEntityListExtended = jest.fn().mockResolvedValue([[], 0]);
+    const resolver = resolverFor(service);
+    await expect(resolver.capabilityGrid(structuredOptions)).resolves.toEqual([
+      [],
+      0,
+    ]);
+    expect(service.getEntityListExtended).toHaveBeenCalledWith(
+      structuredOptions,
+      true,
+    );
+  });
+
+  it('allows basic queries but rejects structured filters for an unadvertised service', async () => {
+    const getEntityListExtended = jest.fn().mockResolvedValue([[], 0]);
+    const resolver = resolverFor({ getEntityListExtended });
+    await expect(
+      resolver.capabilityGrid({ where: { id: 1 } }),
+    ).resolves.toEqual([[], 0]);
+    await expect(resolver.capabilityGrid(structuredOptions)).rejects.toThrow(
+      'Structured GraphQL filters require',
+    );
+    expect(getEntityListExtended).toHaveBeenCalledTimes(1);
   });
 });
 

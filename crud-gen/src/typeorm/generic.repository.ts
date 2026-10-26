@@ -16,18 +16,15 @@ import { IWhereFilters } from '../api-graphql/crud-gen-gql.type.js';
 import { IModelFieldMetadata } from '../object.decorator.js';
 import '../query-builder.helpers.js'; // must be imported here
 
+import type { CrudGenRepositoryCapabilities } from '../crud-gen-capabilities.js';
+
 export const AG_GRID_MAIN_ALIAS = 'CrudGenMainAlias';
 
-export interface CrudGenRepositoryCapabilities {
-  extendedQueries: boolean;
-  structuredGraphqlFilters: boolean;
-}
-
-export const PLAIN_CRUD_GEN_REPOSITORY_CAPABILITIES: CrudGenRepositoryCapabilities =
-  {
-    extendedQueries: false,
-    structuredGraphqlFilters: false,
-  };
+// Preserve the established repository subpath exports.
+export {
+  type CrudGenRepositoryCapabilities,
+  PLAIN_CRUD_GEN_REPOSITORY_CAPABILITIES,
+} from '../crud-gen-capabilities.js';
 
 export class GenericTypeORMRepository<
   Entity extends ObjectLiteral,
