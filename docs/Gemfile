@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 gem 'jekyll', '~> 3.9'
 gem 'jekyll-remote-theme'
-gem 'activesupport', '< 7.0'
+gem 'activesupport', '< 9.0'
 gem 'kramdown-parser-gfm'
 
 group :jekyll_plugins do
